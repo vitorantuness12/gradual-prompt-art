@@ -190,6 +190,21 @@ function CheckoutPage() {
   const [acceptedOffers, setAcceptedOffers] = useState<string[]>([]);
   const [tracking, setTracking] = useState<Tracking>(EMPTY_TRACKING);
   const [submitting, setSubmitting] = useState(false);
+  const [consent, setConsent] = useState<IdentityConsent>({
+    acceptedTerms: false,
+    marketingOptIn: false,
+    createProfile: true,
+  });
+
+  // Preferências de checkout definidas pelo lojista (visitante, verificação, etc.).
+  const checkoutSettingsQuery = useQuery({
+    queryKey: ["checkout-settings", slug],
+    queryFn: () => getCheckoutSettings({ data: { storeSlug: slug } }),
+    staleTime: 300_000,
+  });
+  const settings = checkoutSettingsQuery.data ?? DEFAULT_CHECKOUT_SETTINGS;
+  const persistIdentity = useServerFn(saveCheckoutIdentity);
+
 
   // Funil: registra os eventos do checkout com a origem da visita.
   const logCheckout = useCallback(
