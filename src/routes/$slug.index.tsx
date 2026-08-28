@@ -50,8 +50,11 @@ export const Route = createFileRoute("/$slug/")({
       { property: "og:title", content: "Faça seu pedido online" },
       { property: "og:description", content: "Catálogo, entrega e retirada direto com a loja, sem marketplace." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: `https://oseupedido.com.br/${params.slug}` },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: `https://oseupedido.com.br/${params.slug}` }],
+
   }),
   component: PublicStorePage,
 });
