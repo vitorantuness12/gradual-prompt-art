@@ -191,6 +191,7 @@ function CheckoutPage() {
   const [useCashback, setUseCashback] = useState(false);
   const [estimate, setEstimate] = useState<DeliveryEstimate | null>(null);
   const [estimating, setEstimating] = useState(false);
+  const [isSearchingCep, setIsSearchingCep] = useState(false);
   const [review, setReview] = useState(false);
   const [acceptedOffers, setAcceptedOffers] = useState<string[]>([]);
   const [tracking, setTracking] = useState<Tracking>(EMPTY_TRACKING);
