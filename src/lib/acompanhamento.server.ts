@@ -1,4 +1,4 @@
-import type { TrackedOrderDetail } from "@/lib/acompanhamento";
+import { parseOrderAddress, type TrackedOrderDetail } from "@/lib/acompanhamento";
 
 /**
  * Apoio ao acompanhamento público de pedidos.
@@ -20,7 +20,7 @@ export const CODE_MAX_ATTEMPTS = 5;
 
 /** Campos devolvidos ao cliente: nada de endereço completo, e-mail ou telefone. */
 export const ORDER_SELECT =
-  "id, store_id, customer_name, code, public_token, status, type, created_at, total, subtotal, delivery_fee, discount, payment_method, payment_status, scheduled_for, table_number, notes, customer_phone, is_demo, store:stores(name, slug), order_items(product_name, quantity, total, notes)";
+  "id, store_id, customer_name, code, public_token, status, type, created_at, total, subtotal, delivery_fee, discount, payment_method, payment_status, scheduled_for, table_number, notes, address, customer_phone, is_demo, store:stores(name, slug), order_items(product_name, quantity, total, notes)";
 
 export interface OrderSummary {
   code: string;
@@ -180,6 +180,7 @@ export async function buildDetail(
     scheduled_for: string | null;
     table_number: string | null;
     notes: string | null;
+    address: unknown;
     is_demo: boolean;
     store: { name: string; slug: string } | null;
     order_items: Array<{ product_name: string; quantity: number; total: number; notes: string | null }> | null;
@@ -211,6 +212,7 @@ export async function buildDetail(
     tableNumber: order.table_number,
     notes: order.notes,
     isDemo: order.is_demo,
+    address: parseOrderAddress(order.address),
     items: (order.order_items ?? []).map((item) => ({
       name: item.product_name,
       quantity: item.quantity,

@@ -125,6 +125,14 @@ function CustomerAreaPage() {
       maxQuantity: line.maxQuantity,
     }));
     seedCart(repeat.storeSlug, repeat.storeId, items);
+    // Leva o endereço do pedido original para o checkout preencher sozinho.
+    if (repeat.address) {
+      try {
+        sessionStorage.setItem(`repetir-endereco:${repeat.storeSlug}`, JSON.stringify(repeat.address));
+      } catch {
+        /* sem sessionStorage o cliente só preenche manualmente */
+      }
+    }
     setRepeat(null);
     void navigate({ to: "/$slug/checkout", params: { slug: repeat.storeSlug } });
   }
