@@ -854,7 +854,7 @@ function CheckoutPage() {
               >
                 <Label htmlFor="agora" className="flex cursor-pointer items-center gap-2 text-sm">
                   <RadioGroupItem id="agora" value="now" disabled={fulfillment === "scheduled"} />
-                  Assim que possível
+                  O mais breve possível
                 </Label>
                 <Label
                   htmlFor="agendado"
