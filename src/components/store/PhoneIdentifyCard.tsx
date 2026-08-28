@@ -173,6 +173,19 @@ export function PhoneIdentifyCard({
     }
   }
 
+  /**
+   * Troca de canal: seleciona e, quando um código já foi enviado, pede um novo
+   * imediatamente pelo canal escolhido (o anterior é invalidado no servidor).
+   */
+  async function pickChannel(target: Channel) {
+    if (target === channel && !codeSent) {
+      setChannel(target);
+      return;
+    }
+    setChannel(target);
+    if (codeSent && target !== sentChannel) await sendCode(target);
+  }
+
   async function verify() {
     if (codeExpired) {
       setCodeError("Este código expirou. Toque em “Enviar outro código” para receber um novo.");
