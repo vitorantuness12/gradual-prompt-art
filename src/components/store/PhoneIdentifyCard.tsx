@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -63,6 +63,24 @@ export function PhoneIdentifyCard({
   const [checking, setChecking] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [codeError, setCodeError] = useState<string | null>(null);
+  /** Momento (epoch ms) em que o código enviado deixa de valer. */
+  const [expiresAt, setExpiresAt] = useState<number | null>(null);
+  const [secondsLeft, setSecondsLeft] = useState(0);
+
+  // Contador de validade: atualiza a cada segundo enquanto o código estiver ativo.
+  useEffect(() => {
+    if (!expiresAt) {
+      setSecondsLeft(0);
+      return;
+    }
+    const tick = () => setSecondsLeft(Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000)));
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
+  }, [expiresAt]);
+
+  const codeExpired = codeSent && expiresAt !== null && secondsLeft <= 0;
+  const countdown = `${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, "0")}`;
 
   /** Cliente já cadastrado: os aceites já foram dados em compras anteriores. */
   const isReturning = Boolean(result?.found);
@@ -77,6 +95,7 @@ export function PhoneIdentifyCard({
     setLoading(true);
     setCodeSent(false);
     setCode("");
+    setExpiresAt(null);
     setFeedback(null);
     setCodeError(null);
     try {
@@ -99,6 +118,8 @@ export function PhoneIdentifyCard({
       const outcome = await askCode({ data: { storeSlug: slug, phone, channel } });
       setFeedback(outcome.message);
       setCodeSent(outcome.ok);
+      setCode("");
+      setExpiresAt(outcome.ok && outcome.expiresInSeconds > 0 ? Date.now() + outcome.expiresInSeconds * 1000 : null);
     } catch {
       setFeedback("Não foi possível enviar o código agora. Tente novamente.");
     } finally {
@@ -107,6 +128,10 @@ export function PhoneIdentifyCard({
   }
 
   async function verify() {
+    if (codeExpired) {
+      setCodeError("Este código expirou. Toque em “Enviar outro código” para receber um novo.");
+      return;
+    }
     setChecking(true);
     setCodeError(null);
     try {
@@ -118,6 +143,8 @@ export function PhoneIdentifyCard({
       setResult(confirmed);
       selectFirstAddress(confirmed);
       setFeedback(confirmed.message);
+      setExpiresAt(null);
+      setCodeSent(false);
     } catch {
       setCodeError("Não foi possível confirmar o código agora. Tente novamente.");
     } finally {
@@ -219,7 +246,12 @@ export function PhoneIdentifyCard({
                       onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
                     />
                   </div>
-                  <Button type="button" size="sm" onClick={() => void verify()} disabled={checking || code.length !== 6}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => void verify()}
+                    disabled={checking || code.length !== 6 || codeExpired}
+                  >
                     {checking ? "Confirmando…" : "Confirmar"}
                   </Button>
                 </div>
@@ -227,6 +259,16 @@ export function PhoneIdentifyCard({
             </div>
 
             {feedback ? <p className="text-sm text-muted-foreground">{feedback}</p> : null}
+            {codeSent && !codeExpired ? (
+              <p className="text-sm text-muted-foreground">
+                O código expira em <span className="font-medium text-foreground">{countdown}</span>.
+              </p>
+            ) : null}
+            {codeExpired ? (
+              <p className="text-sm text-destructive">
+                Este código expirou. Toque em “Enviar outro código” para receber um novo.
+              </p>
+            ) : null}
             {codeError ? <p className="text-sm text-destructive">{codeError}</p> : null}
           </div>
         ) : null}
