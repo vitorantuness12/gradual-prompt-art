@@ -13,9 +13,10 @@ export const Route = createFileRoute("/termos")({
       { property: "og:title", content: "Termos de uso — O Seu Pedido" },
       { property: "og:description", content: "Condições de uso da plataforma O Seu Pedido." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/termos" },
+      { property: "og:url", content: "https://oseupedido.com.br/termos" },
     ],
-    links: [{ rel: "canonical", href: "/termos" }],
+    links: [{ rel: "canonical", href: "https://oseupedido.com.br/termos" }],
+
   }),
   component: TermsPage,
 });
