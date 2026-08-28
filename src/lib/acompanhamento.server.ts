@@ -17,6 +17,10 @@ type Admin = Awaited<typeof import("@/integrations/supabase/client.server")>["su
 
 export const CODE_TTL_MINUTES = 10;
 export const CODE_MAX_ATTEMPTS = 5;
+/** Espera mínima entre dois envios do código. */
+export const CODE_RESEND_COOLDOWN_SECONDS = 30;
+/** Bloqueio temporário depois de errar o código muitas vezes. */
+export const CODE_LOCK_MINUTES = 15;
 
 /** Campos devolvidos ao cliente: nada de endereço completo, e-mail ou telefone. */
 export const ORDER_SELECT =
@@ -189,7 +193,7 @@ export async function checkVerificationCode(
 
   const { data: row } = await admin
     .from("verification_codes")
-    .select("id, code_hash, attempts, expires_at, locked_until")
+    .select("id, code_hash, attempts, expires_at, locked_until, consumed_at")
     .eq("identifier", identifier)
     .eq("purpose", "phone")
     .order("created_at", { ascending: false })
