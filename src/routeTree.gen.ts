@@ -78,6 +78,8 @@ import { Route as ApiPublicIntegracoesRetentativasRouteImport } from './routes/a
 import { Route as ApiPublicNotificacoesPushRouteImport } from './routes/api/public/notificacoes/push'
 import { Route as ApiPublicPagamentosProviderRouteImport } from './routes/api/public/pagamentos/$provider'
 import { Route as ApiPublicV1SplatRouteImport } from './routes/api/public/v1/$'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as ApiPublicCanaisChannelStoreIdRouteImport } from './routes/api/public/canais/$channel.$storeId'
 import { Route as ApiPublicIntegracoesKindStoreIdRouteImport } from './routes/api/public/integracoes/$kind.$storeId'
@@ -465,6 +467,16 @@ const ApiPublicV1SplatRoute = ApiPublicV1SplatRouteImport.update({
   path: '/api/public/v1/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
@@ -553,6 +565,8 @@ export interface FileRoutesByFullPath {
   '/api/public/notificacoes/push': typeof ApiPublicNotificacoesPushRoute
   '/api/public/pagamentos/$provider': typeof ApiPublicPagamentosProviderRoute
   '/api/public/v1/$': typeof ApiPublicV1SplatRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/canais/$channel/$storeId': typeof ApiPublicCanaisChannelStoreIdRoute
   '/api/public/integracoes/$kind/$storeId': typeof ApiPublicIntegracoesKindStoreIdRoute
@@ -625,6 +639,8 @@ export interface FileRoutesByTo {
   '/api/public/notificacoes/push': typeof ApiPublicNotificacoesPushRoute
   '/api/public/pagamentos/$provider': typeof ApiPublicPagamentosProviderRoute
   '/api/public/v1/$': typeof ApiPublicV1SplatRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/canais/$channel/$storeId': typeof ApiPublicCanaisChannelStoreIdRoute
   '/api/public/integracoes/$kind/$storeId': typeof ApiPublicIntegracoesKindStoreIdRoute
@@ -700,6 +716,8 @@ export interface FileRoutesById {
   '/api/public/notificacoes/push': typeof ApiPublicNotificacoesPushRoute
   '/api/public/pagamentos/$provider': typeof ApiPublicPagamentosProviderRoute
   '/api/public/v1/$': typeof ApiPublicV1SplatRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/canais/$channel/$storeId': typeof ApiPublicCanaisChannelStoreIdRoute
   '/api/public/integracoes/$kind/$storeId': typeof ApiPublicIntegracoesKindStoreIdRoute
@@ -775,6 +793,8 @@ export interface FileRouteTypes {
     | '/api/public/notificacoes/push'
     | '/api/public/pagamentos/$provider'
     | '/api/public/v1/$'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
     | '/api/public/canais/$channel/$storeId'
     | '/api/public/integracoes/$kind/$storeId'
@@ -847,6 +867,8 @@ export interface FileRouteTypes {
     | '/api/public/notificacoes/push'
     | '/api/public/pagamentos/$provider'
     | '/api/public/v1/$'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
     | '/api/public/canais/$channel/$storeId'
     | '/api/public/integracoes/$kind/$storeId'
@@ -921,6 +943,8 @@ export interface FileRouteTypes {
     | '/api/public/notificacoes/push'
     | '/api/public/pagamentos/$provider'
     | '/api/public/v1/$'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
     | '/api/public/canais/$channel/$storeId'
     | '/api/public/integracoes/$kind/$storeId'
@@ -954,6 +978,8 @@ export interface RootRouteChildren {
   ApiPublicNotificacoesPushRoute: typeof ApiPublicNotificacoesPushRoute
   ApiPublicPagamentosProviderRoute: typeof ApiPublicPagamentosProviderRoute
   ApiPublicV1SplatRoute: typeof ApiPublicV1SplatRoute
+  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
+  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   ApiPublicCanaisChannelStoreIdRoute: typeof ApiPublicCanaisChannelStoreIdRoute
   ApiPublicIntegracoesKindStoreIdRoute: typeof ApiPublicIntegracoesKindStoreIdRoute
@@ -1444,6 +1470,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicV1SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
       path: '/lovable/email/transactional/preview'
@@ -1598,6 +1638,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicNotificacoesPushRoute: ApiPublicNotificacoesPushRoute,
   ApiPublicPagamentosProviderRoute: ApiPublicPagamentosProviderRoute,
   ApiPublicV1SplatRoute: ApiPublicV1SplatRoute,
+  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
+  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   ApiPublicCanaisChannelStoreIdRoute: ApiPublicCanaisChannelStoreIdRoute,
   ApiPublicIntegracoesKindStoreIdRoute: ApiPublicIntegracoesKindStoreIdRoute,
