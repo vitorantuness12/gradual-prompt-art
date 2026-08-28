@@ -256,8 +256,9 @@ export function PhoneIdentifyCard({
               <div className="grid gap-2 sm:grid-cols-2">
                 <button
                   type="button"
-                  onClick={() => setChannel("whatsapp")}
-                  className={`rounded-lg border p-3 text-left text-sm transition ${
+                  disabled={sending || isLocked}
+                  onClick={() => void pickChannel("whatsapp")}
+                  className={`rounded-lg border p-3 text-left text-sm transition disabled:opacity-50 ${
                     channel === "whatsapp" ? "border-primary bg-primary/10" : "border-border/70 bg-background"
                   }`}
                 >
@@ -266,8 +267,8 @@ export function PhoneIdentifyCard({
                 </button>
                 <button
                   type="button"
-                  disabled={!result.channels.email}
-                  onClick={() => setChannel("email")}
+                  disabled={!result.channels.email || sending || isLocked}
+                  onClick={() => void pickChannel("email")}
                   className={`rounded-lg border p-3 text-left text-sm transition disabled:opacity-50 ${
                     channel === "email" ? "border-primary bg-primary/10" : "border-border/70 bg-background"
                   }`}
