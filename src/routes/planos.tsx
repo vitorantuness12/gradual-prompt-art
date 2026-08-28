@@ -34,8 +34,11 @@ export const Route = createFileRoute("/planos")({
         content: "Escolha o plano ideal para a sua loja: sem comissão por pedido e com teste grátis nos planos pagos.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://oseupedido.com.br/planos" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://oseupedido.com.br/planos" }],
+
   }),
 });
 

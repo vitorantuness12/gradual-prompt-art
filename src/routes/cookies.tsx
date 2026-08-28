@@ -13,9 +13,10 @@ export const Route = createFileRoute("/cookies")({
       { property: "og:title", content: "Cookies e LGPD — O Seu Pedido" },
       { property: "og:description", content: "Uso de cookies e gestão de consentimento na plataforma." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/cookies" },
+      { property: "og:url", content: "https://oseupedido.com.br/cookies" },
     ],
-    links: [{ rel: "canonical", href: "/cookies" }],
+    links: [{ rel: "canonical", href: "https://oseupedido.com.br/cookies" }],
+
   }),
   component: CookiesPage,
 });
