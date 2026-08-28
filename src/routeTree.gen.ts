@@ -78,6 +78,7 @@ import { Route as ApiPublicIntegracoesRetentativasRouteImport } from './routes/a
 import { Route as ApiPublicNotificacoesPushRouteImport } from './routes/api/public/notificacoes/push'
 import { Route as ApiPublicPagamentosProviderRouteImport } from './routes/api/public/pagamentos/$provider'
 import { Route as ApiPublicV1SplatRouteImport } from './routes/api/public/v1/$'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as ApiPublicCanaisChannelStoreIdRouteImport } from './routes/api/public/canais/$channel.$storeId'
 import { Route as ApiPublicIntegracoesKindStoreIdRouteImport } from './routes/api/public/integracoes/$kind.$storeId'
 
@@ -464,6 +465,12 @@ const ApiPublicV1SplatRoute = ApiPublicV1SplatRouteImport.update({
   path: '/api/public/v1/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicCanaisChannelStoreIdRoute =
   ApiPublicCanaisChannelStoreIdRouteImport.update({
     id: '/api/public/canais/$channel/$storeId',
@@ -546,6 +553,7 @@ export interface FileRoutesByFullPath {
   '/api/public/notificacoes/push': typeof ApiPublicNotificacoesPushRoute
   '/api/public/pagamentos/$provider': typeof ApiPublicPagamentosProviderRoute
   '/api/public/v1/$': typeof ApiPublicV1SplatRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/canais/$channel/$storeId': typeof ApiPublicCanaisChannelStoreIdRoute
   '/api/public/integracoes/$kind/$storeId': typeof ApiPublicIntegracoesKindStoreIdRoute
 }
@@ -617,6 +625,7 @@ export interface FileRoutesByTo {
   '/api/public/notificacoes/push': typeof ApiPublicNotificacoesPushRoute
   '/api/public/pagamentos/$provider': typeof ApiPublicPagamentosProviderRoute
   '/api/public/v1/$': typeof ApiPublicV1SplatRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/canais/$channel/$storeId': typeof ApiPublicCanaisChannelStoreIdRoute
   '/api/public/integracoes/$kind/$storeId': typeof ApiPublicIntegracoesKindStoreIdRoute
 }
@@ -691,6 +700,7 @@ export interface FileRoutesById {
   '/api/public/notificacoes/push': typeof ApiPublicNotificacoesPushRoute
   '/api/public/pagamentos/$provider': typeof ApiPublicPagamentosProviderRoute
   '/api/public/v1/$': typeof ApiPublicV1SplatRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/canais/$channel/$storeId': typeof ApiPublicCanaisChannelStoreIdRoute
   '/api/public/integracoes/$kind/$storeId': typeof ApiPublicIntegracoesKindStoreIdRoute
 }
@@ -765,6 +775,7 @@ export interface FileRouteTypes {
     | '/api/public/notificacoes/push'
     | '/api/public/pagamentos/$provider'
     | '/api/public/v1/$'
+    | '/lovable/email/transactional/preview'
     | '/api/public/canais/$channel/$storeId'
     | '/api/public/integracoes/$kind/$storeId'
   fileRoutesByTo: FileRoutesByTo
@@ -836,6 +847,7 @@ export interface FileRouteTypes {
     | '/api/public/notificacoes/push'
     | '/api/public/pagamentos/$provider'
     | '/api/public/v1/$'
+    | '/lovable/email/transactional/preview'
     | '/api/public/canais/$channel/$storeId'
     | '/api/public/integracoes/$kind/$storeId'
   id:
@@ -909,6 +921,7 @@ export interface FileRouteTypes {
     | '/api/public/notificacoes/push'
     | '/api/public/pagamentos/$provider'
     | '/api/public/v1/$'
+    | '/lovable/email/transactional/preview'
     | '/api/public/canais/$channel/$storeId'
     | '/api/public/integracoes/$kind/$storeId'
   fileRoutesById: FileRoutesById
@@ -941,6 +954,7 @@ export interface RootRouteChildren {
   ApiPublicNotificacoesPushRoute: typeof ApiPublicNotificacoesPushRoute
   ApiPublicPagamentosProviderRoute: typeof ApiPublicPagamentosProviderRoute
   ApiPublicV1SplatRoute: typeof ApiPublicV1SplatRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   ApiPublicCanaisChannelStoreIdRoute: typeof ApiPublicCanaisChannelStoreIdRoute
   ApiPublicIntegracoesKindStoreIdRoute: typeof ApiPublicIntegracoesKindStoreIdRoute
 }
@@ -1430,6 +1444,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicV1SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/canais/$channel/$storeId': {
       id: '/api/public/canais/$channel/$storeId'
       path: '/api/public/canais/$channel/$storeId'
@@ -1577,6 +1598,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicNotificacoesPushRoute: ApiPublicNotificacoesPushRoute,
   ApiPublicPagamentosProviderRoute: ApiPublicPagamentosProviderRoute,
   ApiPublicV1SplatRoute: ApiPublicV1SplatRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   ApiPublicCanaisChannelStoreIdRoute: ApiPublicCanaisChannelStoreIdRoute,
   ApiPublicIntegracoesKindStoreIdRoute: ApiPublicIntegracoesKindStoreIdRoute,
 }
