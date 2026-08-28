@@ -430,6 +430,24 @@ function CheckoutPage() {
       toast.error(parsed.error.issues[0]?.message ?? "Verifique os dados informados.");
       return;
     }
+    const normalizedPhone = normalizePhoneBR(form.phone);
+    if (!normalizedPhone.ok) {
+      toast.error(normalizedPhone.message);
+      return;
+    }
+    if (!consent.acceptedTerms) {
+      toast.error("Aceite os Termos de Uso e a Política de Privacidade para continuar.");
+      return;
+    }
+    if (settings.requireEmail && !form.email.trim()) {
+      toast.error("Esta loja pede um e-mail válido para o pedido.");
+      return;
+    }
+    if (!settings.allowGuest && !consent.createProfile) {
+      toast.error("Esta loja exige cadastro para finalizar o pedido.");
+      return;
+    }
+
     if (isDelivery && (!form.street.trim() || !form.number.trim())) {
       toast.error("Informe rua e número para a entrega.");
       return;
