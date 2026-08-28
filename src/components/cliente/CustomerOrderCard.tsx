@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TRACK_STEPS, publicTrackingPath, trackStepIndex } from "@/lib/acompanhamento";
+import { TRACK_STEPS, formatOrderAddress, publicTrackingPath, trackStepIndex } from "@/lib/acompanhamento";
 import { customerOrderDetail, type CustomerHistory } from "@/lib/cliente.functions";
 import { ORDER_STATUS_LABEL, ORDER_TYPE_LABEL, formatCurrency, formatDateTime } from "@/lib/format";
 
@@ -135,6 +135,13 @@ export function CustomerOrderCard({ order, session, onRepeat, repeating }: Props
                   </li>
                 ))}
               </ul>
+
+              {live.address ? (
+                <div className="rounded-xl border border-border p-3 text-sm">
+                  <p className="font-medium text-foreground">Endereço de entrega</p>
+                  <p className="text-muted-foreground">{formatOrderAddress(live.address)}</p>
+                </div>
+              ) : null}
 
               <p className="text-xs text-muted-foreground">
                 Atualiza automaticamente. Link público:{" "}
