@@ -985,14 +985,23 @@ function CheckoutPage() {
               <>
                 <div className="space-y-2">
                   <Label htmlFor="cep">CEP</Label>
-                  <Input
-                    id="cep"
-                    inputMode="numeric"
-                    autoComplete="postal-code"
-                    value={form.zip}
-                    onChange={(event) => update("zip", event.target.value)}
-                    placeholder="00000-000"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="cep"
+                      inputMode="numeric"
+                      autoComplete="postal-code"
+                      value={form.zip}
+                      onChange={(event) => update("zip", event.target.value)}
+                      placeholder="00000-000"
+                      disabled={isSearchingCep}
+                      className={isSearchingCep ? "pr-10" : undefined}
+                    />
+                    {isSearchingCep ? (
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="rua">Rua</Label>
