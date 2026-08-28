@@ -117,7 +117,7 @@ export async function storeVerificationCode(
 ): Promise<StoreCodeResult> {
   const { data: last } = await admin
     .from("verification_codes")
-    .select("id, created_at, locked_until")
+    .select("id, created_at, locked_until, channel")
     .eq("identifier", identifier)
     .eq("purpose", "phone")
     .order("created_at", { ascending: false })
