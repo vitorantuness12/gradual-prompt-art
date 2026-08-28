@@ -167,9 +167,10 @@ function TrackPage() {
       <main className="mx-auto w-full max-w-3xl space-y-6 px-4 pb-16 sm:px-6">
         <Card className="border-border/70 shadow-sm">
           <CardHeader>
-            <CardTitle asChild>
+            <CardTitle className="text-xl">
               <h1 className="text-xl font-semibold">Acompanhar pedido</h1>
             </CardTitle>
+
             <CardDescription>
               Escolha como quer consultar: pelo número do pedido, pelo seu telefone ou pelo código
               público que a loja enviou no link.
