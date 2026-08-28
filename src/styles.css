@@ -1,0 +1,354 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system definition.
+ *
+ * The @theme inline block maps CSS custom properties to Tailwind utility
+ * classes (e.g. --color-primary -> bg-primary, text-primary).
+ *
+ * The :root and .dark blocks define the actual color values using oklch.
+ * All colors MUST use oklch format.
+ *
+ * To add a new semantic color:
+ * 1. Add the variable to :root (light value) and .dark (dark value)
+ * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-primary-glow: var(--primary-glow);
+  --font-sans: "Sora", system-ui, sans-serif;
+  --font-display: "Sora", system-ui, sans-serif;
+}
+
+:root {
+  --radius: 1rem;
+  --background: hsl(220 20% 6%);
+  --foreground: hsl(0 0% 98%);
+  --card: hsl(220 20% 10%);
+  --card-foreground: hsl(0 0% 98%);
+  --popover: hsl(220 20% 10%);
+  --popover-foreground: hsl(0 0% 98%);
+  --primary: hsl(0 84% 50%);
+  --primary-foreground: hsl(0 0% 100%);
+  --primary-glow: hsl(0 84% 60%);
+  --brand: hsl(0 84% 50%);
+  --brand-foreground: hsl(0 0% 100%);
+  --secondary: hsl(220 20% 14%);
+  --secondary-foreground: hsl(0 0% 90%);
+  --muted: hsl(220 15% 18%);
+  --muted-foreground: hsl(220 10% 55%);
+  --accent: hsl(0 70% 40%);
+  --accent-foreground: hsl(0 0% 100%);
+  --success: hsl(152 55% 45%);
+  --success-foreground: hsl(0 0% 100%);
+  --warning: hsl(42 92% 58%);
+  --warning-foreground: hsl(30 40% 12%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(220 15% 18%);
+  --input: hsl(220 15% 18%);
+  --ring: hsl(0 84% 50%);
+  --chart-1: hsl(0 84% 50%);
+  --chart-2: hsl(0 84% 60%);
+  --chart-3: hsl(152 55% 45%);
+  --chart-4: hsl(42 92% 58%);
+  --chart-5: hsl(220 10% 55%);
+  --sidebar: hsl(220 20% 8%);
+  --sidebar-foreground: hsl(0 0% 98%);
+  --sidebar-primary: hsl(0 84% 50%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(220 20% 14%);
+  --sidebar-accent-foreground: hsl(0 0% 98%);
+  --sidebar-border: hsl(220 15% 18%);
+  --sidebar-ring: hsl(0 84% 50%);
+
+  --gradient-primary: linear-gradient(135deg, hsl(0 84% 50%) 0%, hsl(0 70% 35%) 100%);
+  --gradient-hero: linear-gradient(180deg, hsl(220 20% 6%) 0%, hsl(220 25% 10%) 50%, hsl(0 60% 12%) 100%);
+  --gradient-card: linear-gradient(180deg, hsl(220 20% 12%) 0%, hsl(220 20% 8%) 100%);
+  --gradient-glass: linear-gradient(135deg, hsla(0, 0%, 100%, 0.1) 0%, hsla(0, 0%, 100%, 0.02) 100%);
+
+  --shadow-glow: 0 0 60px -12px hsl(0 84% 50% / 0.5);
+  --shadow-glow-sm: 0 0 30px -8px hsl(0 84% 50% / 0.4);
+  --shadow-card: 0 25px 50px -12px hsl(0 0% 0% / 0.5);
+  --shadow-elevated: 0 20px 40px -15px hsl(0 0% 0% / 0.7);
+}
+
+
+/* Tema claro: aplicado quando a classe .light está no <html>. O tema base é escuro. */
+.light {
+  color-scheme: light;
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(220 25% 12%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(220 25% 12%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(220 25% 12%);
+  --primary: hsl(0 84% 50%);
+  --primary-foreground: hsl(0 0% 100%);
+  --primary-glow: hsl(0 84% 60%);
+  --brand: hsl(0 84% 50%);
+  --brand-foreground: hsl(0 0% 100%);
+  --secondary: hsl(220 20% 96%);
+  --secondary-foreground: hsl(220 25% 18%);
+  --muted: hsl(220 20% 94%);
+  --muted-foreground: hsl(220 12% 42%);
+  --accent: hsl(0 74% 46%);
+  --accent-foreground: hsl(0 0% 100%);
+  --success: hsl(152 50% 38%);
+  --success-foreground: hsl(0 0% 100%);
+  --warning: hsl(42 92% 45%);
+  --warning-foreground: hsl(30 40% 12%);
+  --destructive: hsl(0 72% 48%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(220 16% 88%);
+  --input: hsl(220 16% 88%);
+  --ring: hsl(0 84% 50%);
+  --chart-1: hsl(0 84% 50%);
+  --chart-2: hsl(0 74% 62%);
+  --chart-3: hsl(152 50% 38%);
+  --chart-4: hsl(42 92% 45%);
+  --chart-5: hsl(220 12% 42%);
+  --sidebar: hsl(220 20% 98%);
+  --sidebar-foreground: hsl(220 25% 12%);
+  --sidebar-primary: hsl(0 84% 50%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(220 20% 94%);
+  --sidebar-accent-foreground: hsl(220 25% 12%);
+  --sidebar-border: hsl(220 16% 88%);
+  --sidebar-ring: hsl(0 84% 50%);
+
+  --gradient-hero: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 25% 97%) 50%, hsl(0 60% 96%) 100%);
+  --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 20% 97%) 100%);
+  --gradient-glass: linear-gradient(135deg, hsla(220, 20%, 10%, 0.06) 0%, hsla(220, 20%, 10%, 0.02) 100%);
+
+  --shadow-card: 0 25px 50px -12px hsl(220 25% 12% / 0.12);
+  --shadow-elevated: 0 20px 40px -15px hsl(220 25% 12% / 0.18);
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .animate-float,
+    .animate-pulse-glow {
+      animation: none !important;
+    }
+  }
+}
+
+@utility container {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+  max-width: 1400px;
+}
+
+@utility text-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: var(--gradient-primary);
+}
+
+@utility bg-gradient-primary {
+  background-image: var(--gradient-primary);
+}
+
+@utility bg-gradient-hero {
+  background-image: var(--gradient-hero);
+}
+
+@utility bg-gradient-card {
+  background-image: var(--gradient-card);
+}
+
+@utility bg-glass {
+  background-image: var(--gradient-glass);
+  backdrop-filter: blur(24px);
+  border: 1px solid hsl(0 0% 100% / 0.1);
+}
+
+@utility shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+@utility shadow-glow-sm {
+  box-shadow: var(--shadow-glow-sm);
+}
+
+@utility shadow-card-soft {
+  box-shadow: var(--shadow-card);
+}
+
+@utility shadow-elevated {
+  box-shadow: var(--shadow-elevated);
+}
+
+@utility animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@utility animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@utility animate-fade-up {
+  animation: fade-up 0.6s ease-out forwards;
+}
+
+@utility animate-shimmer {
+  animation: shimmer 2s linear infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px -5px hsl(0 84% 50% / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px -5px hsl(0 84% 50% / 0.6);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+
+/* Acessibilidade: foco sempre visível para navegação por teclado. */
+:where(a, button, input, select, textarea, summary, [role="button"], [tabindex]):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+/* Respeita quem pediu menos animação no sistema operacional. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "O Seu Pedido",
+  "short_name": "Seu Pedido",
+  "description": "Peça na sua loja favorita, acompanhe o pedido em tempo real e repita compras anteriores.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "/?origem=app",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "categories": ["food", "shopping", "business"],
+  "icons": [
+    { "src": "/app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/app-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Acompanhar pedido",
+      "short_name": "Acompanhar",
+      "url": "/acompanhar?origem=app",
+      "icons": [{ "src": "/app-icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Meus pedidos recentes",
+      "short_name": "Pedidos",
+      "url": "/acompanhar?origem=app&aba=recentes",
+      "icons": [{ "src": "/app-icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}
