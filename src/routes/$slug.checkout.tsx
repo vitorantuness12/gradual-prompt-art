@@ -651,6 +651,8 @@ function CheckoutPage() {
       cart.clear();
       setReview(false);
       toast.success(`Pedido ${order.code} enviado para a loja!`);
+      if (identity.created) toast.success(identity.message);
+
       void navigate({ to: "/$slug/acompanhar", params: { slug }, search: { codigo: order.code } });
     } catch {
       toast.error("Não foi possível enviar o pedido. Tente novamente.");
