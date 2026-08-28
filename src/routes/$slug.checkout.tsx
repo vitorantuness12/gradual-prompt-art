@@ -191,6 +191,7 @@ function CheckoutPage() {
   const [useCashback, setUseCashback] = useState(false);
   const [estimate, setEstimate] = useState<DeliveryEstimate | null>(null);
   const [estimating, setEstimating] = useState(false);
+  const [isSearchingCep, setIsSearchingCep] = useState(false);
   const [review, setReview] = useState(false);
   const [acceptedOffers, setAcceptedOffers] = useState<string[]>([]);
   const [tracking, setTracking] = useState<Tracking>(EMPTY_TRACKING);
@@ -346,6 +347,43 @@ function CheckoutPage() {
       window.clearTimeout(timer);
     };
   }, [addressReady, form.zip, form.street, form.number, form.district, cart.subtotal, slug, quoteDeliveryFee]);
+
+  // Busca automática de endereço pelo CEP (ViaCEP).
+  useEffect(() => {
+    const digits = form.zip.replace(/\D/g, "");
+    if (digits.length !== 8) return;
+    let active = true;
+    setIsSearchingCep(true);
+    const timer = window.setTimeout(() => {
+      fetch(`https://viacep.com.br/ws/${digits}/json/`)
+        .then((res) => res.json())
+        .then((data: { erro?: boolean; logradouro?: string; bairro?: string; complemento?: string; localidade?: string; uf?: string }) => {
+          if (!active) return;
+          if (data.erro) {
+            toast.error("CEP não encontrado. Verifique o número digitado.");
+            return;
+          }
+          setForm((current) => ({
+            ...current,
+            street: current.street.trim() || (data.logradouro ?? current.street),
+            district: current.district.trim() || (data.bairro ?? current.district),
+            complement: current.complement.trim() || (data.complemento ?? current.complement),
+          }));
+        })
+        .catch(() => {
+          if (!active) return;
+          toast.error("Não foi possível consultar o CEP. Tente digitar o endereço manualmente.");
+        })
+        .finally(() => {
+          if (active) setIsSearchingCep(false);
+        });
+    }, 400);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+      setIsSearchingCep(false);
+    };
+  }, [form.zip]);
 
   if (isLoading) {
     return (
@@ -947,14 +985,23 @@ function CheckoutPage() {
               <>
                 <div className="space-y-2">
                   <Label htmlFor="cep">CEP</Label>
-                  <Input
-                    id="cep"
-                    inputMode="numeric"
-                    autoComplete="postal-code"
-                    value={form.zip}
-                    onChange={(event) => update("zip", event.target.value)}
-                    placeholder="00000-000"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="cep"
+                      inputMode="numeric"
+                      autoComplete="postal-code"
+                      value={form.zip}
+                      onChange={(event) => update("zip", event.target.value)}
+                      placeholder="00000-000"
+                      disabled={isSearchingCep}
+                      className={isSearchingCep ? "pr-10" : undefined}
+                    />
+                    {isSearchingCep ? (
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="rua">Rua</Label>
