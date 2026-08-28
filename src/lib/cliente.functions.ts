@@ -223,7 +223,7 @@ export const prepareCustomerRepeat = createServerFn({ method: "POST" })
     const [{ data: products }, { data: groups }, { data: options }] = await Promise.all([
       supabaseAdmin.from("products").select("*").eq("store_id", order.store_id),
       supabaseAdmin.from("product_option_groups").select("id, product_id, name").eq("store_id", order.store_id),
-      supabaseAdmin.from("product_options").select("id, group_id, name, price_delta, is_active"),
+      supabaseAdmin.from("product_options").select("id, group_id, name, price_delta"),
     ]);
 
     const { buildRepeatOrder } = await import("@/lib/repetir-pedido");
