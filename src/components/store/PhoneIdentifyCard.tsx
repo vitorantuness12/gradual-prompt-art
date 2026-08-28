@@ -317,11 +317,9 @@ export function PhoneIdentifyCard({
                   variant="ghost"
                   size="sm"
                   onClick={() => void sendCode(sentChannel === "whatsapp" ? "email" : "whatsapp")}
+                  /* Troca de canal não espera cooldown: só o bloqueio impede. */
                   disabled={
-                    sending ||
-                    isLocked ||
-                    resendLeft > 0 ||
-                    (sentChannel === "whatsapp" && !result.channels.email)
+                    sending || isLocked || (sentChannel === "whatsapp" && !result.channels.email)
                   }
                 >
                   {sentChannel === "whatsapp"
