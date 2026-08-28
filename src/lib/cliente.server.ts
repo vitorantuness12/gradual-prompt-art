@@ -248,7 +248,7 @@ export async function notifyCustomerStatus(
         .from("whatsapp_automation_rules")
         .select("id")
         .eq("store_id", order.store_id)
-        .eq("event", event)
+        .eq("trigger_event", event)
         .eq("is_active", true)
         .maybeSingle();
       storeHandles = Boolean(rule);
