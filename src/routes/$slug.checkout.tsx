@@ -482,6 +482,37 @@ function CheckoutPage() {
         return;
       }
 
+      // Identificação do cliente: cria/atualiza cadastro por telefone e grava aceites.
+      const identity = await persistIdentity({
+        data: {
+          storeSlug: store.slug,
+          phone: form.phone,
+          name: form.name.trim(),
+          email: form.email.trim() || undefined,
+          fulfillment: String(fulfillment),
+          acceptedTerms: consent.acceptedTerms,
+          marketingOptIn: consent.marketingOptIn,
+          createProfile: consent.createProfile,
+          address: isDelivery
+            ? {
+                street: form.street.trim(),
+                number: form.number.trim(),
+                complement: form.complement.trim(),
+                reference: form.reference.trim(),
+                district: form.district.trim(),
+                zipCode: form.zip.trim(),
+              }
+            : undefined,
+        },
+      });
+      if (!identity.ok) {
+        toast.error(identity.message);
+        setSubmitting(false);
+        return;
+      }
+
+
+
       const scheduledFor =
         timing === "scheduled" && date && time
           ? new Date(`${date}T${time}:00`).toISOString()
