@@ -88,13 +88,61 @@ export function linkExpired(createdAt: string, days: number): boolean {
   return Date.now() > limit;
 }
 
-/** Guarda o hash do código e invalida os anteriores do mesmo telefone. */
+export interface StoreCodeResult {
+  ok: boolean;
+  /** Segundos que faltam para poder pedir/reenviar outro código. */
+  retryAfterSeconds: number;
+  message: string;
+}
+
+/** Segundos restantes (arredondados para cima) até um instante futuro. */
+function secondsUntil(iso: string | null | undefined): number {
+  if (!iso) return 0;
+  return Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 1000));
+}
+
+/**
+ * Guarda o hash do código e invalida os anteriores do mesmo telefone.
+ * Respeita a espera entre envios (cooldown) e o bloqueio por erros repetidos.
+ */
 export async function storeVerificationCode(
   admin: Admin,
   identifier: string,
   code: string,
   channel: "whatsapp" | "email",
-): Promise<void> {
+): Promise<StoreCodeResult> {
+  const { data: last } = await admin
+    .from("verification_codes")
+    .select("id, created_at, locked_until")
+    .eq("identifier", identifier)
+    .eq("purpose", "phone")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  // Bloqueio ativo: nem reenvio nem nova confirmação são liberados.
+  const lockLeft = secondsUntil(last?.locked_until ?? null);
+  if (lockLeft > 0) {
+    return {
+      ok: false,
+      retryAfterSeconds: lockLeft,
+      message: `Muitas tentativas incorretas. Aguarde ${Math.ceil(lockLeft / 60)} minuto(s) para pedir um novo código.`,
+    };
+  }
+
+  // Espera mínima entre envios, para evitar disparos em sequência.
+  if (last?.created_at) {
+    const elapsed = Math.floor((Date.now() - new Date(last.created_at).getTime()) / 1000);
+    const wait = CODE_RESEND_COOLDOWN_SECONDS - elapsed;
+    if (wait > 0) {
+      return {
+        ok: false,
+        retryAfterSeconds: wait,
+        message: `Aguarde ${wait} segundo(s) para reenviar o código.`,
+      };
+    }
+  }
+
   await admin
     .from("verification_codes")
     .update({ consumed_at: new Date().toISOString() })
@@ -109,11 +157,17 @@ export async function storeVerificationCode(
     code_hash: hashCode(identifier, code),
     expires_at: new Date(Date.now() + CODE_TTL_MINUTES * 60_000).toISOString(),
   });
+
+  return { ok: true, retryAfterSeconds: CODE_RESEND_COOLDOWN_SECONDS, message: "" };
 }
 
 export interface CodeCheck {
   ok: boolean;
   message: string;
+  /** Quando > 0, novas tentativas estão bloqueadas por este tempo. */
+  lockedForSeconds: number;
+  /** Tentativas restantes com o código atual. */
+  attemptsLeft: number;
 }
 
 /** Confere o código informado: valida validade, tentativas e consome no acerto. */
@@ -122,40 +176,74 @@ export async function checkVerificationCode(
   identifier: string,
   code: string,
 ): Promise<CodeCheck> {
+  const fail = (message: string, extra: Partial<CodeCheck> = {}): CodeCheck => ({
+    ok: false,
+    message,
+    lockedForSeconds: 0,
+    attemptsLeft: 0,
+    ...extra,
+  });
+
   const digits = onlyDigits(code);
-  if (digits.length !== 6) return { ok: false, message: "Informe os 6 dígitos do código recebido." };
+  if (digits.length !== 6) return fail("Informe os 6 dígitos do código recebido.");
 
   const { data: row } = await admin
     .from("verification_codes")
-    .select("id, code_hash, attempts, expires_at")
+    .select("id, code_hash, attempts, expires_at, locked_until")
     .eq("identifier", identifier)
     .eq("purpose", "phone")
-    .is("consumed_at", null)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  if (!row) return { ok: false, message: "Código não encontrado. Peça um novo código." };
-  if (new Date(row.expires_at).getTime() < Date.now()) {
-    return { ok: false, message: "Este código expirou. Peça um novo código." };
+  if (!row) return fail("Código não encontrado. Peça um novo código.");
+
+  const lockLeft = secondsUntil(row.locked_until);
+  if (lockLeft > 0) {
+    return fail(
+      `Muitas tentativas incorretas. Aguarde ${Math.ceil(lockLeft / 60)} minuto(s) antes de tentar de novo.`,
+      { lockedForSeconds: lockLeft },
+    );
   }
-  if (row.attempts >= CODE_MAX_ATTEMPTS) {
-    return { ok: false, message: "Muitas tentativas com este código. Peça um novo código." };
+
+  if (row.consumed_at) return fail("Este código já foi usado. Peça um novo código.");
+  if (new Date(row.expires_at).getTime() < Date.now()) {
+    return fail("Este código expirou. Peça um novo código.");
   }
 
   if (!sameHash(row.code_hash, hashCode(identifier, digits))) {
+    const attempts = row.attempts + 1;
+    const locked = attempts >= CODE_MAX_ATTEMPTS;
     await admin
       .from("verification_codes")
-      .update({ attempts: row.attempts + 1 })
+      .update({
+        attempts,
+        locked_until: locked
+          ? new Date(Date.now() + CODE_LOCK_MINUTES * 60_000).toISOString()
+          : null,
+        ...(locked ? { consumed_at: new Date().toISOString() } : {}),
+      })
       .eq("id", row.id);
-    return { ok: false, message: "Código incorreto. Confira os 6 dígitos e tente novamente." };
+
+    if (locked) {
+      return fail(
+        `Você errou o código ${CODE_MAX_ATTEMPTS} vezes. Por segurança, aguarde ${CODE_LOCK_MINUTES} minutos e peça um novo código.`,
+        { lockedForSeconds: CODE_LOCK_MINUTES * 60 },
+      );
+    }
+    const left = CODE_MAX_ATTEMPTS - attempts;
+    return fail(
+      `Código incorreto. Você ainda tem ${left} tentativa(s) antes do bloqueio temporário.`,
+      { attemptsLeft: left },
+    );
   }
 
   await admin
     .from("verification_codes")
-    .update({ consumed_at: new Date().toISOString() })
+    .update({ consumed_at: new Date().toISOString(), locked_until: null })
     .eq("id", row.id);
-  return { ok: true, message: "" };
+  return { ok: true, message: "", lockedForSeconds: 0, attemptsLeft: CODE_MAX_ATTEMPTS };
+
 }
 
 /** Converte a linha do banco no formato mostrado na página. */
