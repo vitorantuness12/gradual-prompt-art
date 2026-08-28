@@ -50,6 +50,14 @@ import {
   validateCoupon,
   type CustomerAccount,
 } from "@/lib/orders.functions";
+import {
+  DEFAULT_CHECKOUT_SETTINGS,
+  getCheckoutSettings,
+  saveCheckoutIdentity,
+} from "@/lib/identificacao.functions";
+import { PhoneIdentifyCard, type IdentityConsent } from "@/components/store/PhoneIdentifyCard";
+import { normalizePhoneBR } from "@/lib/phone";
+
 
 import { fulfillmentOptions, timeSlots } from "@/lib/orders";
 import {
