@@ -20,7 +20,7 @@ export const CODE_MAX_ATTEMPTS = 5;
 
 /** Campos devolvidos ao cliente: nada de endereço completo, e-mail ou telefone. */
 export const ORDER_SELECT =
-  "id, store_id, customer_name, code, public_token, status, type, created_at, total, subtotal, delivery_fee, discount, payment_method, payment_status, scheduled_for, table_number, notes, customer_phone, is_demo, store:stores(name, slug), order_items(product_name, quantity, total, notes)";
+  "id, store_id, customer_name, code, public_token, status, type, created_at, total, subtotal, delivery_fee, discount, payment_method, payment_status, scheduled_for, table_number, notes, address, customer_phone, is_demo, store:stores(name, slug), order_items(product_name, quantity, total, notes)";
 
 export interface OrderSummary {
   code: string;
