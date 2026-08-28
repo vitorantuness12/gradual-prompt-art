@@ -34,6 +34,7 @@ import { rememberOrder, useCart } from "@/hooks/useCart";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/lib/format";
 import { EMPTY_TRACKING, bumpPrice, parseTracking, type Tracking } from "@/lib/digitais";
+import { PaymentMethodPicker } from "@/components/store/PaymentMethodPicker";
 import { LoyaltyCard } from "@/components/store/LoyaltyCard";
 import {
   checkProductionCapacity,
