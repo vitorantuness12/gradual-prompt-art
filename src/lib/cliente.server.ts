@@ -250,6 +250,7 @@ export async function notifyCustomerStatus(
         .eq("store_id", order.store_id)
         .eq("trigger_event", event)
         .eq("is_active", true)
+        .limit(1)
         .maybeSingle();
       storeHandles = Boolean(rule);
     }
