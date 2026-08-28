@@ -3,7 +3,7 @@ import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { OrderSummaryView, TrackedOrderDetail } from "@/lib/acompanhamento";
+import type { OrderAddress, OrderSummaryView, TrackedOrderDetail } from "@/lib/acompanhamento";
 import type { RepeatLine } from "@/lib/repetir-pedido";
 
 /**
@@ -206,14 +206,14 @@ export const prepareCustomerRepeat = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<RepeatPrepared> => {
     const helpers = await import("@/lib/cliente.server");
     const session = helpers.readSession(data.session);
-    const empty = { storeSlug: "", storeId: "", lines: [], total: 0 };
+    const empty = { storeSlug: "", storeId: "", lines: [], total: 0, address: null };
     if (!session.ok) return { ok: false, message: session.message, ...empty };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: order } = await supabaseAdmin
       .from("orders")
       .select(
-        "id, store_id, status, customer_phone, store:stores(slug), order_items(product_id, product_name, quantity, unit_price, notes)",
+        "id, store_id, status, customer_phone, address, store:stores(slug), order_items(product_id, product_name, quantity, unit_price, notes)",
       )
       .eq("id", data.orderId)
       .maybeSingle();
@@ -228,6 +228,7 @@ export const prepareCustomerRepeat = createServerFn({ method: "POST" })
       supabaseAdmin.from("product_options").select("id, group_id, name, price_delta"),
     ]);
 
+    const { parseOrderAddress } = await import("@/lib/acompanhamento");
     const { buildRepeatOrder } = await import("@/lib/repetir-pedido");
     const result = buildRepeatOrder(
       (order.order_items ?? []).map((item) => ({
@@ -251,6 +252,7 @@ export const prepareCustomerRepeat = createServerFn({ method: "POST" })
       storeId: order.store_id,
       lines: result.lines,
       total: result.total,
+      address: parseOrderAddress(order.address),
     };
   });
 
