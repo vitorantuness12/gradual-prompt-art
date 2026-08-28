@@ -276,7 +276,7 @@ function TrackPage() {
                   </Button>
                 </form>
                 <p className="pt-3 text-xs text-muted-foreground">
-                  O código público vem no link enviado pela loja e pode expirar conforme a配 configuração da loja.
+                  O código público vem no link enviado pela loja e pode expirar conforme a configuração da loja.
                 </p>
               </TabsContent>
             </Tabs>
