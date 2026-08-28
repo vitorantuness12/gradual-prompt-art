@@ -58,10 +58,14 @@ export interface IdentifyResult {
   valid: boolean;
   /** Existe cadastro deste telefone nesta loja. */
   found: boolean;
-  /** A loja exige código antes de liberar os dados salvos. */
+  /** É preciso confirmar um código antes de liberar os dados salvos. */
   needsVerification: boolean;
   phoneE164: string;
   message: string;
+  /** E-mail parcialmente oculto, quando o cadastro tiver um. */
+  emailMasked: string | null;
+  /** Canais disponíveis para receber o código de confirmação. */
+  channels: { whatsapp: boolean; email: boolean };
   customer: {
     firstName: string;
     name: string | null;
@@ -70,6 +74,7 @@ export interface IdentifyResult {
     addresses: CustomerAddressOption[];
   } | null;
 }
+
 
 const identifyInput = z.object({
   storeSlug: z.string().trim().min(1).max(60),
