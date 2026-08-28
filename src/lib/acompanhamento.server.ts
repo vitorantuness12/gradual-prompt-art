@@ -180,6 +180,7 @@ export async function buildDetail(
     scheduled_for: string | null;
     table_number: string | null;
     notes: string | null;
+    address: unknown;
     is_demo: boolean;
     store: { name: string; slug: string } | null;
     order_items: Array<{ product_name: string; quantity: number; total: number; notes: string | null }> | null;
