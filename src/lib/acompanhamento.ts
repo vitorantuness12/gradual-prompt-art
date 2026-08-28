@@ -2,6 +2,63 @@
 
 export type TrackMode = "code" | "phone" | "token";
 
+/** Endereço de entrega guardado no pedido (JSON), usado para repetir o pedido. */
+export interface OrderAddress {
+  zip: string;
+  street: string;
+  number: string;
+  district: string;
+  complement: string;
+  reference: string;
+}
+
+const EMPTY_ADDRESS: OrderAddress = {
+  zip: "",
+  street: "",
+  number: "",
+  district: "",
+  complement: "",
+  reference: "",
+};
+
+function text(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+/** Normaliza o JSON de endereço do pedido; devolve null quando não há nada útil. */
+export function parseOrderAddress(value: unknown): OrderAddress | null {
+  if (!value || typeof value !== "object") return null;
+  const raw = value as Record<string, unknown>;
+  const address: OrderAddress = {
+    ...EMPTY_ADDRESS,
+    zip: text(raw["zip"] ?? raw["zipCode"] ?? raw["cep"]),
+    street: text(raw["street"] ?? raw["logradouro"]),
+    number: text(raw["number"] ?? raw["numero"]),
+    district: text(raw["district"] ?? raw["bairro"]),
+    complement: text(raw["complement"] ?? raw["complemento"]),
+    reference: text(raw["reference"] ?? raw["referencia"]),
+  };
+  const hasData = Object.values(address).some((field) => field.length > 0);
+  return hasData ? address : null;
+}
+
+/** Endereço em uma linha para exibição ("Rua, 10 - Bairro (compl.) · CEP 00000-000"). */
+export function formatOrderAddress(address: OrderAddress | null): string {
+  if (!address) return "";
+  const line = [
+    [address.street, address.number].filter(Boolean).join(", "),
+    address.district,
+  ]
+    .filter(Boolean)
+    .join(" - ");
+  const extras = [
+    address.complement ? `(${address.complement})` : "",
+    address.reference ? `Ref.: ${address.reference}` : "",
+    address.zip ? `CEP ${address.zip}` : "",
+  ].filter(Boolean);
+  return [line, ...extras].filter(Boolean).join(" · ");
+}
+
 export interface TrackedOrderDetail {
   id: string;
   code: string;
