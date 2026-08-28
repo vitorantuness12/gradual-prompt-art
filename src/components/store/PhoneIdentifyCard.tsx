@@ -173,6 +173,19 @@ export function PhoneIdentifyCard({
     }
   }
 
+  /**
+   * Troca de canal: seleciona e, quando um código já foi enviado, pede um novo
+   * imediatamente pelo canal escolhido (o anterior é invalidado no servidor).
+   */
+  async function pickChannel(target: Channel) {
+    if (target === channel && !codeSent) {
+      setChannel(target);
+      return;
+    }
+    setChannel(target);
+    if (codeSent && target !== sentChannel) await sendCode(target);
+  }
+
   async function verify() {
     if (codeExpired) {
       setCodeError("Este código expirou. Toque em “Enviar outro código” para receber um novo.");
@@ -256,8 +269,9 @@ export function PhoneIdentifyCard({
               <div className="grid gap-2 sm:grid-cols-2">
                 <button
                   type="button"
-                  onClick={() => setChannel("whatsapp")}
-                  className={`rounded-lg border p-3 text-left text-sm transition ${
+                  disabled={sending || isLocked}
+                  onClick={() => void pickChannel("whatsapp")}
+                  className={`rounded-lg border p-3 text-left text-sm transition disabled:opacity-50 ${
                     channel === "whatsapp" ? "border-primary bg-primary/10" : "border-border/70 bg-background"
                   }`}
                 >
@@ -266,8 +280,8 @@ export function PhoneIdentifyCard({
                 </button>
                 <button
                   type="button"
-                  disabled={!result.channels.email}
-                  onClick={() => setChannel("email")}
+                  disabled={!result.channels.email || sending || isLocked}
+                  onClick={() => void pickChannel("email")}
                   className={`rounded-lg border p-3 text-left text-sm transition disabled:opacity-50 ${
                     channel === "email" ? "border-primary bg-primary/10" : "border-border/70 bg-background"
                   }`}
@@ -303,11 +317,9 @@ export function PhoneIdentifyCard({
                   variant="ghost"
                   size="sm"
                   onClick={() => void sendCode(sentChannel === "whatsapp" ? "email" : "whatsapp")}
+                  /* Troca de canal não espera cooldown: só o bloqueio impede. */
                   disabled={
-                    sending ||
-                    isLocked ||
-                    resendLeft > 0 ||
-                    (sentChannel === "whatsapp" && !result.channels.email)
+                    sending || isLocked || (sentChannel === "whatsapp" && !result.channels.email)
                   }
                 >
                   {sentChannel === "whatsapp"

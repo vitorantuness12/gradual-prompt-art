@@ -117,7 +117,7 @@ export async function storeVerificationCode(
 ): Promise<StoreCodeResult> {
   const { data: last } = await admin
     .from("verification_codes")
-    .select("id, created_at, locked_until")
+    .select("id, created_at, locked_until, channel")
     .eq("identifier", identifier)
     .eq("purpose", "phone")
     .order("created_at", { ascending: false })
@@ -134,8 +134,12 @@ export async function storeVerificationCode(
     };
   }
 
-  // Espera mínima entre envios, para evitar disparos em sequência.
-  if (last?.created_at) {
+  // Troca de canal (WhatsApp ↔ e-mail): o cliente recebe um código novo na hora,
+  // sem esperar o cooldown. O código anterior é invalidado logo abaixo.
+  const switchedChannel = Boolean(last && last.channel !== channel);
+
+  // Espera mínima entre envios pelo mesmo canal, para evitar disparos em sequência.
+  if (!switchedChannel && last?.created_at) {
     const elapsed = Math.floor((Date.now() - new Date(last.created_at).getTime()) / 1000);
     const wait = CODE_RESEND_COOLDOWN_SECONDS - elapsed;
     if (wait > 0) {
