@@ -8830,6 +8830,7 @@ export type Database = {
           expires_at: string
           id: string
           identifier: string
+          locked_until: string | null
           purpose: Database["public"]["Enums"]["verification_purpose"]
           user_id: string | null
         }
@@ -8842,6 +8843,7 @@ export type Database = {
           expires_at: string
           id?: string
           identifier: string
+          locked_until?: string | null
           purpose?: Database["public"]["Enums"]["verification_purpose"]
           user_id?: string | null
         }
@@ -8854,6 +8856,7 @@ export type Database = {
           expires_at?: string
           id?: string
           identifier?: string
+          locked_until?: string | null
           purpose?: Database["public"]["Enums"]["verification_purpose"]
           user_id?: string | null
         }
