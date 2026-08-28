@@ -709,7 +709,32 @@ function CheckoutPage() {
           </p>
         ) : null}
 
+        {/* 0. Identificação por telefone */}
+        <PhoneIdentifyCard
+          slug={slug}
+          phone={form.phone}
+          settings={settings}
+          consent={consent}
+          onPhoneChange={(value) => update("phone", value)}
+          onConsentChange={setConsent}
+          onApplyCustomer={({ name, email, address }) => {
+            setForm((current) => ({
+              ...current,
+              name: name ?? current.name,
+              email: email ?? current.email,
+              zip: address?.zipCode ?? current.zip,
+              street: address?.street ?? current.street,
+              number: address?.number ?? current.number,
+              district: address?.district ?? current.district,
+              complement: address?.complement ?? current.complement,
+              reference: address?.reference ?? current.reference,
+            }));
+            toast.success("Dados preenchidos. Confira antes de finalizar.");
+          }}
+        />
+
         {/* 1. Itens */}
+
         <Card className="border-border/70 shadow-sm">
           <CardHeader>
             <CardTitle className="text-base">1. Seus itens</CardTitle>
