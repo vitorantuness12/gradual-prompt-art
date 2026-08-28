@@ -196,6 +196,8 @@ export interface RepeatPrepared {
   storeId: string;
   lines: RepeatLine[];
   total: number;
+  /** Endereço usado no pedido original, para repetir com os mesmos dados. */
+  address: OrderAddress | null;
 }
 
 /** Recalcula um pedido antigo com os preços e a disponibilidade de hoje. */
