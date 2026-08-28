@@ -66,6 +66,12 @@ export function PhoneIdentifyCard({
   /** Momento (epoch ms) em que o código enviado deixa de valer. */
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
+  /** Momento em que o reenvio volta a ser permitido. */
+  const [resendAt, setResendAt] = useState<number | null>(null);
+  const [resendLeft, setResendLeft] = useState(0);
+  /** Momento em que o bloqueio por tentativas erradas termina. */
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+  const [lockLeft, setLockLeft] = useState(0);
 
   // Contador de validade: atualiza a cada segundo enquanto o código estiver ativo.
   useEffect(() => {
@@ -79,6 +85,31 @@ export function PhoneIdentifyCard({
     return () => window.clearInterval(timer);
   }, [expiresAt]);
 
+  // Contadores de reenvio e de bloqueio.
+  useEffect(() => {
+    if (!resendAt) {
+      setResendLeft(0);
+      return;
+    }
+    const tick = () => setResendLeft(Math.max(0, Math.ceil((resendAt - Date.now()) / 1000)));
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
+  }, [resendAt]);
+
+  useEffect(() => {
+    if (!lockedUntil) {
+      setLockLeft(0);
+      return;
+    }
+    const tick = () => setLockLeft(Math.max(0, Math.ceil((lockedUntil - Date.now()) / 1000)));
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
+  }, [lockedUntil]);
+
+  const isLocked = lockLeft > 0;
+  const lockCountdown = `${Math.floor(lockLeft / 60)}:${String(lockLeft % 60).padStart(2, "0")}`;
   const codeExpired = codeSent && expiresAt !== null && secondsLeft <= 0;
   const countdown = `${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, "0")}`;
 
@@ -96,6 +127,8 @@ export function PhoneIdentifyCard({
     setCodeSent(false);
     setCode("");
     setExpiresAt(null);
+    setResendAt(null);
+    setLockedUntil(null);
     setFeedback(null);
     setCodeError(null);
     try {
@@ -116,10 +149,17 @@ export function PhoneIdentifyCard({
     setCodeError(null);
     try {
       const outcome = await askCode({ data: { storeSlug: slug, phone, channel } });
+      if (!outcome.ok) {
+        // Cooldown ou bloqueio: mantemos o código anterior na tela e avisamos a espera.
+        setCodeError(outcome.message);
+        setResendAt(outcome.retryAfterSeconds > 0 ? Date.now() + outcome.retryAfterSeconds * 1000 : null);
+        return;
+      }
       setFeedback(outcome.message);
-      setCodeSent(outcome.ok);
+      setCodeSent(true);
       setCode("");
-      setExpiresAt(outcome.ok && outcome.expiresInSeconds > 0 ? Date.now() + outcome.expiresInSeconds * 1000 : null);
+      setExpiresAt(outcome.expiresInSeconds > 0 ? Date.now() + outcome.expiresInSeconds * 1000 : null);
+      setResendAt(outcome.retryAfterSeconds > 0 ? Date.now() + outcome.retryAfterSeconds * 1000 : null);
     } catch {
       setFeedback("Não foi possível enviar o código agora. Tente novamente.");
     } finally {
@@ -138,12 +178,18 @@ export function PhoneIdentifyCard({
       const confirmed = await confirmCode({ data: { storeSlug: slug, phone, code } });
       if (confirmed.needsVerification || !confirmed.customer) {
         setCodeError(confirmed.message || "Código inválido.");
+        if (confirmed.lockedForSeconds > 0) {
+          setLockedUntil(Date.now() + confirmed.lockedForSeconds * 1000);
+          setExpiresAt(null);
+        }
         return;
       }
       setResult(confirmed);
       selectFirstAddress(confirmed);
       setFeedback(confirmed.message);
       setExpiresAt(null);
+      setResendAt(null);
+      setLockedUntil(null);
       setCodeSent(false);
     } catch {
       setCodeError("Não foi possível confirmar o código agora. Tente novamente.");
@@ -229,8 +275,20 @@ export function PhoneIdentifyCard({
             </div>
 
             <div className="flex flex-wrap items-end gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={() => void sendCode()} disabled={sending}>
-                {sending ? "Enviando…" : codeSent ? "Enviar outro código" : "Enviar código"}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => void sendCode()}
+                disabled={sending || isLocked || resendLeft > 0}
+              >
+                {sending
+                  ? "Enviando…"
+                  : resendLeft > 0
+                    ? `Reenviar em ${resendLeft}s`
+                    : codeSent
+                      ? "Reenviar código"
+                      : "Enviar código"}
               </Button>
               {codeSent ? (
                 <div className="flex items-end gap-2">
@@ -243,14 +301,15 @@ export function PhoneIdentifyCard({
                       className="w-28 tracking-widest"
                       placeholder="000000"
                       value={code}
-                      onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
+                      disabled={isLocked}
+                    onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
                     />
                   </div>
                   <Button
                     type="button"
                     size="sm"
                     onClick={() => void verify()}
-                    disabled={checking || code.length !== 6 || codeExpired}
+                    disabled={checking || code.length !== 6 || codeExpired || isLocked}
                   >
                     {checking ? "Confirmando…" : "Confirmar"}
                   </Button>
@@ -267,6 +326,18 @@ export function PhoneIdentifyCard({
             {codeExpired ? (
               <p className="text-sm text-destructive">
                 Este código expirou. Toque em “Enviar outro código” para receber um novo.
+              </p>
+            ) : null}
+            {isLocked ? (
+              <p className="text-sm text-destructive">
+                Confirmação bloqueada por segurança. Tente novamente em{" "}
+                <span className="font-medium">{lockCountdown}</span>.
+              </p>
+            ) : null}
+            {resendLeft > 0 && !isLocked ? (
+              <p className="text-sm text-muted-foreground">
+                Você pode pedir outro código em {resendLeft} segundo(s). O código anterior é
+                cancelado assim que um novo é enviado.
               </p>
             ) : null}
             {codeError ? <p className="text-sm text-destructive">{codeError}</p> : null}

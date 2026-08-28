@@ -66,6 +66,8 @@ export interface IdentifyResult {
   emailMasked: string | null;
   /** Canais disponíveis para receber o código de confirmação. */
   channels: { whatsapp: boolean; email: boolean };
+  /** Quando > 0, novas tentativas de código estão bloqueadas por este tempo. */
+  lockedForSeconds: number;
   customer: {
     firstName: string;
     name: string | null;
@@ -142,6 +144,7 @@ export const identifyPhone = createServerFn({ method: "POST" })
       message: phone.ok ? "" : phone.message,
       emailMasked: null,
       channels: { whatsapp: false, email: false },
+      lockedForSeconds: 0,
       customer: null,
     };
     if (!phone.ok) return base;
@@ -201,6 +204,8 @@ export interface RequestIdentifyCodeResult {
   message: string;
   /** Validade do código em segundos (0 quando nada foi enviado). */
   expiresInSeconds: number;
+  /** Espera até poder pedir/reenviar outro código. */
+  retryAfterSeconds: number;
 }
 
 /** Envia um código de 6 dígitos pelo canal escolhido pelo cliente. */
@@ -211,7 +216,7 @@ export const requestIdentifyCode = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<RequestIdentifyCodeResult> => {
     const { normalizePhoneBR } = await import("@/lib/phone");
     const phone = normalizePhoneBR(data.phone);
-    if (!phone.ok) return { ok: false, channel: null, message: phone.message, expiresInSeconds: 0 };
+    if (!phone.ok) return { ok: false, channel: null, message: phone.message, expiresInSeconds: 0, retryAfterSeconds: 0 };
 
     const { clientIdentifier, consumeRateLimit, rateLimitMessage } = await import(
       "@/lib/security.server"
@@ -220,10 +225,10 @@ export const requestIdentifyCode = createServerFn({ method: "POST" })
       limit: 5,
       windowSeconds: 900,
     });
-    if (!limit.allowed) return { ok: false, channel: null, message: rateLimitMessage(limit), expiresInSeconds: 0 };
+    if (!limit.allowed) return { ok: false, channel: null, message: rateLimitMessage(limit), expiresInSeconds: 0, retryAfterSeconds: 0 };
 
     const store = await loadStore(data.storeSlug);
-    if (!store) return { ok: false, channel: null, message: "Loja não encontrada.", expiresInSeconds: 0 };
+    if (!store) return { ok: false, channel: null, message: "Loja não encontrada.", expiresInSeconds: 0, retryAfterSeconds: 0 };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: customer } = await supabaseAdmin
@@ -241,6 +246,7 @@ export const requestIdentifyCode = createServerFn({ method: "POST" })
       ok: true,
       channel: data.channel,
       expiresInSeconds: ttlMinutes * 60,
+      retryAfterSeconds: helpers.CODE_RESEND_COOLDOWN_SECONDS,
       message:
         data.channel === "email"
           ? `Se houver cadastro, enviamos um código para o e-mail salvo. Ele vale por ${ttlMinutes} minutos.`
@@ -248,11 +254,26 @@ export const requestIdentifyCode = createServerFn({ method: "POST" })
     };
     if (!customer) return generic;
     if (data.channel === "email" && !customer.email) {
-      return { ok: false, channel: null, message: "Este cadastro não tem e-mail salvo. Receba o código pelo WhatsApp.", expiresInSeconds: 0 };
+      return { ok: false, channel: null, message: "Este cadastro não tem e-mail salvo. Receba o código pelo WhatsApp.", expiresInSeconds: 0, retryAfterSeconds: 0 };
     }
 
     const code = helpers.generateCode();
-    await helpers.storeVerificationCode(supabaseAdmin, `${store.id}:${phone.e164}`, code, data.channel);
+    const stored = await helpers.storeVerificationCode(
+      supabaseAdmin,
+      `${store.id}:${phone.e164}`,
+      code,
+      data.channel,
+    );
+    // Espera entre envios ou bloqueio por erros: nada é enviado agora.
+    if (!stored.ok) {
+      return {
+        ok: false,
+        channel: null,
+        message: stored.message,
+        expiresInSeconds: 0,
+        retryAfterSeconds: stored.retryAfterSeconds,
+      };
+    }
 
     try {
       if (data.channel === "email" && customer.email) {
@@ -295,6 +316,7 @@ export const confirmIdentifyCode = createServerFn({ method: "POST" })
       message: phone.ok ? "" : phone.message,
       emailMasked: null,
       channels: { whatsapp: true, email: false },
+      lockedForSeconds: 0,
       customer: null,
     };
     if (!phone.ok) return base;
@@ -314,7 +336,9 @@ export const confirmIdentifyCode = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const helpers = await import("@/lib/acompanhamento.server");
     const check = await helpers.checkVerificationCode(supabaseAdmin, `${store.id}:${phone.e164}`, data.code);
-    if (!check.ok) return { ...base, found: true, message: check.message };
+    if (!check.ok) {
+      return { ...base, found: true, message: check.message, lockedForSeconds: check.lockedForSeconds };
+    }
 
     const { data: customer } = await supabaseAdmin
       .from("customers")
