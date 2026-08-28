@@ -34,6 +34,7 @@ import { rememberOrder, useCart } from "@/hooks/useCart";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/lib/format";
 import { EMPTY_TRACKING, bumpPrice, parseTracking, type Tracking } from "@/lib/digitais";
+import { PaymentMethodPicker } from "@/components/store/PaymentMethodPicker";
 import { LoyaltyCard } from "@/components/store/LoyaltyCard";
 import {
   checkProductionCapacity,
@@ -177,6 +178,8 @@ function CheckoutPage() {
   });
   const [fulfillment, setFulfillment] = useState<Fulfillment | "">("");
   const [payment, setPayment] = useState("");
+  const [needsChange, setNeedsChange] = useState(false);
+  const [changeFor, setChangeFor] = useState("");
   const [timing, setTiming] = useState<"now" | "scheduled">("now");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -560,7 +563,15 @@ function CheckoutPage() {
                 reference: form.reference.trim(),
               }
             : null,
-          notes: form.notes.trim() || null,
+          notes:
+            [
+              form.notes.trim(),
+              payment === "cash" && needsChange && changeFor.trim()
+                ? `Troco para R$ ${changeFor.trim()}`
+                : "",
+            ]
+              .filter(Boolean)
+              .join(" · ") || null,
           subtotal: cart.subtotal + bumpTotal,
           delivery_fee: deliveryFee,
           affiliate_code: tracking.affiliate_code,
@@ -1050,30 +1061,28 @@ function CheckoutPage() {
             <CardTitle className="text-base">4. Descontos e pagamento</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-wrap items-end gap-2">
-              <div className="min-w-[180px] flex-1 space-y-2">
-                <Label htmlFor="cupom">Cupom de desconto</Label>
+            <div className="space-y-3 rounded-xl border border-border/70 bg-muted/40 p-3">
+              <Label htmlFor="cupom" className="text-xs font-bold uppercase tracking-wide">
+                Cupom de desconto
+              </Label>
+              <div className="flex flex-wrap items-center gap-2">
                 <Input
                   id="cupom"
                   value={couponCode}
                   onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
                   placeholder="SEUCUPOM"
+                  className="min-w-[160px] flex-1 bg-card uppercase"
                 />
+                <Button type="button" onClick={() => void applyCoupon()} disabled={checkingCoupon}>
+                  {checkingCoupon ? "Validando..." : "Aplicar"}
+                </Button>
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => void applyCoupon()}
-                disabled={checkingCoupon}
-              >
-                {checkingCoupon ? "Validando..." : "Aplicar"}
-              </Button>
+              {coupon ? (
+                <p className="text-sm font-medium text-success">
+                  Cupom {coupon.code} aplicado: −{formatCurrency(coupon.discount)}
+                </p>
+              ) : null}
             </div>
-            {coupon ? (
-              <p className="text-sm text-emerald-600 dark:text-emerald-400">
-                Cupom {coupon.code} aplicado: −{formatCurrency(coupon.discount)}
-              </p>
-            ) : null}
 
             {offers.filter((offer) => offer.kind === "bump").length > 0 ? (
               <div className="space-y-2">
@@ -1135,25 +1144,15 @@ function CheckoutPage() {
               </label>
             ) : null}
 
-            <div className="space-y-2">
-              <Label>Forma de pagamento</Label>
-              <RadioGroup
-                value={payment}
-                onValueChange={setPayment}
-                className="grid gap-2 sm:grid-cols-2"
-              >
-                {enabledPayments.map((key) => (
-                  <Label
-                    key={key}
-                    htmlFor={`pagamento-${key}`}
-                    className="flex cursor-pointer items-center gap-3 rounded-xl border border-border/70 bg-card p-3 text-sm has-[:checked]:border-primary"
-                  >
-                    <RadioGroupItem id={`pagamento-${key}`} value={key} />
-                    {PAYMENT_METHOD_LABEL[key]}
-                  </Label>
-                ))}
-              </RadioGroup>
-            </div>
+            <PaymentMethodPicker
+              enabled={enabledPayments}
+              value={payment}
+              onChange={setPayment}
+              needsChange={needsChange}
+              onNeedsChangeToggle={setNeedsChange}
+              changeFor={changeFor}
+              onChangeForChange={setChangeFor}
+            />
           </CardContent>
         </Card>
 
