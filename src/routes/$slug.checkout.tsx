@@ -914,8 +914,9 @@ function CheckoutPage() {
                 id="telefone"
                 inputMode="tel"
                 autoComplete="tel"
-                value={form.phone}
-                onChange={(event) => update("phone", event.target.value)}
+                value={maskPhone(form.phone)}
+                onChange={(event) => update("phone", maskPhone(event.target.value))}
+
               />
             </div>
             <div className="space-y-2 sm:col-span-2">
