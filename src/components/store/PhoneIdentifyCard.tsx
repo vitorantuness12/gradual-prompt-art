@@ -83,7 +83,8 @@ export function PhoneIdentifyCard({
       const found = await lookup({ data: { storeSlug: slug, phone } });
       setResult(found);
       selectFirstAddress(found);
-      if (found.found) setChannel(found.channels.email ? "whatsapp" : "whatsapp");
+      // Cliente conhecido: os aceites já existem do pedido anterior.
+      if (found.found) onConsentChange({ ...consent, acceptedTerms: true, createProfile: true });
     } catch {
       setResult(null);
     } finally {
