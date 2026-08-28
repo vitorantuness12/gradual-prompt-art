@@ -24,6 +24,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { notifyCustomerOrderStatus } from "@/lib/cliente.functions";
 import { dispatchWhatsappOrderEvent } from "@/lib/whatsapp.functions";
 
 /** Mapeia a situação do pedido para o evento de automação do WhatsApp. */
@@ -174,6 +175,7 @@ export function OrderDetailDialog({ order, storeId, couriers, onOpenChange }: Pr
   }
 
   const dispatchOrderEvent = useServerFn(dispatchWhatsappOrderEvent);
+  const notifyCustomer = useServerFn(notifyCustomerOrderStatus);
 
   const mutate = useMutation({
     mutationFn: async (patch: Record<string, unknown>) => {
@@ -202,6 +204,17 @@ export function OrderDetailDialog({ order, storeId, couriers, onOpenChange }: Pr
           await dispatchOrderEvent({ data: { storeId, orderId: order!.id, event } });
         } catch {
           // A falha de automação não impede a mudança de status.
+        }
+      }
+
+      // Aviso ao cliente que confirmou o telefone (WhatsApp e/ou e-mail).
+      if (nextStatus) {
+        try {
+          await notifyCustomer({
+            data: { orderId: order!.id, status: nextStatus, ...(event ? { event } : {}) },
+          });
+        } catch {
+          // O aviso ao cliente nunca bloqueia a mudança de status.
         }
       }
     },

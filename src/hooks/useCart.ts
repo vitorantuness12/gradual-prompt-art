@@ -107,6 +107,21 @@ export function rememberOrder(slug: string, order: StoredOrder) {
   window.localStorage.setItem(ordersKey(slug), JSON.stringify(next));
 }
 
+/**
+ * Substitui o carrinho daquela loja por um conjunto de itens.
+ * Usado pela função "Repetir pedido": o cliente confirma as linhas e cai no
+ * checkout já com tudo montado.
+ */
+export function seedCart(slug: string, storeId: string | null, items: CartItem[]) {
+  if (typeof window === "undefined") return;
+  const envelope: CartEnvelope = {
+    storeId,
+    items: normalize(items),
+    updatedAt: new Date().toISOString(),
+  };
+  window.localStorage.setItem(cartKey(slug), JSON.stringify(envelope));
+}
+
 /** Histórico local de pedidos da loja atual — nunca mistura pedidos de outros endereços. */
 export function useOrderHistory(slug: string, storeId?: string | null) {
   const [orders, setOrders] = useState<StoredOrder[]>([]);

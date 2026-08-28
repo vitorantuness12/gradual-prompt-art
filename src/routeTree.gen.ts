@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AcompanharRouteImport } from './routes/acompanhar'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as MeusPedidosRouteImport } from './routes/meus-pedidos'
 import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
@@ -103,6 +104,11 @@ const AuthRoute = AuthRouteImport.update({
 const CookiesRoute = CookiesRouteImport.update({
   id: '/cookies',
   path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeusPedidosRoute = MeusPedidosRouteImport.update({
+  id: '/meus-pedidos',
+  path: '/meus-pedidos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlanosRoute = PlanosRouteImport.update({
@@ -480,6 +486,7 @@ export interface FileRoutesByFullPath {
   '/acompanhar': typeof AcompanharRoute
   '/auth': typeof AuthRoute
   '/cookies': typeof CookiesRoute
+  '/meus-pedidos': typeof MeusPedidosRoute
   '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
@@ -552,6 +559,7 @@ export interface FileRoutesByTo {
   '/acompanhar': typeof AcompanharRoute
   '/auth': typeof AuthRoute
   '/cookies': typeof CookiesRoute
+  '/meus-pedidos': typeof MeusPedidosRoute
   '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
@@ -625,6 +633,7 @@ export interface FileRoutesById {
   '/acompanhar': typeof AcompanharRoute
   '/auth': typeof AuthRoute
   '/cookies': typeof CookiesRoute
+  '/meus-pedidos': typeof MeusPedidosRoute
   '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
@@ -699,6 +708,7 @@ export interface FileRouteTypes {
     | '/acompanhar'
     | '/auth'
     | '/cookies'
+    | '/meus-pedidos'
     | '/planos'
     | '/privacidade'
     | '/redefinir-senha'
@@ -771,6 +781,7 @@ export interface FileRouteTypes {
     | '/acompanhar'
     | '/auth'
     | '/cookies'
+    | '/meus-pedidos'
     | '/planos'
     | '/privacidade'
     | '/redefinir-senha'
@@ -843,6 +854,7 @@ export interface FileRouteTypes {
     | '/acompanhar'
     | '/auth'
     | '/cookies'
+    | '/meus-pedidos'
     | '/planos'
     | '/privacidade'
     | '/redefinir-senha'
@@ -917,6 +929,7 @@ export interface RootRouteChildren {
   AcompanharRoute: typeof AcompanharRoute
   AuthRoute: typeof AuthRoute
   CookiesRoute: typeof CookiesRoute
+  MeusPedidosRoute: typeof MeusPedidosRoute
   PlanosRoute: typeof PlanosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
@@ -980,6 +993,13 @@ declare module '@tanstack/react-router' {
       path: '/cookies'
       fullPath: '/cookies'
       preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/meus-pedidos': {
+      id: '/meus-pedidos'
+      path: '/meus-pedidos'
+      fullPath: '/meus-pedidos'
+      preLoaderRoute: typeof MeusPedidosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/planos': {
@@ -1551,6 +1571,7 @@ const rootRouteChildren: RootRouteChildren = {
   AcompanharRoute: AcompanharRoute,
   AuthRoute: AuthRoute,
   CookiesRoute: CookiesRoute,
+  MeusPedidosRoute: MeusPedidosRoute,
   PlanosRoute: PlanosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
