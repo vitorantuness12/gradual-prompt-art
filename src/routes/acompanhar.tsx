@@ -23,8 +23,11 @@ export const Route = createFileRoute("/acompanhar")({
       { property: "og:title", content: "Acompanhar pedido — O Seu Pedido" },
       { property: "og:description", content: "Veja em que etapa está o seu pedido em tempo real." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://oseupedido.com.br/acompanhar" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://oseupedido.com.br/acompanhar" }],
+
   }),
   component: TrackPage,
 });
