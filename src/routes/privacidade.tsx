@@ -13,9 +13,10 @@ export const Route = createFileRoute("/privacidade")({
       { property: "og:title", content: "Política de privacidade — O Seu Pedido" },
       { property: "og:description", content: "Tratamento de dados pessoais na plataforma, conforme a LGPD." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/privacidade" },
+      { property: "og:url", content: "https://oseupedido.com.br/privacidade" },
     ],
-    links: [{ rel: "canonical", href: "/privacidade" }],
+    links: [{ rel: "canonical", href: "https://oseupedido.com.br/privacidade" }],
+
   }),
   component: PrivacyPage,
 });
