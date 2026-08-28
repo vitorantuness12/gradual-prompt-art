@@ -158,10 +158,13 @@ function TrackPage() {
 
   return (
     <div className="min-h-screen bg-secondary/40">
-      <header className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6">
+      <header className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3 px-4 py-6 sm:px-6">
         <Link to="/" aria-label="Voltar para a página inicial">
           <Logo />
         </Link>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/meus-pedidos">Área do cliente</Link>
+        </Button>
       </header>
 
       <main className="mx-auto w-full max-w-3xl space-y-6 px-4 pb-16 sm:px-6">
