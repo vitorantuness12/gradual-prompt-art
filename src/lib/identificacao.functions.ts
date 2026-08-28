@@ -58,10 +58,14 @@ export interface IdentifyResult {
   valid: boolean;
   /** Existe cadastro deste telefone nesta loja. */
   found: boolean;
-  /** A loja exige código antes de liberar os dados salvos. */
+  /** É preciso confirmar um código antes de liberar os dados salvos. */
   needsVerification: boolean;
   phoneE164: string;
   message: string;
+  /** E-mail parcialmente oculto, quando o cadastro tiver um. */
+  emailMasked: string | null;
+  /** Canais disponíveis para receber o código de confirmação. */
+  channels: { whatsapp: boolean; email: boolean };
   customer: {
     firstName: string;
     name: string | null;
@@ -70,6 +74,7 @@ export interface IdentifyResult {
     addresses: CustomerAddressOption[];
   } | null;
 }
+
 
 const identifyInput = z.object({
   storeSlug: z.string().trim().min(1).max(60),
@@ -80,7 +85,7 @@ async function loadStore(slug: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await supabaseAdmin
     .from("stores")
-    .select("id")
+    .select("id, name")
     .eq("slug", slug)
     .eq("is_active", true)
     .maybeSingle();
@@ -118,6 +123,11 @@ export const getCheckoutSettings = createServerFn({ method: "POST" })
     return loadSettings(store.id);
   });
 
+/**
+ * Busca o cadastro pelo telefone. Nunca devolve dados pessoais aqui: quando o
+ * telefone já tem cadastro, exigimos a confirmação de um código (WhatsApp ou
+ * e-mail, à escolha do cliente) antes de liberar nome, e-mail e endereços.
+ */
 export const identifyPhone = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => identifyInput.parse(data))
   .handler(async ({ data }): Promise<IdentifyResult> => {
@@ -130,6 +140,8 @@ export const identifyPhone = createServerFn({ method: "POST" })
       needsVerification: false,
       phoneE164: phone.e164,
       message: phone.ok ? "" : phone.message,
+      emailMasked: null,
+      channels: { whatsapp: false, email: false },
       customer: null,
     };
     if (!phone.ok) return base;
@@ -152,66 +164,184 @@ export const identifyPhone = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: customer } = await supabaseAdmin
       .from("customers")
-      .select("id, name, email, phone_verified_at, preferences")
+      .select("id, name, email")
       .eq("store_id", store.id)
       .eq("phone_e164", phone.e164)
       .maybeSingle();
 
     if (!customer) return base;
 
-    const verified = Boolean(customer.phone_verified_at);
-    if (settings.requireVerification && !verified) {
-      return {
-        ...base,
-        found: true,
-        needsVerification: true,
-        message: "Encontramos um cadastro. Confirme o código enviado para liberar seus dados.",
-        customer: {
-          firstName: (customer.name ?? "").trim().split(" ")[0] ?? "",
-          name: null,
-          email: null,
-          preferredFulfillment: null,
-          addresses: [],
-        },
-      };
+    const { maskEmail } = await import("@/lib/identificacao.server");
+    const emailMasked = maskEmail(customer.email);
+
+    return {
+      ...base,
+      found: true,
+      needsVerification: true,
+      emailMasked,
+      channels: { whatsapp: true, email: Boolean(emailMasked) },
+      message: "Encontramos um cadastro com este telefone. Para sua segurança, confirme um código.",
+      customer: {
+        firstName: (customer.name ?? "").trim().split(" ")[0] ?? "",
+        name: null,
+        email: null,
+        preferredFulfillment: null,
+        addresses: [],
+      },
+    };
+  });
+
+/** ---------- Confirmação de identidade por código (WhatsApp ou e-mail) ---------- */
+
+const codeChannel = z.enum(["whatsapp", "email"]);
+
+export interface RequestIdentifyCodeResult {
+  ok: boolean;
+  channel: "whatsapp" | "email" | null;
+  message: string;
+}
+
+/** Envia um código de 6 dígitos pelo canal escolhido pelo cliente. */
+export const requestIdentifyCode = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    identifyInput.extend({ channel: codeChannel }).parse(data),
+  )
+  .handler(async ({ data }): Promise<RequestIdentifyCodeResult> => {
+    const { normalizePhoneBR } = await import("@/lib/phone");
+    const phone = normalizePhoneBR(data.phone);
+    if (!phone.ok) return { ok: false, channel: null, message: phone.message };
+
+    const { clientIdentifier, consumeRateLimit, rateLimitMessage } = await import(
+      "@/lib/security.server"
+    );
+    const limit = await consumeRateLimit("login", `${clientIdentifier(getRequest()?.headers)}:${phone.e164}`, {
+      limit: 5,
+      windowSeconds: 900,
+    });
+    if (!limit.allowed) return { ok: false, channel: null, message: rateLimitMessage(limit) };
+
+    const store = await loadStore(data.storeSlug);
+    if (!store) return { ok: false, channel: null, message: "Loja não encontrada." };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: customer } = await supabaseAdmin
+      .from("customers")
+      .select("id, name, email")
+      .eq("store_id", store.id)
+      .eq("phone_e164", phone.e164)
+      .maybeSingle();
+
+    // Resposta genérica: não revelamos se o telefone existe nesta loja.
+    const generic: RequestIdentifyCodeResult = {
+      ok: true,
+      channel: data.channel,
+      message:
+        data.channel === "email"
+          ? "Se houver cadastro, enviamos um código para o e-mail salvo. Ele vale por 10 minutos."
+          : "Se houver cadastro, enviamos um código pelo WhatsApp. Ele vale por 10 minutos.",
+    };
+    if (!customer) return generic;
+    if (data.channel === "email" && !customer.email) {
+      return { ok: false, channel: null, message: "Este cadastro não tem e-mail salvo. Receba o código pelo WhatsApp." };
     }
 
-    const { data: addresses } = await supabaseAdmin
-      .from("customer_addresses")
-      .select("id, label, street, number, complement, reference, district, city, state, zip_code, is_default")
-      .eq("store_id", store.id)
-      .eq("customer_id", customer.id)
-      .order("is_default", { ascending: false })
-      .order("updated_at", { ascending: false })
-      .limit(6);
+    const helpers = await import("@/lib/acompanhamento.server");
+    const code = helpers.generateCode();
+    await helpers.storeVerificationCode(supabaseAdmin, `${store.id}:${phone.e164}`, code, data.channel);
 
+    try {
+      if (data.channel === "email" && customer.email) {
+        const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+        await sendTemplateEmail("verification-code", customer.email, {
+          templateData: { code, storeName: store.name ?? "a loja", customerName: customer.name ?? "Olá" },
+        });
+      } else {
+        const { sendWhatsappMessage } = await import("@/lib/whatsapp/send.server");
+        const outcome = await sendWhatsappMessage(supabaseAdmin, {
+          storeId: store.id,
+          phone: phone.e164,
+          body: `Seu código de confirmação é ${code}. Ele vale por 10 minutos. Se não foi você que pediu, ignore esta mensagem.`,
+          messageType: "transactional",
+          templateKey: "identificacao_codigo",
+        });
+        if (!outcome.ok) console.warn("[identificacao] envio do código:", outcome.message);
+      }
+    } catch (error) {
+      console.error("[identificacao] falha ao enviar código", error);
+    }
+
+    return generic;
+  });
+
+/** Confere o código e libera nome, e-mail e endereços salvos. */
+export const confirmIdentifyCode = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    identifyInput.extend({ code: z.string().trim().min(4).max(10) }).parse(data),
+  )
+  .handler(async ({ data }): Promise<IdentifyResult> => {
+    const { normalizePhoneBR } = await import("@/lib/phone");
+    const phone = normalizePhoneBR(data.phone);
+
+    const base: IdentifyResult = {
+      valid: phone.ok,
+      found: false,
+      needsVerification: true,
+      phoneE164: phone.e164,
+      message: phone.ok ? "" : phone.message,
+      emailMasked: null,
+      channels: { whatsapp: true, email: false },
+      customer: null,
+    };
+    if (!phone.ok) return base;
+
+    const { clientIdentifier, consumeRateLimit, rateLimitMessage } = await import(
+      "@/lib/security.server"
+    );
+    const limit = await consumeRateLimit("login", `${clientIdentifier(getRequest()?.headers)}:${phone.e164}:confirm`, {
+      limit: 12,
+      windowSeconds: 900,
+    });
+    if (!limit.allowed) return { ...base, message: rateLimitMessage(limit) };
+
+    const store = await loadStore(data.storeSlug);
+    if (!store) return { ...base, message: "Loja não encontrada." };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const helpers = await import("@/lib/acompanhamento.server");
+    const check = await helpers.checkVerificationCode(supabaseAdmin, `${store.id}:${phone.e164}`, data.code);
+    if (!check.ok) return { ...base, found: true, message: check.message };
+
+    const { data: customer } = await supabaseAdmin
+      .from("customers")
+      .select("id, name, email, preferences")
+      .eq("store_id", store.id)
+      .eq("phone_e164", phone.e164)
+      .maybeSingle();
+    if (!customer) return { ...base, message: "Cadastro não encontrado." };
+
+    await supabaseAdmin
+      .from("customers")
+      .update({ phone_verified_at: new Date().toISOString() })
+      .eq("id", customer.id);
+
+    const { loadCustomerAddresses } = await import("@/lib/identificacao.server");
     const preferences = (customer.preferences ?? {}) as { fulfillment?: string };
 
     return {
       ...base,
       found: true,
-      message: "Encontramos seus dados. Confirme para continuar.",
+      needsVerification: false,
+      message: "Telefone confirmado. Seus dados foram liberados.",
       customer: {
         firstName: (customer.name ?? "").trim().split(" ")[0] ?? "",
         name: customer.name ?? null,
         email: customer.email ?? null,
         preferredFulfillment: preferences.fulfillment ?? null,
-        addresses: (addresses ?? []).map((row) => ({
-          id: row.id,
-          label: row.label,
-          street: row.street,
-          number: row.number,
-          complement: row.complement,
-          reference: row.reference,
-          district: row.district,
-          city: row.city,
-          state: row.state,
-          zipCode: row.zip_code,
-          isDefault: row.is_default,
-        })),
+        addresses: await loadCustomerAddresses(supabaseAdmin, store.id, customer.id),
       },
     };
   });
+
 
 /** ---------- Cadastro rápido / atualização no fechamento do pedido ---------- */
 
