@@ -93,7 +93,7 @@ export const trackByCode = createServerFn({ method: "POST" })
       ok: true,
       needsVerification: false,
       message: "",
-      order: await buildDetail(supabaseAdmin, match),
+      order: await helpers.buildDetail(supabaseAdmin, match),
     };
   });
 
@@ -137,7 +137,7 @@ export const trackByToken = createServerFn({ method: "POST" })
       ok: true,
       needsVerification: false,
       message: "",
-      order: await buildDetail(supabaseAdmin, match),
+      order: await helpers.buildDetail(supabaseAdmin, match),
     };
   });
 
@@ -254,70 +254,3 @@ export const listOrdersByPhone = createServerFn({ method: "POST" })
       orders: mine,
     };
   });
-
-/** Converte a linha do banco no formato mostrado na página. */
-async function buildDetail(
-  admin: Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"],
-  row: Record<string, unknown>,
-): Promise<TrackedOrderDetail> {
-  const order = row as never as {
-    id: string;
-    code: string;
-    public_token: string;
-    customer_name: string | null;
-    status: string;
-    type: string;
-    created_at: string;
-    total: number;
-    subtotal: number;
-    delivery_fee: number;
-    discount: number | null;
-    payment_method: string | null;
-    payment_status: string;
-    scheduled_for: string | null;
-    table_number: string | null;
-    notes: string | null;
-    is_demo: boolean;
-    store: { name: string; slug: string } | null;
-    order_items: Array<{ product_name: string; quantity: number; total: number; notes: string | null }> | null;
-  };
-
-  const { data: history } = await admin
-    .from("order_status_history")
-    .select("status, created_at, reason")
-    .eq("order_id", order.id)
-    .order("created_at", { ascending: true });
-
-  return {
-    id: order.id,
-    code: order.code,
-    publicToken: order.public_token,
-    storeName: order.store?.name ?? "Loja",
-    storeSlug: order.store?.slug ?? "",
-    customerName: order.customer_name ?? "Cliente",
-    status: order.status,
-    type: order.type,
-    createdAt: order.created_at,
-    total: Number(order.total),
-    subtotal: Number(order.subtotal),
-    deliveryFee: Number(order.delivery_fee),
-    discount: Number(order.discount ?? 0),
-    paymentMethod: order.payment_method,
-    paymentStatus: order.payment_status,
-    scheduledFor: order.scheduled_for,
-    tableNumber: order.table_number,
-    notes: order.notes,
-    isDemo: order.is_demo,
-    items: (order.order_items ?? []).map((item) => ({
-      name: item.product_name,
-      quantity: item.quantity,
-      total: Number(item.total),
-      notes: item.notes,
-    })),
-    timeline: (history ?? []).map((entry) => ({
-      status: entry.status,
-      createdAt: entry.created_at,
-      reason: entry.reason,
-    })),
-  };
-}
