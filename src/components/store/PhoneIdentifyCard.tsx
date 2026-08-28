@@ -144,17 +144,20 @@ export function PhoneIdentifyCard({
     }
   }
 
-  async function sendCode() {
+  /** Envia o código pelo canal escolhido (ou por outro, quando o cliente não recebeu). */
+  async function sendCode(target: Channel = channel) {
     setSending(true);
     setCodeError(null);
     try {
-      const outcome = await askCode({ data: { storeSlug: slug, phone, channel } });
+      const outcome = await askCode({ data: { storeSlug: slug, phone, channel: target } });
       if (!outcome.ok) {
         // Cooldown ou bloqueio: mantemos o código anterior na tela e avisamos a espera.
         setCodeError(outcome.message);
         setResendAt(outcome.retryAfterSeconds > 0 ? Date.now() + outcome.retryAfterSeconds * 1000 : null);
         return;
       }
+      setChannel(target);
+      setSentChannel(target);
       setFeedback(outcome.message);
       setCodeSent(true);
       setCode("");
