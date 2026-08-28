@@ -79,7 +79,6 @@ const NAV: Record<FeatureKey, { to: string; label: string; icon: typeof LayoutDa
   fidelidade: { to: "/painel/fidelidade", label: "Fidelidade e CRM", icon: Gift },
   relatorios: { to: "/painel/relatorios", label: "Relatórios", icon: BarChart3 },
   pagamentos: { to: "/painel/pagamentos", label: "Financeiro", icon: CreditCard },
-  atendimento: { to: "/painel/atendimento", label: "Atendimento", icon: MessageSquare },
   whatsapp: { to: "/painel/whatsapp", label: "WhatsApp da loja", icon: MessageSquare },
   impressao: { to: "/painel/impressao", label: "Impressão", icon: Printer },
   integracoes: { to: "/painel/integracoes", label: "Integrações e API", icon: Plug },
