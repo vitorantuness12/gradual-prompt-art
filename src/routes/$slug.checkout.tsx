@@ -192,6 +192,7 @@ function CheckoutPage() {
   const [estimate, setEstimate] = useState<DeliveryEstimate | null>(null);
   const [estimating, setEstimating] = useState(false);
   const [isSearchingCep, setIsSearchingCep] = useState(false);
+  const [cepError, setCepError] = useState<string | null>(null);
   const [review, setReview] = useState(false);
   const [acceptedOffers, setAcceptedOffers] = useState<string[]>([]);
   const [tracking, setTracking] = useState<Tracking>(EMPTY_TRACKING);
@@ -351,16 +352,20 @@ function CheckoutPage() {
   // Busca automática de endereço pelo CEP (ViaCEP).
   useEffect(() => {
     const digits = form.zip.replace(/\D/g, "");
-    if (digits.length !== 8) return;
+    if (digits.length !== 8) {
+      setCepError(null);
+      return;
+    }
     let active = true;
     setIsSearchingCep(true);
+    setCepError(null);
     const timer = window.setTimeout(() => {
       fetch(`https://viacep.com.br/ws/${digits}/json/`)
         .then((res) => res.json())
-        .then((data: { erro?: boolean; logradouro?: string; bairro?: string; complemento?: string; localidade?: string; uf?: string }) => {
+        .then((data: { erro?: boolean; logradouro?: string; bairro?: string; complemento?: string }) => {
           if (!active) return;
           if (data.erro) {
-            toast.error("CEP não encontrado. Verifique o número digitado.");
+            setCepError("Não encontramos este CEP. Você pode preencher o endereço manualmente.");
             return;
           }
           setForm((current) => ({
@@ -372,7 +377,7 @@ function CheckoutPage() {
         })
         .catch(() => {
           if (!active) return;
-          toast.error("Não foi possível consultar o CEP. Tente digitar o endereço manualmente.");
+          setCepError("Não foi possível consultar o CEP agora. Você pode preencher o endereço manualmente.");
         })
         .finally(() => {
           if (active) setIsSearchingCep(false);
@@ -384,6 +389,40 @@ function CheckoutPage() {
       setIsSearchingCep(false);
     };
   }, [form.zip]);
+
+  // Repetir pedido: reaproveita o endereço completo do pedido anterior.
+  useEffect(() => {
+    let stored: string | null = null;
+    try {
+      stored = sessionStorage.getItem(`repetir-endereco:${slug}`);
+    } catch {
+      stored = null;
+    }
+    if (!stored) return;
+    try {
+      const address = JSON.parse(stored) as Partial<Record<
+        "zip" | "street" | "number" | "district" | "complement" | "reference",
+        string
+      >>;
+      setForm((current) => ({
+        ...current,
+        zip: current.zip.trim() || (address.zip ?? ""),
+        street: current.street.trim() || (address.street ?? ""),
+        number: current.number.trim() || (address.number ?? ""),
+        district: current.district.trim() || (address.district ?? ""),
+        complement: current.complement.trim() || (address.complement ?? ""),
+        reference: current.reference.trim() || (address.reference ?? ""),
+      }));
+    } catch {
+      /* endereço inválido é ignorado */
+    } finally {
+      try {
+        sessionStorage.removeItem(`repetir-endereco:${slug}`);
+      } catch {
+        /* nada a limpar */
+      }
+    }
+  }, [slug]);
 
   if (isLoading) {
     return (
@@ -1002,6 +1041,22 @@ function CheckoutPage() {
                       </span>
                     ) : null}
                   </div>
+                  {cepError ? (
+                    <div className="space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3">
+                      <p className="text-sm text-amber-700 dark:text-amber-400">{cepError}</p>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setCepError(null);
+                          document.getElementById("rua")?.focus();
+                        }}
+                      >
+                        Usar este endereço
+                      </Button>
+                    </div>
+                  ) : null}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="rua">Rua</Label>
