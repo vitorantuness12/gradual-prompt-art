@@ -127,6 +127,7 @@ export function PhoneIdentifyCard({
   async function identify() {
     setLoading(true);
     setCodeSent(false);
+    setSentChannel(null);
     setCode("");
     setExpiresAt(null);
     setResendAt(null);
