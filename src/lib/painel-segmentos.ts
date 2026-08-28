@@ -21,7 +21,6 @@ export const FEATURE_KEYS = [
   "fidelidade",
   "relatorios",
   "pagamentos",
-  "atendimento",
   "whatsapp",
   "impressao",
   "integracoes",
@@ -68,7 +67,6 @@ export const FEATURE_LABEL: Record<FeatureKey, string> = {
   fidelidade: "Fidelidade e CRM",
   relatorios: "Relatórios",
   pagamentos: "Financeiro",
-  atendimento: "Atendimento",
   whatsapp: "WhatsApp da loja",
   impressao: "Impressão",
   integracoes: "Integrações e API",
@@ -86,7 +84,7 @@ export const FEATURE_GROUPS: { title: string; keys: FeatureKey[] }[] = [
   { title: "Logística", keys: ["entregas", "entregadores", "frete"] },
   { title: "Clientes", keys: ["clientes", "avaliacoes", "promocoes", "fidelidade"] },
   { title: "Gestão", keys: ["relatorios", "pagamentos"] },
-  { title: "Canais", keys: ["atendimento", "whatsapp", "impressao", "integracoes"] },
+  { title: "Canais", keys: ["whatsapp", "impressao", "integracoes"] },
   { title: "Conta", keys: ["equipe", "assinatura", "privacidade", "configuracoes", "suporte"] },
 ];
 

@@ -40,7 +40,6 @@ const SHORTCUT_PATH: Record<FeatureKey, string> = {
   fidelidade: "/painel/fidelidade",
   relatorios: "/painel/relatorios",
   pagamentos: "/painel/pagamentos",
-  atendimento: "/painel/atendimento",
   whatsapp: "/painel/whatsapp",
   impressao: "/painel/impressao",
   integracoes: "/painel/integracoes",

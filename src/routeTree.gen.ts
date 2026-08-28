@@ -42,9 +42,7 @@ import { Route as AuthenticatedEntregadorStatusRouteImport } from './routes/_aut
 import { Route as AuthenticatedPainelIndexRouteImport } from './routes/_authenticated/painel.index'
 import { Route as AuthenticatedPainelAgendamentosRouteImport } from './routes/_authenticated/painel.agendamentos'
 import { Route as AuthenticatedPainelAssinaturaRouteImport } from './routes/_authenticated/painel.assinatura'
-import { Route as AuthenticatedPainelAtendimentoRouteImport } from './routes/_authenticated/painel.atendimento'
 import { Route as AuthenticatedPainelAvaliacoesRouteImport } from './routes/_authenticated/painel.avaliacoes'
-import { Route as AuthenticatedPainelCanaisRouteImport } from './routes/_authenticated/painel.canais'
 import { Route as AuthenticatedPainelClientesRouteImport } from './routes/_authenticated/painel.clientes'
 import { Route as AuthenticatedPainelConfiguracoesRouteImport } from './routes/_authenticated/painel.configuracoes'
 import { Route as AuthenticatedPainelDigitaisRouteImport } from './routes/_authenticated/painel.digitais'
@@ -81,7 +79,6 @@ import { Route as ApiPublicV1SplatRouteImport } from './routes/api/public/v1/$'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
-import { Route as ApiPublicCanaisChannelStoreIdRouteImport } from './routes/api/public/canais/$channel.$storeId'
 import { Route as ApiPublicIntegracoesKindStoreIdRouteImport } from './routes/api/public/integracoes/$kind.$storeId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -255,22 +252,10 @@ const AuthenticatedPainelAssinaturaRoute =
     path: '/assinatura',
     getParentRoute: () => AuthenticatedPainelRoute,
   } as any)
-const AuthenticatedPainelAtendimentoRoute =
-  AuthenticatedPainelAtendimentoRouteImport.update({
-    id: '/atendimento',
-    path: '/atendimento',
-    getParentRoute: () => AuthenticatedPainelRoute,
-  } as any)
 const AuthenticatedPainelAvaliacoesRoute =
   AuthenticatedPainelAvaliacoesRouteImport.update({
     id: '/avaliacoes',
     path: '/avaliacoes',
-    getParentRoute: () => AuthenticatedPainelRoute,
-  } as any)
-const AuthenticatedPainelCanaisRoute =
-  AuthenticatedPainelCanaisRouteImport.update({
-    id: '/canais',
-    path: '/canais',
     getParentRoute: () => AuthenticatedPainelRoute,
   } as any)
 const AuthenticatedPainelClientesRoute =
@@ -483,12 +468,6 @@ const LovableEmailTransactionalPreviewRoute =
     path: '/lovable/email/transactional/preview',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicCanaisChannelStoreIdRoute =
-  ApiPublicCanaisChannelStoreIdRouteImport.update({
-    id: '/api/public/canais/$channel/$storeId',
-    path: '/api/public/canais/$channel/$storeId',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicIntegracoesKindStoreIdRoute =
   ApiPublicIntegracoesKindStoreIdRouteImport.update({
     id: '/api/public/integracoes/$kind/$storeId',
@@ -528,9 +507,7 @@ export interface FileRoutesByFullPath {
   '/entregador/status': typeof AuthenticatedEntregadorStatusRoute
   '/painel/agendamentos': typeof AuthenticatedPainelAgendamentosRoute
   '/painel/assinatura': typeof AuthenticatedPainelAssinaturaRoute
-  '/painel/atendimento': typeof AuthenticatedPainelAtendimentoRoute
   '/painel/avaliacoes': typeof AuthenticatedPainelAvaliacoesRoute
-  '/painel/canais': typeof AuthenticatedPainelCanaisRoute
   '/painel/clientes': typeof AuthenticatedPainelClientesRoute
   '/painel/configuracoes': typeof AuthenticatedPainelConfiguracoesRoute
   '/painel/digitais': typeof AuthenticatedPainelDigitaisRoute
@@ -568,7 +545,6 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/api/public/canais/$channel/$storeId': typeof ApiPublicCanaisChannelStoreIdRoute
   '/api/public/integracoes/$kind/$storeId': typeof ApiPublicIntegracoesKindStoreIdRoute
 }
 export interface FileRoutesByTo {
@@ -602,9 +578,7 @@ export interface FileRoutesByTo {
   '/entregador/status': typeof AuthenticatedEntregadorStatusRoute
   '/painel/agendamentos': typeof AuthenticatedPainelAgendamentosRoute
   '/painel/assinatura': typeof AuthenticatedPainelAssinaturaRoute
-  '/painel/atendimento': typeof AuthenticatedPainelAtendimentoRoute
   '/painel/avaliacoes': typeof AuthenticatedPainelAvaliacoesRoute
-  '/painel/canais': typeof AuthenticatedPainelCanaisRoute
   '/painel/clientes': typeof AuthenticatedPainelClientesRoute
   '/painel/configuracoes': typeof AuthenticatedPainelConfiguracoesRoute
   '/painel/digitais': typeof AuthenticatedPainelDigitaisRoute
@@ -642,7 +616,6 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/api/public/canais/$channel/$storeId': typeof ApiPublicCanaisChannelStoreIdRoute
   '/api/public/integracoes/$kind/$storeId': typeof ApiPublicIntegracoesKindStoreIdRoute
 }
 export interface FileRoutesById {
@@ -679,9 +652,7 @@ export interface FileRoutesById {
   '/_authenticated/entregador_/status': typeof AuthenticatedEntregadorStatusRoute
   '/_authenticated/painel/agendamentos': typeof AuthenticatedPainelAgendamentosRoute
   '/_authenticated/painel/assinatura': typeof AuthenticatedPainelAssinaturaRoute
-  '/_authenticated/painel/atendimento': typeof AuthenticatedPainelAtendimentoRoute
   '/_authenticated/painel/avaliacoes': typeof AuthenticatedPainelAvaliacoesRoute
-  '/_authenticated/painel/canais': typeof AuthenticatedPainelCanaisRoute
   '/_authenticated/painel/clientes': typeof AuthenticatedPainelClientesRoute
   '/_authenticated/painel/configuracoes': typeof AuthenticatedPainelConfiguracoesRoute
   '/_authenticated/painel/digitais': typeof AuthenticatedPainelDigitaisRoute
@@ -719,7 +690,6 @@ export interface FileRoutesById {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/api/public/canais/$channel/$storeId': typeof ApiPublicCanaisChannelStoreIdRoute
   '/api/public/integracoes/$kind/$storeId': typeof ApiPublicIntegracoesKindStoreIdRoute
 }
 export interface FileRouteTypes {
@@ -756,9 +726,7 @@ export interface FileRouteTypes {
     | '/entregador/status'
     | '/painel/agendamentos'
     | '/painel/assinatura'
-    | '/painel/atendimento'
     | '/painel/avaliacoes'
-    | '/painel/canais'
     | '/painel/clientes'
     | '/painel/configuracoes'
     | '/painel/digitais'
@@ -796,7 +764,6 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
-    | '/api/public/canais/$channel/$storeId'
     | '/api/public/integracoes/$kind/$storeId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -830,9 +797,7 @@ export interface FileRouteTypes {
     | '/entregador/status'
     | '/painel/agendamentos'
     | '/painel/assinatura'
-    | '/painel/atendimento'
     | '/painel/avaliacoes'
-    | '/painel/canais'
     | '/painel/clientes'
     | '/painel/configuracoes'
     | '/painel/digitais'
@@ -870,7 +835,6 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
-    | '/api/public/canais/$channel/$storeId'
     | '/api/public/integracoes/$kind/$storeId'
   id:
     | '__root__'
@@ -906,9 +870,7 @@ export interface FileRouteTypes {
     | '/_authenticated/entregador_/status'
     | '/_authenticated/painel/agendamentos'
     | '/_authenticated/painel/assinatura'
-    | '/_authenticated/painel/atendimento'
     | '/_authenticated/painel/avaliacoes'
-    | '/_authenticated/painel/canais'
     | '/_authenticated/painel/clientes'
     | '/_authenticated/painel/configuracoes'
     | '/_authenticated/painel/digitais'
@@ -946,7 +908,6 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
-    | '/api/public/canais/$channel/$storeId'
     | '/api/public/integracoes/$kind/$storeId'
   fileRoutesById: FileRoutesById
 }
@@ -981,7 +942,6 @@ export interface RootRouteChildren {
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
-  ApiPublicCanaisChannelStoreIdRoute: typeof ApiPublicCanaisChannelStoreIdRoute
   ApiPublicIntegracoesKindStoreIdRoute: typeof ApiPublicIntegracoesKindStoreIdRoute
 }
 
@@ -1218,25 +1178,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPainelAssinaturaRouteImport
       parentRoute: typeof AuthenticatedPainelRoute
     }
-    '/_authenticated/painel/atendimento': {
-      id: '/_authenticated/painel/atendimento'
-      path: '/atendimento'
-      fullPath: '/painel/atendimento'
-      preLoaderRoute: typeof AuthenticatedPainelAtendimentoRouteImport
-      parentRoute: typeof AuthenticatedPainelRoute
-    }
     '/_authenticated/painel/avaliacoes': {
       id: '/_authenticated/painel/avaliacoes'
       path: '/avaliacoes'
       fullPath: '/painel/avaliacoes'
       preLoaderRoute: typeof AuthenticatedPainelAvaliacoesRouteImport
-      parentRoute: typeof AuthenticatedPainelRoute
-    }
-    '/_authenticated/painel/canais': {
-      id: '/_authenticated/painel/canais'
-      path: '/canais'
-      fullPath: '/painel/canais'
-      preLoaderRoute: typeof AuthenticatedPainelCanaisRouteImport
       parentRoute: typeof AuthenticatedPainelRoute
     }
     '/_authenticated/painel/clientes': {
@@ -1491,13 +1437,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/canais/$channel/$storeId': {
-      id: '/api/public/canais/$channel/$storeId'
-      path: '/api/public/canais/$channel/$storeId'
-      fullPath: '/api/public/canais/$channel/$storeId'
-      preLoaderRoute: typeof ApiPublicCanaisChannelStoreIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/integracoes/$kind/$storeId': {
       id: '/api/public/integracoes/$kind/$storeId'
       path: '/api/public/integracoes/$kind/$storeId'
@@ -1511,9 +1450,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedPainelRouteChildren {
   AuthenticatedPainelAgendamentosRoute: typeof AuthenticatedPainelAgendamentosRoute
   AuthenticatedPainelAssinaturaRoute: typeof AuthenticatedPainelAssinaturaRoute
-  AuthenticatedPainelAtendimentoRoute: typeof AuthenticatedPainelAtendimentoRoute
   AuthenticatedPainelAvaliacoesRoute: typeof AuthenticatedPainelAvaliacoesRoute
-  AuthenticatedPainelCanaisRoute: typeof AuthenticatedPainelCanaisRoute
   AuthenticatedPainelClientesRoute: typeof AuthenticatedPainelClientesRoute
   AuthenticatedPainelConfiguracoesRoute: typeof AuthenticatedPainelConfiguracoesRoute
   AuthenticatedPainelDigitaisRoute: typeof AuthenticatedPainelDigitaisRoute
@@ -1544,9 +1481,7 @@ interface AuthenticatedPainelRouteChildren {
 const AuthenticatedPainelRouteChildren: AuthenticatedPainelRouteChildren = {
   AuthenticatedPainelAgendamentosRoute: AuthenticatedPainelAgendamentosRoute,
   AuthenticatedPainelAssinaturaRoute: AuthenticatedPainelAssinaturaRoute,
-  AuthenticatedPainelAtendimentoRoute: AuthenticatedPainelAtendimentoRoute,
   AuthenticatedPainelAvaliacoesRoute: AuthenticatedPainelAvaliacoesRoute,
-  AuthenticatedPainelCanaisRoute: AuthenticatedPainelCanaisRoute,
   AuthenticatedPainelClientesRoute: AuthenticatedPainelClientesRoute,
   AuthenticatedPainelConfiguracoesRoute: AuthenticatedPainelConfiguracoesRoute,
   AuthenticatedPainelDigitaisRoute: AuthenticatedPainelDigitaisRoute,
@@ -1641,7 +1576,6 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
-  ApiPublicCanaisChannelStoreIdRoute: ApiPublicCanaisChannelStoreIdRoute,
   ApiPublicIntegracoesKindStoreIdRoute: ApiPublicIntegracoesKindStoreIdRoute,
 }
 export const routeTree = rootRouteImport
