@@ -57,6 +57,8 @@ import {
 } from "@/lib/identificacao.functions";
 import { PhoneIdentifyCard, type IdentityConsent } from "@/components/store/PhoneIdentifyCard";
 import { normalizePhoneBR } from "@/lib/phone";
+import { maskPhone } from "@/lib/masks";
+
 
 
 import { fulfillmentOptions, timeSlots } from "@/lib/orders";
