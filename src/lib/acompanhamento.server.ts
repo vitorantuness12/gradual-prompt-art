@@ -212,6 +212,7 @@ export async function buildDetail(
     tableNumber: order.table_number,
     notes: order.notes,
     isDemo: order.is_demo,
+    address: parseOrderAddress(order.address),
     items: (order.order_items ?? []).map((item) => ({
       name: item.product_name,
       quantity: item.quantity,
