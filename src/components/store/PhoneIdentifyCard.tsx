@@ -295,6 +295,25 @@ export function PhoneIdentifyCard({
                       ? "Reenviar código"
                       : "Enviar código"}
               </Button>
+              {/* Não recebeu? Reenvia pelo outro canal disponível. */}
+              {codeSent && sentChannel ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => void sendCode(sentChannel === "whatsapp" ? "email" : "whatsapp")}
+                  disabled={
+                    sending ||
+                    isLocked ||
+                    resendLeft > 0 ||
+                    (sentChannel === "whatsapp" && !result.channels.email)
+                  }
+                >
+                  {sentChannel === "whatsapp"
+                    ? "Não recebi — enviar por e-mail"
+                    : "Não recebi — enviar por WhatsApp"}
+                </Button>
+              ) : null}
               {codeSent ? (
                 <div className="flex items-end gap-2">
                   <div className="space-y-1">
