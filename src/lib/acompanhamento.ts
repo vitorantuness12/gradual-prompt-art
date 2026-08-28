@@ -79,6 +79,7 @@ export interface TrackedOrderDetail {
   tableNumber: string | null;
   notes: string | null;
   isDemo: boolean;
+  address: OrderAddress | null;
   items: Array<{ name: string; quantity: number; total: number; notes: string | null }>;
   timeline: Array<{ status: string; createdAt: string; reason: string | null }>;
 }
