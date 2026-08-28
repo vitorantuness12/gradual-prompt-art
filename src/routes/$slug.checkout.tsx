@@ -61,6 +61,8 @@ import {
 import { computeDynamicEta } from "@/lib/operacao";
 import { getStoreLoad } from "@/lib/operacao.functions";
 import { publicStoreQuery } from "@/lib/store-queries";
+import { StoreThemeProvider } from "@/components/store/StoreThemeProvider";
+import { publicAppearanceQuery, publishedTheme } from "@/lib/store-theme-queries";
 
 export const Route = createFileRoute("/$slug/checkout")({
   head: () => ({
@@ -102,6 +104,8 @@ function CheckoutPage() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
   const { data, isLoading } = useQuery(publicStoreQuery(slug));
+  const appearance = useQuery(publicAppearanceQuery(data?.store.id ?? null));
+  const theme = publishedTheme(appearance.data);
   const load = useQuery({
     queryKey: ["store-load", data?.store.id],
     enabled: Boolean(data?.store.id),
@@ -588,7 +592,7 @@ function CheckoutPage() {
   );
 
   return (
-    <div className="min-h-screen bg-secondary/30">
+    <StoreThemeProvider config={theme} paintDocument className="min-h-screen bg-secondary/30 text-foreground">
       <header className="border-b border-border/70 bg-card">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-5 sm:px-6">
           <span className="text-base font-semibold tracking-tight text-foreground">{store.name}</span>
@@ -1247,6 +1251,6 @@ function CheckoutPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </StoreThemeProvider>
   );
 }
