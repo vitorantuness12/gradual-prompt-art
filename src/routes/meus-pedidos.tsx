@@ -147,7 +147,7 @@ function CustomerAreaPage() {
             </Button>
           ) : (
             <Button asChild variant="ghost" size="sm">
-              <Link to="/acompanhar">Acompanhar por código</Link>
+              <Link to="/acompanhar" search={{ codigo: undefined }}>Acompanhar por código</Link>
             </Button>
           )}
         </div>
