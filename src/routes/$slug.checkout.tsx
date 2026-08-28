@@ -1133,25 +1133,15 @@ function CheckoutPage() {
               </label>
             ) : null}
 
-            <div className="space-y-2">
-              <Label>Forma de pagamento</Label>
-              <RadioGroup
-                value={payment}
-                onValueChange={setPayment}
-                className="grid gap-2 sm:grid-cols-2"
-              >
-                {enabledPayments.map((key) => (
-                  <Label
-                    key={key}
-                    htmlFor={`pagamento-${key}`}
-                    className="flex cursor-pointer items-center gap-3 rounded-xl border border-border/70 bg-card p-3 text-sm has-[:checked]:border-primary"
-                  >
-                    <RadioGroupItem id={`pagamento-${key}`} value={key} />
-                    {PAYMENT_METHOD_LABEL[key]}
-                  </Label>
-                ))}
-              </RadioGroup>
-            </div>
+            <PaymentMethodPicker
+              enabled={enabledPayments}
+              value={payment}
+              onChange={setPayment}
+              needsChange={needsChange}
+              onNeedsChangeToggle={setNeedsChange}
+              changeFor={changeFor}
+              onChangeForChange={setChangeFor}
+            />
           </CardContent>
         </Card>
 
