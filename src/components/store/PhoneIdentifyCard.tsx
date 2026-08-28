@@ -57,6 +57,8 @@ export function PhoneIdentifyCard({
   const [loading, setLoading] = useState(false);
   const [addressId, setAddressId] = useState<string | null>(null);
   const [channel, setChannel] = useState<Channel>("whatsapp");
+  /** Canal pelo qual o último código foi realmente enviado. */
+  const [sentChannel, setSentChannel] = useState<Channel | null>(null);
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   const [sending, setSending] = useState(false);
