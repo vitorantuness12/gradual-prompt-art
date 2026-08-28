@@ -23,7 +23,8 @@ export type RateLimitBucket =
   | "invite"
   | "data_request"
   | "historico"
-  | "popup";
+  | "popup"
+  | "identify";
 
 const DEFAULTS: Record<RateLimitBucket, { limit: number; windowSeconds: number }> = {
   login: { limit: 10, windowSeconds: 300 },
@@ -37,7 +38,9 @@ const DEFAULTS: Record<RateLimitBucket, { limit: number; windowSeconds: number }
   data_request: { limit: 5, windowSeconds: 3600 },
   historico: { limit: 30, windowSeconds: 300 },
   popup: { limit: 120, windowSeconds: 300 },
+  identify: { limit: 12, windowSeconds: 600 },
 };
+
 
 /** IP do chamador a partir dos cabeçalhos do proxy (fallback: "desconhecido"). */
 export function clientIdentifier(headers: Headers | undefined, fallback = "desconhecido"): string {

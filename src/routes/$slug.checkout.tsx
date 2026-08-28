@@ -50,6 +50,16 @@ import {
   validateCoupon,
   type CustomerAccount,
 } from "@/lib/orders.functions";
+import {
+  DEFAULT_CHECKOUT_SETTINGS,
+  getCheckoutSettings,
+  saveCheckoutIdentity,
+} from "@/lib/identificacao.functions";
+import { PhoneIdentifyCard, type IdentityConsent } from "@/components/store/PhoneIdentifyCard";
+import { normalizePhoneBR } from "@/lib/phone";
+import { maskPhone } from "@/lib/masks";
+
+
 
 import { fulfillmentOptions, timeSlots } from "@/lib/orders";
 import {
@@ -182,6 +192,21 @@ function CheckoutPage() {
   const [acceptedOffers, setAcceptedOffers] = useState<string[]>([]);
   const [tracking, setTracking] = useState<Tracking>(EMPTY_TRACKING);
   const [submitting, setSubmitting] = useState(false);
+  const [consent, setConsent] = useState<IdentityConsent>({
+    acceptedTerms: false,
+    marketingOptIn: false,
+    createProfile: true,
+  });
+
+  // Preferências de checkout definidas pelo lojista (visitante, verificação, etc.).
+  const checkoutSettingsQuery = useQuery({
+    queryKey: ["checkout-settings", slug],
+    queryFn: () => getCheckoutSettings({ data: { storeSlug: slug } }),
+    staleTime: 300_000,
+  });
+  const settings = checkoutSettingsQuery.data ?? DEFAULT_CHECKOUT_SETTINGS;
+  const persistIdentity = useServerFn(saveCheckoutIdentity);
+
 
   // Funil: registra os eventos do checkout com a origem da visita.
   const logCheckout = useCallback(
@@ -407,6 +432,24 @@ function CheckoutPage() {
       toast.error(parsed.error.issues[0]?.message ?? "Verifique os dados informados.");
       return;
     }
+    const normalizedPhone = normalizePhoneBR(form.phone);
+    if (!normalizedPhone.ok) {
+      toast.error(normalizedPhone.message);
+      return;
+    }
+    if (!consent.acceptedTerms) {
+      toast.error("Aceite os Termos de Uso e a Política de Privacidade para continuar.");
+      return;
+    }
+    if (settings.requireEmail && !form.email.trim()) {
+      toast.error("Esta loja pede um e-mail válido para o pedido.");
+      return;
+    }
+    if (!settings.allowGuest && !consent.createProfile) {
+      toast.error("Esta loja exige cadastro para finalizar o pedido.");
+      return;
+    }
+
     if (isDelivery && (!form.street.trim() || !form.number.trim())) {
       toast.error("Informe rua e número para a entrega.");
       return;
@@ -440,6 +483,37 @@ function CheckoutPage() {
         setSubmitting(false);
         return;
       }
+
+      // Identificação do cliente: cria/atualiza cadastro por telefone e grava aceites.
+      const identity = await persistIdentity({
+        data: {
+          storeSlug: store.slug,
+          phone: form.phone,
+          name: form.name.trim(),
+          email: form.email.trim() || undefined,
+          fulfillment: String(fulfillment),
+          acceptedTerms: consent.acceptedTerms,
+          marketingOptIn: consent.marketingOptIn,
+          createProfile: consent.createProfile,
+          address: isDelivery
+            ? {
+                street: form.street.trim(),
+                number: form.number.trim(),
+                complement: form.complement.trim(),
+                reference: form.reference.trim(),
+                district: form.district.trim(),
+                zipCode: form.zip.trim(),
+              }
+            : undefined,
+        },
+      });
+      if (!identity.ok) {
+        toast.error(identity.message);
+        setSubmitting(false);
+        return;
+      }
+
+
 
       const scheduledFor =
         timing === "scheduled" && date && time
@@ -579,6 +653,8 @@ function CheckoutPage() {
       cart.clear();
       setReview(false);
       toast.success(`Pedido ${order.code} enviado para a loja!`);
+      if (identity.created) toast.success(identity.message);
+
       void navigate({ to: "/$slug/acompanhar", params: { slug }, search: { codigo: order.code } });
     } catch {
       toast.error("Não foi possível enviar o pedido. Tente novamente.");
@@ -635,7 +711,32 @@ function CheckoutPage() {
           </p>
         ) : null}
 
+        {/* 0. Identificação por telefone */}
+        <PhoneIdentifyCard
+          slug={slug}
+          phone={form.phone}
+          settings={settings}
+          consent={consent}
+          onPhoneChange={(value) => update("phone", value)}
+          onConsentChange={setConsent}
+          onApplyCustomer={({ name, email, address }) => {
+            setForm((current) => ({
+              ...current,
+              name: name ?? current.name,
+              email: email ?? current.email,
+              zip: address?.zipCode ?? current.zip,
+              street: address?.street ?? current.street,
+              number: address?.number ?? current.number,
+              district: address?.district ?? current.district,
+              complement: address?.complement ?? current.complement,
+              reference: address?.reference ?? current.reference,
+            }));
+            toast.success("Dados preenchidos. Confira antes de finalizar.");
+          }}
+        />
+
         {/* 1. Itens */}
+
         <Card className="border-border/70 shadow-sm">
           <CardHeader>
             <CardTitle className="text-base">1. Seus itens</CardTitle>
@@ -815,8 +916,9 @@ function CheckoutPage() {
                 id="telefone"
                 inputMode="tel"
                 autoComplete="tel"
-                value={form.phone}
-                onChange={(event) => update("phone", event.target.value)}
+                value={maskPhone(form.phone)}
+                onChange={(event) => update("phone", maskPhone(event.target.value))}
+
               />
             </div>
             <div className="space-y-2 sm:col-span-2">
