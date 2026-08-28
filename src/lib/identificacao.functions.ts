@@ -85,7 +85,7 @@ async function loadStore(slug: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await supabaseAdmin
     .from("stores")
-    .select("id")
+    .select("id, name")
     .eq("slug", slug)
     .eq("is_active", true)
     .maybeSingle();
