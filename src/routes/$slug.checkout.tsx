@@ -177,6 +177,8 @@ function CheckoutPage() {
   });
   const [fulfillment, setFulfillment] = useState<Fulfillment | "">("");
   const [payment, setPayment] = useState("");
+  const [needsChange, setNeedsChange] = useState(false);
+  const [changeFor, setChangeFor] = useState("");
   const [timing, setTiming] = useState<"now" | "scheduled">("now");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -560,7 +562,15 @@ function CheckoutPage() {
                 reference: form.reference.trim(),
               }
             : null,
-          notes: form.notes.trim() || null,
+          notes:
+            [
+              form.notes.trim(),
+              payment === "cash" && needsChange && changeFor.trim()
+                ? `Troco para R$ ${changeFor.trim()}`
+                : "",
+            ]
+              .filter(Boolean)
+              .join(" · ") || null,
           subtotal: cart.subtotal + bumpTotal,
           delivery_fee: deliveryFee,
           affiliate_code: tracking.affiliate_code,
