@@ -199,6 +199,8 @@ export interface RequestIdentifyCodeResult {
   ok: boolean;
   channel: "whatsapp" | "email" | null;
   message: string;
+  /** Validade do código em segundos (0 quando nada foi enviado). */
+  expiresInSeconds: number;
 }
 
 /** Envia um código de 6 dígitos pelo canal escolhido pelo cliente. */
@@ -209,7 +211,7 @@ export const requestIdentifyCode = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<RequestIdentifyCodeResult> => {
     const { normalizePhoneBR } = await import("@/lib/phone");
     const phone = normalizePhoneBR(data.phone);
-    if (!phone.ok) return { ok: false, channel: null, message: phone.message };
+    if (!phone.ok) return { ok: false, channel: null, message: phone.message, expiresInSeconds: 0 };
 
     const { clientIdentifier, consumeRateLimit, rateLimitMessage } = await import(
       "@/lib/security.server"
@@ -218,10 +220,10 @@ export const requestIdentifyCode = createServerFn({ method: "POST" })
       limit: 5,
       windowSeconds: 900,
     });
-    if (!limit.allowed) return { ok: false, channel: null, message: rateLimitMessage(limit) };
+    if (!limit.allowed) return { ok: false, channel: null, message: rateLimitMessage(limit), expiresInSeconds: 0 };
 
     const store = await loadStore(data.storeSlug);
-    if (!store) return { ok: false, channel: null, message: "Loja não encontrada." };
+    if (!store) return { ok: false, channel: null, message: "Loja não encontrada.", expiresInSeconds: 0 };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: customer } = await supabaseAdmin
@@ -231,21 +233,24 @@ export const requestIdentifyCode = createServerFn({ method: "POST" })
       .eq("phone_e164", phone.e164)
       .maybeSingle();
 
+    const helpers = await import("@/lib/acompanhamento.server");
+    const ttlMinutes = helpers.CODE_TTL_MINUTES;
+
     // Resposta genérica: não revelamos se o telefone existe nesta loja.
     const generic: RequestIdentifyCodeResult = {
       ok: true,
       channel: data.channel,
+      expiresInSeconds: ttlMinutes * 60,
       message:
         data.channel === "email"
-          ? "Se houver cadastro, enviamos um código para o e-mail salvo. Ele vale por 10 minutos."
-          : "Se houver cadastro, enviamos um código pelo WhatsApp. Ele vale por 10 minutos.",
+          ? `Se houver cadastro, enviamos um código para o e-mail salvo. Ele vale por ${ttlMinutes} minutos.`
+          : `Se houver cadastro, enviamos um código pelo WhatsApp. Ele vale por ${ttlMinutes} minutos.`,
     };
     if (!customer) return generic;
     if (data.channel === "email" && !customer.email) {
-      return { ok: false, channel: null, message: "Este cadastro não tem e-mail salvo. Receba o código pelo WhatsApp." };
+      return { ok: false, channel: null, message: "Este cadastro não tem e-mail salvo. Receba o código pelo WhatsApp.", expiresInSeconds: 0 };
     }
 
-    const helpers = await import("@/lib/acompanhamento.server");
     const code = helpers.generateCode();
     await helpers.storeVerificationCode(supabaseAdmin, `${store.id}:${phone.e164}`, code, data.channel);
 
@@ -253,14 +258,14 @@ export const requestIdentifyCode = createServerFn({ method: "POST" })
       if (data.channel === "email" && customer.email) {
         const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
         await sendTemplateEmail("verification-code", customer.email, {
-          templateData: { code, storeName: store.name ?? "a loja", customerName: customer.name ?? "Olá" },
+          templateData: { code, ttlMinutes, storeName: store.name ?? "a loja", customerName: customer.name ?? "Olá" },
         });
       } else {
         const { sendWhatsappMessage } = await import("@/lib/whatsapp/send.server");
         const outcome = await sendWhatsappMessage(supabaseAdmin, {
           storeId: store.id,
           phone: phone.e164,
-          body: `Seu código de confirmação é ${code}. Ele vale por 10 minutos. Se não foi você que pediu, ignore esta mensagem.`,
+          body: `Seu código de confirmação é ${code}. Ele vale por ${ttlMinutes} minutos. Se não foi você que pediu, ignore esta mensagem.`,
           messageType: "transactional",
           templateKey: "identificacao_codigo",
         });
