@@ -348,6 +348,43 @@ function CheckoutPage() {
     };
   }, [addressReady, form.zip, form.street, form.number, form.district, cart.subtotal, slug, quoteDeliveryFee]);
 
+  // Busca automática de endereço pelo CEP (ViaCEP).
+  useEffect(() => {
+    const digits = form.zip.replace(/\D/g, "");
+    if (digits.length !== 8) return;
+    let active = true;
+    setIsSearchingCep(true);
+    const timer = window.setTimeout(() => {
+      fetch(`https://viacep.com.br/ws/${digits}/json/`)
+        .then((res) => res.json())
+        .then((data: { erro?: boolean; logradouro?: string; bairro?: string; complemento?: string; localidade?: string; uf?: string }) => {
+          if (!active) return;
+          if (data.erro) {
+            toast.error("CEP não encontrado. Verifique o número digitado.");
+            return;
+          }
+          setForm((current) => ({
+            ...current,
+            street: current.street.trim() || (data.logradouro ?? current.street),
+            district: current.district.trim() || (data.bairro ?? current.district),
+            complement: current.complement.trim() || (data.complemento ?? current.complement),
+          }));
+        })
+        .catch(() => {
+          if (!active) return;
+          toast.error("Não foi possível consultar o CEP. Tente digitar o endereço manualmente.");
+        })
+        .finally(() => {
+          if (active) setIsSearchingCep(false);
+        });
+    }, 400);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+      setIsSearchingCep(false);
+    };
+  }, [form.zip]);
+
   if (isLoading) {
     return (
       <div className="mx-auto max-w-3xl space-y-4 px-4 py-10 sm:px-6">
