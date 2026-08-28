@@ -1,4 +1,4 @@
-import type { TrackedOrderDetail } from "@/lib/acompanhamento";
+import { parseOrderAddress, type TrackedOrderDetail } from "@/lib/acompanhamento";
 
 /**
  * Apoio ao acompanhamento público de pedidos.
