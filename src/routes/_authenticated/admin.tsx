@@ -1082,7 +1082,12 @@ function NewPlanCard({
   }
 
   function submit() {
-    const formErrors = { ...validatePlanForm(draft, existingKeys), ...limitErrors(draft.limits) };
+    const moduleError = validatePlanModules(normalizePlanModules(draft.modules));
+    const formErrors = {
+      ...validatePlanForm(draft, existingKeys),
+      ...limitErrors(draft.limits),
+      ...(moduleError ? { modules: moduleError } : {}),
+    };
     setErrors(formErrors);
     if (Object.keys(formErrors).length > 0) {
       toast.error("Corrija os campos destacados antes de criar o plano.");
@@ -1163,7 +1168,12 @@ function PlanEditor({
   }
 
   function submit() {
-    const formErrors = { ...validatePlanForm(draft, existingKeys), ...limitErrors(draft.limits) };
+    const moduleError = validatePlanModules(normalizePlanModules(draft.modules));
+    const formErrors = {
+      ...validatePlanForm(draft, existingKeys),
+      ...limitErrors(draft.limits),
+      ...(moduleError ? { modules: moduleError } : {}),
+    };
     setErrors(formErrors);
     if (Object.keys(formErrors).length > 0) {
       toast.error("Corrija os campos destacados antes de salvar.");
