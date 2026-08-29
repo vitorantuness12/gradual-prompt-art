@@ -475,7 +475,7 @@ function CheckoutPage() {
   async function applyCoupon() {
     const result = await couponState.apply(couponCode);
     if (result.kind === "success") {
-      logCheckout("coupon", { couponCode: couponState.coupon?.code, amount: couponState.discount });
+      logCheckout("coupon", { couponCode: couponState.coupon?.code ?? null, amount: couponState.discount });
       toast.success(result.message);
     } else {
       toast.error(result.message);
