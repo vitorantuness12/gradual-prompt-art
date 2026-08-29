@@ -512,6 +512,34 @@ function PlansTab() {
       toast.success("Plano atualizado.");
       void queryClient.invalidateQueries({ queryKey: ["admin-plans-all"] });
       void queryClient.invalidateQueries({ queryKey: ["plans"] });
+      void queryClient.invalidateQueries({ queryKey: ["public-plans"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const create = useMutation({
+    mutationFn: async (input: Record<string, unknown>) => {
+      const { error } = await supabase.from("plans").insert(input as never);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      toast.success("Plano criado e publicado na página inicial.");
+      void queryClient.invalidateQueries({ queryKey: ["admin-plans-all"] });
+      void queryClient.invalidateQueries({ queryKey: ["plans"] });
+      void queryClient.invalidateQueries({ queryKey: ["public-plans"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("plans").delete().eq("id", id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      toast.success("Plano removido.");
+      void queryClient.invalidateQueries({ queryKey: ["admin-plans-all"] });
+      void queryClient.invalidateQueries({ queryKey: ["public-plans"] });
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -519,15 +547,160 @@ function PlansTab() {
   if (isLoading) return <Skeleton className="h-52 rounded-2xl" />;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      {plans.map((plan) => (
-        <PlanEditor key={plan.id} plan={plan} onSave={(patch) => save.mutate({ id: plan.id, patch })} />
-      ))}
+    <div className="space-y-4">
+      <NewPlanCard
+        nextSortOrder={(plans.at(-1)?.sort_order ?? 0) + 1}
+        pending={create.isPending}
+        onCreate={(payload) => create.mutate(payload)}
+      />
+      <div className="grid gap-4 lg:grid-cols-2">
+        {plans.map((plan) => (
+          <PlanEditor
+            key={plan.id}
+            plan={plan}
+            onSave={(patch) => save.mutate({ id: plan.id, patch })}
+            onDelete={() => remove.mutate(plan.id)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
 
-function PlanEditor({ plan, onSave }: { plan: PlanRow; onSave: (patch: Record<string, unknown>) => void }) {
+/** Formulário de criação de plano — o plano ativo aparece na página inicial e em /planos. */
+function NewPlanCard({
+  nextSortOrder,
+  pending,
+  onCreate,
+}: {
+  nextSortOrder: number;
+  pending: boolean;
+  onCreate: (payload: Record<string, unknown>) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [key, setKey] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [priceMonth, setPriceMonth] = useState("0");
+  const [priceYear, setPriceYear] = useState("0");
+  const [trialDays, setTrialDays] = useState("0");
+  const [highlighted, setHighlighted] = useState(false);
+  const [isActive, setIsActive] = useState(true);
+  const [highlights, setHighlights] = useState("");
+
+  function submit() {
+    const slug = (key || name)
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_|_$/g, "");
+    if (!name.trim() || !slug) {
+      toast.error("Informe o nome do plano.");
+      return;
+    }
+    onCreate({
+      key: slug,
+      name: name.trim(),
+      tagline: tagline.trim() || null,
+      price_month: Number(priceMonth) || 0,
+      price_year: Number(priceYear) || 0,
+      trial_days: Number(trialDays) || 0,
+      is_active: isActive,
+      is_highlighted: highlighted,
+      sort_order: nextSortOrder,
+      limits: Object.fromEntries(LIMIT_KEYS.map((item) => [item.key, 0])),
+      features: {},
+      highlights: highlights.split("\n").map((line) => line.trim()).filter(Boolean),
+    });
+    setOpen(false);
+    setName("");
+    setKey("");
+    setTagline("");
+    setHighlights("");
+  }
+
+  if (!open) {
+    return (
+      <Button onClick={() => setOpen(true)} className="bg-accent text-accent-foreground hover:bg-accent/90">
+        Criar plano
+      </Button>
+    );
+  }
+
+  return (
+    <Card className="border-accent/50 shadow-sm">
+      <CardHeader>
+        <CardTitle className="text-base">Novo plano</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3 text-sm">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label>Nome</Label>
+            <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Profissional" />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Identificador (opcional)</Label>
+            <Input value={key} onChange={(event) => setKey(event.target.value)} placeholder="pro" />
+          </div>
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label>Chamada</Label>
+            <Input
+              value={tagline}
+              onChange={(event) => setTagline(event.target.value)}
+              placeholder="Para negócios em crescimento."
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Preço mensal</Label>
+            <Input value={priceMonth} onChange={(event) => setPriceMonth(event.target.value)} inputMode="decimal" />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Preço anual</Label>
+            <Input value={priceYear} onChange={(event) => setPriceYear(event.target.value)} inputMode="decimal" />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Dias de teste</Label>
+            <Input value={trialDays} onChange={(event) => setTrialDays(event.target.value)} inputMode="numeric" />
+          </div>
+          <div className="flex items-center gap-4 pt-6">
+            <label className="flex items-center gap-2">
+              <Switch checked={isActive} onCheckedChange={setIsActive} aria-label="Plano ativo" />
+              <span className="text-muted-foreground">Publicado</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <Switch checked={highlighted} onCheckedChange={setHighlighted} aria-label="Plano destacado" />
+              <span className="text-muted-foreground">Destaque</span>
+            </label>
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Destaques (um por linha)</Label>
+          <Textarea rows={4} value={highlights} onChange={(event) => setHighlights(event.target.value)} />
+        </div>
+        <div className="flex gap-2">
+          <Button size="sm" onClick={submit} disabled={pending}>
+            {pending ? "Criando…" : "Criar plano"}
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>
+            Cancelar
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+
+function PlanEditor({
+  plan,
+  onSave,
+  onDelete,
+}: {
+  plan: PlanRow;
+  onSave: (patch: Record<string, unknown>) => void;
+  onDelete: () => void;
+}) {
   const [name, setName] = useState(plan.name);
   const [tagline, setTagline] = useState(plan.tagline ?? "");
   const [priceMonth, setPriceMonth] = useState(String(plan.price_month));
@@ -595,23 +768,35 @@ function PlanEditor({ plan, onSave }: { plan: PlanRow; onSave: (patch: Record<st
           <Textarea rows={3} value={highlights} onChange={(event) => setHighlights(event.target.value)} />
         </div>
 
-        <Button
-          size="sm"
-          onClick={() =>
-            onSave({
-              name,
-              tagline,
-              price_month: Number(priceMonth) || 0,
-              price_year: Number(priceYear) || 0,
-              trial_days: Number(trialDays) || 0,
-              is_active: isActive,
-              limits,
-              highlights: highlights.split("\n").map((line) => line.trim()).filter(Boolean),
-            })
-          }
-        >
-          Salvar plano
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            onClick={() =>
+              onSave({
+                name,
+                tagline,
+                price_month: Number(priceMonth) || 0,
+                price_year: Number(priceYear) || 0,
+                trial_days: Number(trialDays) || 0,
+                is_active: isActive,
+                limits,
+                highlights: highlights.split("\n").map((line) => line.trim()).filter(Boolean),
+              })
+            }
+          >
+            Salvar plano
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-destructive"
+            onClick={() => {
+              if (window.confirm(`Remover o plano ${plan.name}?`)) onDelete();
+            }}
+          >
+            Excluir
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
