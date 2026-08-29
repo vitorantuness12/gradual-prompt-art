@@ -42,6 +42,33 @@ export function planAllowsModule(
   return planModules(plan).includes(key);
 }
 
+/**
+ * Valida a seleção de módulos antes de salvar o plano.
+ * Retorna a mensagem de erro ou `null` quando a seleção é consistente.
+ */
+export function validatePlanModules(values: unknown): string | null {
+  if (!Array.isArray(values)) return "Seleção de módulos inválida.";
+
+  const invalid = values.filter((value) => !isModuleKey(value));
+  if (invalid.length > 0) return "Há módulos desconhecidos na seleção.";
+
+  const unique = new Set(values as PlanModuleKey[]);
+  if (unique.size !== values.length) return "Há módulos repetidos na seleção.";
+
+  const missing = PLAN_ESSENTIAL_MODULES.filter((key) => !unique.has(key));
+  if (missing.length > 0) {
+    return `Módulos obrigatórios precisam ficar liberados: ${missing
+      .map((key) => PLAN_MODULE_LABEL[key])
+      .join(", ")}.`;
+  }
+
+  const optional = [...unique].filter((key) => !PLAN_ESSENTIAL_MODULES.includes(key));
+  if (optional.length === 0) return "Selecione ao menos um módulo além dos obrigatórios.";
+
+  return null;
+}
+
+
 export type PlanRow = Database["public"]["Tables"]["plans"]["Row"];
 export type SubscriptionRow = Database["public"]["Tables"]["store_subscriptions"]["Row"];
 export type SubscriptionStatus = Database["public"]["Enums"]["subscription_status"];
