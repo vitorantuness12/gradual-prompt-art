@@ -1,8 +1,22 @@
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Check, Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { formatCurrency } from "@/lib/format";
 
-const plans = [
+/** Formato usado pelos cartões desta seção. */
+interface PricingCard {
+  name: string;
+  description: string;
+  popular: boolean;
+  features: string[];
+  cta: string;
+  price?: string;
+}
+
+/** Usado apenas se ainda não houver planos publicados no painel. */
+const fallbackPlans: PricingCard[] = [
   {
     name: "Inicial",
     description: "Para começar sua operação online.",
@@ -94,6 +108,31 @@ const cardVariants = {
 };
 
 const Pricing = () => {
+  // Planos publicados no painel administrativo (/admin > Planos).
+  const { data: dbPlans = [] } = useQuery({
+    queryKey: ["public-plans"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("plans")
+        .select("name, tagline, description, price_month, highlights, is_highlighted, is_active, sort_order")
+        .eq("is_active", true)
+        .order("sort_order");
+      if (error) throw new Error(error.message);
+      return data ?? [];
+    },
+  });
+
+  const plans: PricingCard[] = dbPlans.length
+    ? dbPlans.map((plan) => ({
+        name: plan.name,
+        description: plan.tagline ?? plan.description ?? "",
+        popular: plan.is_highlighted,
+        features: plan.highlights ?? [],
+        cta: Number(plan.price_month) > 0 ? "Começar teste grátis" : "Criar minha loja",
+        price: Number(plan.price_month) > 0 ? `${formatCurrency(Number(plan.price_month))}/mês` : "Grátis",
+      }))
+    : fallbackPlans;
+
   return (
     <section id="precos" className="py-16 md:py-24 bg-background relative overflow-hidden">
       {/* Animated Background */}
@@ -197,6 +236,11 @@ const Pricing = () => {
                 <h3 className="font-display text-lg md:text-xl font-semibold mb-2 text-foreground">
                   {plan.name}
                 </h3>
+                {plan.price && (
+                  <p className="font-display text-2xl md:text-3xl font-bold text-foreground mb-2">
+                    {plan.price}
+                  </p>
+                )}
                 <p className="text-muted-foreground text-xs md:text-sm mb-4 md:mb-6">
                   {plan.description}
                 </p>
