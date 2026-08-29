@@ -1,12 +1,17 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckoutThemeProvider } from "@/components/store/CheckoutThemeProvider";
 import { useCart } from "@/hooks/useCart";
+import { useCartCoupon } from "@/hooks/useCartCoupon";
 import { useStoreDocumentTitle } from "@/hooks/useStoreDocumentTitle";
 import { formatCurrency } from "@/lib/format";
 import { publicStoreQuery } from "@/lib/store-queries";
@@ -37,6 +42,9 @@ function StoreCartPage() {
   useStoreDocumentTitle(store?.name, "Carrinho");
 
   const cart = useCart(slug, store?.id ?? null);
+  const [couponCode, setCouponCode] = useState("");
+  const couponState = useCartCoupon(slug, store?.id ?? null, cart.subtotal, cart.hydrated);
+  const total = Math.max(0, cart.subtotal - couponState.discount);
   const availability = store ? storeAvailability(store) : null;
   const canCheckout = Boolean(availability?.accepting) && cart.count > 0;
 
@@ -203,12 +211,69 @@ function StoreCartPage() {
 
             <Card className="border-border/70 shadow-sm">
               <CardContent className="space-y-3 py-6">
+                <div className="space-y-3 rounded-xl border border-border/70 bg-muted/40 p-3">
+                  <Label htmlFor="cupom-carrinho" className="text-xs font-bold uppercase tracking-wide">
+                    Cupom de desconto
+                  </Label>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Input
+                      id="cupom-carrinho"
+                      value={couponState.coupon?.code ?? couponCode}
+                      onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
+                      placeholder="SEUCUPOM"
+                      disabled={Boolean(couponState.coupon) || couponState.checking}
+                      className="min-w-[160px] flex-1 bg-card uppercase"
+                    />
+                    {couponState.coupon ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          couponState.clear();
+                          setCouponCode("");
+                        }}
+                      >
+                        Remover
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        disabled={couponState.checking}
+                        onClick={async () => {
+                          const result = await couponState.apply(couponCode);
+                          if (result.kind === "success") toast.success(result.message);
+                          else toast.error(result.message);
+                        }}
+                      >
+                        {couponState.checking ? "Validando..." : "Aplicar"}
+                      </Button>
+                    )}
+                  </div>
+                  {couponState.coupon ? (
+                    <p className="text-sm font-medium text-success">
+                      Cupom {couponState.coupon.code} aplicado: −{formatCurrency(couponState.discount)}
+                    </p>
+                  ) : couponState.feedback?.kind === "error" ? (
+                    <p className="text-sm font-medium text-destructive">{couponState.feedback.message}</p>
+                  ) : null}
+                </div>
+
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>Subtotal</span>
                   <span className="font-medium text-foreground">{formatCurrency(cart.subtotal)}</span>
                 </div>
+                {couponState.discount > 0 ? (
+                  <div className="flex items-center justify-between text-sm text-success">
+                    <span>Cupom {couponState.coupon?.code}</span>
+                    <span>−{formatCurrency(couponState.discount)}</span>
+                  </div>
+                ) : null}
+                <div className="flex items-center justify-between text-base font-semibold text-foreground">
+                  <span>Total dos itens</span>
+                  <span>{formatCurrency(total)}</span>
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  Entrega, descontos e forma de pagamento são calculados na próxima etapa.
+                  Entrega e forma de pagamento são calculados na próxima etapa.
                 </p>
                 <Button
                   type="button"
@@ -229,8 +294,10 @@ function StoreCartPage() {
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur">
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
             <div className="text-sm">
-              <p className="text-muted-foreground">Subtotal</p>
-              <p className="font-semibold text-foreground">{formatCurrency(cart.subtotal)}</p>
+              <p className="text-muted-foreground">
+                {couponState.discount > 0 ? `Subtotal ${formatCurrency(cart.subtotal)} · cupom −${formatCurrency(couponState.discount)}` : "Subtotal"}
+              </p>
+              <p className="font-semibold text-foreground">{formatCurrency(total)}</p>
             </div>
             {canCheckout ? (
               <Button asChild size="lg">
