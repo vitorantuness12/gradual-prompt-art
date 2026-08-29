@@ -5,6 +5,11 @@
  * paleta neutra clara com destaque vermelho, para que o momento do pagamento
  * tenha aparência previsível e confiável em qualquer loja.
  *
+ * Regras de cor:
+ * - Verde (#15803d) é exclusivo para status/estados de sucesso.
+ * - Vermelho (#dc2626) é exclusivo para destaques do fluxo de compra
+ *   (botões, seleção, preços em destaque).
+ *
  * Todos os valores ficam centralizados aqui — nunca escreva estes hex
  * diretamente em componentes.
  */
@@ -14,9 +19,9 @@ import { defaultThemeConfig, paletteFromPrimary, type StoreThemeConfig } from "@
 
 /** Tokens crus da paleta. Fonte única de verdade. */
 export const CHECKOUT_PALETTE = {
-  /** Vermelho principal (ações, seleção, preço em destaque). */
+  /** Vermelho principal: destaques do fluxo de compra (botões, seleção, preço). */
   primary: "#dc2626",
-  /** Vermelho escurecido para hover e ênfase. */
+  /** Vermelho escurecido para hover e ênfase no fluxo de compra. */
   primaryStrong: "#b91c1c",
   /** Fundo neutro da página. */
   background: "#f4f6f8",
@@ -30,7 +35,7 @@ export const CHECKOUT_PALETTE = {
   mutedText: "#54606e",
   /** Bordas visíveis sobre fundo neutro. */
   border: "#d8dee6",
-  /** Estados. Todos escolhidos para ≥ 4.5:1 sobre branco/neutro. */
+  /** Verde: reservado para status/estados de sucesso. Não usar para destaques de compra. */
   success: "#15803d",
   warning: "#a1620a",
   info: "#1d4ed8",
