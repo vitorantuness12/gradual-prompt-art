@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,11 +27,18 @@ import {
   FEATURE_CONTROLS,
   FEATURE_KEYS,
   LIMIT_KEYS,
+  PLAN_ESSENTIAL_MODULES,
+  PLAN_MODULE_GROUPS,
+  PLAN_MODULE_KEYS,
+  PLAN_MODULE_LABEL,
   SUBSCRIPTION_STATUS_LABEL,
   parsePlanNumber,
   slugifyPlanKey,
   validatePlanForm,
+  normalizePlanModules,
+  planModules,
   type PlanFormErrors,
+  type PlanModuleKey,
   type PlanRow,
 } from "@/lib/plans";
 import {
@@ -555,6 +563,7 @@ function draftFromPlan(plan: PlanRow): PlanDraft {
         return [item.key, control.kind === "toggle" ? "false" : (control.options[0]?.value ?? "false")];
       }),
     ),
+    modules: planModules(plan),
     highlights: plan.highlights.join("\n"),
   };
 }
@@ -590,6 +599,7 @@ function payloadFromDraft(draft: PlanDraft): Record<string, unknown> {
         return [item.key, value];
       }),
     ),
+    modules: normalizePlanModules(draft.modules),
     highlights: draft.highlights
       .split("\n")
       .map((line) => line.trim())
@@ -886,6 +896,7 @@ function NewPlanCard({
     isHighlighted: false,
     limits: emptyLimits(),
     features: defaultFeatures(),
+    modules: [...PLAN_MODULE_KEYS],
     highlights: "",
   }));
 
