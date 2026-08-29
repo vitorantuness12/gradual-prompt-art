@@ -20,6 +20,7 @@ import {
   type TrackedOrderDetail,
 } from "@/lib/acompanhamento";
 import { CheckoutThemeProvider } from "@/components/store/CheckoutThemeProvider";
+import { checkoutStatusClass } from "@/lib/checkout-theme";
 import {
   listOrdersByPhone,
   requestTrackingCode,
@@ -316,7 +317,11 @@ function TrackPage() {
                     </span>
                   </span>
                   <span className="flex items-center gap-2">
-                    <Badge variant="secondary">{ORDER_STATUS_LABEL[item.status] ?? item.status}</Badge>
+                    <span
+                      className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${checkoutStatusClass(item.status)}`}
+                    >
+                      {ORDER_STATUS_LABEL[item.status] ?? item.status}
+                    </span>
                     <span className="text-sm font-semibold">{formatCurrency(item.total)}</span>
                   </span>
                 </button>
@@ -345,9 +350,11 @@ function OrderDetail({ order }: OrderDetailProps) {
         <div className="flex flex-wrap items-center gap-2">
           <CardTitle className="text-lg">Pedido {order.code}</CardTitle>
           {order.isDemo ? <DemoBadge /> : null}
-          <Badge variant={cancelled ? "destructive" : "secondary"}>
+          <span
+            className={`rounded-full border px-3 py-1 text-xs font-medium ${checkoutStatusClass(order.status)}`}
+          >
             {ORDER_STATUS_LABEL[order.status] ?? order.status}
-          </Badge>
+          </span>
         </div>
         <CardDescription>
           {order.storeName} · {ORDER_TYPE_LABEL[order.type] ?? order.type} · {formatDateTime(order.createdAt)}
