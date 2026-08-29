@@ -73,8 +73,8 @@ export const checkoutExtraCssVars: Record<string, string> = {
   "--destructive-foreground": "#ffffff",
   "--border": CHECKOUT_PALETTE.border,
   "--input": CHECKOUT_PALETTE.border,
-  "--shadow-glow": "0 0 40px -14px color-mix(in oklab, #16a34a 45%, transparent)",
-  "--shadow-glow-sm": "0 0 22px -10px color-mix(in oklab, #16a34a 40%, transparent)",
+  "--shadow-glow": "0 0 40px -14px color-mix(in oklab, #dc2626 45%, transparent)",
+  "--shadow-glow-sm": "0 0 22px -10px color-mix(in oklab, #dc2626 40%, transparent)",
   "--checkout-warning": CHECKOUT_PALETTE.warning,
   "--checkout-info": CHECKOUT_PALETTE.info,
 };
