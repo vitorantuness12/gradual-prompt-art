@@ -492,6 +492,100 @@ function UsersTab() {
 
 /* ---------------- Planos ---------------- */
 
+/** Estado compartilhado entre criação e edição de plano. */
+interface PlanDraft {
+  name: string;
+  key: string;
+  tagline: string;
+  priceMonth: string;
+  priceYear: string;
+  trialDays: string;
+  sortOrder: string;
+  isActive: boolean;
+  isHighlighted: boolean;
+  limits: Record<string, string>;
+  features: Record<string, string>;
+  highlights: string;
+}
+
+function emptyLimits(): Record<string, string> {
+  return Object.fromEntries(LIMIT_KEYS.map((item) => [item.key, "0"]));
+}
+
+function defaultFeatures(): Record<string, string> {
+  return Object.fromEntries(
+    FEATURE_KEYS.map((item) => {
+      const control = FEATURE_CONTROLS[item.key];
+      return [item.key, control.kind === "toggle" ? "false" : (control.options[0]?.value ?? "false")];
+    }),
+  );
+}
+
+function draftFromPlan(plan: PlanRow): PlanDraft {
+  const limitSource = (plan.limits ?? {}) as Record<string, unknown>;
+  const featureSource = (plan.features ?? {}) as Record<string, unknown>;
+  return {
+    name: plan.name,
+    key: plan.key,
+    tagline: plan.tagline ?? "",
+    priceMonth: String(plan.price_month ?? 0),
+    priceYear: String(plan.price_year ?? 0),
+    trialDays: String(plan.trial_days ?? 0),
+    sortOrder: String(plan.sort_order ?? 0),
+    isActive: plan.is_active,
+    isHighlighted: plan.is_highlighted,
+    limits: Object.fromEntries(LIMIT_KEYS.map((item) => [item.key, String(limitSource[item.key] ?? 0)])),
+    features: Object.fromEntries(
+      FEATURE_KEYS.map((item) => {
+        const raw = featureSource[item.key];
+        if (typeof raw === "boolean") return [item.key, raw ? "true" : "false"];
+        if (typeof raw === "string") return [item.key, raw];
+        const control = FEATURE_CONTROLS[item.key];
+        return [item.key, control.kind === "toggle" ? "false" : (control.options[0]?.value ?? "false")];
+      }),
+    ),
+    highlights: plan.highlights.join("\n"),
+  };
+}
+
+/** Erros de limites: aceita -1 (ilimitado) ou inteiros >= 0. */
+function limitErrors(limits: Record<string, string>): Record<string, string> {
+  const errors: Record<string, string> = {};
+  for (const item of LIMIT_KEYS) {
+    const raw = (limits[item.key] ?? "").trim();
+    const parsed = Number(raw);
+    if (!raw || !Number.isInteger(parsed) || parsed < -1) errors[item.key] = "Use -1 ou um inteiro ≥ 0.";
+  }
+  return errors;
+}
+
+function payloadFromDraft(draft: PlanDraft): Record<string, unknown> {
+  return {
+    key: slugifyPlanKey(draft.key || draft.name),
+    name: draft.name.trim(),
+    tagline: draft.tagline.trim() || null,
+    price_month: parsePlanNumber(draft.priceMonth),
+    price_year: parsePlanNumber(draft.priceYear),
+    trial_days: parsePlanNumber(draft.trialDays),
+    sort_order: parsePlanNumber(draft.sortOrder),
+    is_active: draft.isActive,
+    is_highlighted: draft.isHighlighted,
+    limits: Object.fromEntries(LIMIT_KEYS.map((item) => [item.key, Number(draft.limits[item.key] ?? 0)])),
+    features: Object.fromEntries(
+      FEATURE_KEYS.map((item) => {
+        const value = draft.features[item.key] ?? "false";
+        if (value === "true") return [item.key, true];
+        if (value === "false") return [item.key, false];
+        return [item.key, value];
+      }),
+    ),
+    highlights: draft.highlights
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean),
+  };
+}
+
 function PlansTab() {
   const queryClient = useQueryClient();
   const { data: plans = [], isLoading } = useQuery({
@@ -503,6 +597,12 @@ function PlansTab() {
     },
   });
 
+  function invalidate() {
+    void queryClient.invalidateQueries({ queryKey: ["admin-plans-all"] });
+    void queryClient.invalidateQueries({ queryKey: ["plans"] });
+    void queryClient.invalidateQueries({ queryKey: ["public-plans"] });
+  }
+
   const save = useMutation({
     mutationFn: async (input: { id: string; patch: Record<string, unknown> }) => {
       const { error } = await supabase.from("plans").update(input.patch as never).eq("id", input.id);
@@ -510,9 +610,7 @@ function PlansTab() {
     },
     onSuccess: () => {
       toast.success("Plano atualizado.");
-      void queryClient.invalidateQueries({ queryKey: ["admin-plans-all"] });
-      void queryClient.invalidateQueries({ queryKey: ["plans"] });
-      void queryClient.invalidateQueries({ queryKey: ["public-plans"] });
+      invalidate();
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -524,9 +622,7 @@ function PlansTab() {
     },
     onSuccess: () => {
       toast.success("Plano criado e publicado na página inicial.");
-      void queryClient.invalidateQueries({ queryKey: ["admin-plans-all"] });
-      void queryClient.invalidateQueries({ queryKey: ["plans"] });
-      void queryClient.invalidateQueries({ queryKey: ["public-plans"] });
+      invalidate();
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -538,18 +634,20 @@ function PlansTab() {
     },
     onSuccess: () => {
       toast.success("Plano removido.");
-      void queryClient.invalidateQueries({ queryKey: ["admin-plans-all"] });
-      void queryClient.invalidateQueries({ queryKey: ["public-plans"] });
+      invalidate();
     },
     onError: (error: Error) => toast.error(error.message),
   });
 
   if (isLoading) return <Skeleton className="h-52 rounded-2xl" />;
 
+  const keys = plans.map((plan) => plan.key);
+
   return (
     <div className="space-y-4">
       <NewPlanCard
         nextSortOrder={(plans.at(-1)?.sort_order ?? 0) + 1}
+        existingKeys={keys}
         pending={create.isPending}
         onCreate={(payload) => create.mutate(payload)}
       />
@@ -558,6 +656,8 @@ function PlansTab() {
           <PlanEditor
             key={plan.id}
             plan={plan}
+            existingKeys={keys.filter((item) => item !== plan.key)}
+            pending={save.isPending}
             onSave={(patch) => save.mutate({ id: plan.id, patch })}
             onDelete={() => remove.mutate(plan.id)}
           />
@@ -567,57 +667,245 @@ function PlansTab() {
   );
 }
 
+/** Campos de limites e recursos reutilizados na criação e na edição. */
+function PlanCapabilityFields({
+  draft,
+  errors,
+  update,
+}: {
+  draft: PlanDraft;
+  errors: Record<string, string>;
+  update: (patch: Partial<PlanDraft>) => void;
+}) {
+  return (
+    <>
+      <fieldset className="grid gap-2 rounded-xl border border-border p-3 sm:grid-cols-2">
+        <legend className="px-1 text-xs font-medium text-muted-foreground">
+          Quantidades incluídas (-1 = ilimitado, 0 = não incluso)
+        </legend>
+        {LIMIT_KEYS.map((item) => (
+          <div key={item.key} className="space-y-1">
+            <div className="flex items-center justify-between gap-2">
+              <Label className="text-xs">{item.label}</Label>
+              <Input
+                className="h-8 w-24"
+                inputMode="numeric"
+                aria-invalid={Boolean(errors[item.key])}
+                value={draft.limits[item.key] ?? "0"}
+                onChange={(event) => update({ limits: { ...draft.limits, [item.key]: event.target.value } })}
+              />
+            </div>
+            {errors[item.key] ? <p className="text-xs text-destructive">{errors[item.key]}</p> : null}
+          </div>
+        ))}
+      </fieldset>
+
+      <fieldset className="grid gap-3 rounded-xl border border-border p-3 sm:grid-cols-2">
+        <legend className="px-1 text-xs font-medium text-muted-foreground">Funcionalidades liberadas</legend>
+        {FEATURE_KEYS.map((item) => {
+          const control = FEATURE_CONTROLS[item.key];
+          const value = draft.features[item.key] ?? "false";
+          return (
+            <div key={item.key} className="flex items-center justify-between gap-2">
+              <Label className="text-xs">{item.label}</Label>
+              {control.kind === "toggle" ? (
+                <Switch
+                  checked={value === "true"}
+                  aria-label={item.label}
+                  onCheckedChange={(checked) =>
+                    update({ features: { ...draft.features, [item.key]: checked ? "true" : "false" } })
+                  }
+                />
+              ) : (
+                <Select
+                  value={value}
+                  onValueChange={(next) => update({ features: { ...draft.features, [item.key]: next } })}
+                >
+                  <SelectTrigger className="h-8 w-40 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {control.options.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+          );
+        })}
+      </fieldset>
+    </>
+  );
+}
+
+/** Campos comuns de identidade/preço com mensagens de erro por campo. */
+function PlanBasicFields({
+  draft,
+  errors,
+  update,
+  showKey,
+}: {
+  draft: PlanDraft;
+  errors: PlanFormErrors;
+  update: (patch: Partial<PlanDraft>) => void;
+  showKey: boolean;
+}) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <div className="space-y-1.5">
+        <Label>Nome</Label>
+        <Input
+          value={draft.name}
+          aria-invalid={Boolean(errors.name)}
+          onChange={(event) => update({ name: event.target.value })}
+          placeholder="Profissional"
+        />
+        {errors.name ? <p className="text-xs text-destructive">{errors.name}</p> : null}
+      </div>
+      {showKey ? (
+        <div className="space-y-1.5">
+          <Label>Identificador (opcional)</Label>
+          <Input
+            value={draft.key}
+            aria-invalid={Boolean(errors.key)}
+            onChange={(event) => update({ key: event.target.value })}
+            placeholder="pro"
+          />
+          {errors.key ? <p className="text-xs text-destructive">{errors.key}</p> : null}
+        </div>
+      ) : null}
+      <div className="space-y-1.5 sm:col-span-2">
+        <Label>Chamada</Label>
+        <Input
+          value={draft.tagline}
+          aria-invalid={Boolean(errors.tagline)}
+          onChange={(event) => update({ tagline: event.target.value })}
+          placeholder="Para negócios em crescimento."
+        />
+        {errors.tagline ? <p className="text-xs text-destructive">{errors.tagline}</p> : null}
+      </div>
+      <div className="space-y-1.5">
+        <Label>Preço mensal (R$)</Label>
+        <Input
+          value={draft.priceMonth}
+          inputMode="decimal"
+          aria-invalid={Boolean(errors.priceMonth)}
+          onChange={(event) => update({ priceMonth: event.target.value })}
+        />
+        {errors.priceMonth ? <p className="text-xs text-destructive">{errors.priceMonth}</p> : null}
+      </div>
+      <div className="space-y-1.5">
+        <Label>Preço anual (R$)</Label>
+        <Input
+          value={draft.priceYear}
+          inputMode="decimal"
+          aria-invalid={Boolean(errors.priceYear)}
+          onChange={(event) => update({ priceYear: event.target.value })}
+        />
+        {errors.priceYear ? <p className="text-xs text-destructive">{errors.priceYear}</p> : null}
+      </div>
+      <div className="space-y-1.5">
+        <Label>Dias de teste</Label>
+        <Input
+          value={draft.trialDays}
+          inputMode="numeric"
+          aria-invalid={Boolean(errors.trialDays)}
+          onChange={(event) => update({ trialDays: event.target.value })}
+        />
+        {errors.trialDays ? <p className="text-xs text-destructive">{errors.trialDays}</p> : null}
+      </div>
+      <div className="space-y-1.5">
+        <Label>Ordem de exibição</Label>
+        <Input
+          value={draft.sortOrder}
+          inputMode="numeric"
+          aria-invalid={Boolean(errors.sortOrder)}
+          onChange={(event) => update({ sortOrder: event.target.value })}
+        />
+        {errors.sortOrder ? <p className="text-xs text-destructive">{errors.sortOrder}</p> : null}
+      </div>
+      <div className="flex items-center gap-4 sm:col-span-2">
+        <label className="flex items-center gap-2">
+          <Switch
+            checked={draft.isActive}
+            onCheckedChange={(checked) => update({ isActive: checked })}
+            aria-label="Plano publicado"
+          />
+          <span className="text-muted-foreground">{draft.isActive ? "Publicado" : "Oculto"}</span>
+        </label>
+        <label className="flex items-center gap-2">
+          <Switch
+            checked={draft.isHighlighted}
+            onCheckedChange={(checked) => update({ isHighlighted: checked })}
+            aria-label="Plano destacado"
+          />
+          <span className="text-muted-foreground">Destaque (“Mais popular”)</span>
+        </label>
+      </div>
+    </div>
+  );
+}
+
 /** Formulário de criação de plano — o plano ativo aparece na página inicial e em /planos. */
 function NewPlanCard({
   nextSortOrder,
+  existingKeys,
   pending,
   onCreate,
 }: {
   nextSortOrder: number;
+  existingKeys: string[];
   pending: boolean;
   onCreate: (payload: Record<string, unknown>) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [key, setKey] = useState("");
-  const [tagline, setTagline] = useState("");
-  const [priceMonth, setPriceMonth] = useState("0");
-  const [priceYear, setPriceYear] = useState("0");
-  const [trialDays, setTrialDays] = useState("0");
-  const [highlighted, setHighlighted] = useState(false);
-  const [isActive, setIsActive] = useState(true);
-  const [highlights, setHighlights] = useState("");
+  const [errors, setErrors] = useState<PlanFormErrors & Record<string, string>>({});
+  const [draft, setDraft] = useState<PlanDraft>(() => ({
+    name: "",
+    key: "",
+    tagline: "",
+    priceMonth: "0",
+    priceYear: "0",
+    trialDays: "0",
+    sortOrder: String(nextSortOrder),
+    isActive: true,
+    isHighlighted: false,
+    limits: emptyLimits(),
+    features: defaultFeatures(),
+    highlights: "",
+  }));
+
+  function update(patch: Partial<PlanDraft>) {
+    setDraft((current) => ({ ...current, ...patch }));
+  }
 
   function submit() {
-    const slug = (key || name)
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "_")
-      .replace(/^_|_$/g, "");
-    if (!name.trim() || !slug) {
-      toast.error("Informe o nome do plano.");
+    const formErrors = { ...validatePlanForm(draft, existingKeys), ...limitErrors(draft.limits) };
+    setErrors(formErrors);
+    if (Object.keys(formErrors).length > 0) {
+      toast.error("Corrija os campos destacados antes de criar o plano.");
       return;
     }
-    onCreate({
-      key: slug,
-      name: name.trim(),
-      tagline: tagline.trim() || null,
-      price_month: Number(priceMonth) || 0,
-      price_year: Number(priceYear) || 0,
-      trial_days: Number(trialDays) || 0,
-      is_active: isActive,
-      is_highlighted: highlighted,
-      sort_order: nextSortOrder,
-      limits: Object.fromEntries(LIMIT_KEYS.map((item) => [item.key, 0])),
-      features: {},
-      highlights: highlights.split("\n").map((line) => line.trim()).filter(Boolean),
-    });
+    onCreate(payloadFromDraft(draft));
     setOpen(false);
-    setName("");
-    setKey("");
-    setTagline("");
-    setHighlights("");
+    setErrors({});
+    setDraft({
+      name: "",
+      key: "",
+      tagline: "",
+      priceMonth: "0",
+      priceYear: "0",
+      trialDays: "0",
+      sortOrder: String(nextSortOrder + 1),
+      isActive: true,
+      isHighlighted: false,
+      limits: emptyLimits(),
+      features: defaultFeatures(),
+      highlights: "",
+    });
   }
 
   if (!open) {
@@ -634,49 +922,11 @@ function NewPlanCard({
         <CardTitle className="text-base">Novo plano</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label>Nome</Label>
-            <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Profissional" />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Identificador (opcional)</Label>
-            <Input value={key} onChange={(event) => setKey(event.target.value)} placeholder="pro" />
-          </div>
-          <div className="space-y-1.5 sm:col-span-2">
-            <Label>Chamada</Label>
-            <Input
-              value={tagline}
-              onChange={(event) => setTagline(event.target.value)}
-              placeholder="Para negócios em crescimento."
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Preço mensal</Label>
-            <Input value={priceMonth} onChange={(event) => setPriceMonth(event.target.value)} inputMode="decimal" />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Preço anual</Label>
-            <Input value={priceYear} onChange={(event) => setPriceYear(event.target.value)} inputMode="decimal" />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Dias de teste</Label>
-            <Input value={trialDays} onChange={(event) => setTrialDays(event.target.value)} inputMode="numeric" />
-          </div>
-          <div className="flex items-center gap-4 pt-6">
-            <label className="flex items-center gap-2">
-              <Switch checked={isActive} onCheckedChange={setIsActive} aria-label="Plano ativo" />
-              <span className="text-muted-foreground">Publicado</span>
-            </label>
-            <label className="flex items-center gap-2">
-              <Switch checked={highlighted} onCheckedChange={setHighlighted} aria-label="Plano destacado" />
-              <span className="text-muted-foreground">Destaque</span>
-            </label>
-          </div>
-        </div>
+        <PlanBasicFields draft={draft} errors={errors} update={update} showKey />
+        <PlanCapabilityFields draft={draft} errors={errors} update={update} />
         <div className="space-y-1.5">
           <Label>Destaques (um por linha)</Label>
-          <Textarea rows={4} value={highlights} onChange={(event) => setHighlights(event.target.value)} />
+          <Textarea rows={4} value={draft.highlights} onChange={(event) => update({ highlights: event.target.value })} />
         </div>
         <div className="flex gap-2">
           <Button size="sm" onClick={submit} disabled={pending}>
@@ -691,100 +941,61 @@ function NewPlanCard({
   );
 }
 
-
+/** Edição completa de um plano existente. */
 function PlanEditor({
   plan,
+  existingKeys,
+  pending,
   onSave,
   onDelete,
 }: {
   plan: PlanRow;
+  existingKeys: string[];
+  pending: boolean;
   onSave: (patch: Record<string, unknown>) => void;
   onDelete: () => void;
 }) {
-  const [name, setName] = useState(plan.name);
-  const [tagline, setTagline] = useState(plan.tagline ?? "");
-  const [priceMonth, setPriceMonth] = useState(String(plan.price_month));
-  const [priceYear, setPriceYear] = useState(String(plan.price_year));
-  const [trialDays, setTrialDays] = useState(String(plan.trial_days));
-  const [isActive, setIsActive] = useState(plan.is_active);
-  const [limits, setLimits] = useState<Record<string, number>>(() => {
-    const source = (plan.limits ?? {}) as Record<string, number>;
-    return Object.fromEntries(LIMIT_KEYS.map((item) => [item.key, Number(source[item.key] ?? 0)]));
-  });
-  const [highlights, setHighlights] = useState(plan.highlights.join("\n"));
+  const [draft, setDraft] = useState<PlanDraft>(() => draftFromPlan(plan));
+  const [errors, setErrors] = useState<PlanFormErrors & Record<string, string>>({});
+
+  function update(patch: Partial<PlanDraft>) {
+    setDraft((current) => ({ ...current, ...patch }));
+  }
+
+  function submit() {
+    const formErrors = { ...validatePlanForm(draft, existingKeys), ...limitErrors(draft.limits) };
+    setErrors(formErrors);
+    if (Object.keys(formErrors).length > 0) {
+      toast.error("Corrija os campos destacados antes de salvar.");
+      return;
+    }
+    onSave(payloadFromDraft(draft));
+  }
 
   return (
     <Card className="border-border/70 shadow-sm">
-      <CardHeader>
+      <CardHeader className="flex-row items-center justify-between gap-2">
         <CardTitle className="text-base">{plan.name}</CardTitle>
+        <div className="flex items-center gap-2">
+          {plan.is_highlighted ? <Badge>Destaque</Badge> : null}
+          <Badge variant="outline">#{plan.sort_order}</Badge>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label>Nome</Label>
-            <Input value={name} onChange={(event) => setName(event.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Chamada</Label>
-            <Input value={tagline} onChange={(event) => setTagline(event.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Preço mensal</Label>
-            <Input value={priceMonth} onChange={(event) => setPriceMonth(event.target.value)} inputMode="decimal" />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Preço anual</Label>
-            <Input value={priceYear} onChange={(event) => setPriceYear(event.target.value)} inputMode="decimal" />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Dias de teste</Label>
-            <Input value={trialDays} onChange={(event) => setTrialDays(event.target.value)} inputMode="numeric" />
-          </div>
-          <div className="flex items-center gap-2 pt-6">
-            <Switch checked={isActive} onCheckedChange={setIsActive} aria-label="Plano ativo" />
-            <span className="text-muted-foreground">{isActive ? "Visível na venda" : "Oculto"}</span>
-          </div>
-        </div>
-
-        <fieldset className="grid gap-2 rounded-xl border border-border p-3 sm:grid-cols-2">
-          <legend className="px-1 text-xs font-medium text-muted-foreground">Limites (-1 = ilimitado)</legend>
-          {LIMIT_KEYS.map((item) => (
-            <div key={item.key} className="flex items-center justify-between gap-2">
-              <Label className="text-xs">{item.label}</Label>
-              <Input
-                className="h-8 w-24"
-                inputMode="numeric"
-                value={String(limits[item.key] ?? 0)}
-                onChange={(event) =>
-                  setLimits((current) => ({ ...current, [item.key]: Number(event.target.value) || 0 }))
-                }
-              />
-            </div>
-          ))}
-        </fieldset>
+        <PlanBasicFields draft={draft} errors={errors} update={update} showKey={false} />
+        <PlanCapabilityFields draft={draft} errors={errors} update={update} />
 
         <div className="space-y-1.5">
           <Label>Destaques (um por linha)</Label>
-          <Textarea rows={3} value={highlights} onChange={(event) => setHighlights(event.target.value)} />
+          <Textarea rows={3} value={draft.highlights} onChange={(event) => update({ highlights: event.target.value })} />
         </div>
 
         <div className="flex gap-2">
-          <Button
-            size="sm"
-            onClick={() =>
-              onSave({
-                name,
-                tagline,
-                price_month: Number(priceMonth) || 0,
-                price_year: Number(priceYear) || 0,
-                trial_days: Number(trialDays) || 0,
-                is_active: isActive,
-                limits,
-                highlights: highlights.split("\n").map((line) => line.trim()).filter(Boolean),
-              })
-            }
-          >
-            Salvar plano
+          <Button size="sm" onClick={submit} disabled={pending}>
+            {pending ? "Salvando…" : "Salvar plano"}
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => setDraft(draftFromPlan(plan))}>
+            Desfazer
           </Button>
           <Button
             size="sm"
@@ -801,6 +1012,7 @@ function PlanEditor({
     </Card>
   );
 }
+
 
 /* ---------------- Conteúdo ---------------- */
 
