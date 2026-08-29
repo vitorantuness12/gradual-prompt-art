@@ -253,9 +253,9 @@ function StoreCartPage() {
                     <p className="text-sm font-medium text-success">
                       Cupom {couponState.coupon.code} aplicado: −{formatCurrency(couponState.discount)}
                     </p>
-                  ) : couponState.feedback?.kind === "error" ? (
-                    <p className="text-sm font-medium text-destructive">{couponState.feedback.message}</p>
-                  ) : null}
+                   ) : couponState.feedback?.kind === "error" ? (
+                     <CouponFeedbackMessage feedback={couponState.feedback} />
+                   ) : null}
                 </div>
 
                 <div className="flex items-center justify-between text-sm text-muted-foreground">

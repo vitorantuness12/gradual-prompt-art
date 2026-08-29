@@ -1190,7 +1190,7 @@ function CheckoutPage() {
                   Cupom {coupon.code} aplicado: −{formatCurrency(discountFromCoupon)}
                 </p>
               ) : couponState.feedback?.kind === "error" ? (
-                <p className="text-sm font-medium text-destructive">{couponState.feedback.message}</p>
+                <CouponFeedbackMessage feedback={couponState.feedback} />
               ) : null}
             </div>
 
