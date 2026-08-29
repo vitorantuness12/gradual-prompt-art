@@ -26,6 +26,107 @@ export const FEATURE_KEYS = [
 
 export type FeatureKey = (typeof FEATURE_KEYS)[number]["key"];
 
+/**
+ * Como cada recurso é editado no painel: `toggle` = liberado/bloqueado,
+ * `options` = nível do recurso incluído no plano.
+ */
+export const FEATURE_CONTROLS: Record<
+  FeatureKey,
+  { kind: "toggle" } | { kind: "options"; options: { value: string; label: string }[] }
+> = {
+  reports: {
+    kind: "options",
+    options: [
+      { value: "false", label: "Não incluso" },
+      { value: "basic", label: "Básicos" },
+      { value: "standard", label: "Completos" },
+      { value: "advanced", label: "Avançados" },
+    ],
+  },
+  kds: { kind: "toggle" },
+  custom_domain: { kind: "toggle" },
+  support: {
+    kind: "options",
+    options: [
+      { value: "community", label: "Central de ajuda" },
+      { value: "email", label: "Por e-mail" },
+      { value: "priority", label: "Prioritário" },
+      { value: "dedicated", label: "Dedicado" },
+    ],
+  },
+};
+
+/** Dados brutos do formulário de plano (strings vindas dos inputs). */
+export interface PlanFormInput {
+  name: string;
+  key: string;
+  tagline: string;
+  priceMonth: string;
+  priceYear: string;
+  trialDays: string;
+  sortOrder: string;
+}
+
+export type PlanFormErrors = Partial<Record<keyof PlanFormInput, string>>;
+
+export function slugifyPlanKey(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "");
+}
+
+function numberError(raw: string, { min = 0, integer = false }: { min?: number; integer?: boolean } = {}) {
+  const trimmed = raw.trim();
+  if (!trimmed) return "Campo obrigatório.";
+  const parsed = Number(trimmed.replace(",", "."));
+  if (!Number.isFinite(parsed)) return "Informe um número válido.";
+  if (parsed < min) return `Valor mínimo: ${min}.`;
+  if (integer && !Number.isInteger(parsed)) return "Use um número inteiro.";
+  return null;
+}
+
+export function parsePlanNumber(raw: string): number {
+  const parsed = Number(String(raw).trim().replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/** Valida o formulário de plano; retorna um mapa vazio quando está tudo certo. */
+export function validatePlanForm(input: PlanFormInput, existingKeys: string[] = []): PlanFormErrors {
+  const errors: PlanFormErrors = {};
+
+  if (!input.name.trim()) errors.name = "Informe o nome do plano.";
+  else if (input.name.trim().length > 60) errors.name = "Máximo de 60 caracteres.";
+
+  const slug = slugifyPlanKey(input.key || input.name);
+  if (!slug) errors.key = "Identificador inválido — use letras ou números.";
+  else if (existingKeys.includes(slug)) errors.key = "Já existe um plano com este identificador.";
+
+  if (input.tagline.trim().length > 120) errors.tagline = "Máximo de 120 caracteres.";
+
+  const month = numberError(input.priceMonth);
+  if (month) errors.priceMonth = month;
+  const year = numberError(input.priceYear);
+  if (year) errors.priceYear = year;
+  const trial = numberError(input.trialDays, { integer: true });
+  if (trial) errors.trialDays = trial;
+  const sort = numberError(input.sortOrder, { integer: true });
+  if (sort) errors.sortOrder = sort;
+
+  if (!month && !year) {
+    const monthValue = parsePlanNumber(input.priceMonth);
+    const yearValue = parsePlanNumber(input.priceYear);
+    if (monthValue > 0 && yearValue > 0 && yearValue < monthValue) {
+      errors.priceYear = "O preço anual deve ser maior ou igual ao mensal.";
+    }
+  }
+
+  return errors;
+}
+
+
 export const SUBSCRIPTION_STATUS_LABEL: Record<SubscriptionStatus, string> = {
   trialing: "Em teste",
   active: "Ativa",
