@@ -515,6 +515,7 @@ interface PlanDraft {
   isHighlighted: boolean;
   limits: Record<string, string>;
   features: Record<string, string>;
+  modules: PlanModuleKey[];
   highlights: string;
 }
 
