@@ -1,4 +1,46 @@
 import type { Database } from "@/integrations/supabase/types";
+import {
+  ESSENTIAL_FEATURES,
+  FEATURE_GROUPS,
+  FEATURE_LABEL,
+  FEATURE_KEYS as PANEL_FEATURE_KEYS,
+  type FeatureKey as PanelFeatureKey,
+} from "@/lib/painel-segmentos";
+
+/** Módulos do painel que podem ser liberados individualmente em cada plano. */
+export type PlanModuleKey = PanelFeatureKey;
+
+export const PLAN_MODULE_KEYS: readonly PlanModuleKey[] = PANEL_FEATURE_KEYS;
+export const PLAN_MODULE_LABEL = FEATURE_LABEL;
+export const PLAN_MODULE_GROUPS = FEATURE_GROUPS;
+/** Módulos obrigatórios: sempre liberados, mesmo no plano mais simples. */
+export const PLAN_ESSENTIAL_MODULES: readonly PlanModuleKey[] = ESSENTIAL_FEATURES;
+
+function isModuleKey(value: unknown): value is PlanModuleKey {
+  return typeof value === "string" && (PLAN_MODULE_KEYS as readonly string[]).includes(value);
+}
+
+/** Normaliza a lista de módulos garantindo os essenciais e a ordem canônica. */
+export function normalizePlanModules(values: unknown): PlanModuleKey[] {
+  const list = Array.isArray(values) ? values.filter(isModuleKey) : [];
+  const set = new Set<PlanModuleKey>([...list, ...PLAN_ESSENTIAL_MODULES]);
+  return PLAN_MODULE_KEYS.filter((key) => set.has(key));
+}
+
+/** Módulos liberados pelo plano. Planos antigos (sem a chave) liberam tudo. */
+export function planModules(plan: Pick<PlanRow, "features"> | null | undefined): PlanModuleKey[] {
+  const features = (plan?.features ?? {}) as Record<string, unknown>;
+  const raw = features["modules"];
+  if (!Array.isArray(raw)) return [...PLAN_MODULE_KEYS];
+  return normalizePlanModules(raw);
+}
+
+export function planAllowsModule(
+  plan: Pick<PlanRow, "features"> | null | undefined,
+  key: PlanModuleKey,
+): boolean {
+  return planModules(plan).includes(key);
+}
 
 export type PlanRow = Database["public"]["Tables"]["plans"]["Row"];
 export type SubscriptionRow = Database["public"]["Tables"]["store_subscriptions"]["Row"];
