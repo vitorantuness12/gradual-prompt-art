@@ -760,7 +760,107 @@ function PlanCapabilityFields({
           );
         })}
       </fieldset>
+
+      <PlanModulesFields draft={draft} update={update} />
     </>
+  );
+}
+
+/**
+ * Seleção módulo por módulo do painel. Módulos essenciais ficam sempre
+ * liberados (não podem ser desmarcados) para não travar a conta do lojista.
+ */
+function PlanModulesFields({
+  draft,
+  update,
+}: {
+  draft: PlanDraft;
+  update: (patch: Partial<PlanDraft>) => void;
+}) {
+  const selected = new Set(draft.modules);
+  const essential = new Set<PlanModuleKey>(PLAN_ESSENTIAL_MODULES);
+
+  function setModules(next: PlanModuleKey[]) {
+    update({ modules: normalizePlanModules(next) });
+  }
+
+  function toggle(key: PlanModuleKey, checked: boolean) {
+    if (essential.has(key)) return;
+    setModules(checked ? [...draft.modules, key] : draft.modules.filter((item) => item !== key));
+  }
+
+  const allSelected = PLAN_MODULE_KEYS.every((key) => selected.has(key));
+
+  return (
+    <fieldset className="space-y-3 rounded-xl border border-border p-3">
+      <legend className="px-1 text-xs font-medium text-muted-foreground">
+        Módulos do painel liberados neste plano
+      </legend>
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground">
+          {selected.size} de {PLAN_MODULE_KEYS.length} módulos liberados
+        </p>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => setModules(allSelected ? [] : [...PLAN_MODULE_KEYS])}
+          >
+            {allSelected ? "Limpar seleção" : "Selecionar tudo"}
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        {PLAN_MODULE_GROUPS.map((group) => {
+          const groupAll = group.keys.every((key) => selected.has(key));
+          return (
+            <div key={group.title} className="rounded-lg border border-border/70 bg-muted/30 p-3">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-foreground">{group.title}</span>
+                <button
+                  type="button"
+                  className="text-xs text-primary underline-offset-4 hover:underline"
+                  onClick={() =>
+                    setModules(
+                      groupAll
+                        ? draft.modules.filter((item) => !group.keys.includes(item))
+                        : [...draft.modules, ...group.keys],
+                    )
+                  }
+                >
+                  {groupAll ? "Desmarcar" : "Marcar todos"}
+                </button>
+              </div>
+              <div className="space-y-2">
+                {group.keys.map((key) => {
+                  const locked = essential.has(key);
+                  return (
+                    <label
+                      key={key}
+                      className="flex items-center justify-between gap-2 text-xs text-foreground"
+                    >
+                      <span className={locked ? "text-muted-foreground" : undefined}>
+                        {PLAN_MODULE_LABEL[key]}
+                        {locked ? " (sempre incluso)" : ""}
+                      </span>
+                      <Checkbox
+                        checked={selected.has(key)}
+                        disabled={locked}
+                        aria-label={PLAN_MODULE_LABEL[key]}
+                        onCheckedChange={(checked) => toggle(key, checked === true)}
+                      />
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </fieldset>
   );
 }
 
