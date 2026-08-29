@@ -105,7 +105,7 @@ export const extractCatalogWithAi = createServerFn({ method: "POST" })
       return { ok: false, items: [], message: "Envie ao menos uma foto ou cole o texto do cardápio." };
     }
 
-    const apiKey = process.env["LOVABLE_API_KEY"];
+    const apiKey = process.env["OPENAI_API_KEY"];
     if (!apiKey) {
       return { ok: false, items: [], message: "A leitura com IA não está disponível no momento." };
     }
@@ -122,11 +122,12 @@ export const extractCatalogWithAi = createServerFn({ method: "POST" })
     }
 
     try {
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: "gpt-4o-mini",
+          temperature: 0,
           messages: [
             { role: "system", content: `${SYSTEM_PROMPT} ${catalogPreset(data.segment).aiInstructions}` },
             { role: "user", content },
