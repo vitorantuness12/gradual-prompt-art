@@ -16,8 +16,7 @@ import { useOrderHistory } from "@/hooks/useCart";
 import { ORDER_STATUS_LABEL, ORDER_TYPE_LABEL, formatCurrency, formatDateTime } from "@/lib/format";
 import { customerTimeline, statusClass, statusLabel } from "@/lib/orders";
 import { publicStoreQuery } from "@/lib/store-queries";
-import { StoreThemeProvider } from "@/components/store/StoreThemeProvider";
-import { publicAppearanceQuery, publishedTheme } from "@/lib/store-theme-queries";
+import { CheckoutThemeProvider } from "@/components/store/CheckoutThemeProvider";
 import { trackOrder, type TrackedOrder } from "@/lib/tracking.functions";
 
 export const Route = createFileRoute("/$slug/acompanhar")({
@@ -44,8 +43,6 @@ function StoreTrackPage() {
   const { slug } = Route.useParams();
   const { codigo } = Route.useSearch();
   const { data } = useQuery(publicStoreQuery(slug));
-  const appearance = useQuery(publicAppearanceQuery(data?.store.id ?? null));
-  const theme = publishedTheme(appearance.data);
   useStoreDocumentTitle(data?.store.name, "Acompanhar pedido");
 
   const track = useServerFn(trackOrder);
@@ -99,7 +96,7 @@ function StoreTrackPage() {
   const finished = order ? ["cancelled", "rejected", "completed"].includes(order.status) : false;
 
   return (
-    <StoreThemeProvider config={theme} paintDocument className="min-h-screen bg-secondary/30 text-foreground">
+    <CheckoutThemeProvider className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border/70 bg-card">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-5 sm:px-6">
           <span className="text-base font-semibold tracking-tight text-foreground">{data?.store.name ?? ""}</span>
@@ -288,6 +285,6 @@ function StoreTrackPage() {
           <ReviewForm storeId={order.storeId} orderId={order.id} defaultName={order.customerName} />
         ) : null}
       </main>
-    </StoreThemeProvider>
+    </CheckoutThemeProvider>
   );
 }
