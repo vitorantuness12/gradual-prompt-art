@@ -22,7 +22,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { INTEGRATIONS, PROVIDER_LABEL } from "@/lib/integrations";
-import { LIMIT_KEYS, SUBSCRIPTION_STATUS_LABEL, type PlanRow } from "@/lib/plans";
+import {
+  FEATURE_CONTROLS,
+  FEATURE_KEYS,
+  LIMIT_KEYS,
+  SUBSCRIPTION_STATUS_LABEL,
+  parsePlanNumber,
+  slugifyPlanKey,
+  validatePlanForm,
+  type PlanFormErrors,
+  type PlanRow,
+} from "@/lib/plans";
 import {
   listPlatformIntegrations,
   savePlatformIntegration,
