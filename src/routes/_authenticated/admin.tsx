@@ -591,15 +591,17 @@ function payloadFromDraft(draft: PlanDraft): Record<string, unknown> {
     is_active: draft.isActive,
     is_highlighted: draft.isHighlighted,
     limits: Object.fromEntries(LIMIT_KEYS.map((item) => [item.key, Number(draft.limits[item.key] ?? 0)])),
-    features: Object.fromEntries(
-      FEATURE_KEYS.map((item) => {
-        const value = draft.features[item.key] ?? "false";
-        if (value === "true") return [item.key, true];
-        if (value === "false") return [item.key, false];
-        return [item.key, value];
-      }),
-    ),
-    modules: normalizePlanModules(draft.modules),
+    features: {
+      ...Object.fromEntries(
+        FEATURE_KEYS.map((item) => {
+          const value = draft.features[item.key] ?? "false";
+          if (value === "true") return [item.key, true];
+          if (value === "false") return [item.key, false];
+          return [item.key, value];
+        }),
+      ),
+      modules: normalizePlanModules(draft.modules),
+    },
     highlights: draft.highlights
       .split("\n")
       .map((line) => line.trim())
