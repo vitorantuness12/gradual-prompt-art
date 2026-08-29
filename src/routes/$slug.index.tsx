@@ -664,9 +664,9 @@ function PublicStorePage() {
             </div>
             {availability.accepting ? (
               <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
-                <Link to="/$slug/checkout" params={{ slug }}>
+                <Link to="/$slug/carrinho" params={{ slug }}>
                   <ShoppingBag className="mr-2 size-4" aria-hidden="true" />
-                  Finalizar pedido
+                  Ver carrinho
                 </Link>
               </Button>
             ) : (

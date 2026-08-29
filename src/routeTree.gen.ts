@@ -21,6 +21,7 @@ import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SlugIndexRouteImport } from './routes/$slug.index'
 import { Route as SlugAcompanharRouteImport } from './routes/$slug.acompanhar'
+import { Route as SlugCarrinhoRouteImport } from './routes/$slug.carrinho'
 import { Route as SlugCheckoutRouteImport } from './routes/$slug.checkout'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedCompletarCadastroRouteImport } from './routes/_authenticated/completar-cadastro'
@@ -139,6 +140,11 @@ const SlugIndexRoute = SlugIndexRouteImport.update({
 const SlugAcompanharRoute = SlugAcompanharRouteImport.update({
   id: '/$slug/acompanhar',
   path: '/$slug/acompanhar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SlugCarrinhoRoute = SlugCarrinhoRouteImport.update({
+  id: '/$slug/carrinho',
+  path: '/$slug/carrinho',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SlugCheckoutRoute = SlugCheckoutRouteImport.update({
@@ -492,6 +498,7 @@ export interface FileRoutesByFullPath {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/termos': typeof TermosRoute
   '/$slug/acompanhar': typeof SlugAcompanharRoute
+  '/$slug/carrinho': typeof SlugCarrinhoRoute
   '/$slug/checkout': typeof SlugCheckoutRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/completar-cadastro': typeof AuthenticatedCompletarCadastroRoute
@@ -565,6 +572,7 @@ export interface FileRoutesByTo {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/termos': typeof TermosRoute
   '/$slug/acompanhar': typeof SlugAcompanharRoute
+  '/$slug/carrinho': typeof SlugCarrinhoRoute
   '/$slug/checkout': typeof SlugCheckoutRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/completar-cadastro': typeof AuthenticatedCompletarCadastroRoute
@@ -639,6 +647,7 @@ export interface FileRoutesById {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/termos': typeof TermosRoute
   '/$slug/acompanhar': typeof SlugAcompanharRoute
+  '/$slug/carrinho': typeof SlugCarrinhoRoute
   '/$slug/checkout': typeof SlugCheckoutRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/completar-cadastro': typeof AuthenticatedCompletarCadastroRoute
@@ -714,6 +723,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/termos'
     | '/$slug/acompanhar'
+    | '/$slug/carrinho'
     | '/$slug/checkout'
     | '/admin'
     | '/completar-cadastro'
@@ -787,6 +797,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/termos'
     | '/$slug/acompanhar'
+    | '/$slug/carrinho'
     | '/$slug/checkout'
     | '/admin'
     | '/completar-cadastro'
@@ -860,6 +871,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/termos'
     | '/$slug/acompanhar'
+    | '/$slug/carrinho'
     | '/$slug/checkout'
     | '/_authenticated/admin'
     | '/_authenticated/completar-cadastro'
@@ -935,6 +947,7 @@ export interface RootRouteChildren {
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   TermosRoute: typeof TermosRoute
   SlugAcompanharRoute: typeof SlugAcompanharRoute
+  SlugCarrinhoRoute: typeof SlugCarrinhoRoute
   SlugCheckoutRoute: typeof SlugCheckoutRoute
   AgendamentoTokenRoute: typeof AgendamentoTokenRoute
   EncomendaTokenRoute: typeof EncomendaTokenRoute
@@ -1042,6 +1055,13 @@ declare module '@tanstack/react-router' {
       path: '/$slug/acompanhar'
       fullPath: '/$slug/acompanhar'
       preLoaderRoute: typeof SlugAcompanharRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$slug/carrinho': {
+      id: '/$slug/carrinho'
+      path: '/$slug/carrinho'
+      fullPath: '/$slug/carrinho'
+      preLoaderRoute: typeof SlugCarrinhoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$slug/checkout': {
@@ -1577,6 +1597,7 @@ const rootRouteChildren: RootRouteChildren = {
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   TermosRoute: TermosRoute,
   SlugAcompanharRoute: SlugAcompanharRoute,
+  SlugCarrinhoRoute: SlugCarrinhoRoute,
   SlugCheckoutRoute: SlugCheckoutRoute,
   AgendamentoTokenRoute: AgendamentoTokenRoute,
   EncomendaTokenRoute: EncomendaTokenRoute,
