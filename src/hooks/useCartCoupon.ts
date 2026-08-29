@@ -100,7 +100,11 @@ export function useCartCoupon(slug: string, storeId: string | null, subtotal: nu
         }
         setCoupon(null);
         clearStoredCoupon(slug);
-        const result: CouponFeedback = { kind: "error", message: response.message };
+        const result: CouponFeedback = {
+          kind: "error",
+          message: response.message,
+          reason: response.reason,
+        };
         setFeedback(result);
         return result;
       } catch {
