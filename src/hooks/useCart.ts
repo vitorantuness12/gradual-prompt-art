@@ -148,6 +148,26 @@ export function useCart(slug: string, storeId?: string | null) {
     setHydrated(true);
   }, [slug, storeId]);
 
+  // Mantém itens e observações idênticos entre carrinho, checkout e outras abas.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sync = () => setItems(readCart(slug, storeId));
+    const onStorage = (event: StorageEvent) => {
+      if (!event.key || event.key === cartKey(slug)) sync();
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") sync();
+    };
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("focus", sync);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("focus", sync);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [slug, storeId]);
+
   const persist = useCallback(
     (next: CartItem[]) => {
       setItems(next);
