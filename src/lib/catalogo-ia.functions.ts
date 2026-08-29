@@ -135,8 +135,15 @@ export const extractCatalogWithAi = createServerFn({ method: "POST" })
         }),
       });
 
+      if (response.status === 401) {
+        return { ok: false, items: [], message: "Chave da OpenAI inválida. Revise a configuração da IA." };
+      }
       if (response.status === 429) {
-        return { ok: false, items: [], message: "Muitas leituras seguidas. Tente novamente em instantes." };
+        return {
+          ok: false,
+          items: [],
+          message: "Limite de uso da IA atingido. Aguarde instantes ou verifique os créditos da sua conta OpenAI.",
+        };
       }
       if (response.status === 402) {
         return { ok: false, items: [], message: "Créditos de IA esgotados. Recarregue para continuar usando." };
