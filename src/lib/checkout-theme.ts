@@ -5,6 +5,11 @@
  * paleta neutra clara com destaque vermelho, para que o momento do pagamento
  * tenha aparência previsível e confiável em qualquer loja.
  *
+ * Regras de cor:
+ * - Verde (#15803d) é exclusivo para status/estados de sucesso.
+ * - Vermelho (#dc2626) é exclusivo para destaques do fluxo de compra
+ *   (botões, seleção, preços em destaque).
+ *
  * Todos os valores ficam centralizados aqui — nunca escreva estes hex
  * diretamente em componentes.
  */
