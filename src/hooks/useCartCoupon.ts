@@ -50,7 +50,7 @@ export interface CouponFeedback {
   kind: "success" | "error";
   message: string;
   /** Classifica a recusa para a UI destacar o motivo (expirado, mínimo etc.). */
-  reason?: "not_found" | "inactive" | "not_started" | "expired" | "usage_limit" | "min_order";
+  reason?: "not_found" | "inactive" | "not_started" | "expired" | "usage_limit" | "min_order" | undefined;
 }
 
 /**
