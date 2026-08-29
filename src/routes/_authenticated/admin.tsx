@@ -692,7 +692,15 @@ function NewPlanCard({
 }
 
 
-function PlanEditor({ plan, onSave }: { plan: PlanRow; onSave: (patch: Record<string, unknown>) => void }) {
+function PlanEditor({
+  plan,
+  onSave,
+  onDelete,
+}: {
+  plan: PlanRow;
+  onSave: (patch: Record<string, unknown>) => void;
+  onDelete: () => void;
+}) {
   const [name, setName] = useState(plan.name);
   const [tagline, setTagline] = useState(plan.tagline ?? "");
   const [priceMonth, setPriceMonth] = useState(String(plan.price_month));
