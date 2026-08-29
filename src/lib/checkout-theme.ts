@@ -14,10 +14,10 @@ import { defaultThemeConfig, paletteFromPrimary, type StoreThemeConfig } from "@
 
 /** Tokens crus da paleta. Fonte única de verdade. */
 export const CHECKOUT_PALETTE = {
-  /** Verde principal (ações, seleção, preço em destaque). */
-  primary: "#16a34a",
-  /** Verde escurecido para hover e ênfase. */
-  primaryStrong: "#0f8a41",
+  /** Vermelho principal (ações, seleção, preço em destaque). */
+  primary: "#dc2626",
+  /** Vermelho escurecido para hover e ênfase. */
+  primaryStrong: "#b91c1c",
   /** Fundo neutro da página. */
   background: "#f4f6f8",
   /** Superfície dos cards. */
