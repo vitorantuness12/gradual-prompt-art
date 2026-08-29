@@ -221,11 +221,32 @@ export interface CouponRule {
   is_active: boolean;
 }
 
+/** Motivo da recusa do cupom — permite feedback específico na UI. */
+export type CouponRejection =
+  | "not_found"
+  | "inactive"
+  | "not_started"
+  | "expired"
+  | "usage_limit"
+  | "min_order";
+
 export interface CouponEvaluation {
   ok: boolean;
   message: string;
+  /** Presente quando ok=false — classifica a recusa. */
+  reason?: CouponRejection;
   code?: string;
   discount?: number;
+}
+
+function formatCouponDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+function formatCouponCurrency(value: number): string {
+  return `R$ ${value.toFixed(2).replace(".", ",")}`;
 }
 
 /** Valida validade, limite de uso e valor mínimo, devolvendo o desconto final. */
@@ -234,22 +255,54 @@ export function evaluateCoupon(
   subtotal: number,
   now: Date = new Date(),
 ): CouponEvaluation {
-  if (!promo || !promo.is_active) return { ok: false, message: "Cupom inválido para esta loja." };
+  if (!promo) {
+    return {
+      ok: false,
+      reason: "not_found",
+      message: "Cupom não encontrado. Confira o código digitado.",
+    };
+  }
+  if (!promo.is_active) {
+    return {
+      ok: false,
+      reason: "inactive",
+      message: "Este cupom foi desativado pela loja.",
+    };
+  }
 
   const reference = now.getTime();
   if (promo.starts_at && new Date(promo.starts_at).getTime() > reference) {
-    return { ok: false, message: "Este cupom ainda não está válido." };
-  }
-  if (promo.ends_at && new Date(promo.ends_at).getTime() < reference) {
-    return { ok: false, message: "Este cupom já expirou." };
-  }
-  if (promo.usage_limit !== null && promo.used_count >= promo.usage_limit) {
-    return { ok: false, message: "Este cupom atingiu o limite de uso." };
-  }
-  if (subtotal < Number(promo.min_order_value)) {
+    const start = formatCouponDate(promo.starts_at);
     return {
       ok: false,
-      message: `Cupom válido para pedidos a partir de R$ ${Number(promo.min_order_value).toFixed(2).replace(".", ",")}.`,
+      reason: "not_started",
+      message: start
+        ? `Este cupom ainda não está válido — ele começa a valer em ${start}.`
+        : "Este cupom ainda não está válido.",
+    };
+  }
+  if (promo.ends_at && new Date(promo.ends_at).getTime() < reference) {
+    const end = formatCouponDate(promo.ends_at);
+    return {
+      ok: false,
+      reason: "expired",
+      message: end ? `Este cupom expirou em ${end}.` : "Este cupom já expirou.",
+    };
+  }
+  if (promo.usage_limit !== null && promo.used_count >= promo.usage_limit) {
+    return {
+      ok: false,
+      reason: "usage_limit",
+      message: "Este cupom esgotou — o limite de usos já foi atingido.",
+    };
+  }
+  if (subtotal < Number(promo.min_order_value)) {
+    const minimum = Number(promo.min_order_value);
+    const missing = Math.max(minimum - subtotal, 0);
+    return {
+      ok: false,
+      reason: "min_order",
+      message: `Este cupom vale para pedidos a partir de ${formatCouponCurrency(minimum)} — adicione mais ${formatCouponCurrency(missing)} em produtos.`,
     };
   }
 
@@ -258,10 +311,15 @@ export function evaluateCoupon(
       ? (subtotal * Number(promo.discount_value)) / 100
       : Number(promo.discount_value);
 
+  const discount = Math.min(Math.round(raw * 100) / 100, subtotal);
+  const description =
+    promo.discount_type === "percent"
+      ? `${Number(promo.discount_value)}% de desconto`
+      : `${formatCouponCurrency(Number(promo.discount_value))} de desconto`;
   return {
     ok: true,
-    message: "Cupom aplicado.",
+    message: `Cupom ${promo.code} aplicado: ${description}.`,
     code: promo.code,
-    discount: Math.min(Math.round(raw * 100) / 100, subtotal),
+    discount,
   };
 }

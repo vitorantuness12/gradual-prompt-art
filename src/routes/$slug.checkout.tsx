@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { DemoBadge } from "@/components/brand/DemoBadge";
+import { CouponFeedbackMessage } from "@/components/catalogo/CouponFeedbackMessage";
 import { useStoreDocumentTitle } from "@/hooks/useStoreDocumentTitle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -1190,7 +1191,7 @@ function CheckoutPage() {
                   Cupom {coupon.code} aplicado: −{formatCurrency(discountFromCoupon)}
                 </p>
               ) : couponState.feedback?.kind === "error" ? (
-                <p className="text-sm font-medium text-destructive">{couponState.feedback.message}</p>
+                <CouponFeedbackMessage feedback={couponState.feedback} />
               ) : null}
             </div>
 

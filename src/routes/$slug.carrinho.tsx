@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+
+import { CouponFeedbackMessage } from "@/components/catalogo/CouponFeedbackMessage";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -253,9 +255,9 @@ function StoreCartPage() {
                     <p className="text-sm font-medium text-success">
                       Cupom {couponState.coupon.code} aplicado: −{formatCurrency(couponState.discount)}
                     </p>
-                  ) : couponState.feedback?.kind === "error" ? (
-                    <p className="text-sm font-medium text-destructive">{couponState.feedback.message}</p>
-                  ) : null}
+                   ) : couponState.feedback?.kind === "error" ? (
+                     <CouponFeedbackMessage feedback={couponState.feedback} />
+                   ) : null}
                 </div>
 
                 <div className="flex items-center justify-between text-sm text-muted-foreground">

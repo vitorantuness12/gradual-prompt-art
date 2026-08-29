@@ -23,6 +23,8 @@ const couponInput = z.object({
 export interface CouponResult {
   ok: boolean;
   message: string;
+  /** Classifica a recusa (cupom inválido, expirado, loja errada etc.). */
+  reason?: "not_found" | "inactive" | "not_started" | "expired" | "usage_limit" | "min_order";
   code?: string;
   discount?: number;
 }
