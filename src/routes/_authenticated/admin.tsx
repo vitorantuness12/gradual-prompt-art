@@ -768,23 +768,35 @@ function PlanEditor({
           <Textarea rows={3} value={highlights} onChange={(event) => setHighlights(event.target.value)} />
         </div>
 
-        <Button
-          size="sm"
-          onClick={() =>
-            onSave({
-              name,
-              tagline,
-              price_month: Number(priceMonth) || 0,
-              price_year: Number(priceYear) || 0,
-              trial_days: Number(trialDays) || 0,
-              is_active: isActive,
-              limits,
-              highlights: highlights.split("\n").map((line) => line.trim()).filter(Boolean),
-            })
-          }
-        >
-          Salvar plano
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            onClick={() =>
+              onSave({
+                name,
+                tagline,
+                price_month: Number(priceMonth) || 0,
+                price_year: Number(priceYear) || 0,
+                trial_days: Number(trialDays) || 0,
+                is_active: isActive,
+                limits,
+                highlights: highlights.split("\n").map((line) => line.trim()).filter(Boolean),
+              })
+            }
+          >
+            Salvar plano
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-destructive"
+            onClick={() => {
+              if (window.confirm(`Remover o plano ${plan.name}?`)) onDelete();
+            }}
+          >
+            Excluir
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
