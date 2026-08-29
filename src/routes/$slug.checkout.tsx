@@ -423,21 +423,25 @@ function CheckoutPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-3xl space-y-4 px-4 py-10 sm:px-6">
-        <Skeleton className="h-40 w-full rounded-2xl" />
-        <Skeleton className="h-64 w-full rounded-2xl" />
-      </div>
+      <CheckoutThemeProvider className="min-h-screen bg-background text-foreground">
+        <div className="mx-auto max-w-3xl space-y-4 px-4 py-10 sm:px-6">
+          <Skeleton className="h-40 w-full rounded-2xl" />
+          <Skeleton className="h-64 w-full rounded-2xl" />
+        </div>
+      </CheckoutThemeProvider>
     );
   }
 
   if (!data || !store || !payments) {
     return (
-      <div className="mx-auto max-w-xl px-4 py-20 text-center sm:px-6">
-        <h1 className="text-2xl font-semibold text-foreground">Loja não encontrada</h1>
-        <Button asChild className="mt-6">
-          <Link to="/">Voltar ao início</Link>
-        </Button>
-      </div>
+      <CheckoutThemeProvider className="min-h-screen bg-background text-foreground">
+        <div className="mx-auto max-w-xl px-4 py-20 text-center sm:px-6">
+          <h1 className="text-2xl font-semibold text-foreground">Loja não encontrada</h1>
+          <Button asChild className="mt-6">
+            <Link to="/">Voltar ao início</Link>
+          </Button>
+        </div>
+      </CheckoutThemeProvider>
     );
   }
 

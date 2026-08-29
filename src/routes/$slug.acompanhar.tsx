@@ -17,6 +17,7 @@ import { ORDER_STATUS_LABEL, ORDER_TYPE_LABEL, formatCurrency, formatDateTime } 
 import { customerTimeline, statusClass, statusLabel } from "@/lib/orders";
 import { publicStoreQuery } from "@/lib/store-queries";
 import { CheckoutThemeProvider } from "@/components/store/CheckoutThemeProvider";
+import { checkoutStatusClass } from "@/lib/checkout-theme";
 import { trackOrder, type TrackedOrder } from "@/lib/tracking.functions";
 
 export const Route = createFileRoute("/$slug/acompanhar")({
@@ -192,7 +193,7 @@ function StoreTrackPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`rounded-full border px-3 py-1 text-xs font-medium ${statusClass(order.status)}`}>
+                <span className={`rounded-full border px-3 py-1 text-xs font-medium ${checkoutStatusClass(order.status)}`}>
                   {statusLabel(order.status)}
                 </span>
                 <Button type="button" size="sm" variant="outline" disabled={loading} onClick={() => void lookup(order.code, lastPhone)}>
