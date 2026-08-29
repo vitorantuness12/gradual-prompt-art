@@ -327,7 +327,7 @@ function TrackPage() {
 
         {order ? <OrderDetail order={order} /> : null}
       </main>
-    </div>
+    </CheckoutThemeProvider>
   );
 }
 
