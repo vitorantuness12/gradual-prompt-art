@@ -121,6 +121,9 @@ function CheckoutPage() {
     queryFn: () => getStoreLoad({ data: { storeId: data!.store.id } }),
   });
   const cart = useCart(slug, data?.store.id ?? null);
+  const couponState = useCartCoupon(slug, store?.id ?? null, cart.subtotal, cart.hydrated);
+  const coupon = couponState.coupon;
+  const checkingCoupon = couponState.checking;
 
   // Origem da venda: afiliado e UTMs vindos do link, guardados durante a sessão.
   useEffect(() => {
@@ -181,8 +184,6 @@ function CheckoutPage() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [couponCode, setCouponCode] = useState("");
-  const [coupon, setCoupon] = useState<{ code: string; discount: number } | null>(null);
-  const [checkingCoupon, setCheckingCoupon] = useState(false);
   const [account, setAccount] = useState<CustomerAccount | null>(null);
   const [capacityBlock, setCapacityBlock] = useState<CapacityResponse | null>(null);
   const [useCashback, setUseCashback] = useState(false);
@@ -450,7 +451,7 @@ function CheckoutPage() {
   const isDelivery = isDeliverySelected;
   const deliveryFee = isDelivery ? (estimate?.ok ? estimate.fee : Number(store.delivery_fee)) : 0;
   const cashbackAvailable = account?.cashback ?? 0;
-  const discountFromCoupon = coupon?.discount ?? 0;
+  const discountFromCoupon = couponState.discount;
   const afterCoupon = Math.max(0, cart.subtotal - discountFromCoupon);
   const cashbackApplied = useCashback ? Math.min(cashbackAvailable, afterCoupon) : 0;
   const offers = (offersQuery.data ?? []).filter((offer) => offer.product);
@@ -471,24 +472,12 @@ function CheckoutPage() {
   }
 
   async function applyCoupon() {
-    if (!couponCode.trim()) return;
-    setCheckingCoupon(true);
-    try {
-      const result = await checkCoupon({
-        data: { storeSlug: slug, code: couponCode, subtotal: cart.subtotal },
-      });
-      if (result.ok && result.code) {
-        setCoupon({ code: result.code, discount: result.discount ?? 0 });
-        logCheckout("coupon", { couponCode: result.code, amount: result.discount ?? 0 });
-        toast.success(result.message);
-      } else {
-        setCoupon(null);
-        toast.error(result.message);
-      }
-    } catch {
-      toast.error("Não foi possível validar o cupom agora.");
-    } finally {
-      setCheckingCoupon(false);
+    const result = await couponState.apply(couponCode);
+    if (result.kind === "success") {
+      logCheckout("coupon", { couponCode: couponState.coupon?.code, amount: couponState.discount });
+      toast.success(result.message);
+    } else {
+      toast.error(result.message);
     }
   }
 
