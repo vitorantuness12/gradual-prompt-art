@@ -2,7 +2,7 @@
  * Tema padrão do fluxo de compra (carrinho, checkout e acompanhamento).
  *
  * Estas telas NÃO seguem as cores personalizadas do lojista: usam sempre a
- * paleta neutra clara com destaque verde, para que o momento do pagamento
+ * paleta neutra clara com destaque vermelho, para que o momento do pagamento
  * tenha aparência previsível e confiável em qualquer loja.
  *
  * Todos os valores ficam centralizados aqui — nunca escreva estes hex
