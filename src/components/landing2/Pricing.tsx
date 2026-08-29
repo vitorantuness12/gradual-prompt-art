@@ -116,22 +116,27 @@ const Pricing = () => {
         .from("plans")
         .select("name, tagline, description, price_month, highlights, is_highlighted, is_active, sort_order")
         .eq("is_active", true)
-        .order("sort_order");
+        .order("sort_order", { ascending: true })
+        .order("price_month", { ascending: true });
       if (error) throw new Error(error.message);
       return data ?? [];
     },
   });
 
+  // Apenas um cartão pode receber o selo "Mais Popular": o primeiro destacado na ordem do banco.
+  const highlightedIndex = dbPlans.findIndex((plan) => plan.is_highlighted);
+
   const plans: PricingCard[] = dbPlans.length
-    ? dbPlans.map((plan) => ({
+    ? dbPlans.map((plan, index) => ({
         name: plan.name,
         description: plan.tagline ?? plan.description ?? "",
-        popular: plan.is_highlighted,
+        popular: index === highlightedIndex,
         features: plan.highlights ?? [],
         cta: Number(plan.price_month) > 0 ? "Começar teste grátis" : "Criar minha loja",
         price: Number(plan.price_month) > 0 ? `${formatCurrency(Number(plan.price_month))}/mês` : "Grátis",
       }))
     : fallbackPlans;
+
 
   return (
     <section id="precos" className="py-16 md:py-24 bg-background relative overflow-hidden">
