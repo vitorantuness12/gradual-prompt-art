@@ -35,6 +35,7 @@ import {
   parsePlanNumber,
   slugifyPlanKey,
   validatePlanForm,
+  validatePlanModules,
   normalizePlanModules,
   planModules,
   type PlanFormErrors,
@@ -860,7 +861,81 @@ function PlanModulesFields({
           );
         })}
       </div>
+
+      <PlanModulesPreview draft={draft} />
     </fieldset>
+  );
+}
+
+/**
+ * Prévia do plano: mostra o que o lojista verá no painel e o que aparece
+ * na homepage, para conferir a seleção antes de salvar.
+ */
+function PlanModulesPreview({ draft }: { draft: PlanDraft }) {
+  const selected = normalizePlanModules(draft.modules);
+  const blocked = PLAN_MODULE_KEYS.filter((key) => !selected.includes(key));
+  const issue = validatePlanModules(selected);
+  const highlights = draft.highlights
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  return (
+    <div className="space-y-3 rounded-lg border border-dashed border-border bg-background p-3">
+      <p className="text-xs font-semibold text-foreground">Prévia do plano</p>
+
+      {issue ? <p className="text-xs text-destructive">{issue}</p> : null}
+
+      <div>
+        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          Menu do painel ({selected.length})
+        </p>
+        <div className="mt-1 flex flex-wrap gap-1">
+          {selected.map((key) => (
+            <Badge key={key} variant="secondary" className="text-[11px]">
+              {PLAN_MODULE_LABEL[key]}
+            </Badge>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          Bloqueado no painel ({blocked.length})
+        </p>
+        {blocked.length === 0 ? (
+          <p className="mt-1 text-xs text-muted-foreground">Nenhum módulo bloqueado — plano completo.</p>
+        ) : (
+          <div className="mt-1 flex flex-wrap gap-1">
+            {blocked.map((key) => (
+              <Badge key={key} variant="outline" className="text-[11px] text-muted-foreground">
+                {PLAN_MODULE_LABEL[key]}
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          Homepage e /planos
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {draft.isActive
+            ? `Publicado como "${draft.name.trim() || "Sem nome"}"${draft.isHighlighted ? " com selo de destaque" : ""}, na posição #${draft.sortOrder || "0"}.`
+            : "Plano inativo — não aparece na homepage nem em /planos."}
+        </p>
+        {highlights.length > 0 ? (
+          <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs text-muted-foreground">
+            {highlights.slice(0, 5).map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-1 text-xs text-muted-foreground">Sem destaques escritos para o cartão de preço.</p>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -1007,7 +1082,12 @@ function NewPlanCard({
   }
 
   function submit() {
-    const formErrors = { ...validatePlanForm(draft, existingKeys), ...limitErrors(draft.limits) };
+    const moduleError = validatePlanModules(normalizePlanModules(draft.modules));
+    const formErrors = {
+      ...validatePlanForm(draft, existingKeys),
+      ...limitErrors(draft.limits),
+      ...(moduleError ? { modules: moduleError } : {}),
+    };
     setErrors(formErrors);
     if (Object.keys(formErrors).length > 0) {
       toast.error("Corrija os campos destacados antes de criar o plano.");
@@ -1088,7 +1168,12 @@ function PlanEditor({
   }
 
   function submit() {
-    const formErrors = { ...validatePlanForm(draft, existingKeys), ...limitErrors(draft.limits) };
+    const moduleError = validatePlanModules(normalizePlanModules(draft.modules));
+    const formErrors = {
+      ...validatePlanForm(draft, existingKeys),
+      ...limitErrors(draft.limits),
+      ...(moduleError ? { modules: moduleError } : {}),
+    };
     setErrors(formErrors);
     if (Object.keys(formErrors).length > 0) {
       toast.error("Corrija os campos destacados antes de salvar.");

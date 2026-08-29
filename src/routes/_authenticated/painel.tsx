@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 
@@ -49,9 +49,11 @@ import {
 } from "@/components/ui/select";
 import { useActiveStore } from "@/hooks/useMyStores";
 import { useStoreFeatures } from "@/hooks/useStoreFeatures";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { ROLE_LABEL } from "@/lib/format";
 import { FEATURE_GROUPS, FEATURE_LABEL, isFeatureEnabled, type FeatureKey } from "@/lib/painel-segmentos";
+import { planAllowsModule } from "@/lib/plans";
 
 export const Route = createFileRoute("/_authenticated/painel")({
   component: PainelLayout,
@@ -96,10 +98,24 @@ function PainelLayout() {
   const { data: config } = useStoreFeatures(active?.storeId, active?.store.segment);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
+  const subscriptionQuery = useSubscription(active?.storeId);
+  const plan = subscriptionQuery.data?.plan ?? null;
+  const planLoaded = !subscriptionQuery.isLoading;
+
   const enabled = config?.features ?? [];
+  /** Um módulo aparece no menu quando o ramo o ativa E o plano o libera. */
+  const allowsModule = useCallback(
+    (key: FeatureKey) => {
+      if (config && !isFeatureEnabled(enabled, key)) return false;
+      if (!planLoaded || !plan) return true;
+      return planAllowsModule(plan, key);
+    },
+    [config, enabled, plan, planLoaded],
+  );
+
   const groups = FEATURE_GROUPS.map((group) => ({
     title: group.title,
-    items: group.keys.filter((key) => !config || isFeatureEnabled(enabled, key)).map((key) => NAV[key]),
+    items: group.keys.filter(allowsModule).map((key) => NAV[key]),
   })).filter((group) => group.items.length > 0);
 
   useEffect(() => {
@@ -108,10 +124,16 @@ function PainelLayout() {
       ([, item]) => item.to !== "/painel" && pathname.startsWith(item.to),
     );
     if (!entry) return;
-    if (isFeatureEnabled(enabled, entry[0])) return;
-    toast.info(`${FEATURE_LABEL[entry[0]]} está desativado para o seu ramo de atividade.`);
-    void navigate({ to: "/painel", replace: true });
-  }, [config, enabled, pathname, navigate]);
+    const key = entry[0];
+    if (allowsModule(key)) return;
+    const blockedByPlan = planLoaded && plan !== null && !planAllowsModule(plan, key);
+    toast.info(
+      blockedByPlan
+        ? `${FEATURE_LABEL[key]} não está incluído no plano ${plan?.name ?? "atual"}.`
+        : `${FEATURE_LABEL[key]} está desativado para o seu ramo de atividade.`,
+    );
+    void navigate({ to: blockedByPlan ? "/painel/assinatura" : "/painel", replace: true });
+  }, [config, allowsModule, plan, planLoaded, pathname, navigate]);
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
