@@ -31,6 +31,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { rememberOrder, useCart } from "@/hooks/useCart";
+import { useCartCoupon } from "@/hooks/useCartCoupon";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/lib/format";
 import { EMPTY_TRACKING, bumpPrice, parseTracking, type Tracking } from "@/lib/digitais";
@@ -121,7 +122,7 @@ function CheckoutPage() {
     queryFn: () => getStoreLoad({ data: { storeId: data!.store.id } }),
   });
   const cart = useCart(slug, data?.store.id ?? null);
-  const couponState = useCartCoupon(slug, store?.id ?? null, cart.subtotal, cart.hydrated);
+  const couponState = useCartCoupon(slug, data?.store.id ?? null, cart.subtotal, cart.hydrated);
   const coupon = couponState.coupon;
   const checkingCoupon = couponState.checking;
 
@@ -1160,19 +1161,35 @@ function CheckoutPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <Input
                   id="cupom"
-                  value={couponCode}
+                  value={coupon?.code ?? couponCode}
                   onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
                   placeholder="SEUCUPOM"
+                  disabled={Boolean(coupon) || checkingCoupon}
                   className="min-w-[160px] flex-1 bg-card uppercase"
                 />
-                <Button type="button" onClick={() => void applyCoupon()} disabled={checkingCoupon}>
-                  {checkingCoupon ? "Validando..." : "Aplicar"}
-                </Button>
+                {coupon ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      couponState.clear();
+                      setCouponCode("");
+                    }}
+                  >
+                    Remover
+                  </Button>
+                ) : (
+                  <Button type="button" onClick={() => void applyCoupon()} disabled={checkingCoupon}>
+                    {checkingCoupon ? "Validando..." : "Aplicar"}
+                  </Button>
+                )}
               </div>
               {coupon ? (
                 <p className="text-sm font-medium text-success">
-                  Cupom {coupon.code} aplicado: −{formatCurrency(coupon.discount)}
+                  Cupom {coupon.code} aplicado: −{formatCurrency(discountFromCoupon)}
                 </p>
+              ) : couponState.feedback?.kind === "error" ? (
+                <p className="text-sm font-medium text-destructive">{couponState.feedback.message}</p>
               ) : null}
             </div>
 
