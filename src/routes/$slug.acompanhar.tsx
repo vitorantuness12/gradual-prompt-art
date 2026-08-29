@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useOrderHistory } from "@/hooks/useCart";
 import { ORDER_STATUS_LABEL, ORDER_TYPE_LABEL, formatCurrency, formatDateTime } from "@/lib/format";
-import { customerTimeline, statusClass, statusLabel } from "@/lib/orders";
+import { customerTimeline, statusLabel } from "@/lib/orders";
 import { publicStoreQuery } from "@/lib/store-queries";
 import { CheckoutThemeProvider } from "@/components/store/CheckoutThemeProvider";
 import { checkoutStatusClass } from "@/lib/checkout-theme";
