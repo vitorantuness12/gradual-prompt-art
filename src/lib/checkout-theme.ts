@@ -9,6 +9,7 @@
  * diretamente em componentes.
  */
 
+import { ORDER_STATUS_META, type OrderStatus } from "@/lib/orders";
 import { defaultThemeConfig, paletteFromPrimary, type StoreThemeConfig } from "@/lib/store-theme";
 
 /** Tokens crus da paleta. Fonte única de verdade. */
@@ -87,3 +88,9 @@ export const CHECKOUT_STATUS_BADGE: Record<"success" | "warning" | "info" | "mut
   muted: "border-border bg-muted text-foreground",
   destructive: "border-destructive/30 bg-destructive/12 text-destructive",
 };
+
+/** Badge da situação do pedido dentro do fluxo de compra. */
+export function checkoutStatusClass(status: string): string {
+  const tone = ORDER_STATUS_META[status as OrderStatus]?.tone ?? "muted";
+  return CHECKOUT_STATUS_BADGE[tone];
+}
