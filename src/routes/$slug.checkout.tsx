@@ -31,6 +31,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { rememberOrder, useCart } from "@/hooks/useCart";
+import { useCartCoupon } from "@/hooks/useCartCoupon";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/lib/format";
 import { EMPTY_TRACKING, bumpPrice, parseTracking, type Tracking } from "@/lib/digitais";
@@ -121,6 +122,9 @@ function CheckoutPage() {
     queryFn: () => getStoreLoad({ data: { storeId: data!.store.id } }),
   });
   const cart = useCart(slug, data?.store.id ?? null);
+  const couponState = useCartCoupon(slug, data?.store.id ?? null, cart.subtotal, cart.hydrated);
+  const coupon = couponState.coupon;
+  const checkingCoupon = couponState.checking;
 
   // Origem da venda: afiliado e UTMs vindos do link, guardados durante a sessão.
   useEffect(() => {
@@ -181,8 +185,6 @@ function CheckoutPage() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [couponCode, setCouponCode] = useState("");
-  const [coupon, setCoupon] = useState<{ code: string; discount: number } | null>(null);
-  const [checkingCoupon, setCheckingCoupon] = useState(false);
   const [account, setAccount] = useState<CustomerAccount | null>(null);
   const [capacityBlock, setCapacityBlock] = useState<CapacityResponse | null>(null);
   const [useCashback, setUseCashback] = useState(false);
@@ -450,7 +452,7 @@ function CheckoutPage() {
   const isDelivery = isDeliverySelected;
   const deliveryFee = isDelivery ? (estimate?.ok ? estimate.fee : Number(store.delivery_fee)) : 0;
   const cashbackAvailable = account?.cashback ?? 0;
-  const discountFromCoupon = coupon?.discount ?? 0;
+  const discountFromCoupon = couponState.discount;
   const afterCoupon = Math.max(0, cart.subtotal - discountFromCoupon);
   const cashbackApplied = useCashback ? Math.min(cashbackAvailable, afterCoupon) : 0;
   const offers = (offersQuery.data ?? []).filter((offer) => offer.product);
@@ -471,24 +473,12 @@ function CheckoutPage() {
   }
 
   async function applyCoupon() {
-    if (!couponCode.trim()) return;
-    setCheckingCoupon(true);
-    try {
-      const result = await checkCoupon({
-        data: { storeSlug: slug, code: couponCode, subtotal: cart.subtotal },
-      });
-      if (result.ok && result.code) {
-        setCoupon({ code: result.code, discount: result.discount ?? 0 });
-        logCheckout("coupon", { couponCode: result.code, amount: result.discount ?? 0 });
-        toast.success(result.message);
-      } else {
-        setCoupon(null);
-        toast.error(result.message);
-      }
-    } catch {
-      toast.error("Não foi possível validar o cupom agora.");
-    } finally {
-      setCheckingCoupon(false);
+    const result = await couponState.apply(couponCode);
+    if (result.kind === "success") {
+      logCheckout("coupon", { couponCode: couponState.coupon?.code ?? null, amount: couponState.discount });
+      toast.success(result.message);
+    } else {
+      toast.error(result.message);
     }
   }
 
@@ -740,6 +730,7 @@ function CheckoutPage() {
         phone: form.phone.trim(),
       });
       cart.clear();
+      couponState.clear();
       setReview(false);
       toast.success(`Pedido ${order.code} enviado para a loja!`);
       if (identity.created) toast.success(identity.message);
@@ -1171,19 +1162,35 @@ function CheckoutPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <Input
                   id="cupom"
-                  value={couponCode}
+                  value={coupon?.code ?? couponCode}
                   onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
                   placeholder="SEUCUPOM"
+                  disabled={Boolean(coupon) || checkingCoupon}
                   className="min-w-[160px] flex-1 bg-card uppercase"
                 />
-                <Button type="button" onClick={() => void applyCoupon()} disabled={checkingCoupon}>
-                  {checkingCoupon ? "Validando..." : "Aplicar"}
-                </Button>
+                {coupon ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      couponState.clear();
+                      setCouponCode("");
+                    }}
+                  >
+                    Remover
+                  </Button>
+                ) : (
+                  <Button type="button" onClick={() => void applyCoupon()} disabled={checkingCoupon}>
+                    {checkingCoupon ? "Validando..." : "Aplicar"}
+                  </Button>
+                )}
               </div>
               {coupon ? (
                 <p className="text-sm font-medium text-success">
-                  Cupom {coupon.code} aplicado: −{formatCurrency(coupon.discount)}
+                  Cupom {coupon.code} aplicado: −{formatCurrency(discountFromCoupon)}
                 </p>
+              ) : couponState.feedback?.kind === "error" ? (
+                <p className="text-sm font-medium text-destructive">{couponState.feedback.message}</p>
               ) : null}
             </div>
 
