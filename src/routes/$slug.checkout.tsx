@@ -730,6 +730,7 @@ function CheckoutPage() {
         phone: form.phone.trim(),
       });
       cart.clear();
+      couponState.clear();
       setReview(false);
       toast.success(`Pedido ${order.code} enviado para a loja!`);
       if (identity.created) toast.success(identity.message);
