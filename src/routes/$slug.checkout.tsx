@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { DemoBadge } from "@/components/brand/DemoBadge";
+import { CouponFeedbackMessage } from "@/components/catalogo/CouponFeedbackMessage";
 import { useStoreDocumentTitle } from "@/hooks/useStoreDocumentTitle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

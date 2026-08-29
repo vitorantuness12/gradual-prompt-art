@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+
+import { CouponFeedbackMessage } from "@/components/catalogo/CouponFeedbackMessage";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
