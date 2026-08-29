@@ -2,7 +2,7 @@
  * Tema padrão do fluxo de compra (carrinho, checkout e acompanhamento).
  *
  * Estas telas NÃO seguem as cores personalizadas do lojista: usam sempre a
- * paleta neutra clara com destaque verde, para que o momento do pagamento
+ * paleta neutra clara com destaque vermelho, para que o momento do pagamento
  * tenha aparência previsível e confiável em qualquer loja.
  *
  * Todos os valores ficam centralizados aqui — nunca escreva estes hex
@@ -14,10 +14,10 @@ import { defaultThemeConfig, paletteFromPrimary, type StoreThemeConfig } from "@
 
 /** Tokens crus da paleta. Fonte única de verdade. */
 export const CHECKOUT_PALETTE = {
-  /** Verde principal (ações, seleção, preço em destaque). */
-  primary: "#16a34a",
-  /** Verde escurecido para hover e ênfase. */
-  primaryStrong: "#0f8a41",
+  /** Vermelho principal (ações, seleção, preço em destaque). */
+  primary: "#dc2626",
+  /** Vermelho escurecido para hover e ênfase. */
+  primaryStrong: "#b91c1c",
   /** Fundo neutro da página. */
   background: "#f4f6f8",
   /** Superfície dos cards. */
@@ -73,8 +73,8 @@ export const checkoutExtraCssVars: Record<string, string> = {
   "--destructive-foreground": "#ffffff",
   "--border": CHECKOUT_PALETTE.border,
   "--input": CHECKOUT_PALETTE.border,
-  "--shadow-glow": "0 0 40px -14px color-mix(in oklab, #16a34a 45%, transparent)",
-  "--shadow-glow-sm": "0 0 22px -10px color-mix(in oklab, #16a34a 40%, transparent)",
+  "--shadow-glow": "0 0 40px -14px color-mix(in oklab, #dc2626 45%, transparent)",
+  "--shadow-glow-sm": "0 0 22px -10px color-mix(in oklab, #dc2626 40%, transparent)",
   "--checkout-warning": CHECKOUT_PALETTE.warning,
   "--checkout-info": CHECKOUT_PALETTE.info,
 };
