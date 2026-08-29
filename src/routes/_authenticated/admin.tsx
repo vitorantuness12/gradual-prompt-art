@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,11 +27,18 @@ import {
   FEATURE_CONTROLS,
   FEATURE_KEYS,
   LIMIT_KEYS,
+  PLAN_ESSENTIAL_MODULES,
+  PLAN_MODULE_GROUPS,
+  PLAN_MODULE_KEYS,
+  PLAN_MODULE_LABEL,
   SUBSCRIPTION_STATUS_LABEL,
   parsePlanNumber,
   slugifyPlanKey,
   validatePlanForm,
+  normalizePlanModules,
+  planModules,
   type PlanFormErrors,
+  type PlanModuleKey,
   type PlanRow,
 } from "@/lib/plans";
 import {
@@ -515,6 +523,7 @@ interface PlanDraft {
   isHighlighted: boolean;
   limits: Record<string, string>;
   features: Record<string, string>;
+  modules: PlanModuleKey[];
   highlights: string;
 }
 
@@ -554,6 +563,7 @@ function draftFromPlan(plan: PlanRow): PlanDraft {
         return [item.key, control.kind === "toggle" ? "false" : (control.options[0]?.value ?? "false")];
       }),
     ),
+    modules: planModules(plan),
     highlights: plan.highlights.join("\n"),
   };
 }
@@ -581,14 +591,17 @@ function payloadFromDraft(draft: PlanDraft): Record<string, unknown> {
     is_active: draft.isActive,
     is_highlighted: draft.isHighlighted,
     limits: Object.fromEntries(LIMIT_KEYS.map((item) => [item.key, Number(draft.limits[item.key] ?? 0)])),
-    features: Object.fromEntries(
-      FEATURE_KEYS.map((item) => {
-        const value = draft.features[item.key] ?? "false";
-        if (value === "true") return [item.key, true];
-        if (value === "false") return [item.key, false];
-        return [item.key, value];
-      }),
-    ),
+    features: {
+      ...Object.fromEntries(
+        FEATURE_KEYS.map((item) => {
+          const value = draft.features[item.key] ?? "false";
+          if (value === "true") return [item.key, true];
+          if (value === "false") return [item.key, false];
+          return [item.key, value];
+        }),
+      ),
+      modules: normalizePlanModules(draft.modules),
+    },
     highlights: draft.highlights
       .split("\n")
       .map((line) => line.trim())
@@ -747,7 +760,107 @@ function PlanCapabilityFields({
           );
         })}
       </fieldset>
+
+      <PlanModulesFields draft={draft} update={update} />
     </>
+  );
+}
+
+/**
+ * Seleção módulo por módulo do painel. Módulos essenciais ficam sempre
+ * liberados (não podem ser desmarcados) para não travar a conta do lojista.
+ */
+function PlanModulesFields({
+  draft,
+  update,
+}: {
+  draft: PlanDraft;
+  update: (patch: Partial<PlanDraft>) => void;
+}) {
+  const selected = new Set(draft.modules);
+  const essential = new Set<PlanModuleKey>(PLAN_ESSENTIAL_MODULES);
+
+  function setModules(next: PlanModuleKey[]) {
+    update({ modules: normalizePlanModules(next) });
+  }
+
+  function toggle(key: PlanModuleKey, checked: boolean) {
+    if (essential.has(key)) return;
+    setModules(checked ? [...draft.modules, key] : draft.modules.filter((item) => item !== key));
+  }
+
+  const allSelected = PLAN_MODULE_KEYS.every((key) => selected.has(key));
+
+  return (
+    <fieldset className="space-y-3 rounded-xl border border-border p-3">
+      <legend className="px-1 text-xs font-medium text-muted-foreground">
+        Módulos do painel liberados neste plano
+      </legend>
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground">
+          {selected.size} de {PLAN_MODULE_KEYS.length} módulos liberados
+        </p>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => setModules(allSelected ? [] : [...PLAN_MODULE_KEYS])}
+          >
+            {allSelected ? "Limpar seleção" : "Selecionar tudo"}
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        {PLAN_MODULE_GROUPS.map((group) => {
+          const groupAll = group.keys.every((key) => selected.has(key));
+          return (
+            <div key={group.title} className="rounded-lg border border-border/70 bg-muted/30 p-3">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-foreground">{group.title}</span>
+                <button
+                  type="button"
+                  className="text-xs text-primary underline-offset-4 hover:underline"
+                  onClick={() =>
+                    setModules(
+                      groupAll
+                        ? draft.modules.filter((item) => !group.keys.includes(item))
+                        : [...draft.modules, ...group.keys],
+                    )
+                  }
+                >
+                  {groupAll ? "Desmarcar" : "Marcar todos"}
+                </button>
+              </div>
+              <div className="space-y-2">
+                {group.keys.map((key) => {
+                  const locked = essential.has(key);
+                  return (
+                    <label
+                      key={key}
+                      className="flex items-center justify-between gap-2 text-xs text-foreground"
+                    >
+                      <span className={locked ? "text-muted-foreground" : undefined}>
+                        {PLAN_MODULE_LABEL[key]}
+                        {locked ? " (sempre incluso)" : ""}
+                      </span>
+                      <Checkbox
+                        checked={selected.has(key)}
+                        disabled={locked}
+                        aria-label={PLAN_MODULE_LABEL[key]}
+                        onCheckedChange={(checked) => toggle(key, checked === true)}
+                      />
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </fieldset>
   );
 }
 
@@ -885,6 +998,7 @@ function NewPlanCard({
     isHighlighted: false,
     limits: emptyLimits(),
     features: defaultFeatures(),
+    modules: [...PLAN_MODULE_KEYS],
     highlights: "",
   }));
 
@@ -914,6 +1028,7 @@ function NewPlanCard({
       isHighlighted: false,
       limits: emptyLimits(),
       features: defaultFeatures(),
+      modules: [...PLAN_MODULE_KEYS],
       highlights: "",
     });
   }
