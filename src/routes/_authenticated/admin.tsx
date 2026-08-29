@@ -928,6 +928,7 @@ function NewPlanCard({
       isHighlighted: false,
       limits: emptyLimits(),
       features: defaultFeatures(),
+      modules: [...PLAN_MODULE_KEYS],
       highlights: "",
     });
   }
