@@ -311,10 +311,15 @@ export function evaluateCoupon(
       ? (subtotal * Number(promo.discount_value)) / 100
       : Number(promo.discount_value);
 
+  const discount = Math.min(Math.round(raw * 100) / 100, subtotal);
+  const description =
+    promo.discount_type === "percent"
+      ? `${Number(promo.discount_value)}% de desconto`
+      : `${formatCouponCurrency(Number(promo.discount_value))} de desconto`;
   return {
     ok: true,
-    message: "Cupom aplicado.",
+    message: `Cupom ${promo.code} aplicado: ${description}.`,
     code: promo.code,
-    discount: Math.min(Math.round(raw * 100) / 100, subtotal),
+    discount,
   };
 }
