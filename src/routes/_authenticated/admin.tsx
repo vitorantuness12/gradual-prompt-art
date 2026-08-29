@@ -35,6 +35,7 @@ import {
   parsePlanNumber,
   slugifyPlanKey,
   validatePlanForm,
+  validatePlanModules,
   normalizePlanModules,
   planModules,
   type PlanFormErrors,
