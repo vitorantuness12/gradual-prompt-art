@@ -1427,7 +1427,25 @@ function CheckoutPage() {
             </CardContent>
           </Card>
         ) : null}
+
+        <UpsellSuggestions
+          suggestions={upsellSuggestions}
+          onAdd={(suggestion) => {
+            cart.add(
+              {
+                productId: suggestion.product.id,
+                name: suggestion.product.name,
+                unitPrice: suggestion.price,
+                maxQuantity: suggestion.maxQuantity,
+              },
+              1,
+            );
+            toast.success(`${suggestion.product.name} adicionado.`);
+          }}
+        />
       </main>
+
+
 
       {/* Barra fixa com o total */}
       <div className="fixed inset-x-0 bottom-0 border-t border-border/70 bg-card/95 backdrop-blur">
