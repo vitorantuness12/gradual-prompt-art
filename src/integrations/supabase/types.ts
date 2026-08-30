@@ -14,6 +14,91 @@ export type Database = {
   }
   public: {
     Tables: {
+      abandoned_carts: {
+        Row: {
+          address: Json | null
+          coupon_code: string | null
+          created_at: string
+          customer_id: string | null
+          customer_name: string | null
+          id: string
+          items: Json
+          last_activity_at: string
+          notes: string | null
+          phone_e164: string
+          recovered_at: string | null
+          recovered_order_id: string | null
+          reminder_count: number
+          reminder_sent_at: string | null
+          store_id: string
+          subtotal: number
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          address?: Json | null
+          coupon_code?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string | null
+          id?: string
+          items?: Json
+          last_activity_at?: string
+          notes?: string | null
+          phone_e164: string
+          recovered_at?: string | null
+          recovered_order_id?: string | null
+          reminder_count?: number
+          reminder_sent_at?: string | null
+          store_id: string
+          subtotal?: number
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: Json | null
+          coupon_code?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string | null
+          id?: string
+          items?: Json
+          last_activity_at?: string
+          notes?: string | null
+          phone_e164?: string
+          recovered_at?: string | null
+          recovered_order_id?: string | null
+          reminder_count?: number
+          reminder_sent_at?: string | null
+          store_id?: string
+          subtotal?: number
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "abandoned_carts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "abandoned_carts_recovered_order_id_fkey"
+            columns: ["recovered_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "abandoned_carts_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_keys: {
         Row: {
           created_at: string
@@ -7067,6 +7152,9 @@ export type Database = {
       }
       store_checkout_settings: {
         Row: {
+          abandoned_cart_coupon_code: string | null
+          abandoned_cart_delay_minutes: number
+          abandoned_cart_enabled: boolean
           allow_guest: boolean
           allow_phone_lookup: boolean
           allow_public_tracking: boolean
@@ -7083,8 +7171,13 @@ export type Database = {
           store_id: string
           tracking_link_days: number
           updated_at: string
+          upsell_enabled: boolean
+          upsell_max_items: number
         }
         Insert: {
+          abandoned_cart_coupon_code?: string | null
+          abandoned_cart_delay_minutes?: number
+          abandoned_cart_enabled?: boolean
           allow_guest?: boolean
           allow_phone_lookup?: boolean
           allow_public_tracking?: boolean
@@ -7101,8 +7194,13 @@ export type Database = {
           store_id: string
           tracking_link_days?: number
           updated_at?: string
+          upsell_enabled?: boolean
+          upsell_max_items?: number
         }
         Update: {
+          abandoned_cart_coupon_code?: string | null
+          abandoned_cart_delay_minutes?: number
+          abandoned_cart_enabled?: boolean
           allow_guest?: boolean
           allow_phone_lookup?: boolean
           allow_public_tracking?: boolean
@@ -7119,6 +7217,8 @@ export type Database = {
           store_id?: string
           tracking_link_days?: number
           updated_at?: string
+          upsell_enabled?: boolean
+          upsell_max_items?: number
         }
         Relationships: [
           {
