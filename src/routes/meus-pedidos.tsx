@@ -182,6 +182,8 @@ function CustomerAreaPage() {
         ) : (
           <div className="space-y-6">
             <CashbackCard session={session} />
+            <AssinaturasCard session={session} />
+
 
             {history.data?.orders.length ? (
               <div className="space-y-3">
