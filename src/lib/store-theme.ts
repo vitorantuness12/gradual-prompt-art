@@ -72,8 +72,10 @@ export interface StoreFooterConfig {
   phone: string | null;
   address: string | null;
   note: string | null;
-  background: string;
-  text: string;
+  /** Quando nulo, o rodapé segue a cor principal da loja. */
+  background: string | null;
+  /** Quando nulo, usa um texto legível sobre o fundo do rodapé. */
+  text: string | null;
 }
 
 export interface StoreSectionDraft {
@@ -203,9 +205,23 @@ export function paletteFromPrimary(primary: string): StoreThemeColors {
  * Cores do rodapé derivadas da cor principal da loja.
  * Mantém o rodapé sempre em harmonia com o restante da paleta.
  */
-export function footerColorsFromPrimary(primary: string): Pick<StoreFooterConfig, "background" | "text"> {
+export function footerColorsFromPrimary(primary: string): { background: string; text: string } {
   const safe = isValidHex(primary) ? primary : "#e2452b";
   return { background: safe, text: readableTextOn(safe) };
+}
+
+/**
+ * Cores efetivas do rodapé: seguem a cor principal da loja por padrão,
+ * mas respeitam a personalização do lojista quando definida.
+ */
+export function resolvedFooterColors(
+  footer: Pick<StoreFooterConfig, "background" | "text">,
+  primary: string,
+): { background: string; text: string } {
+  const derived = footerColorsFromPrimary(primary);
+  const background = footer.background && isValidHex(footer.background) ? footer.background : derived.background;
+  const text = footer.text && isValidHex(footer.text) ? footer.text : readableTextOn(background);
+  return { background, text };
 }
 
 /** ---------- Padrão e temas prontos ---------- */
@@ -242,8 +258,8 @@ export function defaultFooterConfig(): StoreFooterConfig {
     phone: null,
     address: null,
     note: null,
-    background: "#f59e0b",
-    text: "#ffffff",
+    background: null,
+    text: null,
   };
 }
 
@@ -289,8 +305,7 @@ export interface FooterFallbackStore {
 export function resolvedFooterConfig(
   footer: StoreFooterConfig,
   store: FooterFallbackStore,
-): Required<Omit<StoreFooterConfig, "name" | "phone" | "address" | "note">> &
-    Pick<StoreFooterConfig, "name" | "phone" | "address" | "note"> {
+): StoreFooterConfig {
   const zip = formatFooterZip(store.address_zip ?? null);
 
   const street = [store.address_street, store.address_number].filter(Boolean).join(", ");
@@ -306,8 +321,8 @@ export function resolvedFooterConfig(
     address: footer.address?.trim() || fullAddress || null,
     // A assinatura "Feito com O Seu Pedido" é fixa em todas as lojas.
     note: null,
-    background: footer.background || defaultFooterConfig().background,
-    text: footer.text || defaultFooterConfig().text,
+    background: footer.background ?? null,
+    text: footer.text ?? null,
   };
 }
 
