@@ -39,6 +39,21 @@ interface Props {
   storeId?: string | null;
 }
 
+const QUICK_COLORS: { label: string; value: string }[] = [
+  { label: "Vermelho", value: "#dc2626" },
+  { label: "Laranja", value: "#ea580c" },
+  { label: "Amarelo", value: "#d97706" },
+  { label: "Verde", value: "#16a34a" },
+  { label: "Verde escuro", value: "#065f46" },
+  { label: "Azul", value: "#2563eb" },
+  { label: "Azul marinho", value: "#1e3a8a" },
+  { label: "Roxo", value: "#7c3aed" },
+  { label: "Rosa", value: "#db2777" },
+  { label: "Marrom", value: "#78350f" },
+  { label: "Cinza escuro", value: "#334155" },
+  { label: "Preto", value: "#111827" },
+];
+
 const COLOR_FIELDS: { key: keyof StoreThemeColors; label: string }[] = [
   { key: "primary", label: "Cor principal" },
   { key: "secondary", label: "Cor secundária" },
