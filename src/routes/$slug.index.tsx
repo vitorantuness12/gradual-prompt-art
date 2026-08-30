@@ -762,25 +762,54 @@ function StoreFooter({
 
 interface ProductCardProps {
   product: ProductRow;
-  layout: "menu" | "showcase" | "schedule";
+  /** Estilo escolhido pelo lojista em /painel/personalizar. */
+  cardStyle: CardStyle;
+  imagePosition: ImagePosition;
+  showPromoPrices: boolean;
   isFavorite: boolean;
   onToggleFavorite: () => void;
   onOpen: () => void;
 }
 
-function ProductCard({ product, layout, isFavorite, onToggleFavorite, onOpen }: ProductCardProps) {
+function ProductCard({
+  product,
+  cardStyle,
+  imagePosition,
+  showPromoPrices,
+  isFavorite,
+  onToggleFavorite,
+  onOpen,
+}: ProductCardProps) {
   const availability = productAvailability(product);
   const price = currentPrice(product);
+  // Em grade a imagem sempre fica no topo; em lista segue a escolha do lojista.
+  const stacked = cardStyle === "grid" || imagePosition === "top";
+  const compact = cardStyle === "compact";
+  const image = product.image_url ?? null;
 
   return (
-    <Card className="overflow-hidden border-border/70 shadow-sm transition hover:shadow-md">
+    <Card className="flex h-full flex-col overflow-hidden border-border/70 shadow-[var(--store-shadow)] transition hover:shadow-md">
       <CardContent
         className={cn(
-          "p-3 sm:p-4 sm:pt-6",
-          layout === "showcase" ? "space-y-2.5" : "flex items-start justify-between gap-3 sm:gap-4",
+          "flex h-full gap-3",
+          compact ? "p-2.5 sm:p-3" : "p-3 sm:p-4",
+          stacked ? "flex-col items-stretch" : "flex-row items-start justify-between sm:gap-4",
+          !stacked && imagePosition === "right" && "flex-row-reverse",
         )}
       >
-        <div className="min-w-0 flex-1">
+        {image && !compact ? (
+          <img
+            src={image}
+            alt={product.name}
+            loading="lazy"
+            className={cn(
+              "shrink-0 rounded-[var(--radius)] object-cover",
+              stacked ? "h-32 w-full sm:h-40" : "size-20 sm:size-24",
+            )}
+          />
+        ) : null}
+
+        <div className="flex min-w-0 flex-1 flex-col">
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <h3 className="min-w-0 break-words text-[15px] font-medium leading-snug text-foreground sm:text-base">
               {product.name}
@@ -796,12 +825,12 @@ function ProductCard({ product, layout, isFavorite, onToggleFavorite, onOpen }: 
               </Badge>
             ) : null}
           </div>
-          {product.description ? (
+          {product.description && !compact ? (
             <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-muted-foreground sm:text-sm">
               {product.description}
             </p>
           ) : null}
-          {(product.tags ?? []).length > 0 ? (
+          {(product.tags ?? []).length > 0 && !compact ? (
             <p className="mt-1 truncate text-[11px] text-muted-foreground sm:text-xs">{(product.tags ?? []).join(" · ")}</p>
           ) : null}
           <p className="mt-2 flex flex-wrap items-baseline gap-x-2 text-[13px] sm:text-sm">
@@ -809,7 +838,7 @@ function ProductCard({ product, layout, isFavorite, onToggleFavorite, onOpen }: 
               {formatCurrency(price)}
             </span>
 
-            {hasPromo(product) ? (
+            {showPromoPrices && hasPromo(product) ? (
               <span className="text-muted-foreground line-through">{formatCurrency(Number(product.price))}</span>
             ) : null}
             {product.kind === "service" && product.duration_minutes ? (
@@ -822,7 +851,7 @@ function ProductCard({ product, layout, isFavorite, onToggleFavorite, onOpen }: 
         <div
           className={cn(
             "flex shrink-0 gap-1.5 sm:gap-2",
-            layout === "showcase" ? "items-center justify-between" : "flex-col items-end",
+            stacked ? "items-center justify-between" : "flex-col items-end",
           )}
         >
           <Button
@@ -838,7 +867,11 @@ function ProductCard({ product, layout, isFavorite, onToggleFavorite, onOpen }: 
           <Button
             size="sm"
             variant="outline"
-            className={cn("h-8 px-2.5 text-xs sm:h-9 sm:px-3 sm:text-sm", layout === "showcase" && "flex-1")}
+            className={cn(
+              "h-8 px-2.5 text-xs sm:h-9 sm:px-3 sm:text-sm",
+              stacked && "flex-1",
+              "rounded-[var(--store-button-radius)]",
+            )}
             disabled={!availability.available}
             onClick={onOpen}
           >
@@ -846,6 +879,7 @@ function ProductCard({ product, layout, isFavorite, onToggleFavorite, onOpen }: 
           </Button>
         </div>
       </CardContent>
+
     </Card>
   );
 }
