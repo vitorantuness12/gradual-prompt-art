@@ -154,6 +154,10 @@ function SettingsPage() {
 
       <StorePublicSettings store={store} editable={editable} onSaved={refetch} />
 
+      <CheckoutModelCard store={store} storeId={store.id} editable={editable} onSaved={refetch} />
+
+
+
 
       <Card className="border-border/70 shadow-sm">
         <CardHeader>
