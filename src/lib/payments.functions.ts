@@ -156,6 +156,9 @@ export const createCharge = createServerFn({ method: "POST" })
 
     if (result.status === "paid") {
       await supabaseAdmin.from("orders").update({ payment_status: "paid" }).eq("id", order.id);
+      // Libera entregas digitais pendentes deste pedido e envia as instruções.
+      const { releaseDigitalForOrder } = await import("@/lib/checkout-especializado.server");
+      await releaseDigitalForOrder(supabaseAdmin, order.id, Number(order.total));
     } else {
       await supabaseAdmin.from("orders").update({ payment_status: "pending" }).eq("id", order.id);
     }
