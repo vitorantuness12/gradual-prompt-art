@@ -10,6 +10,7 @@ import { RepeatOrderModal } from "@/components/store/RepeatOrderModal";
 import { InstallAppBanner } from "@/components/store/InstallAppBanner";
 import { StoreThemeProvider } from "@/components/store/StoreThemeProvider";
 import { ProductDetailDialog } from "@/components/store/ProductDetailDialog";
+import { CartSheet, quickCartEnabled } from "@/components/store/CartSheet";
 import { StoreReviews } from "@/components/store/StoreReviews";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
