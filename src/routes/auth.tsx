@@ -417,14 +417,23 @@ function AuthPage() {
           <Logo />
         </Link>
         {etapa !== "inicio" || perfil ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => (perfil ? go({ perfil: undefined }) : go({ etapa: "inicio" }))}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" aria-hidden /> Voltar
+          // Link real (com href): funciona mesmo antes do JS terminar de carregar.
+          <Button variant="ghost" size="sm" asChild>
+            <Link
+              to="/auth"
+              search={
+                perfil
+                  ? { etapa, perfil: undefined, redirect: search.redirect }
+                  : { etapa: "inicio", perfil: undefined, redirect: search.redirect }
+              }
+              replace
+              onClick={() => (perfil ? go({ perfil: undefined }) : go({ etapa: "inicio" }))}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" aria-hidden /> Voltar
+            </Link>
           </Button>
         ) : null}
+
       </header>
 
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center px-4 pb-16 sm:px-6">
