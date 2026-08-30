@@ -71,7 +71,9 @@ function PublicStorePage() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
   const { data, isLoading, isError } = useQuery(publicStoreQuery(slug));
-  const cart = useCart(slug, data?.store.id ?? null);
+   const cart = useCart(slug, data?.store.id ?? null);
+  /** Sacola em painel lateral: o cliente confere sem sair do catálogo. */
+  const [cartSheetOpen, setCartSheetOpen] = useState(false);
   const favorites = useFavorites(slug);
   const appearance = useQuery(publicAppearanceQuery(data?.store.id ?? null));
   const theme = publishedTheme(appearance.data);
