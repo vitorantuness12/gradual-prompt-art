@@ -276,7 +276,7 @@ function PublicStorePage() {
               </div>
 
               <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] leading-snug text-muted-foreground sm:text-sm">
-                {rating.data && rating.data.count > 0 ? (
+                {display.showRatings && rating.data && rating.data.count > 0 ? (
                   <>
                     <span className="flex items-center gap-1 font-medium text-foreground">
                       <Star className="size-4 fill-current text-amber-500" aria-hidden="true" />
