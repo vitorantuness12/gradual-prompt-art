@@ -403,35 +403,6 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
   );
 }
 
-function SliderField({
-  label,
-  value,
-  min,
-  max,
-  step,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <div className="space-y-2">
-      <Label className="text-xs">{label}</Label>
-      <Slider
-        value={[value]}
-        min={min}
-        max={max}
-        step={step}
-        onValueChange={([next]) => onChange(next ?? value)}
-        aria-label={label}
-      />
-    </div>
-  );
-}
 
 function SelectField({
   label,
