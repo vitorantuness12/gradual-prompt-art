@@ -16,7 +16,6 @@ import { cn } from "@/lib/utils";
 import {
   contrastWarnings,
   isValidHex,
-  footerColorsFromPrimary,
   paletteFromPrimary,
   THEME_PRESETS,
   type ButtonShape,
@@ -75,14 +74,8 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
   const patch = (partial: Partial<StoreThemeConfig>) => onChange({ ...config, ...partial });
   const setColor = (key: keyof StoreThemeColors, value: string) =>
     patch({ colors: { ...config.colors, [key]: value } });
-  const setFooter = (partial: Partial<StoreThemeConfig["footer"]>) =>
-    patch({ footer: { ...config.footer, ...partial } });
-  /** Uma escolha de cor ajusta a paleta inteira, inclusive o rodapé. */
-  const applyPrimary = (value: string) =>
-    patch({
-      colors: paletteFromPrimary(value),
-      footer: { ...config.footer, ...footerColorsFromPrimary(value) },
-    });
+  /** Uma escolha de cor ajusta a paleta inteira; o rodapé segue a cor principal na renderização. */
+  const applyPrimary = (value: string) => patch({ colors: paletteFromPrimary(value) });
 
   return (
     <div className="space-y-6">
@@ -193,17 +186,10 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
                 </div>
               </div>
             ))}
-            <ColorField
-              label="Fundo do rodapé"
-              value={config.footer.background}
-              onChange={(value) => setFooter({ background: value })}
-            />
-            <ColorField
-              label="Texto do rodapé"
-              value={config.footer.text}
-              onChange={(value) => setFooter({ text: value })}
-            />
           </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            O rodapé acompanha automaticamente a cor principal da loja.
+          </p>
         </details>
       </section>
 
@@ -366,25 +352,6 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
     </div>
   );
 }
-
-function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
-  return (
-    <div className="space-y-1">
-      <Label className="text-xs">{label}</Label>
-      <div className="flex items-center gap-2">
-        <input
-          type="color"
-          value={isValidHex(value) ? value : "#000000"}
-          onChange={(event) => onChange(event.target.value)}
-          className="size-9 cursor-pointer rounded border border-border bg-transparent p-0"
-          aria-label={label}
-        />
-        <Input value={value} onChange={(event) => onChange(event.target.value)} className="font-mono text-xs" />
-      </div>
-    </div>
-  );
-}
-
 
 function SelectField({
   label,
