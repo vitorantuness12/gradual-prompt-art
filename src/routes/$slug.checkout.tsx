@@ -50,6 +50,8 @@ import {
   joinProductionQueue,
   type CapacityResponse,
 } from "@/lib/producao.functions";
+import { maxRedeemable } from "@/lib/cashback";
+import { applyReferralCode, publicCashbackStatus } from "@/lib/cashback.functions";
 import { awardOrderLoyalty } from "@/lib/fidelidade.functions";
 import { estimateDelivery, type DeliveryEstimate } from "@/lib/geo.functions";
 import { formatKm } from "@/lib/geo";
@@ -197,6 +199,9 @@ function CheckoutPage() {
   const [account, setAccount] = useState<CustomerAccount | null>(null);
   const [capacityBlock, setCapacityBlock] = useState<CapacityResponse | null>(null);
   const [useCashback, setUseCashback] = useState(false);
+  const [referralInput, setReferralInput] = useState("");
+  const [referralMessage, setReferralMessage] = useState<string | null>(null);
+  const [referralApplied, setReferralApplied] = useState<string | null>(null);
   const [estimate, setEstimate] = useState<DeliveryEstimate | null>(null);
   const [estimating, setEstimating] = useState(false);
   const [isSearchingCep, setIsSearchingCep] = useState(false);
@@ -323,6 +328,18 @@ function CheckoutPage() {
       window.clearTimeout(timer);
     };
   }, [form.phone, form.email, slug, loadAccount]);
+
+  // Cashback em R$: o saldo utilizável já respeita validade e teto da loja,
+  // por isso vem do servidor em vez de ser calculado no cliente.
+  const cashbackQuery = useQuery({
+    queryKey: ["cashback", slug, form.phone.replace(/\D/g, "")],
+    enabled: form.phone.replace(/\D/g, "").length >= 10,
+    queryFn: () => publicCashbackStatus({ data: { storeSlug: slug, phone: form.phone } }),
+    staleTime: 30_000,
+  });
+  const cashback = cashbackQuery.data ?? null;
+
+
 
   // Recuperação de carrinho abandonado: com o telefone já informado, guardamos
   // o carrinho no servidor para poder enviar um único lembrete depois. Sem
@@ -510,10 +527,12 @@ function CheckoutPage() {
   const selected = options.find((option) => option.value === fulfillment) ?? null;
   const isDelivery = isDeliverySelected;
   const deliveryFee = isDelivery ? (estimate?.ok ? estimate.fee : Number(store.delivery_fee)) : 0;
-  const cashbackAvailable = account?.cashback ?? 0;
+  const cashbackAvailable = cashback?.enabled ? cashback.balance : (account?.cashback ?? 0);
   const discountFromCoupon = couponState.discount;
   const afterCoupon = Math.max(0, cart.subtotal - discountFromCoupon);
-  const cashbackApplied = useCashback ? Math.min(cashbackAvailable, afterCoupon) : 0;
+  // Teto de uso por pedido definido pelo lojista (ex.: no máximo 50% do valor).
+  const cashbackLimit = maxRedeemable(cashbackAvailable, afterCoupon, cashback?.maxPercentUse ?? 100);
+  const cashbackApplied = useCashback ? cashbackLimit : 0;
   const offers = (offersQuery.data ?? []).filter((offer) => offer.product);
   const bumpLines = offers
     .filter((offer) => acceptedOffers.includes(offer.id))
@@ -709,6 +728,7 @@ function CheckoutPage() {
           discount: discountFromCoupon,
           coupon_code: coupon?.code ?? null,
           cashback_used: cashbackApplied,
+          referral_code: referralApplied,
           total,
           payment_method: payment,
           scheduled_for: scheduledFor,
@@ -1305,19 +1325,80 @@ function CheckoutPage() {
             ) : null}
 
             {cashbackAvailable > 0 ? (
-              <label className="flex items-center gap-3 rounded-xl border border-border/70 p-3 text-sm">
+              <label className="flex items-start gap-3 rounded-xl border border-border/70 p-3 text-sm">
                 <input
                   type="checkbox"
                   checked={useCashback}
                   onChange={(event) => setUseCashback(event.target.checked)}
-                  className="size-4 accent-primary"
+                  disabled={cashbackLimit <= 0}
+                  className="mt-0.5 size-4 accent-primary"
                 />
                 <span>
-                  Usar saldo de fidelidade disponível:{" "}
+                  Usar meu cashback:{" "}
                   <strong className="text-foreground">{formatCurrency(cashbackAvailable)}</strong>
+                  {cashbackLimit > 0 && cashbackLimit < cashbackAvailable ? (
+                    <span className="block text-xs text-muted-foreground">
+                      Neste pedido você pode usar até {formatCurrency(cashbackLimit)}.
+                    </span>
+                  ) : null}
+                  {cashbackLimit <= 0 ? (
+                    <span className="block text-xs text-muted-foreground">
+                      Saldo indisponível para este pedido.
+                    </span>
+                  ) : null}
+                  {cashback?.expiresAt ? (
+                    <span className="block text-xs text-muted-foreground">
+                      Válido até {new Date(cashback.expiresAt).toLocaleDateString("pt-BR")}.
+                    </span>
+                  ) : null}
                 </span>
               </label>
             ) : null}
+
+            {cashback?.referralEnabled && !cashback.referredAlready && cashback.referralCount === 0 ? (
+              <div className="space-y-2 rounded-xl border border-border/70 p-3 text-sm">
+                <p className="font-medium text-foreground">Tem um código de indicação?</p>
+                <p className="text-xs text-muted-foreground">
+                  Você e quem indicou recebem cashback depois que este pedido for concluído.
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    value={referralInput}
+                    onChange={(event) => setReferralInput(event.target.value.toUpperCase())}
+                    placeholder="CODIGO"
+                    disabled={Boolean(referralApplied)}
+                    aria-label="Código de indicação"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={Boolean(referralApplied) || referralInput.trim().length < 4}
+                    onClick={async () => {
+                      const result = await applyReferralCode({
+                        data: { storeSlug: slug, phone: form.phone, code: referralInput },
+                      });
+                      setReferralMessage(result.message);
+                      if (result.ok) {
+                        setReferralApplied(referralInput.trim().toUpperCase());
+                        await cashbackQuery.refetch();
+                      }
+                    }}
+                  >
+                    Aplicar
+                  </Button>
+                </div>
+                {referralMessage ? (
+                  <p
+                    className={
+                      referralApplied ? "text-xs text-emerald-700" : "text-xs text-destructive"
+                    }
+                  >
+                    {referralMessage}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+
 
             <PaymentMethodPicker
               enabled={enabledPayments}

@@ -42,6 +42,12 @@ const settingsInput = z.object({
   pointsPerCurrency: z.number().min(0).max(100),
   currencyPerPoint: z.number().min(0).max(100),
   cashbackPercent: z.number().min(0).max(100),
+  cashbackExpirationDays: z.number().int().min(0).max(3650).default(90),
+  cashbackMinOrder: z.number().min(0).default(0),
+  cashbackMaxPercentUse: z.number().min(1).max(100).default(100),
+  referralEnabled: z.boolean().default(false),
+  referralCashbackReferrer: z.number().min(0).max(100000).default(0),
+  referralCashbackReferred: z.number().min(0).max(100000).default(0),
   pointsExpirationDays: z.number().int().min(0).max(3650),
   minOrderValue: z.number().min(0),
   birthdayBonusPoints: z.number().int().min(0).max(100000),
@@ -67,6 +73,12 @@ export const saveLoyaltySettings = createServerFn({ method: "POST" })
         points_per_currency: data.pointsPerCurrency,
         currency_per_point: data.currencyPerPoint,
         cashback_percent: data.cashbackPercent,
+        cashback_expiration_days: data.cashbackExpirationDays,
+        cashback_min_order: data.cashbackMinOrder,
+        cashback_max_percent_use: data.cashbackMaxPercentUse,
+        referral_enabled: data.referralEnabled,
+        referral_cashback_referrer: data.referralCashbackReferrer,
+        referral_cashback_referred: data.referralCashbackReferred,
         points_expiration_days: data.pointsExpirationDays,
         min_order_value: data.minOrderValue,
         birthday_bonus_points: data.birthdayBonusPoints,
@@ -622,7 +634,7 @@ export const awardOrderLoyalty = createServerFn({ method: "POST" })
     const { data: order } = await supabaseAdmin
       .from("orders")
       .select(
-        "id, total, type, customer_name, customer_phone, customer_email, customer_id, address, created_at",
+        "id, total, type, customer_name, customer_phone, customer_email, customer_id, address, created_at, cashback_used",
       )
       .eq("store_id", store.id)
       .eq("code", data.orderCode)
@@ -734,7 +746,7 @@ export const awardOrderLoyalty = createServerFn({ method: "POST" })
         customer_id: customerId,
         kind: "earn",
         points: result.total,
-        cashback_amount: result.cashback,
+        cashback_amount: 0,
         order_id: order.id,
         description: result.lines.map((line) => line.label).join(" · "),
         expires_at: expiresAt,
@@ -746,20 +758,39 @@ export const awardOrderLoyalty = createServerFn({ method: "POST" })
       .update({
         points_balance: account.points_balance + result.total,
         points_earned: account.points_earned + result.total,
-        cashback_balance: Number(account.cashback_balance) + result.cashback,
         orders_count: account.orders_count + 1,
         total_spent: Number(account.total_spent) + Number(order.total),
         last_order_at: order.created_at,
       })
       .eq("id", account.id);
 
+    // Cashback em R$: debita o que foi usado no pedido, credita o novo saldo
+    // com validade e paga as duas pontas da indicação (uma única vez).
+    const { settleOrderCashback } = await import("@/lib/cashback.server");
+    const cashback = await settleOrderCashback(supabaseAdmin, {
+      storeId: store.id,
+      customerId,
+      orderId: order.id,
+      orderTotal: Number(order.total),
+      cashbackUsed: Number(order.cashback_used ?? 0),
+    });
+
     await syncTier(supabaseAdmin, store.id, customerId);
     await updateMissions(supabaseAdmin, store.id, customerId, Number(order.total));
+
+    const parts = [
+      result.total > 0 ? `${result.total} ponto(s)` : "",
+      cashback.earned > 0 ? `R$ ${cashback.earned.toFixed(2)} de cashback` : "",
+      cashback.referral > 0 ? `R$ ${cashback.referral.toFixed(2)} de bônus da indicação` : "",
+    ].filter(Boolean);
 
     return {
       ok: true,
       points: result.total,
-      message: `Você ganhou ${result.total} ponto(s) neste pedido.`,
+      message:
+        parts.length > 0
+          ? `Você ganhou ${parts.join(" e ")} neste pedido.`
+          : "Pedido registrado no programa de fidelidade.",
     };
   });
 
