@@ -42,7 +42,7 @@ export const Route = createFileRoute("/$slug/checkout_/loja")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: LojaCheckout;
+  component: LojaCheckout,
 });
 
 interface AddressForm {
