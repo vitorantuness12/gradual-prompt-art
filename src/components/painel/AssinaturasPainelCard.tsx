@@ -18,8 +18,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SUBSCRIPTION_PERIOD_LABEL, SUBSCRIPTION_STATUS_LABEL } from "@/lib/assinaturas";
+import { toast } from "sonner";
+
 import {
   subscriptionPanelReport,
+  updateStoreSubscription,
   type SubscriptionPanelReport,
   type SubscriptionPanelRow,
 } from "@/lib/assinaturas-painel.functions";
@@ -349,7 +352,11 @@ export function AssinaturasPainelCard({
           <>
             <Summary report={query.data} />
             <DailyCharts report={query.data} />
-            <SubscriptionList rows={query.data.subscriptions} />
+            <SubscriptionList
+              rows={query.data.subscriptions}
+              storeId={storeId}
+              onChanged={() => void query.refetch()}
+            />
           </>
         )}
       </CardContent>
