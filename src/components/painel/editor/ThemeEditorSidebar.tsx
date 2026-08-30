@@ -358,25 +358,6 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
   );
 }
 
-function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
-  return (
-    <div className="space-y-1">
-      <Label className="text-xs">{label}</Label>
-      <div className="flex items-center gap-2">
-        <input
-          type="color"
-          value={isValidHex(value) ? value : "#000000"}
-          onChange={(event) => onChange(event.target.value)}
-          className="size-9 cursor-pointer rounded border border-border bg-transparent p-0"
-          aria-label={label}
-        />
-        <Input value={value} onChange={(event) => onChange(event.target.value)} className="font-mono text-xs" />
-      </div>
-    </div>
-  );
-}
-
-
 function SelectField({
   label,
   value,
