@@ -80,6 +80,32 @@ export function CustomerOrderCard({ order, session, onRepeat, repeating }: Props
               Repetir pedido
             </Button>
           ) : null}
+          {order.canRepeat ? (
+            <div className="flex items-center gap-2">
+              <Select value={period} onValueChange={(value) => setPeriod(value as SubscriptionPeriod)}>
+                <SelectTrigger className="h-8 w-[150px] text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUBSCRIPTION_PERIODS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {SUBSCRIPTION_PERIOD_LABEL[option]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={subscribe.isPending}
+                onClick={() => subscribe.mutate()}
+              >
+                <CalendarClock className="mr-1 size-4" aria-hidden="true" />
+                Assinar
+              </Button>
+            </div>
+          ) : null}
+
           <Button asChild variant="ghost" size="sm">
             <Link to="/acompanhar" search={{ codigo: order.publicToken }}>
               Link de acompanhamento
