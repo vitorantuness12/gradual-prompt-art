@@ -117,20 +117,50 @@ function AuthPage() {
   const [otpCode, setOtpCode] = useState("");
   const [checkEmail, setCheckEmail] = useState(false);
 
-  const etapa = search.etapa && search.etapa !== "inicio" ? search.etapa : search.modo === "criar" ? "criar" : search.modo ? "entrar" : "inicio";
-  const perfil = search.perfil ?? null;
+  // Etapa/perfil derivados da URL, mas com estado otimista: o clique muda a tela
+  // imediatamente e a URL é sincronizada em segundo plano (sem travar o render).
+  const urlEtapa =
+    search.etapa && search.etapa !== "inicio"
+      ? search.etapa
+      : search.modo === "criar"
+        ? "criar"
+        : search.modo
+          ? "entrar"
+          : "inicio";
+  const urlPerfil = search.perfil ?? null;
+  const [step, setStep] = useState<{ etapa: typeof urlEtapa; perfil: AccountKind | null }>({
+    etapa: urlEtapa,
+    perfil: urlPerfil,
+  });
+
+  // Se a URL mudar por fora (voltar/avançar do navegador), acompanha.
+  useEffect(() => {
+    setStep({ etapa: urlEtapa, perfil: urlPerfil });
+  }, [urlEtapa, urlPerfil]);
+
+  const etapa = step.etapa;
+  const perfil = step.perfil;
 
   function update(patch: Partial<FormState>) {
     setForm((current) => ({ ...current, ...patch }));
   }
 
   function go(next: Partial<z.infer<typeof searchSchema>>) {
+    const nextEtapa = (next.etapa && next.etapa !== "inicio" ? next.etapa : next.etapa === "inicio" ? "inicio" : etapa) as typeof urlEtapa;
+    const nextPerfil = "perfil" in next ? ((next.perfil ?? null) as AccountKind | null) : perfil;
+    setStep({ etapa: nextEtapa, perfil: nextPerfil });
     void navigate({
       to: "/auth",
-      search: { etapa, perfil: search.perfil, redirect: search.redirect, ...next },
+      search: {
+        etapa: nextEtapa,
+        perfil: nextPerfil ?? undefined,
+        redirect: search.redirect,
+        ...(next.modo ? { modo: next.modo } : {}),
+      },
       replace: true,
     });
   }
+
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -387,14 +417,23 @@ function AuthPage() {
           <Logo />
         </Link>
         {etapa !== "inicio" || perfil ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => (perfil ? go({ perfil: undefined }) : go({ etapa: "inicio" }))}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" aria-hidden /> Voltar
+          // Link real (com href): funciona mesmo antes do JS terminar de carregar.
+          <Button variant="ghost" size="sm" asChild>
+            <Link
+              to="/auth"
+              search={
+                perfil
+                  ? { etapa, perfil: undefined, redirect: search.redirect }
+                  : { etapa: "inicio", perfil: undefined, redirect: search.redirect }
+              }
+              replace
+              onClick={() => (perfil ? go({ perfil: undefined }) : go({ etapa: "inicio" }))}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" aria-hidden /> Voltar
+            </Link>
           </Button>
         ) : null}
+
       </header>
 
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center px-4 pb-16 sm:px-6">
@@ -405,25 +444,32 @@ function AuthPage() {
               Escolha como você quer continuar. Leva menos de um minuto.
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <button
-                type="button"
+              <Link
+                to="/auth"
+                search={{ etapa: "entrar", redirect: search.redirect }}
+                replace
+                preload="intent"
                 onClick={() => go({ etapa: "entrar" })}
                 className="rounded-2xl border border-border/70 bg-card p-6 text-left transition hover:border-primary hover:shadow-md"
               >
                 <LogIn className="h-6 w-6 text-primary" aria-hidden />
                 <p className="mt-3 text-lg font-semibold">Já tenho uma conta</p>
                 <p className="mt-1 text-sm text-muted-foreground">Entrar na plataforma.</p>
-              </button>
-              <button
-                type="button"
+              </Link>
+              <Link
+                to="/auth"
+                search={{ etapa: "criar", redirect: search.redirect }}
+                replace
+                preload="intent"
                 onClick={() => go({ etapa: "criar" })}
                 className="rounded-2xl border border-border/70 bg-card p-6 text-left transition hover:border-accent hover:shadow-md"
               >
                 <UserPlus className="h-6 w-6 text-accent" aria-hidden />
                 <p className="mt-3 text-lg font-semibold">Ainda não tenho conta</p>
                 <p className="mt-1 text-sm text-muted-foreground">Criar cadastro gratuito.</p>
-              </button>
+              </Link>
             </div>
+
           </section>
         ) : null}
 
@@ -437,9 +483,12 @@ function AuthPage() {
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
               {ACCOUNT_KINDS.map((item) => (
-                <button
+                <Link
                   key={item.key}
-                  type="button"
+                  to="/auth"
+                  search={{ etapa, perfil: item.key, redirect: search.redirect }}
+                  replace
+                  preload="intent"
                   onClick={() => go({ perfil: item.key })}
                   className="flex h-full flex-col rounded-2xl border border-border/70 bg-card p-5 text-left transition hover:border-primary hover:shadow-md"
                 >
@@ -450,8 +499,9 @@ function AuthPage() {
                     {etapa === "entrar" ? `Entrar como ${item.label}` : `Sou ${item.label}`}
                   </span>
                   <span className="mt-1 text-sm text-muted-foreground">{item.description}</span>
-                </button>
+                </Link>
               ))}
+
             </div>
           </section>
         ) : null}
