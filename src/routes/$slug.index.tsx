@@ -308,7 +308,7 @@ function PublicStorePage() {
               ) : null}
 
               <ul className="mt-3 flex flex-col gap-2 text-[13px] text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-6 sm:text-sm">
-                {store.address_street ? (
+                {display.showAddress && store.address_street ? (
                   <li className="flex min-w-0 items-start gap-1.5">
                     <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                     <span className="min-w-0 break-words">
@@ -317,31 +317,34 @@ function PublicStorePage() {
                     </span>
                   </li>
                 ) : null}
-                {store.phone ? (
+                {display.showPhone && store.phone ? (
                   <li className="flex items-center gap-1.5">
                     <Phone className="size-4 shrink-0" aria-hidden="true" />
                     {store.phone}
                   </li>
                 ) : null}
-                <li className="flex min-w-0 items-center gap-1.5">
-                  <Clock className="size-4 shrink-0" aria-hidden="true" />
-                  <span className="min-w-0 truncate">{availability.message}</span>
-                </li>
+                {display.showHours ? (
+                  <li className="flex min-w-0 items-center gap-1.5">
+                    <Clock className="size-4 shrink-0" aria-hidden="true" />
+                    <span className="min-w-0 truncate">{availability.message}</span>
+                  </li>
+                ) : null}
               </ul>
 
               <div className="mt-4 flex flex-wrap items-center gap-2 sm:gap-3">
-                {contactNumber ? (
+                {display.showPhone && contactNumber ? (
                   <Button variant="outline" size="sm" className="flex-1 sm:flex-none" asChild>
                     <a href={`https://wa.me/55${contactNumber}`} target="_blank" rel="noreferrer">
                       <MessageCircle className="mr-2 size-4" aria-hidden="true" /> Falar com a loja
                     </a>
                   </Button>
                 ) : null}
-                {repeatConfig && manualAccessEnabled(repeatConfig) && !popups.isHidden("repeat") ? (
+                {display.showRepeatOrder && repeatConfig && manualAccessEnabled(repeatConfig) && !popups.isHidden("repeat") ? (
                   <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => popups.openManually("repeat")}>
                     <History className="mr-2 size-4" aria-hidden="true" /> Repetir pedido
                   </Button>
                 ) : null}
+
                 {highlightsConfig && manualAccessEnabled(highlightsConfig) && campaign && campaignItems.length > 0 ? (
                   <Button variant="outline" size="sm" className="max-w-full flex-1 truncate sm:flex-none" onClick={() => popups.openManually("highlights")}>
                     <Sparkles className="mr-2 size-4 shrink-0" aria-hidden="true" /> <span className="truncate">{campaign.title}</span>
