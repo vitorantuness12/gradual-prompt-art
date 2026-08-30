@@ -444,25 +444,32 @@ function AuthPage() {
               Escolha como você quer continuar. Leva menos de um minuto.
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <button
-                type="button"
+              <Link
+                to="/auth"
+                search={{ etapa: "entrar", redirect: search.redirect }}
+                replace
+                preload="intent"
                 onClick={() => go({ etapa: "entrar" })}
                 className="rounded-2xl border border-border/70 bg-card p-6 text-left transition hover:border-primary hover:shadow-md"
               >
                 <LogIn className="h-6 w-6 text-primary" aria-hidden />
                 <p className="mt-3 text-lg font-semibold">Já tenho uma conta</p>
                 <p className="mt-1 text-sm text-muted-foreground">Entrar na plataforma.</p>
-              </button>
-              <button
-                type="button"
+              </Link>
+              <Link
+                to="/auth"
+                search={{ etapa: "criar", redirect: search.redirect }}
+                replace
+                preload="intent"
                 onClick={() => go({ etapa: "criar" })}
                 className="rounded-2xl border border-border/70 bg-card p-6 text-left transition hover:border-accent hover:shadow-md"
               >
                 <UserPlus className="h-6 w-6 text-accent" aria-hidden />
                 <p className="mt-3 text-lg font-semibold">Ainda não tenho conta</p>
                 <p className="mt-1 text-sm text-muted-foreground">Criar cadastro gratuito.</p>
-              </button>
+              </Link>
             </div>
+
           </section>
         ) : null}
 
