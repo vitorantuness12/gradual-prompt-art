@@ -1,7 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { useState } from "react";
 
+import { CouponFeedbackMessage } from "@/components/catalogo/CouponFeedbackMessage";
+import { UpsellSuggestions } from "@/components/store/UpsellSuggestions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetContent,
@@ -11,7 +16,9 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import type { CartItem } from "@/hooks/useCart";
+import type { CouponFeedback } from "@/hooks/useCartCoupon";
 import { formatCurrency } from "@/lib/format";
+import type { UpsellSuggestion } from "@/lib/upsell";
 
 /**
  * Segmentos em que o cliente monta o pedido item por item e precisa conferir a
@@ -25,6 +32,16 @@ export function quickCartEnabled(segment: string | null | undefined): boolean {
   );
 }
 
+/** Estado do cupom vindo do hook compartilhado (`useCartCoupon`). */
+export interface CartSheetCoupon {
+  code: string | null;
+  discount: number;
+  checking: boolean;
+  feedback: CouponFeedback | null;
+  apply: (code: string) => Promise<CouponFeedback>;
+  clear: () => void;
+}
+
 interface CartSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -34,6 +51,10 @@ interface CartSheetProps {
   accepting: boolean;
   onSetQuantity: (lineId: string, quantity: number) => void;
   onRemove: (lineId: string) => void;
+  /** Sugestões "leve também" do lojista para os itens já escolhidos. */
+  suggestions?: UpsellSuggestion[];
+  onAddSuggestion?: (suggestion: UpsellSuggestion) => void;
+  coupon?: CartSheetCoupon;
 }
 
 /** Sacola em painel lateral: confere, ajusta quantidades e segue para o checkout. */
@@ -46,7 +67,13 @@ export function CartSheet({
   accepting,
   onSetQuantity,
   onRemove,
+  suggestions = [],
+  onAddSuggestion,
+  coupon,
 }: CartSheetProps) {
+  const [couponInput, setCouponInput] = useState("");
+  const discount = coupon ? Math.min(coupon.discount, subtotal) : 0;
+  const total = Math.max(0, subtotal - discount);
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
@@ -123,13 +150,67 @@ export function CartSheet({
               ))}
             </ul>
           )}
+
+          {onAddSuggestion && items.length > 0 ? (
+            <UpsellSuggestions className="mt-4" suggestions={suggestions} onAdd={onAddSuggestion} />
+          ) : null}
+
+          {coupon && items.length > 0 ? (
+            <div className="mt-4 space-y-2 rounded-xl border border-border/70 bg-muted/40 p-3">
+              <Label htmlFor="cupom-sacola" className="text-xs font-bold uppercase tracking-wide">
+                Cupom de desconto
+              </Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="cupom-sacola"
+                  value={coupon.code ?? couponInput}
+                  onChange={(event) => setCouponInput(event.target.value.toUpperCase().slice(0, 40))}
+                  placeholder="SEUCUPOM"
+                  maxLength={40}
+                  disabled={Boolean(coupon.code) || coupon.checking}
+                  className="min-w-0 flex-1 bg-card uppercase"
+                />
+                {coupon.code ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      coupon.clear();
+                      setCouponInput("");
+                    }}
+                  >
+                    Remover
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    disabled={coupon.checking}
+                    onClick={() => void coupon.apply(couponInput)}
+                  >
+                    {coupon.checking ? "Validando..." : "Aplicar"}
+                  </Button>
+                )}
+              </div>
+              {coupon.feedback ? <CouponFeedbackMessage feedback={coupon.feedback} /> : null}
+            </div>
+          ) : null}
         </div>
 
         <SheetFooter className="border-t border-border p-4">
           <div className="w-full space-y-3">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
-              <span className="font-semibold text-foreground">{formatCurrency(subtotal)}</span>
+              <span className="font-medium text-foreground">{formatCurrency(subtotal)}</span>
+            </div>
+            {discount > 0 ? (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Desconto</span>
+                <span className="font-medium text-success">−{formatCurrency(discount)}</span>
+              </div>
+            ) : null}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Total</span>
+              <span className="text-base font-semibold text-foreground">{formatCurrency(total)}</span>
             </div>
             <Button
               asChild={accepting && items.length > 0}

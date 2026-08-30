@@ -19,6 +19,8 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildLineId, useCart, type CartOption } from "@/hooks/useCart";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useCartCoupon } from "@/hooks/useCartCoupon";
+import { useUpsellSuggestions } from "@/hooks/useUpsellSuggestions";
 import { currentPrice, hasPromo, layoutForStore, productAvailability, PRODUCT_KIND_LABEL } from "@/lib/catalog";
 import { fetchRatingSummary } from "@/lib/avaliacoes";
 import { formatCurrency } from "@/lib/format";
@@ -72,9 +74,12 @@ function PublicStorePage() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
   const { data, isLoading, isError } = useQuery(publicStoreQuery(slug));
-   const cart = useCart(slug, data?.store.id ?? null);
+  const cart = useCart(slug, data?.store.id ?? null);
   /** Sacola em painel lateral: o cliente confere sem sair do catálogo. */
   const [cartSheetOpen, setCartSheetOpen] = useState(false);
+  /** Cupom compartilhado com carrinho/checkout, revalidado quando o subtotal muda. */
+  const couponState = useCartCoupon(slug, data?.store.id ?? null, cart.subtotal, cart.hydrated);
+  const upsell = useUpsellSuggestions(data, cart.items, { max: 4 });
   const favorites = useFavorites(slug);
   const appearance = useQuery(publicAppearanceQuery(data?.store.id ?? null));
   const theme = publishedTheme(appearance.data);
@@ -734,6 +739,27 @@ function PublicStorePage() {
           accepting={availability.accepting}
           onSetQuantity={cart.setQuantity}
           onRemove={cart.remove}
+          suggestions={upsell}
+          onAddSuggestion={(suggestion) =>
+            cart.add(
+              {
+                productId: suggestion.product.id,
+                name: suggestion.product.name,
+                unitPrice: suggestion.price,
+                maxQuantity: suggestion.maxQuantity,
+                fromUpsell: true,
+              },
+              1,
+            )
+          }
+          coupon={{
+            code: couponState.coupon?.code ?? null,
+            discount: couponState.discount,
+            checking: couponState.checking,
+            feedback: couponState.feedback,
+            apply: couponState.apply,
+            clear: couponState.clear,
+          }}
         />
       ) : null}
 
