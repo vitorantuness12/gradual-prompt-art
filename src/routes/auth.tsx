@@ -117,20 +117,50 @@ function AuthPage() {
   const [otpCode, setOtpCode] = useState("");
   const [checkEmail, setCheckEmail] = useState(false);
 
-  const etapa = search.etapa && search.etapa !== "inicio" ? search.etapa : search.modo === "criar" ? "criar" : search.modo ? "entrar" : "inicio";
-  const perfil = search.perfil ?? null;
+  // Etapa/perfil derivados da URL, mas com estado otimista: o clique muda a tela
+  // imediatamente e a URL é sincronizada em segundo plano (sem travar o render).
+  const urlEtapa =
+    search.etapa && search.etapa !== "inicio"
+      ? search.etapa
+      : search.modo === "criar"
+        ? "criar"
+        : search.modo
+          ? "entrar"
+          : "inicio";
+  const urlPerfil = search.perfil ?? null;
+  const [step, setStep] = useState<{ etapa: typeof urlEtapa; perfil: AccountKind | null }>({
+    etapa: urlEtapa,
+    perfil: urlPerfil,
+  });
+
+  // Se a URL mudar por fora (voltar/avançar do navegador), acompanha.
+  useEffect(() => {
+    setStep({ etapa: urlEtapa, perfil: urlPerfil });
+  }, [urlEtapa, urlPerfil]);
+
+  const etapa = step.etapa;
+  const perfil = step.perfil;
 
   function update(patch: Partial<FormState>) {
     setForm((current) => ({ ...current, ...patch }));
   }
 
   function go(next: Partial<z.infer<typeof searchSchema>>) {
+    const nextEtapa = (next.etapa && next.etapa !== "inicio" ? next.etapa : next.etapa === "inicio" ? "inicio" : etapa) as typeof urlEtapa;
+    const nextPerfil = "perfil" in next ? ((next.perfil ?? null) as AccountKind | null) : perfil;
+    setStep({ etapa: nextEtapa, perfil: nextPerfil });
     void navigate({
       to: "/auth",
-      search: { etapa, perfil: search.perfil, redirect: search.redirect, ...next },
+      search: {
+        etapa: nextEtapa,
+        perfil: nextPerfil ?? undefined,
+        redirect: search.redirect,
+        ...(next.modo ? { modo: next.modo } : {}),
+      },
       replace: true,
     });
   }
+
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
