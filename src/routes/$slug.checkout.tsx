@@ -50,6 +50,7 @@ import {
   joinProductionQueue,
   type CapacityResponse,
 } from "@/lib/producao.functions";
+import { maxRedeemable } from "@/lib/cashback";
 import { applyReferralCode, publicCashbackStatus } from "@/lib/cashback.functions";
 import { awardOrderLoyalty } from "@/lib/fidelidade.functions";
 import { estimateDelivery, type DeliveryEstimate } from "@/lib/geo.functions";
