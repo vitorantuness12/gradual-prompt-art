@@ -483,9 +483,12 @@ function AuthPage() {
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
               {ACCOUNT_KINDS.map((item) => (
-                <button
+                <Link
                   key={item.key}
-                  type="button"
+                  to="/auth"
+                  search={{ etapa, perfil: item.key, redirect: search.redirect }}
+                  replace
+                  preload="intent"
                   onClick={() => go({ perfil: item.key })}
                   className="flex h-full flex-col rounded-2xl border border-border/70 bg-card p-5 text-left transition hover:border-primary hover:shadow-md"
                 >
@@ -496,8 +499,9 @@ function AuthPage() {
                     {etapa === "entrar" ? `Entrar como ${item.label}` : `Sou ${item.label}`}
                   </span>
                   <span className="mt-1 text-sm text-muted-foreground">{item.description}</span>
-                </button>
+                </Link>
               ))}
+
             </div>
           </section>
         ) : null}
