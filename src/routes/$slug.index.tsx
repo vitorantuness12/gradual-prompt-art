@@ -658,9 +658,11 @@ function PublicStorePage() {
         />
       ) : null}
 
-      <div className="mx-auto w-full px-4 pb-24 sm:px-6" style={shellStyle}>
-        <StoreReviews storeId={data.store.id} />
-      </div>
+      {display.showRatings ? (
+        <div className="mx-auto w-full px-4 pb-24 sm:px-6" style={shellStyle}>
+          <StoreReviews storeId={data.store.id} />
+        </div>
+      ) : null}
 
       <ProductDetailDialog
         product={detail}
