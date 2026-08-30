@@ -35,7 +35,7 @@ export interface GrowthReport {
   cartsReminded: number;
   /** Carrinhos que voltaram e viraram pedido. */
   cartsRecovered: number;
-  /** Receita dos pedidos recuperados. */
+  /** Valor dos carrinhos que foram recuperados (subtotal salvo). */
   recoveredRevenue: number;
   /** Percentual de recuperação sobre os lembretes enviados. */
   recoveryRate: number;
@@ -73,7 +73,7 @@ export const growthReport = createServerFn({ method: "POST" })
         .gte("created_at", since),
       context.supabase
         .from("abandoned_carts")
-        .select("id, reminder_count, recovered_at, recovered_total, created_at")
+        .select("id, reminder_count, recovered_at, subtotal, created_at")
         .eq("store_id", data.storeId)
         .gte("created_at", since),
       context.supabase
@@ -107,7 +107,7 @@ export const growthReport = createServerFn({ method: "POST" })
       cartsCreated: carts.length,
       cartsReminded,
       cartsRecovered: recovered.length,
-      recoveredRevenue: sum(recovered, "recovered_total"),
+      recoveredRevenue: sum(recovered, "subtotal"),
       recoveryRate: cartsReminded ? (recovered.length / cartsReminded) * 100 : 0,
       couponOrders: couponOrders.length,
       couponDiscount: sum(couponOrders, "discount"),
