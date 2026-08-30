@@ -102,6 +102,12 @@ export const Route = createFileRoute("/api/public/pagamentos/$provider")({
             .from("orders")
             .update({ payment_status: orderPaymentStatus })
             .eq("id", payment.order_id);
+
+          // Produto digital: acesso liberado só agora, com o valor pago conferido.
+          if (orderPaymentStatus === "paid") {
+            const { releaseDigitalForOrder } = await import("@/lib/checkout-especializado.server");
+            await releaseDigitalForOrder(supabaseAdmin, payment.order_id, Number(payment.amount));
+          }
         }
         await supabaseAdmin
           .from("payment_webhook_events")
