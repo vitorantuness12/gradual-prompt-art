@@ -31,6 +31,14 @@ export interface CashbackStoreBalance {
   /** Saldo vence nos próximos 7 dias. */
   expiringSoon: boolean;
   entries: CashbackEntry[];
+  /** Código do cliente para indicar amigos ("indique e ganhe"). */
+  referralCode: string | null;
+  /** Indicações já convertidas em pedido. */
+  referralCount: number;
+  /** O programa de indicação está ativo nesta loja. */
+  referralEnabled: boolean;
+  /** Crédito que o cliente ganha por indicação convertida. */
+  referralReward: number;
 }
 
 export interface CustomerCashbackOverview {
@@ -69,7 +77,9 @@ export const customerCashback = createServerFn({ method: "POST" })
 
     const { data: accounts } = await supabaseAdmin
       .from("loyalty_accounts")
-      .select("id, store_id, customer_id, cashback_balance, cashback_expires_at, store:stores(name, slug)")
+      .select(
+        "id, store_id, customer_id, cashback_balance, cashback_expires_at, referral_code, referral_count, store:stores(name, slug)",
+      )
       .in("customer_id", customerIds);
 
     const { data: transactions } = await supabaseAdmin
@@ -79,6 +89,11 @@ export const customerCashback = createServerFn({ method: "POST" })
       .not("cashback_amount", "is", null)
       .order("created_at", { ascending: false })
       .limit(200);
+
+    const { data: settingsRows } = await supabaseAdmin
+      .from("loyalty_settings")
+      .select("store_id, is_enabled, referral_enabled, referral_cashback_referrer")
+      .in("store_id", (accounts ?? []).map((account) => account.store_id));
 
     const now = Date.now();
     const stores: CashbackStoreBalance[] = (accounts ?? [])
@@ -115,9 +130,28 @@ export const customerCashback = createServerFn({ method: "POST" })
               new Date(expiresAt).getTime() <= now + EXPIRING_WINDOW_DAYS * 86_400_000,
           ),
           entries,
+          referralCode: account.referral_code ?? null,
+          referralCount: Number(account.referral_count ?? 0),
+          referralEnabled: Boolean(
+            (settingsRows ?? []).find((row) => row.store_id === account.store_id)?.is_enabled &&
+              (settingsRows ?? []).find((row) => row.store_id === account.store_id)
+                ?.referral_enabled,
+          ),
+          referralReward: Math.max(
+            0,
+            Number(
+              (settingsRows ?? []).find((row) => row.store_id === account.store_id)
+                ?.referral_cashback_referrer ?? 0,
+            ),
+          ),
         };
       })
-      .filter((store) => store.balance > 0 || store.entries.length > 0)
+      .filter(
+        (store) =>
+          store.balance > 0 ||
+          store.entries.length > 0 ||
+          (store.referralEnabled && Boolean(store.referralCode)),
+      )
       .sort((a, b) => b.balance - a.balance);
 
     return {
