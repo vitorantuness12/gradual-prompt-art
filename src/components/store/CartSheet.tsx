@@ -1,7 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { useState } from "react";
 
+import { CouponFeedbackMessage } from "@/components/catalogo/CouponFeedbackMessage";
+import { UpsellSuggestions } from "@/components/store/UpsellSuggestions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetContent,
@@ -11,7 +16,9 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import type { CartItem } from "@/hooks/useCart";
+import type { CouponFeedback } from "@/hooks/useCartCoupon";
 import { formatCurrency } from "@/lib/format";
+import type { UpsellSuggestion } from "@/lib/upsell";
 
 /**
  * Segmentos em que o cliente monta o pedido item por item e precisa conferir a
@@ -25,6 +32,16 @@ export function quickCartEnabled(segment: string | null | undefined): boolean {
   );
 }
 
+/** Estado do cupom vindo do hook compartilhado (`useCartCoupon`). */
+export interface CartSheetCoupon {
+  code: string | null;
+  discount: number;
+  checking: boolean;
+  feedback: CouponFeedback | null;
+  apply: (code: string) => Promise<CouponFeedback>;
+  clear: () => void;
+}
+
 interface CartSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -34,6 +51,10 @@ interface CartSheetProps {
   accepting: boolean;
   onSetQuantity: (lineId: string, quantity: number) => void;
   onRemove: (lineId: string) => void;
+  /** Sugestões "leve também" do lojista para os itens já escolhidos. */
+  suggestions?: UpsellSuggestion[];
+  onAddSuggestion?: (suggestion: UpsellSuggestion) => void;
+  coupon?: CartSheetCoupon;
 }
 
 /** Sacola em painel lateral: confere, ajusta quantidades e segue para o checkout. */
@@ -46,7 +67,13 @@ export function CartSheet({
   accepting,
   onSetQuantity,
   onRemove,
+  suggestions = [],
+  onAddSuggestion,
+  coupon,
 }: CartSheetProps) {
+  const [couponInput, setCouponInput] = useState("");
+  const discount = coupon ? Math.min(coupon.discount, subtotal) : 0;
+  const total = Math.max(0, subtotal - discount);
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
