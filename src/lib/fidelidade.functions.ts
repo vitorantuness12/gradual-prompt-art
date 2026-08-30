@@ -622,7 +622,7 @@ export const awardOrderLoyalty = createServerFn({ method: "POST" })
     const { data: order } = await supabaseAdmin
       .from("orders")
       .select(
-        "id, total, type, customer_name, customer_phone, customer_email, customer_id, address, created_at",
+        "id, total, type, customer_name, customer_phone, customer_email, customer_id, address, created_at, cashback_used",
       )
       .eq("store_id", store.id)
       .eq("code", data.orderCode)
