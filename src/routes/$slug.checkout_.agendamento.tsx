@@ -99,12 +99,27 @@ function AgendamentoCheckout() {
   }, [options.data, service]);
 
   async function confirm() {
-    if (!service) return toast.error("Escolha o serviço.");
-    if (!startsAt) return toast.error("Escolha um horário disponível.");
-    if (customer.name.trim().length < 3) return toast.error("Informe seu nome completo.");
+    if (!service) {
+      toast.error("Escolha o serviço.");
+      return;
+    }
+    if (!startsAt) {
+      toast.error("Escolha um horário disponível.");
+      return;
+    }
+    if (customer.name.trim().length < 3) {
+      toast.error("Informe seu nome completo.");
+      return;
+    }
     const phone = normalizePhoneBR(customer.phone);
-    if (!phone) return toast.error("Informe um WhatsApp válido.");
-    if (!payment) return toast.error("Escolha a forma de pagamento.");
+    if (!phone.ok) {
+      toast.error(phone.message);
+      return;
+    }
+    if (!payment) {
+      toast.error("Escolha a forma de pagamento.");
+      return;
+    }
 
     setSaving(true);
     try {
@@ -117,7 +132,7 @@ function AgendamentoCheckout() {
           startsAt,
           paymentMethod: payment,
           name: customer.name.trim(),
-          phone,
+          phone: phone.e164,
           email: customer.email.trim() || null,
           notes: customer.notes.trim() || null,
         },
@@ -130,11 +145,11 @@ function AgendamentoCheckout() {
         return;
       }
       toast.success(result.message);
-      if (result.publicToken) {
-        void navigate({ to: "/acompanhar", search: { token: result.publicToken } });
-      } else {
-        void navigate({ to: "/$slug", params: { slug } });
-      }
+      void navigate({
+        to: "/$slug/acompanhar",
+        params: { slug },
+        search: result.code ? { codigo: result.code } : {},
+      });
     } catch {
       toast.error("Não foi possível concluir o agendamento agora.");
     } finally {
