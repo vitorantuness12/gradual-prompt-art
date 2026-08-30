@@ -1,16 +1,31 @@
 import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import { CalendarClock, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TRACK_STEPS, formatOrderAddress, publicTrackingPath, trackStepIndex } from "@/lib/acompanhamento";
+import {
+  SUBSCRIPTION_PERIODS,
+  SUBSCRIPTION_PERIOD_LABEL,
+  type SubscriptionPeriod,
+} from "@/lib/assinaturas";
+import { createSubscriptionFromOrder } from "@/lib/assinaturas.functions";
 import { customerOrderDetail, type CustomerHistory } from "@/lib/cliente.functions";
 import { ORDER_STATUS_LABEL, ORDER_TYPE_LABEL, formatCurrency, formatDateTime } from "@/lib/format";
+
 
 type OrderRow = CustomerHistory["orders"][number];
 
@@ -38,7 +53,25 @@ const OPEN_STATUSES = new Set([
 
 export function CustomerOrderCard({ order, session, onRepeat, repeating }: Props) {
   const [open, setOpen] = useState(false);
+  /** Periodicidade escolhida ao transformar este pedido em assinatura. */
+  const [period, setPeriod] = useState<SubscriptionPeriod>("month");
   const fetchDetail = useServerFn(customerOrderDetail);
+  const createSubscription = useServerFn(createSubscriptionFromOrder);
+  const queryClient = useQueryClient();
+
+  const subscribe = useMutation({
+    mutationFn: () => createSubscription({ data: { session, orderId: order.id, period } }),
+    onSuccess: (result) => {
+      if (result.ok) {
+        toast.success(result.message);
+        void queryClient.invalidateQueries({ queryKey: ["cliente-assinaturas", session] });
+      } else {
+        toast.error(result.message);
+      }
+    },
+    onError: () => toast.error("Não foi possível criar a assinatura agora."),
+  });
+
 
   const detail = useQuery({
     queryKey: ["cliente-pedido", order.id],
@@ -80,6 +113,32 @@ export function CustomerOrderCard({ order, session, onRepeat, repeating }: Props
               Repetir pedido
             </Button>
           ) : null}
+          {order.canRepeat ? (
+            <div className="flex items-center gap-2">
+              <Select value={period} onValueChange={(value) => setPeriod(value as SubscriptionPeriod)}>
+                <SelectTrigger className="h-8 w-[150px] text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUBSCRIPTION_PERIODS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {SUBSCRIPTION_PERIOD_LABEL[option]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={subscribe.isPending}
+                onClick={() => subscribe.mutate()}
+              >
+                <CalendarClock className="mr-1 size-4" aria-hidden="true" />
+                Assinar
+              </Button>
+            </div>
+          ) : null}
+
           <Button asChild variant="ghost" size="sm">
             <Link to="/acompanhar" search={{ codigo: order.publicToken }}>
               Link de acompanhamento

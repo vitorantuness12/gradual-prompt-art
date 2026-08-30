@@ -1946,17 +1946,30 @@ export type Database = {
           customer_id: string | null
           customer_name: string
           customer_phone: string | null
+          delivery_address: Json | null
+          delivery_fee: number
+          delivery_type: string
           failed_attempts: number
           id: string
+          items: Json
           last_charge_at: string | null
           last_error: string | null
+          last_order_at: string | null
           next_charge_at: string | null
+          next_order_at: string | null
+          notes: string | null
+          orders_count: number
+          paused_at: string | null
           period: string
           product_id: string
+          quantity: number
           reactivated_at: string | null
+          resumes_at: string | null
+          source_order_id: string | null
           started_at: string
           status: string
           store_id: string
+          unit_price: number
           updated_at: string
           user_id: string | null
         }
@@ -1970,17 +1983,30 @@ export type Database = {
           customer_id?: string | null
           customer_name: string
           customer_phone?: string | null
+          delivery_address?: Json | null
+          delivery_fee?: number
+          delivery_type?: string
           failed_attempts?: number
           id?: string
+          items?: Json
           last_charge_at?: string | null
           last_error?: string | null
+          last_order_at?: string | null
           next_charge_at?: string | null
+          next_order_at?: string | null
+          notes?: string | null
+          orders_count?: number
+          paused_at?: string | null
           period?: string
           product_id: string
+          quantity?: number
           reactivated_at?: string | null
+          resumes_at?: string | null
+          source_order_id?: string | null
           started_at?: string
           status?: string
           store_id: string
+          unit_price?: number
           updated_at?: string
           user_id?: string | null
         }
@@ -1994,17 +2020,30 @@ export type Database = {
           customer_id?: string | null
           customer_name?: string
           customer_phone?: string | null
+          delivery_address?: Json | null
+          delivery_fee?: number
+          delivery_type?: string
           failed_attempts?: number
           id?: string
+          items?: Json
           last_charge_at?: string | null
           last_error?: string | null
+          last_order_at?: string | null
           next_charge_at?: string | null
+          next_order_at?: string | null
+          notes?: string | null
+          orders_count?: number
+          paused_at?: string | null
           period?: string
           product_id?: string
+          quantity?: number
           reactivated_at?: string | null
+          resumes_at?: string | null
+          source_order_id?: string | null
           started_at?: string
           status?: string
           store_id?: string
+          unit_price?: number
           updated_at?: string
           user_id?: string | null
         }
@@ -2021,6 +2060,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_subscriptions_source_order_id_fkey"
+            columns: ["source_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
           {
@@ -4570,6 +4616,7 @@ export type Database = {
           scheduled_for: string | null
           status: Database["public"]["Enums"]["order_status"]
           store_id: string
+          subscription_id: string | null
           subtotal: number
           table_number: string | null
           table_session_id: string | null
@@ -4625,6 +4672,7 @@ export type Database = {
           scheduled_for?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           store_id: string
+          subscription_id?: string | null
           subtotal?: number
           table_number?: string | null
           table_session_id?: string | null
@@ -4680,6 +4728,7 @@ export type Database = {
           scheduled_for?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           store_id?: string
+          subscription_id?: string | null
           subtotal?: number
           table_number?: string | null
           table_session_id?: string | null
@@ -4707,6 +4756,13 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "customer_subscriptions"
             referencedColumns: ["id"]
           },
           {
