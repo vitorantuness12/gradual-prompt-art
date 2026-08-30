@@ -150,13 +150,67 @@ export function CartSheet({
               ))}
             </ul>
           )}
+
+          {onAddSuggestion && items.length > 0 ? (
+            <UpsellSuggestions className="mt-4" suggestions={suggestions} onAdd={onAddSuggestion} />
+          ) : null}
+
+          {coupon && items.length > 0 ? (
+            <div className="mt-4 space-y-2 rounded-xl border border-border/70 bg-muted/40 p-3">
+              <Label htmlFor="cupom-sacola" className="text-xs font-bold uppercase tracking-wide">
+                Cupom de desconto
+              </Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="cupom-sacola"
+                  value={coupon.code ?? couponInput}
+                  onChange={(event) => setCouponInput(event.target.value.toUpperCase().slice(0, 40))}
+                  placeholder="SEUCUPOM"
+                  maxLength={40}
+                  disabled={Boolean(coupon.code) || coupon.checking}
+                  className="min-w-0 flex-1 bg-card uppercase"
+                />
+                {coupon.code ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      coupon.clear();
+                      setCouponInput("");
+                    }}
+                  >
+                    Remover
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    disabled={coupon.checking}
+                    onClick={() => void coupon.apply(couponInput)}
+                  >
+                    {coupon.checking ? "Validando..." : "Aplicar"}
+                  </Button>
+                )}
+              </div>
+              {coupon.feedback ? <CouponFeedbackMessage feedback={coupon.feedback} /> : null}
+            </div>
+          ) : null}
         </div>
 
         <SheetFooter className="border-t border-border p-4">
           <div className="w-full space-y-3">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
-              <span className="font-semibold text-foreground">{formatCurrency(subtotal)}</span>
+              <span className="font-medium text-foreground">{formatCurrency(subtotal)}</span>
+            </div>
+            {discount > 0 ? (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Desconto</span>
+                <span className="font-medium text-success">−{formatCurrency(discount)}</span>
+              </div>
+            ) : null}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Total</span>
+              <span className="text-base font-semibold text-foreground">{formatCurrency(total)}</span>
             </div>
             <Button
               asChild={accepting && items.length > 0}
