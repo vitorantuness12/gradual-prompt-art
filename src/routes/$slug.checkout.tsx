@@ -545,6 +545,14 @@ function CheckoutPage() {
   const bumpTotal = bumpLines.reduce((sum, line) => sum + line.price, 0);
   const total = Math.max(0, afterCoupon - cashbackApplied + deliveryFee + bumpTotal);
   const belowMinimum = cart.subtotal < Number(store.min_order_value);
+  // Quanto do pedido veio do "leve também" — alimenta o relatório do lojista.
+  const upsellStats = cart.items.reduce(
+    (acc, item) =>
+      item.fromUpsell
+        ? { items: acc.items + item.quantity, total: acc.total + item.unitPrice * item.quantity }
+        : acc,
+    { items: 0, total: 0 },
+  );
 
   function update(field: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -729,6 +737,8 @@ function CheckoutPage() {
           coupon_code: coupon?.code ?? null,
           cashback_used: cashbackApplied,
           referral_code: referralApplied,
+          upsell_items: upsellStats.items,
+          upsell_total: upsellStats.total,
           total,
           payment_method: payment,
           scheduled_for: scheduledFor,
@@ -1523,6 +1533,7 @@ function CheckoutPage() {
                 name: suggestion.product.name,
                 unitPrice: suggestion.price,
                 maxQuantity: suggestion.maxQuantity,
+                fromUpsell: true,
               },
               1,
             );

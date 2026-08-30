@@ -21,6 +21,11 @@ export interface CartItem {
   options?: CartOption[];
   notes?: string | null;
   maxQuantity?: number | null;
+  /**
+   * Item adicionado pelo bloco "leve também". Guardado no carrinho para o
+   * lojista poder medir quanto o upsell realmente gerou de receita.
+   */
+  fromUpsell?: boolean;
 }
 
 export type CartItemInput = Omit<CartItem, "quantity" | "lineId"> & { lineId?: string };

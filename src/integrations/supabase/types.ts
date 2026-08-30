@@ -3269,6 +3269,7 @@ export type Database = {
         Row: {
           cashback_balance: number
           cashback_expires_at: string | null
+          cashback_expiry_notified_at: string | null
           created_at: string
           customer_id: string
           id: string
@@ -3289,6 +3290,7 @@ export type Database = {
         Insert: {
           cashback_balance?: number
           cashback_expires_at?: string | null
+          cashback_expiry_notified_at?: string | null
           created_at?: string
           customer_id: string
           id?: string
@@ -3309,6 +3311,7 @@ export type Database = {
         Update: {
           cashback_balance?: number
           cashback_expires_at?: string | null
+          cashback_expiry_notified_at?: string | null
           created_at?: string
           customer_id?: string
           id?: string
@@ -4573,6 +4576,8 @@ export type Database = {
           total: number
           type: Database["public"]["Enums"]["order_type"]
           updated_at: string
+          upsell_items: number
+          upsell_total: number
           user_id: string | null
           utm_campaign: string | null
           utm_content: string | null
@@ -4626,6 +4631,8 @@ export type Database = {
           total?: number
           type?: Database["public"]["Enums"]["order_type"]
           updated_at?: string
+          upsell_items?: number
+          upsell_total?: number
           user_id?: string | null
           utm_campaign?: string | null
           utm_content?: string | null
@@ -4679,6 +4686,8 @@ export type Database = {
           total?: number
           type?: Database["public"]["Enums"]["order_type"]
           updated_at?: string
+          upsell_items?: number
+          upsell_total?: number
           user_id?: string | null
           utm_campaign?: string | null
           utm_content?: string | null
