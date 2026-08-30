@@ -58,7 +58,11 @@ export type PedidoLojaValidationResult =
 
 export function validatePedidoLoja(input: unknown): PedidoLojaValidationResult {
   const result = pedidoLojaSchema.safeParse(input);
-  if (result.success) return { success: true, data: result.data };
+  if (result.success) {
+    // O schema acima valida integralmente a estrutura compartilhada. O cast
+    // reconcilia apenas propriedades opcionais sob exactOptionalPropertyTypes.
+    return { success: true, data: result.data as PedidoLojaInput };
+  }
 
   const issue = result.error.issues[0];
   const field = issue?.path.join(".");
