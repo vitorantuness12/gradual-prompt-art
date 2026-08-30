@@ -199,6 +199,15 @@ export function paletteFromPrimary(primary: string): StoreThemeColors {
   };
 }
 
+/**
+ * Cores do rodapé derivadas da cor principal da loja.
+ * Mantém o rodapé sempre em harmonia com o restante da paleta.
+ */
+export function footerColorsFromPrimary(primary: string): Pick<StoreFooterConfig, "background" | "text"> {
+  const safe = isValidHex(primary) ? primary : "#e2452b";
+  return { background: safe, text: readableTextOn(safe) };
+}
+
 /** ---------- Padrão e temas prontos ---------- */
 
 export function defaultThemeConfig(): StoreThemeConfig {
@@ -295,7 +304,8 @@ export function resolvedFooterConfig(
     name: footer.name?.trim() || store.name || null,
     phone: formatFooterPhone(footer.phone?.trim() || store.phone || null),
     address: footer.address?.trim() || fullAddress || null,
-    note: footer.note?.trim() || null,
+    // A assinatura "Feito com O Seu Pedido" é fixa em todas as lojas.
+    note: null,
     background: footer.background || defaultFooterConfig().background,
     text: footer.text || defaultFooterConfig().text,
   };
