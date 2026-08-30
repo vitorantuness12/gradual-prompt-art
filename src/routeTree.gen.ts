@@ -75,6 +75,7 @@ import { Route as AuthenticatedPainelWhatsappRouteImport } from './routes/_authe
 import { Route as ApiV1SplatRouteImport } from './routes/api/v1/$'
 import { Route as ApiPublicAgendaLembretesRouteImport } from './routes/api/public/agenda/lembretes'
 import { Route as ApiPublicAssinaturasCobrancasRouteImport } from './routes/api/public/assinaturas/cobrancas'
+import { Route as ApiPublicAssinaturasPedidosRouteImport } from './routes/api/public/assinaturas/pedidos'
 import { Route as ApiPublicCarrinhoLembretesRouteImport } from './routes/api/public/carrinho/lembretes'
 import { Route as ApiPublicCashbackExpiracaoRouteImport } from './routes/api/public/cashback/expiracao'
 import { Route as ApiPublicEncomendasLembretesRouteImport } from './routes/api/public/encomendas/lembretes'
@@ -449,6 +450,12 @@ const ApiPublicAssinaturasCobrancasRoute =
     path: '/api/public/assinaturas/cobrancas',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicAssinaturasPedidosRoute =
+  ApiPublicAssinaturasPedidosRouteImport.update({
+    id: '/api/public/assinaturas/pedidos',
+    path: '/api/public/assinaturas/pedidos',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicCarrinhoLembretesRoute =
   ApiPublicCarrinhoLembretesRouteImport.update({
     id: '/api/public/carrinho/lembretes',
@@ -585,6 +592,7 @@ export interface FileRoutesByFullPath {
   '/painel/': typeof AuthenticatedPainelIndexRoute
   '/api/public/agenda/lembretes': typeof ApiPublicAgendaLembretesRoute
   '/api/public/assinaturas/cobrancas': typeof ApiPublicAssinaturasCobrancasRoute
+  '/api/public/assinaturas/pedidos': typeof ApiPublicAssinaturasPedidosRoute
   '/api/public/carrinho/lembretes': typeof ApiPublicCarrinhoLembretesRoute
   '/api/public/cashback/expiracao': typeof ApiPublicCashbackExpiracaoRoute
   '/api/public/encomendas/lembretes': typeof ApiPublicEncomendasLembretesRoute
@@ -663,6 +671,7 @@ export interface FileRoutesByTo {
   '/painel': typeof AuthenticatedPainelIndexRoute
   '/api/public/agenda/lembretes': typeof ApiPublicAgendaLembretesRoute
   '/api/public/assinaturas/cobrancas': typeof ApiPublicAssinaturasCobrancasRoute
+  '/api/public/assinaturas/pedidos': typeof ApiPublicAssinaturasPedidosRoute
   '/api/public/carrinho/lembretes': typeof ApiPublicCarrinhoLembretesRoute
   '/api/public/cashback/expiracao': typeof ApiPublicCashbackExpiracaoRoute
   '/api/public/encomendas/lembretes': typeof ApiPublicEncomendasLembretesRoute
@@ -744,6 +753,7 @@ export interface FileRoutesById {
   '/_authenticated/painel/': typeof AuthenticatedPainelIndexRoute
   '/api/public/agenda/lembretes': typeof ApiPublicAgendaLembretesRoute
   '/api/public/assinaturas/cobrancas': typeof ApiPublicAssinaturasCobrancasRoute
+  '/api/public/assinaturas/pedidos': typeof ApiPublicAssinaturasPedidosRoute
   '/api/public/carrinho/lembretes': typeof ApiPublicCarrinhoLembretesRoute
   '/api/public/cashback/expiracao': typeof ApiPublicCashbackExpiracaoRoute
   '/api/public/encomendas/lembretes': typeof ApiPublicEncomendasLembretesRoute
@@ -825,6 +835,7 @@ export interface FileRouteTypes {
     | '/painel/'
     | '/api/public/agenda/lembretes'
     | '/api/public/assinaturas/cobrancas'
+    | '/api/public/assinaturas/pedidos'
     | '/api/public/carrinho/lembretes'
     | '/api/public/cashback/expiracao'
     | '/api/public/encomendas/lembretes'
@@ -903,6 +914,7 @@ export interface FileRouteTypes {
     | '/painel'
     | '/api/public/agenda/lembretes'
     | '/api/public/assinaturas/cobrancas'
+    | '/api/public/assinaturas/pedidos'
     | '/api/public/carrinho/lembretes'
     | '/api/public/cashback/expiracao'
     | '/api/public/encomendas/lembretes'
@@ -983,6 +995,7 @@ export interface FileRouteTypes {
     | '/_authenticated/painel/'
     | '/api/public/agenda/lembretes'
     | '/api/public/assinaturas/cobrancas'
+    | '/api/public/assinaturas/pedidos'
     | '/api/public/carrinho/lembretes'
     | '/api/public/cashback/expiracao'
     | '/api/public/encomendas/lembretes'
@@ -1024,6 +1037,7 @@ export interface RootRouteChildren {
   ApiV1SplatRoute: typeof ApiV1SplatRoute
   ApiPublicAgendaLembretesRoute: typeof ApiPublicAgendaLembretesRoute
   ApiPublicAssinaturasCobrancasRoute: typeof ApiPublicAssinaturasCobrancasRoute
+  ApiPublicAssinaturasPedidosRoute: typeof ApiPublicAssinaturasPedidosRoute
   ApiPublicCarrinhoLembretesRoute: typeof ApiPublicCarrinhoLembretesRoute
   ApiPublicCashbackExpiracaoRoute: typeof ApiPublicCashbackExpiracaoRoute
   ApiPublicEncomendasLembretesRoute: typeof ApiPublicEncomendasLembretesRoute
@@ -1502,6 +1516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAssinaturasCobrancasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/assinaturas/pedidos': {
+      id: '/api/public/assinaturas/pedidos'
+      path: '/api/public/assinaturas/pedidos'
+      fullPath: '/api/public/assinaturas/pedidos'
+      preLoaderRoute: typeof ApiPublicAssinaturasPedidosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/carrinho/lembretes': {
       id: '/api/public/carrinho/lembretes'
       path: '/api/public/carrinho/lembretes'
@@ -1714,6 +1735,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1SplatRoute: ApiV1SplatRoute,
   ApiPublicAgendaLembretesRoute: ApiPublicAgendaLembretesRoute,
   ApiPublicAssinaturasCobrancasRoute: ApiPublicAssinaturasCobrancasRoute,
+  ApiPublicAssinaturasPedidosRoute: ApiPublicAssinaturasPedidosRoute,
   ApiPublicCarrinhoLembretesRoute: ApiPublicCarrinhoLembretesRoute,
   ApiPublicCashbackExpiracaoRoute: ApiPublicCashbackExpiracaoRoute,
   ApiPublicEncomendasLembretesRoute: ApiPublicEncomendasLembretesRoute,
