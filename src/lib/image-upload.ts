@@ -35,11 +35,12 @@ export async function compressImage(file: File, options: CompressOptions): Promi
   return blob ?? file;
 }
 
-export type StoreImageKind = "logo" | "cover";
+export type StoreImageKind = "logo" | "cover" | "product";
 
 const PRESET: Record<StoreImageKind, CompressOptions> = {
   logo: { maxWidth: 512, maxHeight: 512 },
   cover: { maxWidth: 1600, maxHeight: 900 },
+  product: { maxWidth: 1200, maxHeight: 1200 },
 };
 
 /** Envia a imagem para a pasta da loja e devolve uma URL utilizável na loja pública. */
