@@ -238,7 +238,7 @@ function DigitalCheckout() {
               </Button>
             </div>
           )}
-          <CouponFeedbackMessage feedback={coupon.feedback} />
+          {coupon.feedback ? <CouponFeedbackMessage feedback={coupon.feedback} /> : null}
         </CardContent>
       </Card>
 
