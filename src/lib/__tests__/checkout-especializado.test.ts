@@ -266,7 +266,6 @@ describe("delivery permanece no fluxo original", () => {
       segment: "restaurante",
       checkout_type: null,
       accepts_delivery: true,
-      accepts_pickup: true,
       accepts_scheduling: false,
       accepts_dine_in: true,
     };
@@ -280,7 +279,6 @@ describe("delivery permanece no fluxo original", () => {
         segment: "barbearia",
         checkout_type: null,
         accepts_delivery: false,
-        accepts_pickup: false,
         accepts_scheduling: true,
         accepts_dine_in: false,
       }),
@@ -290,7 +288,6 @@ describe("delivery permanece no fluxo original", () => {
         segment: "infoproduto",
         checkout_type: "digital",
         accepts_delivery: false,
-        accepts_pickup: false,
         accepts_scheduling: false,
         accepts_dine_in: false,
       }),
