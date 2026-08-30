@@ -74,7 +74,7 @@ export const salvarCarrinhoAbandonado = createServerFn({ method: "POST" })
 
     const { clientIdentifier, consumeRateLimit } = await import("@/lib/security.server");
     const limit = await consumeRateLimit(
-      "abandoned-cart",
+      "abandoned_cart",
       `${clientIdentifier(getRequest()?.headers)}:${data.storeSlug}`,
     );
     if (!limit.allowed) return { ok: false };
@@ -148,7 +148,7 @@ export const recuperarCarrinhoAbandonado = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }): Promise<AbandonedCartRecovery> => {
     const { clientIdentifier, consumeRateLimit } = await import("@/lib/security.server");
-    const limit = await consumeRateLimit("abandoned-cart-open", clientIdentifier(getRequest()?.headers));
+    const limit = await consumeRateLimit("abandoned_cart_open", clientIdentifier(getRequest()?.headers));
     if (!limit.allowed) {
       return {
         ok: false,

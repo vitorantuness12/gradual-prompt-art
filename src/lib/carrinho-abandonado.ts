@@ -18,12 +18,12 @@ export interface AbandonedCartItem {
 }
 
 export interface AbandonedCartAddress {
-  zipCode?: string | null;
-  street?: string | null;
-  number?: string | null;
-  complement?: string | null;
-  district?: string | null;
-  reference?: string | null;
+  zipCode?: string | null | undefined;
+  street?: string | null | undefined;
+  number?: string | null | undefined;
+  complement?: string | null | undefined;
+  district?: string | null | undefined;
+  reference?: string | null | undefined;
 }
 
 export interface AbandonedCartRecovery {
