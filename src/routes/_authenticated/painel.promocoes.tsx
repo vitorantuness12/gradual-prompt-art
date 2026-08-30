@@ -7,6 +7,7 @@ import { z } from "zod";
 import { DemoBadge } from "@/components/brand/DemoBadge";
 import { EmptyState, PageHeader } from "@/components/painel/PageHeader";
 import { RecuperacaoCard } from "@/components/painel/RecuperacaoCard";
+import { RelatorioCrescimentoCard } from "@/components/painel/RelatorioCrescimentoCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -211,6 +212,8 @@ function PromotionsPage() {
       <section className="mt-8 space-y-3">
         <h2 className="text-lg font-semibold text-foreground">Recuperação de vendas</h2>
         <RecuperacaoCard storeId={storeId} />
+
+        <RelatorioCrescimentoCard storeId={storeId} />
       </section>
     </div>
   );
