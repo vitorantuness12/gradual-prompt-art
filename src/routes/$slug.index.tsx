@@ -10,6 +10,7 @@ import { RepeatOrderModal } from "@/components/store/RepeatOrderModal";
 import { InstallAppBanner } from "@/components/store/InstallAppBanner";
 import { StoreThemeProvider } from "@/components/store/StoreThemeProvider";
 import { ProductDetailDialog } from "@/components/store/ProductDetailDialog";
+import { CartSheet, quickCartEnabled } from "@/components/store/CartSheet";
 import { StoreReviews } from "@/components/store/StoreReviews";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -71,7 +72,9 @@ function PublicStorePage() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
   const { data, isLoading, isError } = useQuery(publicStoreQuery(slug));
-  const cart = useCart(slug, data?.store.id ?? null);
+   const cart = useCart(slug, data?.store.id ?? null);
+  /** Sacola em painel lateral: o cliente confere sem sair do catálogo. */
+  const [cartSheetOpen, setCartSheetOpen] = useState(false);
   const favorites = useFavorites(slug);
   const appearance = useQuery(publicAppearanceQuery(data?.store.id ?? null));
   const theme = publishedTheme(appearance.data);
@@ -198,6 +201,8 @@ function PublicStorePage() {
       })
     : null;
   const layout = layoutForStore(store.segment, products);
+  /** Delivery, restaurantes, saúde e conveniência conferem a sacola sem sair do catálogo. */
+  const quickCart = quickCartEnabled(store.segment);
   const promos = products.filter((product) => hasPromo(product)).slice(0, 6);
   const recommended = products.filter((product) => product.is_featured && !hasPromo(product)).slice(0, 6);
   const contactNumber = (store.whatsapp || store.phone || "").replace(/\D/g, "");
@@ -693,21 +698,43 @@ function PublicStorePage() {
               </p>
               <p className="text-muted-foreground">{formatCurrency(cart.subtotal)}</p>
             </div>
-            {availability.accepting ? (
+            {!availability.accepting ? (
+              <Button disabled className="bg-accent text-accent-foreground">
+                <ShoppingBag className="mr-2 size-4" aria-hidden="true" />
+                Loja indisponível
+              </Button>
+            ) : quickCart ? (
+              <Button
+                type="button"
+                className="bg-accent text-accent-foreground hover:bg-accent/90"
+                onClick={() => setCartSheetOpen(true)}
+              >
+                <ShoppingBag className="mr-2 size-4" aria-hidden="true" />
+                Ver sacola
+              </Button>
+            ) : (
               <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
                 <Link to="/$slug/carrinho" params={{ slug }}>
                   <ShoppingBag className="mr-2 size-4" aria-hidden="true" />
                   Ver carrinho
                 </Link>
               </Button>
-            ) : (
-              <Button disabled className="bg-accent text-accent-foreground">
-                <ShoppingBag className="mr-2 size-4" aria-hidden="true" />
-                Loja indisponível
-              </Button>
             )}
           </div>
         </div>
+      ) : null}
+
+      {quickCart ? (
+        <CartSheet
+          open={cartSheetOpen}
+          onOpenChange={setCartSheetOpen}
+          slug={slug}
+          items={cart.items}
+          subtotal={cart.subtotal}
+          accepting={availability.accepting}
+          onSetQuantity={cart.setQuantity}
+          onRemove={cart.remove}
+        />
       ) : null}
 
       <div className="flex-1" aria-hidden="true" />
