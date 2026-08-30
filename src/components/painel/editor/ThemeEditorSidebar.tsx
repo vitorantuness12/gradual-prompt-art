@@ -225,68 +225,8 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
       <Separator />
 
       <section className="space-y-3">
-        <h3 className="text-sm font-semibold text-foreground">Tipografia</h3>
-        <div className="space-y-1">
-          <Label className="text-xs">Fonte</Label>
-          <Select value={config.typography.font} onValueChange={(value) => patch({ typography: { ...config.typography, font: value as FontKey } })}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {FONT_OPTIONS.map((font) => (
-                <SelectItem key={font.key} value={font.key}>
-                  {font.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <SliderField
-          label={`Tamanho dos títulos (${config.typography.titleSize.toFixed(2)}x)`}
-          value={config.typography.titleSize}
-          min={0.9}
-          max={1.4}
-          step={0.05}
-          onChange={(value) => patch({ typography: { ...config.typography, titleSize: value } })}
-        />
-        <SliderField
-          label={`Peso dos títulos (${config.typography.titleWeight})`}
-          value={config.typography.titleWeight}
-          min={500}
-          max={800}
-          step={100}
-          onChange={(value) => patch({ typography: { ...config.typography, titleWeight: value } })}
-        />
-      </section>
-
-      <Separator />
-
-      <section className="space-y-3">
         <h3 className="text-sm font-semibold text-foreground">Layout</h3>
-        <SliderField
-          label={`Arredondamento (${config.layout.radius}px)`}
-          value={config.layout.radius}
-          min={0}
-          max={28}
-          step={2}
-          onChange={(value) => patch({ layout: { ...config.layout, radius: value } })}
-        />
-        <SliderField
-          label={`Espaço entre seções (${config.layout.sectionSpacing}px)`}
-          value={config.layout.sectionSpacing}
-          min={12}
-          max={64}
-          step={4}
-          onChange={(value) => patch({ layout: { ...config.layout, sectionSpacing: value } })}
-        />
-        <SliderField
-          label={`Largura máxima (${config.layout.maxWidth}px)`}
-          value={config.layout.maxWidth}
-          min={768}
-          max={1440}
-          step={32}
-          onChange={(value) => patch({ layout: { ...config.layout, maxWidth: value } })}
-        />
+
         <SelectField
           label="Formato dos botões"
           value={config.layout.buttonShape}
