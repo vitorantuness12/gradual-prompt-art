@@ -90,39 +90,46 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
       <Separator />
 
       <section className="space-y-3">
-        <h3 className="text-sm font-semibold text-foreground">Cores</h3>
-        <button
-          type="button"
-          className="text-xs font-medium text-primary underline underline-offset-2"
-          onClick={() => patch({ colors: { ...paletteFromPrimary(config.colors.primary) } })}
-        >
-          Gerar paleta a partir da cor principal
-        </button>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {COLOR_FIELDS.map((field) => (
-            <div key={field.key} className="space-y-1">
-              <Label htmlFor={`color-${field.key}`} className="text-xs">
-                {field.label}
-              </Label>
-              <div className="flex items-center gap-2">
-                <input
-                  id={`color-${field.key}`}
-                  type="color"
-                  value={isValidHex(config.colors[field.key]) ? config.colors[field.key] : "#000000"}
-                  onChange={(event) => setColor(field.key, event.target.value)}
-                  className="h-9 w-10 cursor-pointer rounded border border-border bg-card"
-                  aria-label={field.label}
-                />
-                <Input
-                  value={config.colors[field.key]}
-                  onChange={(event) => setColor(field.key, event.target.value)}
-                  className="h-9 text-xs"
-                  aria-label={`${field.label} em hexadecimal`}
-                />
-              </div>
-            </div>
-          ))}
+        <h3 className="text-sm font-semibold text-foreground">Cor da sua loja</h3>
+        <p className="text-xs text-muted-foreground">
+          Escolha uma cor. O resto (fundos, textos e selos) é ajustado automaticamente para ficar legível.
+        </p>
+
+        <div className="flex flex-wrap gap-2">
+          {QUICK_COLORS.map((color) => {
+            const selected = config.colors.primary.toLowerCase() === color.value.toLowerCase();
+            return (
+              <button
+                key={color.value}
+                type="button"
+                title={color.label}
+                aria-label={color.label}
+                aria-pressed={selected}
+                onClick={() => patch({ colors: paletteFromPrimary(color.value) })}
+                className={cn(
+                  "size-9 rounded-full border-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  selected ? "border-foreground scale-110" : "border-border hover:scale-105",
+                )}
+                style={{ background: color.value }}
+              />
+            );
+          })}
         </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            id="color-primary"
+            type="color"
+            value={isValidHex(config.colors.primary) ? config.colors.primary : "#000000"}
+            onChange={(event) => patch({ colors: paletteFromPrimary(event.target.value) })}
+            className="h-9 w-10 cursor-pointer rounded border border-border bg-card"
+            aria-label="Escolher outra cor"
+          />
+          <Label htmlFor="color-primary" className="text-xs text-muted-foreground">
+            Ou escolha outra cor
+          </Label>
+        </div>
+
         {warnings.length > 0 ? (
           <Alert>
             <AlertTriangle className="size-4" aria-hidden="true" />
@@ -137,7 +144,39 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
         ) : (
           <p className="text-xs text-muted-foreground">Contraste dentro do recomendado para leitura.</p>
         )}
+
+        <details className="rounded-lg border border-border bg-card p-3">
+          <summary className="cursor-pointer text-xs font-medium text-foreground">
+            Ajustes avançados de cores (opcional)
+          </summary>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            {COLOR_FIELDS.map((field) => (
+              <div key={field.key} className="space-y-1">
+                <Label htmlFor={`color-${field.key}`} className="text-xs">
+                  {field.label}
+                </Label>
+                <div className="flex items-center gap-2">
+                  <input
+                    id={`color-${field.key}`}
+                    type="color"
+                    value={isValidHex(config.colors[field.key]) ? config.colors[field.key] : "#000000"}
+                    onChange={(event) => setColor(field.key, event.target.value)}
+                    className="h-9 w-10 cursor-pointer rounded border border-border bg-card"
+                    aria-label={field.label}
+                  />
+                  <Input
+                    value={config.colors[field.key]}
+                    onChange={(event) => setColor(field.key, event.target.value)}
+                    className="h-9 text-xs"
+                    aria-label={`${field.label} em hexadecimal`}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </details>
       </section>
+
 
       <Separator />
 
