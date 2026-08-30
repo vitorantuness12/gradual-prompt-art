@@ -33,3 +33,13 @@ describe("assinaturas", () => {
     expect(canManage("canceled")).toBe(false);
   });
 });
+
+describe("receita recorrente", () => {
+  it("converte o ciclo em valor mensal equivalente", async () => {
+    const { monthlyRecurringValue } = await import("@/lib/assinaturas");
+    expect(monthlyRecurringValue("month", 100)).toBe(100);
+    expect(monthlyRecurringValue("week", 100)).toBeCloseTo(434.52, 1);
+    expect(monthlyRecurringValue("biweek", 100)).toBeCloseTo(202.78, 1);
+    expect(monthlyRecurringValue("month", -5)).toBe(0);
+  });
+});
