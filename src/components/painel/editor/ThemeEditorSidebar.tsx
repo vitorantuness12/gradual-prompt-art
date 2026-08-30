@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { maskPhone } from "@/lib/masks";
+import { cn } from "@/lib/utils";
 import {
   contrastWarnings,
   formatFooterPhone,
