@@ -8285,6 +8285,7 @@ export type Database = {
           address_street: string | null
           address_zip: string | null
           availability_status: string
+          checkout_type: string | null
           cover_url: string | null
           created_at: string
           delivery_areas: Json
@@ -8329,6 +8330,7 @@ export type Database = {
           address_street?: string | null
           address_zip?: string | null
           availability_status?: string
+          checkout_type?: string | null
           cover_url?: string | null
           created_at?: string
           delivery_areas?: Json
@@ -8373,6 +8375,7 @@ export type Database = {
           address_street?: string | null
           address_zip?: string | null
           availability_status?: string
+          checkout_type?: string | null
           cover_url?: string | null
           created_at?: string
           delivery_areas?: Json

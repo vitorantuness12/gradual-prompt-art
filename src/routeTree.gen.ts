@@ -39,6 +39,9 @@ import { Route as EntregaTokenRouteImport } from './routes/entrega.$token'
 import { Route as LojaSplatRouteImport } from './routes/loja.$'
 import { Route as MesaTokenRouteImport } from './routes/mesa.$token'
 import { Route as OrcamentoTokenRouteImport } from './routes/orcamento.$token'
+import { Route as SlugCheckoutAgendamentoRouteImport } from './routes/$slug.checkout_.agendamento'
+import { Route as SlugCheckoutDigitalRouteImport } from './routes/$slug.checkout_.digital'
+import { Route as SlugCheckoutLojaRouteImport } from './routes/$slug.checkout_.loja'
 import { Route as AuthenticatedConviteTokenRouteImport } from './routes/_authenticated/convite.$token'
 import { Route as AuthenticatedEntregadorStatusRouteImport } from './routes/_authenticated/entregador_.status'
 import { Route as AuthenticatedPainelIndexRouteImport } from './routes/_authenticated/painel.index'
@@ -232,6 +235,21 @@ const MesaTokenRoute = MesaTokenRouteImport.update({
 const OrcamentoTokenRoute = OrcamentoTokenRouteImport.update({
   id: '/orcamento/$token',
   path: '/orcamento/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SlugCheckoutAgendamentoRoute = SlugCheckoutAgendamentoRouteImport.update({
+  id: '/$slug/checkout_/agendamento',
+  path: '/$slug/checkout/agendamento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SlugCheckoutDigitalRoute = SlugCheckoutDigitalRouteImport.update({
+  id: '/$slug/checkout_/digital',
+  path: '/$slug/checkout/digital',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SlugCheckoutLojaRoute = SlugCheckoutLojaRouteImport.update({
+  id: '/$slug/checkout_/loja',
+  path: '/$slug/checkout/loja',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedConviteTokenRoute =
@@ -517,6 +535,9 @@ export interface FileRoutesByFullPath {
   '/mesa/$token': typeof MesaTokenRoute
   '/orcamento/$token': typeof OrcamentoTokenRoute
   '/$slug/': typeof SlugIndexRoute
+  '/$slug/checkout/agendamento': typeof SlugCheckoutAgendamentoRoute
+  '/$slug/checkout/digital': typeof SlugCheckoutDigitalRoute
+  '/$slug/checkout/loja': typeof SlugCheckoutLojaRoute
   '/convite/$token': typeof AuthenticatedConviteTokenRoute
   '/entregador/status': typeof AuthenticatedEntregadorStatusRoute
   '/painel/agendamentos': typeof AuthenticatedPainelAgendamentosRoute
@@ -590,6 +611,9 @@ export interface FileRoutesByTo {
   '/mesa/$token': typeof MesaTokenRoute
   '/orcamento/$token': typeof OrcamentoTokenRoute
   '/$slug': typeof SlugIndexRoute
+  '/$slug/checkout/agendamento': typeof SlugCheckoutAgendamentoRoute
+  '/$slug/checkout/digital': typeof SlugCheckoutDigitalRoute
+  '/$slug/checkout/loja': typeof SlugCheckoutLojaRoute
   '/convite/$token': typeof AuthenticatedConviteTokenRoute
   '/entregador/status': typeof AuthenticatedEntregadorStatusRoute
   '/painel/agendamentos': typeof AuthenticatedPainelAgendamentosRoute
@@ -666,6 +690,9 @@ export interface FileRoutesById {
   '/mesa/$token': typeof MesaTokenRoute
   '/orcamento/$token': typeof OrcamentoTokenRoute
   '/$slug/': typeof SlugIndexRoute
+  '/$slug/checkout_/agendamento': typeof SlugCheckoutAgendamentoRoute
+  '/$slug/checkout_/digital': typeof SlugCheckoutDigitalRoute
+  '/$slug/checkout_/loja': typeof SlugCheckoutLojaRoute
   '/_authenticated/convite/$token': typeof AuthenticatedConviteTokenRoute
   '/_authenticated/entregador_/status': typeof AuthenticatedEntregadorStatusRoute
   '/_authenticated/painel/agendamentos': typeof AuthenticatedPainelAgendamentosRoute
@@ -742,6 +769,9 @@ export interface FileRouteTypes {
     | '/mesa/$token'
     | '/orcamento/$token'
     | '/$slug/'
+    | '/$slug/checkout/agendamento'
+    | '/$slug/checkout/digital'
+    | '/$slug/checkout/loja'
     | '/convite/$token'
     | '/entregador/status'
     | '/painel/agendamentos'
@@ -815,6 +845,9 @@ export interface FileRouteTypes {
     | '/mesa/$token'
     | '/orcamento/$token'
     | '/$slug'
+    | '/$slug/checkout/agendamento'
+    | '/$slug/checkout/digital'
+    | '/$slug/checkout/loja'
     | '/convite/$token'
     | '/entregador/status'
     | '/painel/agendamentos'
@@ -890,6 +923,9 @@ export interface FileRouteTypes {
     | '/mesa/$token'
     | '/orcamento/$token'
     | '/$slug/'
+    | '/$slug/checkout_/agendamento'
+    | '/$slug/checkout_/digital'
+    | '/$slug/checkout_/loja'
     | '/_authenticated/convite/$token'
     | '/_authenticated/entregador_/status'
     | '/_authenticated/painel/agendamentos'
@@ -956,6 +992,9 @@ export interface RootRouteChildren {
   MesaTokenRoute: typeof MesaTokenRoute
   OrcamentoTokenRoute: typeof OrcamentoTokenRoute
   SlugIndexRoute: typeof SlugIndexRoute
+  SlugCheckoutAgendamentoRoute: typeof SlugCheckoutAgendamentoRoute
+  SlugCheckoutDigitalRoute: typeof SlugCheckoutDigitalRoute
+  SlugCheckoutLojaRoute: typeof SlugCheckoutLojaRoute
   ApiV1SplatRoute: typeof ApiV1SplatRoute
   ApiPublicAgendaLembretesRoute: typeof ApiPublicAgendaLembretesRoute
   ApiPublicAssinaturasCobrancasRoute: typeof ApiPublicAssinaturasCobrancasRoute
@@ -1181,6 +1220,27 @@ declare module '@tanstack/react-router' {
       path: '/orcamento/$token'
       fullPath: '/orcamento/$token'
       preLoaderRoute: typeof OrcamentoTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$slug/checkout_/agendamento': {
+      id: '/$slug/checkout_/agendamento'
+      path: '/$slug/checkout/agendamento'
+      fullPath: '/$slug/checkout/agendamento'
+      preLoaderRoute: typeof SlugCheckoutAgendamentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$slug/checkout_/digital': {
+      id: '/$slug/checkout_/digital'
+      path: '/$slug/checkout/digital'
+      fullPath: '/$slug/checkout/digital'
+      preLoaderRoute: typeof SlugCheckoutDigitalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$slug/checkout_/loja': {
+      id: '/$slug/checkout_/loja'
+      path: '/$slug/checkout/loja'
+      fullPath: '/$slug/checkout/loja'
+      preLoaderRoute: typeof SlugCheckoutLojaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/convite/$token': {
@@ -1606,6 +1666,9 @@ const rootRouteChildren: RootRouteChildren = {
   MesaTokenRoute: MesaTokenRoute,
   OrcamentoTokenRoute: OrcamentoTokenRoute,
   SlugIndexRoute: SlugIndexRoute,
+  SlugCheckoutAgendamentoRoute: SlugCheckoutAgendamentoRoute,
+  SlugCheckoutDigitalRoute: SlugCheckoutDigitalRoute,
+  SlugCheckoutLojaRoute: SlugCheckoutLojaRoute,
   ApiV1SplatRoute: ApiV1SplatRoute,
   ApiPublicAgendaLembretesRoute: ApiPublicAgendaLembretesRoute,
   ApiPublicAssinaturasCobrancasRoute: ApiPublicAssinaturasCobrancasRoute,

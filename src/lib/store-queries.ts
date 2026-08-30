@@ -16,7 +16,7 @@ export type CollectionItemRow = Database["public"]["Tables"]["product_collection
 export type RelatedRow = Database["public"]["Tables"]["product_related"]["Row"];
 
 export const PUBLIC_STORE_COLUMNS =
-  "id, slug, name, segment, description, logo_url, cover_url, phone, whatsapp, email, address_street, address_number, address_district, address_city, address_state, address_zip, opening_hours, delivery_fee, min_order_value, accepts_delivery, accepts_pickup, accepts_scheduling, accepts_dine_in, plan, is_active, is_demo, is_published, availability_status, paused_until, timezone, payment_methods, delivery_mode, delivery_areas, holidays, created_at, updated_at";
+  "id, slug, name, segment, checkout_type, description, logo_url, cover_url, phone, whatsapp, email, address_street, address_number, address_district, address_city, address_state, address_zip, opening_hours, delivery_fee, min_order_value, accepts_delivery, accepts_pickup, accepts_scheduling, accepts_dine_in, plan, is_active, is_demo, is_published, availability_status, paused_until, timezone, payment_methods, delivery_mode, delivery_areas, holidays, created_at, updated_at";
 
 export interface PublicStoreData {
   store: StoreRow;

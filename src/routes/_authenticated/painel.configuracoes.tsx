@@ -4,6 +4,7 @@ import { type FormEvent } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { CheckoutModelCard } from "@/components/painel/CheckoutModelCard";
 import { EmptyState, PageHeader } from "@/components/painel/PageHeader";
 import { StorePublicSettings } from "@/components/painel/StorePublicSettings";
 import { Button } from "@/components/ui/button";
@@ -153,6 +154,10 @@ function SettingsPage() {
       ) : null}
 
       <StorePublicSettings store={store} editable={editable} onSaved={refetch} />
+
+      <CheckoutModelCard store={store} storeId={store.id} editable={editable} onSaved={refetch} />
+
+
 
 
       <Card className="border-border/70 shadow-sm">
