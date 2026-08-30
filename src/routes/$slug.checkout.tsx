@@ -312,6 +312,52 @@ function CheckoutPage() {
     };
   }, [form.phone, form.email, slug, loadAccount]);
 
+  // Recuperação de carrinho abandonado: com o telefone já informado, guardamos
+  // o carrinho no servidor para poder enviar um único lembrete depois. Sem
+  // telefone válido não há nada a guardar — e nada é enviado.
+  const cartSignature = JSON.stringify(
+    cart.items.map((item) => [item.productId, item.variantId ?? "", item.quantity, item.unitPrice, item.notes ?? ""]),
+  );
+  useEffect(() => {
+    if (!cart.hydrated) return;
+    const digits = form.phone.replace(/\D/g, "");
+    if (digits.length < 10) return;
+
+    const timer = window.setTimeout(() => {
+      void salvarCarrinhoAbandonado({
+        data: {
+          storeSlug: slug,
+          phone: form.phone,
+          name: form.name.trim() || undefined,
+          notes: form.notes?.trim() || undefined,
+          couponCode: couponState.coupon?.code ?? undefined,
+          items: cart.items.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId ?? null,
+            variantName: item.variantName ?? null,
+            name: item.name,
+            unitPrice: item.unitPrice,
+            quantity: item.quantity,
+            notes: item.notes ?? null,
+            options: item.options ?? [],
+          })),
+          address: {
+            zipCode: form.zip || undefined,
+            street: form.street || undefined,
+            number: form.number || undefined,
+            complement: form.complement || undefined,
+            district: form.district || undefined,
+            reference: form.reference || undefined,
+          },
+        },
+      }).catch(() => undefined);
+    }, 1500);
+    return () => window.clearTimeout(timer);
+    // cartSignature resume o conteúdo do carrinho sem disparar a cada render.
+  }, [cartSignature, cart.hydrated, form.phone, slug]);
+
+
+
   // Calcula distância, prazo e frete assim que o endereço estiver utilizável.
   const zipDigits = form.zip.replace(/\D/g, "");
   const addressReady = isDeliverySelected && (zipDigits.length === 8 || (form.street.trim().length > 3 && form.district.trim().length > 2));
