@@ -25,7 +25,13 @@ import { storeAvailability } from "@/lib/store-config";
 import { computeDynamicEta } from "@/lib/operacao";
 import { getStoreLoad } from "@/lib/operacao.functions";
 import { publicAppearanceQuery, publishedTheme } from "@/lib/store-theme-queries";
-import { isSectionVisibleNow, resolvedFooterColors, resolvedFooterConfig } from "@/lib/store-theme";
+import {
+  isSectionVisibleNow,
+  resolvedFooterColors,
+  resolvedFooterConfig,
+  type CardStyle,
+  type ImagePosition,
+} from "@/lib/store-theme";
 import { publicStoreQuery, resolveSlugRedirect, type ProductRow } from "@/lib/store-queries";
 import { publicEntryPopupsQuery } from "@/lib/entry-popup-queries";
 import { isCampaignActive, selectCampaignProducts } from "@/lib/destaques";
@@ -435,7 +441,9 @@ function PublicStorePage() {
                 <ProductCard
                   key={product.id}
                   product={product}
-                  layout={layout}
+                  cardStyle={cardStyle}
+                  imagePosition={imagePosition}
+                  showPromoPrices={display.showPromoPrices}
                   isFavorite={favorites.has(product.id)}
                   onToggleFavorite={() => favorites.toggle(product.id)}
                   onOpen={() => setDetail(product)}
@@ -477,7 +485,9 @@ function PublicStorePage() {
                       <ProductCard
                         key={`${collection.id}-${product.id}`}
                         product={product}
-                        layout={layout}
+                        cardStyle={cardStyle}
+                      imagePosition={imagePosition}
+                      showPromoPrices={display.showPromoPrices}
                         isFavorite={favorites.has(product.id)}
                         onToggleFavorite={() => favorites.toggle(product.id)}
                         onOpen={() => setDetail(product)}
@@ -510,7 +520,9 @@ function PublicStorePage() {
                     <ProductCard
                       key={product.id}
                       product={product}
-                      layout={layout}
+                      cardStyle={cardStyle}
+                      imagePosition={imagePosition}
+                      showPromoPrices={display.showPromoPrices}
                       isFavorite={favorites.has(product.id)}
                       onToggleFavorite={() => favorites.toggle(product.id)}
                       onOpen={() => setDetail(product)}
@@ -534,7 +546,9 @@ function PublicStorePage() {
                   <ProductCard
                     key={product.id}
                     product={product}
-                    layout={layout}
+                    cardStyle={cardStyle}
+                  imagePosition={imagePosition}
+                  showPromoPrices={display.showPromoPrices}
                     isFavorite={favorites.has(product.id)}
                     onToggleFavorite={() => favorites.toggle(product.id)}
                     onOpen={() => setDetail(product)}
@@ -575,7 +589,9 @@ function PublicStorePage() {
                 <ProductCard
                   key={product.id}
                   product={product}
-                  layout={layout}
+                  cardStyle={cardStyle}
+                  imagePosition={imagePosition}
+                  showPromoPrices={display.showPromoPrices}
                   isFavorite={favorites.has(product.id)}
                   onToggleFavorite={() => favorites.toggle(product.id)}
                   onOpen={() => setDetail(product)}
