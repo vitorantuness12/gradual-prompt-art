@@ -187,7 +187,8 @@ export function paletteFromPrimary(primary: string): StoreThemeColors {
   const safe = isValidHex(primary) ? primary : "#e2452b";
   return {
     primary: safe,
-    secondary: shade(safe, 0.82),
+    // A cor secundária é sempre branca; o lojista pode mudar nos ajustes avançados.
+    secondary: "#ffffff",
     accent: shade(safe, -0.18),
     background: "#f7f7f8",
     card: "#ffffff",
@@ -401,7 +402,7 @@ export const THEME_PRESETS: ThemePreset[] = [
   preset("minimalista", "Minimalista", "Preto e branco, sem sombras, muito espaço.", "#111827", {
     layout: { ...defaultThemeConfig().layout, shadow: "none", radius: 8, buttonShape: "square", sectionSpacing: 48 },
     typography: { font: "inter", titleSize: 1, titleWeight: 500 },
-  }, { background: "#ffffff", card: "#ffffff", secondary: "#f2f2f3" }),
+  }, { background: "#ffffff", card: "#ffffff", secondary: "#ffffff" }),
 ];
 
 export function presetByKey(key: string): ThemePreset {
