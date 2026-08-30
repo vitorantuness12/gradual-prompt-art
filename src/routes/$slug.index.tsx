@@ -869,7 +869,7 @@ function ProductCard({
         <div
           className={cn(
             "flex shrink-0 gap-1.5 sm:gap-2",
-            stacked ? "items-center justify-between" : "flex-col items-end",
+            stacked ? "items-center justify-between" : "flex-col items-end justify-center",
           )}
         >
           <Button
