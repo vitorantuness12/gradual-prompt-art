@@ -249,7 +249,7 @@ function PublicStorePage() {
           <div className="h-16 w-full bg-primary/10" />
         )}
 
-        <div className="mx-auto max-w-5xl px-3 sm:px-6">
+        <div className="mx-auto w-full px-3 sm:px-6" style={shellStyle}>
           <div className={cn("relative rounded-2xl bg-card p-4 shadow-sm sm:p-6", coverUrl && "-mt-10 sm:-mt-10")}>
             {logoUrl ? (
               <img
