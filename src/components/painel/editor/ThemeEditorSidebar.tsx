@@ -75,12 +75,8 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
   const patch = (partial: Partial<StoreThemeConfig>) => onChange({ ...config, ...partial });
   const setColor = (key: keyof StoreThemeColors, value: string) =>
     patch({ colors: { ...config.colors, [key]: value } });
-  /** Uma escolha de cor ajusta a paleta inteira, inclusive o rodapé. */
-  const applyPrimary = (value: string) =>
-    patch({
-      colors: paletteFromPrimary(value),
-      footer: { ...config.footer, ...footerColorsFromPrimary(value) },
-    });
+  /** Uma escolha de cor ajusta a paleta inteira; o rodapé segue a cor principal na renderização. */
+  const applyPrimary = (value: string) => patch({ colors: paletteFromPrimary(value) });
 
   return (
     <div className="space-y-6">
