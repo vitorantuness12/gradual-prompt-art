@@ -72,9 +72,12 @@ function PublicStorePage() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
   const { data, isLoading, isError } = useQuery(publicStoreQuery(slug));
-   const cart = useCart(slug, data?.store.id ?? null);
+  const cart = useCart(slug, data?.store.id ?? null);
   /** Sacola em painel lateral: o cliente confere sem sair do catálogo. */
   const [cartSheetOpen, setCartSheetOpen] = useState(false);
+  /** Cupom compartilhado com carrinho/checkout, revalidado quando o subtotal muda. */
+  const couponState = useCartCoupon(slug, data?.store.id ?? null, cart.subtotal, cart.hydrated);
+  const upsell = useUpsellSuggestions(data, cart.items, { max: 4 });
   const favorites = useFavorites(slug);
   const appearance = useQuery(publicAppearanceQuery(data?.store.id ?? null));
   const theme = publishedTheme(appearance.data);
