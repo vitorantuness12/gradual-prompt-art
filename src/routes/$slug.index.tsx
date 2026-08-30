@@ -19,6 +19,8 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildLineId, useCart, type CartOption } from "@/hooks/useCart";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useCartCoupon } from "@/hooks/useCartCoupon";
+import { useUpsellSuggestions } from "@/hooks/useUpsellSuggestions";
 import { currentPrice, hasPromo, layoutForStore, productAvailability, PRODUCT_KIND_LABEL } from "@/lib/catalog";
 import { fetchRatingSummary } from "@/lib/avaliacoes";
 import { formatCurrency } from "@/lib/format";
