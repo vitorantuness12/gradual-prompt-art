@@ -33,6 +33,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { rememberOrder, useCart } from "@/hooks/useCart";
 import { useCartCoupon } from "@/hooks/useCartCoupon";
+import { useUpsellSuggestions } from "@/hooks/useUpsellSuggestions";
+import { UpsellSuggestions } from "@/components/store/UpsellSuggestions";
+import {
+  marcarCarrinhoRecuperado,
+  salvarCarrinhoAbandonado,
+} from "@/lib/carrinho-abandonado.functions";
+
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/lib/format";
 import { EMPTY_TRACKING, bumpPrice, parseTracking, type Tracking } from "@/lib/digitais";
