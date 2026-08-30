@@ -4,6 +4,7 @@ import { type FormEvent } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { CheckoutModelCard } from "@/components/painel/CheckoutModelCard";
 import { EmptyState, PageHeader } from "@/components/painel/PageHeader";
 import { StorePublicSettings } from "@/components/painel/StorePublicSettings";
 import { Button } from "@/components/ui/button";
