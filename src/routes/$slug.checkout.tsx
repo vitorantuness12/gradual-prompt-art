@@ -728,6 +728,7 @@ function CheckoutPage() {
           discount: discountFromCoupon,
           coupon_code: coupon?.code ?? null,
           cashback_used: cashbackApplied,
+          referral_code: referralApplied,
           total,
           payment_method: payment,
           scheduled_for: scheduledFor,
