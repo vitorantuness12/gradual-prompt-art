@@ -10,6 +10,10 @@ const itemSchema = z.object({
   quantity: z.number().finite().positive(),
   unitPrice: z.number().finite().min(0),
   notes: z.string().nullish(),
+  options: z
+    .array(z.object({ groupName: z.string(), optionName: z.string() }))
+    .optional(),
+  fromUpsell: z.boolean().optional(),
 });
 
 const offerSchema = z.object({
