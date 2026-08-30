@@ -16,7 +16,6 @@ import { cn } from "@/lib/utils";
 import {
   contrastWarnings,
   isValidHex,
-  footerColorsFromPrimary,
   paletteFromPrimary,
   THEME_PRESETS,
   type ButtonShape,
