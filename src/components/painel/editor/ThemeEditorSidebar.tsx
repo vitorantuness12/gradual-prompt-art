@@ -75,8 +75,6 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
   const patch = (partial: Partial<StoreThemeConfig>) => onChange({ ...config, ...partial });
   const setColor = (key: keyof StoreThemeColors, value: string) =>
     patch({ colors: { ...config.colors, [key]: value } });
-  const setFooter = (partial: Partial<StoreThemeConfig["footer"]>) =>
-    patch({ footer: { ...config.footer, ...partial } });
   /** Uma escolha de cor ajusta a paleta inteira, inclusive o rodapé. */
   const applyPrimary = (value: string) =>
     patch({
@@ -193,17 +191,10 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
                 </div>
               </div>
             ))}
-            <ColorField
-              label="Fundo do rodapé"
-              value={config.footer.background}
-              onChange={(value) => setFooter({ background: value })}
-            />
-            <ColorField
-              label="Texto do rodapé"
-              value={config.footer.text}
-              onChange={(value) => setFooter({ text: value })}
-            />
           </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            O rodapé acompanha automaticamente a cor principal da loja.
+          </p>
         </details>
       </section>
 
