@@ -729,17 +729,17 @@ function StoreFooter({
           <p className="mt-1.5 text-sm leading-snug opacity-90">{footer.address}</p>
         ) : null}
         <p className="mt-4 text-xs opacity-90">
-            Feito com{" "}
-            <a
-              href="https://www.oseupedido.com.br"
-              target="_blank"
-              rel="noreferrer"
-              className="font-semibold underline underline-offset-2 hover:opacity-100"
-            >
-              O Seu Pedido
-            </a>
-          </p>
-        )}
+          Feito com{" "}
+          <a
+            href="https://www.oseupedido.com.br"
+            target="_blank"
+            rel="noreferrer"
+            className="font-semibold underline underline-offset-2 hover:opacity-100"
+          >
+            O Seu Pedido
+          </a>
+        </p>
+
       </div>
     </footer>
   );
