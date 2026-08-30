@@ -775,6 +775,11 @@ function CheckoutPage() {
         /* o programa de fidelidade nunca bloqueia a conclusão do pedido */
       }
 
+      // Pedido enviado: encerra o ciclo de recuperação (nada de lembrete).
+      void marcarCarrinhoRecuperado({
+        data: { storeSlug: store.slug, phone: form.phone, orderId: order.id },
+      }).catch(() => undefined);
+
       rememberOrder(slug, {
         code: order.code,
         storeId: store.id,
@@ -784,6 +789,7 @@ function CheckoutPage() {
         phone: form.phone.trim(),
       });
       cart.clear();
+
       couponState.clear();
       setReview(false);
       toast.success(`Pedido ${order.code} enviado para a loja!`);
