@@ -572,7 +572,13 @@ export async function releaseDigitalForOrder(
     .maybeSingle();
   if (!order) return { ok: false, released: 0, message: "Pedido não encontrado." };
 
-  if (!canReleaseDigital({ paymentStatus: order.payment_status, total: order.total, paidAmount })) {
+  if (
+    !canReleaseDigital({
+      paymentStatus: order.payment_status,
+      total: order.total,
+      paidAmount: paidAmount ?? null,
+    })
+  ) {
     return { ok: false, released: 0, message: "Pagamento ainda não confirmado: acesso mantido bloqueado." };
   }
 
