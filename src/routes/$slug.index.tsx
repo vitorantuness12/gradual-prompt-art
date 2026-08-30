@@ -25,7 +25,13 @@ import { storeAvailability } from "@/lib/store-config";
 import { computeDynamicEta } from "@/lib/operacao";
 import { getStoreLoad } from "@/lib/operacao.functions";
 import { publicAppearanceQuery, publishedTheme } from "@/lib/store-theme-queries";
-import { isSectionVisibleNow, resolvedFooterColors, resolvedFooterConfig } from "@/lib/store-theme";
+import {
+  isSectionVisibleNow,
+  resolvedFooterColors,
+  resolvedFooterConfig,
+  type CardStyle,
+  type ImagePosition,
+} from "@/lib/store-theme";
 import { publicStoreQuery, resolveSlugRedirect, type ProductRow } from "@/lib/store-queries";
 import { publicEntryPopupsQuery } from "@/lib/entry-popup-queries";
 import { isCampaignActive, selectCampaignProducts } from "@/lib/destaques";
@@ -198,12 +204,19 @@ function PublicStorePage() {
   const coverUrl = theme.branding?.coverUrl ?? store.cover_url ?? null;
   const logoUrl = theme.branding?.logoUrl ?? store.logo_url ?? null;
 
+  // O lojista escolhe o estilo dos itens no editor; o segmento é só o ponto de partida.
+  const cardStyle = theme.layout.cardStyle;
+  const imagePosition = theme.layout.imagePosition;
+  const display = theme.display;
+  /** Largura máxima do conteúdo vem do tema (variável do StoreThemeProvider). */
+  const shellStyle = { maxWidth: "var(--store-max-width)" } as const;
+
   const gridClass =
-    layout === "menu"
-      ? "grid gap-2.5 sm:gap-3 sm:grid-cols-2"
-      : layout === "showcase"
-        ? "grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-3"
-        : "grid gap-2.5 sm:gap-3";
+    cardStyle === "grid"
+      ? "grid grid-cols-2 items-stretch gap-2.5 sm:gap-4 lg:grid-cols-3"
+      : cardStyle === "compact"
+        ? "grid items-stretch gap-2 sm:grid-cols-2"
+        : "grid items-stretch gap-2.5 sm:gap-3";
 
   function addToCart(
     product: ProductRow,
@@ -242,7 +255,7 @@ function PublicStorePage() {
           <div className="h-16 w-full bg-primary/10" />
         )}
 
-        <div className="mx-auto max-w-5xl px-3 sm:px-6">
+        <div className="mx-auto w-full px-3 sm:px-6" style={shellStyle}>
           <div className={cn("relative rounded-2xl bg-card p-4 shadow-sm sm:p-6", coverUrl && "-mt-10 sm:-mt-10")}>
             {logoUrl ? (
               <img
@@ -269,7 +282,7 @@ function PublicStorePage() {
               </div>
 
               <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] leading-snug text-muted-foreground sm:text-sm">
-                {rating.data && rating.data.count > 0 ? (
+                {display.showRatings && rating.data && rating.data.count > 0 ? (
                   <>
                     <span className="flex items-center gap-1 font-medium text-foreground">
                       <Star className="size-4 fill-current text-amber-500" aria-hidden="true" />
@@ -301,7 +314,7 @@ function PublicStorePage() {
               ) : null}
 
               <ul className="mt-3 flex flex-col gap-2 text-[13px] text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-6 sm:text-sm">
-                {store.address_street ? (
+                {display.showAddress && store.address_street ? (
                   <li className="flex min-w-0 items-start gap-1.5">
                     <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                     <span className="min-w-0 break-words">
@@ -310,31 +323,34 @@ function PublicStorePage() {
                     </span>
                   </li>
                 ) : null}
-                {store.phone ? (
+                {display.showPhone && store.phone ? (
                   <li className="flex items-center gap-1.5">
                     <Phone className="size-4 shrink-0" aria-hidden="true" />
                     {store.phone}
                   </li>
                 ) : null}
-                <li className="flex min-w-0 items-center gap-1.5">
-                  <Clock className="size-4 shrink-0" aria-hidden="true" />
-                  <span className="min-w-0 truncate">{availability.message}</span>
-                </li>
+                {display.showHours ? (
+                  <li className="flex min-w-0 items-center gap-1.5">
+                    <Clock className="size-4 shrink-0" aria-hidden="true" />
+                    <span className="min-w-0 truncate">{availability.message}</span>
+                  </li>
+                ) : null}
               </ul>
 
               <div className="mt-4 flex flex-wrap items-center gap-2 sm:gap-3">
-                {contactNumber ? (
+                {display.showPhone && contactNumber ? (
                   <Button variant="outline" size="sm" className="flex-1 sm:flex-none" asChild>
                     <a href={`https://wa.me/55${contactNumber}`} target="_blank" rel="noreferrer">
                       <MessageCircle className="mr-2 size-4" aria-hidden="true" /> Falar com a loja
                     </a>
                   </Button>
                 ) : null}
-                {repeatConfig && manualAccessEnabled(repeatConfig) && !popups.isHidden("repeat") ? (
+                {display.showRepeatOrder && repeatConfig && manualAccessEnabled(repeatConfig) && !popups.isHidden("repeat") ? (
                   <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => popups.openManually("repeat")}>
                     <History className="mr-2 size-4" aria-hidden="true" /> Repetir pedido
                   </Button>
                 ) : null}
+
                 {highlightsConfig && manualAccessEnabled(highlightsConfig) && campaign && campaignItems.length > 0 ? (
                   <Button variant="outline" size="sm" className="max-w-full flex-1 truncate sm:flex-none" onClick={() => popups.openManually("highlights")}>
                     <Sparkles className="mr-2 size-4 shrink-0" aria-hidden="true" /> <span className="truncate">{campaign.title}</span>
@@ -355,7 +371,10 @@ function PublicStorePage() {
       </header>
 
 
-      <main className="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:px-6">
+      <main
+        className="mx-auto w-full px-4 py-8 sm:px-6"
+        style={{ ...shellStyle, display: "flex", flexDirection: "column", gap: "var(--store-section-gap)" }}
+      >
         <InstallAppBanner storeName={store.name} />
 
         {/* Busca e filtros */}
@@ -422,7 +441,9 @@ function PublicStorePage() {
                 <ProductCard
                   key={product.id}
                   product={product}
-                  layout={layout}
+                  cardStyle={cardStyle}
+                  imagePosition={imagePosition}
+                  showPromoPrices={display.showPromoPrices}
                   isFavorite={favorites.has(product.id)}
                   onToggleFavorite={() => favorites.toggle(product.id)}
                   onOpen={() => setDetail(product)}
@@ -464,7 +485,9 @@ function PublicStorePage() {
                       <ProductCard
                         key={`${collection.id}-${product.id}`}
                         product={product}
-                        layout={layout}
+                        cardStyle={cardStyle}
+                      imagePosition={imagePosition}
+                      showPromoPrices={display.showPromoPrices}
                         isFavorite={favorites.has(product.id)}
                         onToggleFavorite={() => favorites.toggle(product.id)}
                         onOpen={() => setDetail(product)}
@@ -497,7 +520,9 @@ function PublicStorePage() {
                     <ProductCard
                       key={product.id}
                       product={product}
-                      layout={layout}
+                      cardStyle={cardStyle}
+                      imagePosition={imagePosition}
+                      showPromoPrices={display.showPromoPrices}
                       isFavorite={favorites.has(product.id)}
                       onToggleFavorite={() => favorites.toggle(product.id)}
                       onOpen={() => setDetail(product)}
@@ -521,7 +546,9 @@ function PublicStorePage() {
                   <ProductCard
                     key={product.id}
                     product={product}
-                    layout={layout}
+                    cardStyle={cardStyle}
+                  imagePosition={imagePosition}
+                  showPromoPrices={display.showPromoPrices}
                     isFavorite={favorites.has(product.id)}
                     onToggleFavorite={() => favorites.toggle(product.id)}
                     onOpen={() => setDetail(product)}
@@ -562,7 +589,9 @@ function PublicStorePage() {
                 <ProductCard
                   key={product.id}
                   product={product}
-                  layout={layout}
+                  cardStyle={cardStyle}
+                  imagePosition={imagePosition}
+                  showPromoPrices={display.showPromoPrices}
                   isFavorite={favorites.has(product.id)}
                   onToggleFavorite={() => favorites.toggle(product.id)}
                   onOpen={() => setDetail(product)}
@@ -629,9 +658,11 @@ function PublicStorePage() {
         />
       ) : null}
 
-      <div className="mx-auto w-full max-w-5xl px-4 pb-24 sm:px-6">
-        <StoreReviews storeId={data.store.id} />
-      </div>
+      {display.showRatings ? (
+        <div className="mx-auto w-full px-4 pb-24 sm:px-6" style={shellStyle}>
+          <StoreReviews storeId={data.store.id} />
+        </div>
+      ) : null}
 
       <ProductDetailDialog
         product={detail}
@@ -655,7 +686,7 @@ function PublicStorePage() {
 
       {cart.hydrated && cart.count > 0 ? (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur">
-          <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+          <div className="mx-auto flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6" style={{ maxWidth: "var(--store-max-width)" }}>
             <div className="text-sm">
               <p className="font-medium text-foreground">
                 {cart.count} {cart.count === 1 ? "item" : "itens"}
@@ -720,7 +751,7 @@ function StoreFooter({
         paddingBottom: cartActive ? "5.5rem" : undefined,
       }}
     >
-      <div className="mx-auto max-w-5xl px-4 sm:px-6">
+      <div className="mx-auto w-full px-4 sm:px-6" style={{ maxWidth: "var(--store-max-width)" }}>
         {footer.name ? (
           <p className="text-base font-bold leading-tight sm:text-lg">{footer.name}</p>
         ) : null}
@@ -749,25 +780,54 @@ function StoreFooter({
 
 interface ProductCardProps {
   product: ProductRow;
-  layout: "menu" | "showcase" | "schedule";
+  /** Estilo escolhido pelo lojista em /painel/personalizar. */
+  cardStyle: CardStyle;
+  imagePosition: ImagePosition;
+  showPromoPrices: boolean;
   isFavorite: boolean;
   onToggleFavorite: () => void;
   onOpen: () => void;
 }
 
-function ProductCard({ product, layout, isFavorite, onToggleFavorite, onOpen }: ProductCardProps) {
+function ProductCard({
+  product,
+  cardStyle,
+  imagePosition,
+  showPromoPrices,
+  isFavorite,
+  onToggleFavorite,
+  onOpen,
+}: ProductCardProps) {
   const availability = productAvailability(product);
   const price = currentPrice(product);
+  // Em grade a imagem sempre fica no topo; em lista segue a escolha do lojista.
+  const stacked = cardStyle === "grid" || imagePosition === "top";
+  const compact = cardStyle === "compact";
+  const image = product.image_url ?? null;
 
   return (
-    <Card className="overflow-hidden border-border/70 shadow-sm transition hover:shadow-md">
+    <Card className="flex h-full flex-col overflow-hidden border-border/70 shadow-[var(--store-shadow)] transition hover:shadow-md">
       <CardContent
         className={cn(
-          "p-3 sm:p-4 sm:pt-6",
-          layout === "showcase" ? "space-y-2.5" : "flex items-start justify-between gap-3 sm:gap-4",
+          "flex h-full gap-3",
+          compact ? "p-2.5 sm:p-3" : "p-3 sm:p-4",
+          stacked ? "flex-col items-stretch" : "flex-row items-start justify-between sm:gap-4",
+          !stacked && imagePosition === "right" && "flex-row-reverse",
         )}
       >
-        <div className="min-w-0 flex-1">
+        {image && !compact ? (
+          <img
+            src={image}
+            alt={product.name}
+            loading="lazy"
+            className={cn(
+              "shrink-0 rounded-[var(--radius)] object-cover",
+              stacked ? "h-32 w-full sm:h-40" : "size-20 sm:size-24",
+            )}
+          />
+        ) : null}
+
+        <div className="flex min-w-0 flex-1 flex-col">
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <h3 className="min-w-0 break-words text-[15px] font-medium leading-snug text-foreground sm:text-base">
               {product.name}
@@ -783,12 +843,12 @@ function ProductCard({ product, layout, isFavorite, onToggleFavorite, onOpen }: 
               </Badge>
             ) : null}
           </div>
-          {product.description ? (
+          {product.description && !compact ? (
             <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-muted-foreground sm:text-sm">
               {product.description}
             </p>
           ) : null}
-          {(product.tags ?? []).length > 0 ? (
+          {(product.tags ?? []).length > 0 && !compact ? (
             <p className="mt-1 truncate text-[11px] text-muted-foreground sm:text-xs">{(product.tags ?? []).join(" · ")}</p>
           ) : null}
           <p className="mt-2 flex flex-wrap items-baseline gap-x-2 text-[13px] sm:text-sm">
@@ -796,7 +856,7 @@ function ProductCard({ product, layout, isFavorite, onToggleFavorite, onOpen }: 
               {formatCurrency(price)}
             </span>
 
-            {hasPromo(product) ? (
+            {showPromoPrices && hasPromo(product) ? (
               <span className="text-muted-foreground line-through">{formatCurrency(Number(product.price))}</span>
             ) : null}
             {product.kind === "service" && product.duration_minutes ? (
@@ -809,7 +869,7 @@ function ProductCard({ product, layout, isFavorite, onToggleFavorite, onOpen }: 
         <div
           className={cn(
             "flex shrink-0 gap-1.5 sm:gap-2",
-            layout === "showcase" ? "items-center justify-between" : "flex-col items-end",
+            stacked ? "items-center justify-between" : "flex-col items-end justify-center",
           )}
         >
           <Button
@@ -825,7 +885,11 @@ function ProductCard({ product, layout, isFavorite, onToggleFavorite, onOpen }: 
           <Button
             size="sm"
             variant="outline"
-            className={cn("h-8 px-2.5 text-xs sm:h-9 sm:px-3 sm:text-sm", layout === "showcase" && "flex-1")}
+            className={cn(
+              "h-8 px-2.5 text-xs sm:h-9 sm:px-3 sm:text-sm",
+              stacked && "flex-1",
+              "rounded-[var(--store-button-radius)]",
+            )}
             disabled={!availability.available}
             onClick={onOpen}
           >
@@ -833,6 +897,7 @@ function ProductCard({ product, layout, isFavorite, onToggleFavorite, onOpen }: 
           </Button>
         </div>
       </CardContent>
+
     </Card>
   );
 }
