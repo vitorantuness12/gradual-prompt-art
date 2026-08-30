@@ -58,7 +58,26 @@ export interface CheckoutModelStore {
   accepts_scheduling?: boolean | null;
 }
 
+/**
+ * Palavras que decidem o checkout antes do classificador geral.
+ * `suggestSegmentGroup` prioriza alimentação e, por isso, "barbearia" cai em
+ * alimentação por causa do trecho "bar". Aqui a leitura precisa ser exata.
+ */
+const CHECKOUT_KEYWORDS: { group: SegmentGroupId; terms: string[] }[] = [
+  {
+    group: "servicos",
+    terms: ["barbe", "salão", "salao", "clínic", "clinic", "consult", "estét", "estet", "tosa", "manicure", "massag"],
+  },
+  { group: "digital", terms: ["curso", "mentor", "e-book", "ebook", "software", "digital", "assinatura", "infoprodut"] },
+];
+
 function segmentGroupOf(store: CheckoutModelStore): SegmentGroupId {
+  const term = (store.segment ?? "").trim().toLowerCase();
+  if (term) {
+    for (const rule of CHECKOUT_KEYWORDS) {
+      if (rule.terms.some((keyword) => term.includes(keyword))) return rule.group;
+    }
+  }
   return suggestSegmentGroup(store.segment);
 }
 
