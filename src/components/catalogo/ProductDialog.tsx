@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { ImageUploadField } from "@/components/store/ImageUploadField";
 import type { CatalogData, ProductRow } from "@/hooks/useCatalog";
 import { supabase } from "@/integrations/supabase/client";
 import { parseCustomFields, parseCustomFieldsText, serializeCustomFields } from "@/lib/encomendas";
@@ -46,6 +47,7 @@ const schema = z.object({
 interface FormState {
   name: string;
   description: string;
+  imageUrl: string | null;
   categoryId: string;
   kind: ProductKind;
   price: string;
@@ -97,6 +99,7 @@ function initialState(product: ProductRow | null, defaultKind: ProductKind = "pr
   return {
     name: product?.name ?? "",
     description: product?.description ?? "",
+    imageUrl: product?.image_url ?? null,
     categoryId: product?.category_id ?? "none",
     kind: (product?.kind ?? defaultKind) as ProductKind,
     price: product ? String(Number(product.price)) : "",
@@ -252,6 +255,7 @@ export function ProductDialog({
       store_id: storeId,
       name: parsed.data.name,
       description: form.description.trim() || null,
+      image_url: form.imageUrl,
       category_id: form.categoryId === "none" ? null : form.categoryId,
       kind: form.kind,
       price: parsed.data.price,
@@ -435,6 +439,16 @@ export function ProductDialog({
                           ? "Ex.: avaliação, lavagem, corte e finalização. Traga referências se quiser."
                           : undefined
                     }
+                  />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <ImageUploadField
+                    storeId={storeId}
+                    kind="product"
+                    label="Foto do item"
+                    value={form.imageUrl}
+                    onChange={(url) => set("imageUrl", url)}
+                    hint="Use uma foto quadrada e bem iluminada. Máximo 8 MB."
                   />
                 </div>
                 <div className="space-y-2">
