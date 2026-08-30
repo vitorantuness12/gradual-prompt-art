@@ -734,7 +734,7 @@ export const awardOrderLoyalty = createServerFn({ method: "POST" })
         customer_id: customerId,
         kind: "earn",
         points: result.total,
-        cashback_amount: result.cashback,
+        cashback_amount: 0,
         order_id: order.id,
         description: result.lines.map((line) => line.label).join(" · "),
         expires_at: expiresAt,
@@ -746,20 +746,39 @@ export const awardOrderLoyalty = createServerFn({ method: "POST" })
       .update({
         points_balance: account.points_balance + result.total,
         points_earned: account.points_earned + result.total,
-        cashback_balance: Number(account.cashback_balance) + result.cashback,
         orders_count: account.orders_count + 1,
         total_spent: Number(account.total_spent) + Number(order.total),
         last_order_at: order.created_at,
       })
       .eq("id", account.id);
 
+    // Cashback em R$: debita o que foi usado no pedido, credita o novo saldo
+    // com validade e paga as duas pontas da indicação (uma única vez).
+    const { settleOrderCashback } = await import("@/lib/cashback.server");
+    const cashback = await settleOrderCashback(supabaseAdmin, {
+      storeId: store.id,
+      customerId,
+      orderId: order.id,
+      orderTotal: Number(order.total),
+      cashbackUsed: Number(order.cashback_used ?? 0),
+    });
+
     await syncTier(supabaseAdmin, store.id, customerId);
     await updateMissions(supabaseAdmin, store.id, customerId, Number(order.total));
+
+    const parts = [
+      result.total > 0 ? `${result.total} ponto(s)` : "",
+      cashback.earned > 0 ? `R$ ${cashback.earned.toFixed(2)} de cashback` : "",
+      cashback.referral > 0 ? `R$ ${cashback.referral.toFixed(2)} de bônus da indicação` : "",
+    ].filter(Boolean);
 
     return {
       ok: true,
       points: result.total,
-      message: `Você ganhou ${result.total} ponto(s) neste pedido.`,
+      message:
+        parts.length > 0
+          ? `Você ganhou ${parts.join(" e ")} neste pedido.`
+          : "Pedido registrado no programa de fidelidade.",
     };
   });
 
