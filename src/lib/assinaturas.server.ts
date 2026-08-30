@@ -200,9 +200,8 @@ export async function runRecurringOrders(
       continue;
     }
 
-    const order = await createOrderFromSubscription(row, now, admin) as never;
-    void order;
     const created = await createOrderFromSubscription(admin, row, now);
+
     if (!created) {
       result.failed += 1;
       await admin
