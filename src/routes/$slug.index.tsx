@@ -198,12 +198,19 @@ function PublicStorePage() {
   const coverUrl = theme.branding?.coverUrl ?? store.cover_url ?? null;
   const logoUrl = theme.branding?.logoUrl ?? store.logo_url ?? null;
 
+  // O lojista escolhe o estilo dos itens no editor; o segmento é só o ponto de partida.
+  const cardStyle = theme.layout.cardStyle;
+  const imagePosition = theme.layout.imagePosition;
+  const display = theme.display;
+  /** Largura máxima do conteúdo vem do tema (variável do StoreThemeProvider). */
+  const shellStyle = { maxWidth: "var(--store-max-width)" } as const;
+
   const gridClass =
-    layout === "menu"
-      ? "grid gap-2.5 sm:gap-3 sm:grid-cols-2"
-      : layout === "showcase"
-        ? "grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-3"
-        : "grid gap-2.5 sm:gap-3";
+    cardStyle === "grid"
+      ? "grid grid-cols-2 items-stretch gap-2.5 sm:gap-4 lg:grid-cols-3"
+      : cardStyle === "compact"
+        ? "grid items-stretch gap-2 sm:grid-cols-2"
+        : "grid items-stretch gap-2.5 sm:gap-3";
 
   function addToCart(
     product: ProductRow,
