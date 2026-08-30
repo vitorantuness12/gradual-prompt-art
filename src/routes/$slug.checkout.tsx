@@ -197,6 +197,9 @@ function CheckoutPage() {
   const [account, setAccount] = useState<CustomerAccount | null>(null);
   const [capacityBlock, setCapacityBlock] = useState<CapacityResponse | null>(null);
   const [useCashback, setUseCashback] = useState(false);
+  const [referralInput, setReferralInput] = useState("");
+  const [referralMessage, setReferralMessage] = useState<string | null>(null);
+  const [referralApplied, setReferralApplied] = useState<string | null>(null);
   const [estimate, setEstimate] = useState<DeliveryEstimate | null>(null);
   const [estimating, setEstimating] = useState(false);
   const [isSearchingCep, setIsSearchingCep] = useState(false);
