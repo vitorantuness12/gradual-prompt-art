@@ -445,7 +445,7 @@ export async function runCashbackExpiryReminders(
   const { data: accounts } = await admin
     .from("loyalty_accounts")
     .select(
-      "id, store_id, customer_id, cashback_balance, cashback_expires_at, cashback_expiry_notified_at, customer:customers(name, phone), store:stores(name, slug)",
+      "id, store_id, customer_id, cashback_balance, cashback_expires_at, cashback_expiry_notified_at, customer:customers!loyalty_accounts_customer_id_fkey(name, phone), store:stores(name, slug)",
     )
     .gt("cashback_balance", 0)
     .not("cashback_expires_at", "is", null)
