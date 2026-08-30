@@ -1324,19 +1324,80 @@ function CheckoutPage() {
             ) : null}
 
             {cashbackAvailable > 0 ? (
-              <label className="flex items-center gap-3 rounded-xl border border-border/70 p-3 text-sm">
+              <label className="flex items-start gap-3 rounded-xl border border-border/70 p-3 text-sm">
                 <input
                   type="checkbox"
                   checked={useCashback}
                   onChange={(event) => setUseCashback(event.target.checked)}
-                  className="size-4 accent-primary"
+                  disabled={cashbackLimit <= 0}
+                  className="mt-0.5 size-4 accent-primary"
                 />
                 <span>
-                  Usar saldo de fidelidade disponível:{" "}
+                  Usar meu cashback:{" "}
                   <strong className="text-foreground">{formatCurrency(cashbackAvailable)}</strong>
+                  {cashbackLimit > 0 && cashbackLimit < cashbackAvailable ? (
+                    <span className="block text-xs text-muted-foreground">
+                      Neste pedido você pode usar até {formatCurrency(cashbackLimit)}.
+                    </span>
+                  ) : null}
+                  {cashbackLimit <= 0 ? (
+                    <span className="block text-xs text-muted-foreground">
+                      Saldo indisponível para este pedido.
+                    </span>
+                  ) : null}
+                  {cashback?.expiresAt ? (
+                    <span className="block text-xs text-muted-foreground">
+                      Válido até {new Date(cashback.expiresAt).toLocaleDateString("pt-BR")}.
+                    </span>
+                  ) : null}
                 </span>
               </label>
             ) : null}
+
+            {cashback?.referralEnabled && !cashback.referredAlready && cashback.referralCount === 0 ? (
+              <div className="space-y-2 rounded-xl border border-border/70 p-3 text-sm">
+                <p className="font-medium text-foreground">Tem um código de indicação?</p>
+                <p className="text-xs text-muted-foreground">
+                  Você e quem indicou recebem cashback depois que este pedido for concluído.
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    value={referralInput}
+                    onChange={(event) => setReferralInput(event.target.value.toUpperCase())}
+                    placeholder="CODIGO"
+                    disabled={Boolean(referralApplied)}
+                    aria-label="Código de indicação"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={Boolean(referralApplied) || referralInput.trim().length < 4}
+                    onClick={async () => {
+                      const result = await applyReferralCode({
+                        data: { storeSlug: slug, phone: form.phone, code: referralInput },
+                      });
+                      setReferralMessage(result.message);
+                      if (result.ok) {
+                        setReferralApplied(referralInput.trim().toUpperCase());
+                        await cashbackQuery.refetch();
+                      }
+                    }}
+                  >
+                    Aplicar
+                  </Button>
+                </div>
+                {referralMessage ? (
+                  <p
+                    className={
+                      referralApplied ? "text-xs text-emerald-700" : "text-xs text-destructive"
+                    }
+                  >
+                    {referralMessage}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+
 
             <PaymentMethodPicker
               enabled={enabledPayments}
