@@ -6,6 +6,13 @@
  * (RLS), e o checkout precisa receber de volta o código gerado.
  */
 
+export type PedidoLojaType =
+  | "delivery"
+  | "pickup"
+  | "dine_in"
+  | "scheduled"
+  | "counter";
+
 export interface PedidoLojaItemInput {
   productId: string;
   variantId?: string | null;
@@ -28,7 +35,7 @@ export interface PedidoLojaInput {
   customerName: string;
   customerPhone: string;
   customerEmail?: string | null;
-  type: string;
+  type: PedidoLojaType;
   tableNumber?: string | null;
   distanceKm?: number | null;
   deliveryLat?: number | null;
