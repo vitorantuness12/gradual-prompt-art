@@ -713,18 +713,19 @@ function CheckoutPage() {
         setCapacityBlock(null);
       }
 
-      const { data: order, error } = await supabase
-        .from("orders")
-        .insert({
-          store_id: store.id,
-          customer_name: form.name.trim(),
-          customer_phone: form.phone.trim(),
-          customer_email: form.email.trim() || null,
+      // A gravação acontece no servidor: o visitante anônimo pode inserir mas
+      // não pode ler pedidos (RLS), e precisamos do código gerado de volta.
+      const created = await sendOrder({
+        data: {
+          storeSlug: store.slug,
+          customerName: form.name.trim(),
+          customerPhone: form.phone.trim(),
+          customerEmail: form.email.trim() || null,
           type: scheduledFor ? "scheduled" : selected.orderType,
-          table_number: fulfillment === "table" ? form.table.trim() : null,
-          distance_km: isDelivery ? estimate?.distanceKm ?? null : null,
-          delivery_lat: isDelivery ? estimate?.destination?.lat ?? null : null,
-          delivery_lng: isDelivery ? estimate?.destination?.lng ?? null : null,
+          tableNumber: fulfillment === "table" ? form.table.trim() : null,
+          distanceKm: isDelivery ? estimate?.distanceKm ?? null : null,
+          deliveryLat: isDelivery ? estimate?.destination?.lat ?? null : null,
+          deliveryLng: isDelivery ? estimate?.destination?.lng ?? null : null,
           address: isDelivery
             ? {
                 zip: form.zip.trim(),
@@ -745,76 +746,55 @@ function CheckoutPage() {
               .filter(Boolean)
               .join(" · ") || null,
           subtotal: cart.subtotal + bumpTotal,
-          delivery_fee: deliveryFee,
-          affiliate_code: tracking.affiliate_code,
-          utm_source: tracking.utm_source,
-          utm_medium: tracking.utm_medium,
-          utm_campaign: tracking.utm_campaign,
-          utm_content: tracking.utm_content,
+          deliveryFee: deliveryFee,
           discount: discountFromCoupon,
-          coupon_code: coupon?.code ?? null,
-          cashback_used: cashbackApplied,
-          referral_code: referralApplied,
-          upsell_items: upsellStats.items,
-          upsell_total: upsellStats.total,
+          couponCode: coupon?.code ?? null,
+          cashbackUsed: cashbackApplied,
+          referralCode: referralApplied,
+          upsellItems: upsellStats.items,
+          upsellTotal: upsellStats.total,
           total,
-          payment_method: payment,
-          scheduled_for: scheduledFor,
+          paymentMethod: payment,
+          scheduledFor,
           channel: "loja",
-        })
-        .select("id, code")
-        .single();
-
-      if (error || !order) throw new Error(error?.message ?? "Falha ao criar pedido.");
-
-      const { error: itemsError } = await supabase.from("order_items").insert(
-        cart.items.map((item) => ({
-          order_id: order.id,
-          store_id: store.id,
-          product_id: item.productId,
-          variant_id: item.variantId ?? null,
-          variant_name: item.variantName ?? null,
-          product_name: item.name,
-          quantity: item.quantity,
-          unit_price: item.unitPrice,
-          total: item.unitPrice * item.quantity,
-          notes:
-            [
-              (item.options ?? [])
-                .map((option) => `${option.groupName}: ${option.optionName}`)
-                .join(" · "),
-              item.notes?.trim() ?? "",
-            ]
-              .filter(Boolean)
-              .join(" | ") || null,
-        })),
-      );
-      if (itemsError) throw new Error(itemsError.message);
-
-      // Order bump: adiciona as ofertas aceitas e registra a conversão.
-      if (bumpLines.length > 0) {
-        await supabase.from("order_items").insert(
-          bumpLines.map((line) => ({
-            order_id: order.id,
-            store_id: store.id,
-            product_id: line.productId,
-            product_name: line.name,
-            quantity: 1,
-            unit_price: line.price,
-            total: line.price,
-            notes: "Oferta do checkout",
+          affiliateCode: tracking.affiliate_code,
+          utmSource: tracking.utm_source,
+          utmMedium: tracking.utm_medium,
+          utmCampaign: tracking.utm_campaign,
+          utmContent: tracking.utm_content,
+          items: cart.items.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId ?? null,
+            variantName: item.variantName ?? null,
+            productName: item.name,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            notes:
+              [
+                (item.options ?? [])
+                  .map((option) => `${option.groupName}: ${option.optionName}`)
+                  .join(" · "),
+                item.notes?.trim() ?? "",
+              ]
+                .filter(Boolean)
+                .join(" | ") || null,
           })),
-        );
-        for (const line of bumpLines) {
-          const offer = offers.find((item) => item.id === line.offerId);
-          if (offer) {
-            await supabase
-              .from("checkout_offers")
-              .update({ conversions: (offer.conversions ?? 0) + 1 })
-              .eq("id", line.offerId);
-          }
-        }
+          offers: bumpLines.map((line) => ({
+            offerId: line.offerId,
+            productId: line.productId,
+            name: line.name,
+            price: line.price,
+          })),
+        },
+      });
+
+      if (!created.ok || !created.code || !created.id) {
+        toast.error(created.message || "Não foi possível enviar o pedido.");
+        setSubmitting(false);
+        return;
       }
+
+      const order = { id: created.id, code: created.code };
 
       logCheckout("purchase", { amount: total, orderId: order.id, couponCode: coupon?.code ?? null });
 
