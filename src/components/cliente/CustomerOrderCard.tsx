@@ -1,16 +1,31 @@
 import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import { CalendarClock, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TRACK_STEPS, formatOrderAddress, publicTrackingPath, trackStepIndex } from "@/lib/acompanhamento";
+import {
+  SUBSCRIPTION_PERIODS,
+  SUBSCRIPTION_PERIOD_LABEL,
+  type SubscriptionPeriod,
+} from "@/lib/assinaturas";
+import { createSubscriptionFromOrder } from "@/lib/assinaturas.functions";
 import { customerOrderDetail, type CustomerHistory } from "@/lib/cliente.functions";
 import { ORDER_STATUS_LABEL, ORDER_TYPE_LABEL, formatCurrency, formatDateTime } from "@/lib/format";
+
 
 type OrderRow = CustomerHistory["orders"][number];
 
