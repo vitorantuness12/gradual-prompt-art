@@ -705,7 +705,7 @@ function StoreFooter({
   cartActive: boolean;
 }) {
   const footer = resolvedFooterConfig(theme.footer, store);
-  const hasContent = footer.name || footer.phone || footer.address || footer.note;
+  const hasContent = footer.name || footer.phone || footer.address;
 
   if (!hasContent) return null;
 
@@ -728,10 +728,7 @@ function StoreFooter({
         {footer.address ? (
           <p className="mt-1.5 text-sm leading-snug opacity-90">{footer.address}</p>
         ) : null}
-        {footer.note ? (
-          <p className="mt-4 text-xs opacity-90">{footer.note}</p>
-        ) : (
-          <p className="mt-4 text-xs opacity-90">
+        <p className="mt-4 text-xs opacity-90">
             Feito com{" "}
             <a
               href="https://www.oseupedido.com.br"

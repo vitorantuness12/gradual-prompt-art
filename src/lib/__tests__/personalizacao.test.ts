@@ -130,6 +130,7 @@ describe("rodapé da loja", () => {
     expect(footer.name).toBe("Meu Nome");
     expect(footer.phone).toBe("(11) 99999-8888");
     expect(footer.address).toBe("Av. Paulista, 1");
-    expect(footer.note).toBe("Obrigado!");
+    // A assinatura do rodapé é fixa: nunca vem da configuração da loja.
+    expect(footer.note).toBeNull();
   });
 });
