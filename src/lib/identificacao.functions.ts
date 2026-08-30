@@ -40,7 +40,10 @@ export const DEFAULT_CHECKOUT_SETTINGS: CheckoutSettings = {
   trackingLinkDays: 30,
   requireEmail: false,
   requireFullAddress: true,
+  upsellEnabled: true,
+  upsellMaxItems: 4,
 };
+
 
 export interface CustomerAddressOption {
   id: string;
