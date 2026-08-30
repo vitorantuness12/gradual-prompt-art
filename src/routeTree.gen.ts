@@ -39,6 +39,7 @@ import { Route as EntregaTokenRouteImport } from './routes/entrega.$token'
 import { Route as LojaSplatRouteImport } from './routes/loja.$'
 import { Route as MesaTokenRouteImport } from './routes/mesa.$token'
 import { Route as OrcamentoTokenRouteImport } from './routes/orcamento.$token'
+import { Route as SlugCheckoutDigitalRouteImport } from './routes/$slug.checkout_.digital'
 import { Route as AuthenticatedConviteTokenRouteImport } from './routes/_authenticated/convite.$token'
 import { Route as AuthenticatedEntregadorStatusRouteImport } from './routes/_authenticated/entregador_.status'
 import { Route as AuthenticatedPainelIndexRouteImport } from './routes/_authenticated/painel.index'
@@ -232,6 +233,11 @@ const MesaTokenRoute = MesaTokenRouteImport.update({
 const OrcamentoTokenRoute = OrcamentoTokenRouteImport.update({
   id: '/orcamento/$token',
   path: '/orcamento/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SlugCheckoutDigitalRoute = SlugCheckoutDigitalRouteImport.update({
+  id: '/$slug/checkout_/digital',
+  path: '/$slug/checkout/digital',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedConviteTokenRoute =
@@ -517,6 +523,7 @@ export interface FileRoutesByFullPath {
   '/mesa/$token': typeof MesaTokenRoute
   '/orcamento/$token': typeof OrcamentoTokenRoute
   '/$slug/': typeof SlugIndexRoute
+  '/$slug/checkout/digital': typeof SlugCheckoutDigitalRoute
   '/convite/$token': typeof AuthenticatedConviteTokenRoute
   '/entregador/status': typeof AuthenticatedEntregadorStatusRoute
   '/painel/agendamentos': typeof AuthenticatedPainelAgendamentosRoute
@@ -590,6 +597,7 @@ export interface FileRoutesByTo {
   '/mesa/$token': typeof MesaTokenRoute
   '/orcamento/$token': typeof OrcamentoTokenRoute
   '/$slug': typeof SlugIndexRoute
+  '/$slug/checkout/digital': typeof SlugCheckoutDigitalRoute
   '/convite/$token': typeof AuthenticatedConviteTokenRoute
   '/entregador/status': typeof AuthenticatedEntregadorStatusRoute
   '/painel/agendamentos': typeof AuthenticatedPainelAgendamentosRoute
@@ -666,6 +674,7 @@ export interface FileRoutesById {
   '/mesa/$token': typeof MesaTokenRoute
   '/orcamento/$token': typeof OrcamentoTokenRoute
   '/$slug/': typeof SlugIndexRoute
+  '/$slug/checkout_/digital': typeof SlugCheckoutDigitalRoute
   '/_authenticated/convite/$token': typeof AuthenticatedConviteTokenRoute
   '/_authenticated/entregador_/status': typeof AuthenticatedEntregadorStatusRoute
   '/_authenticated/painel/agendamentos': typeof AuthenticatedPainelAgendamentosRoute
@@ -742,6 +751,7 @@ export interface FileRouteTypes {
     | '/mesa/$token'
     | '/orcamento/$token'
     | '/$slug/'
+    | '/$slug/checkout/digital'
     | '/convite/$token'
     | '/entregador/status'
     | '/painel/agendamentos'
@@ -815,6 +825,7 @@ export interface FileRouteTypes {
     | '/mesa/$token'
     | '/orcamento/$token'
     | '/$slug'
+    | '/$slug/checkout/digital'
     | '/convite/$token'
     | '/entregador/status'
     | '/painel/agendamentos'
@@ -890,6 +901,7 @@ export interface FileRouteTypes {
     | '/mesa/$token'
     | '/orcamento/$token'
     | '/$slug/'
+    | '/$slug/checkout_/digital'
     | '/_authenticated/convite/$token'
     | '/_authenticated/entregador_/status'
     | '/_authenticated/painel/agendamentos'
@@ -956,6 +968,7 @@ export interface RootRouteChildren {
   MesaTokenRoute: typeof MesaTokenRoute
   OrcamentoTokenRoute: typeof OrcamentoTokenRoute
   SlugIndexRoute: typeof SlugIndexRoute
+  SlugCheckoutDigitalRoute: typeof SlugCheckoutDigitalRoute
   ApiV1SplatRoute: typeof ApiV1SplatRoute
   ApiPublicAgendaLembretesRoute: typeof ApiPublicAgendaLembretesRoute
   ApiPublicAssinaturasCobrancasRoute: typeof ApiPublicAssinaturasCobrancasRoute
@@ -1181,6 +1194,13 @@ declare module '@tanstack/react-router' {
       path: '/orcamento/$token'
       fullPath: '/orcamento/$token'
       preLoaderRoute: typeof OrcamentoTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$slug/checkout_/digital': {
+      id: '/$slug/checkout_/digital'
+      path: '/$slug/checkout/digital'
+      fullPath: '/$slug/checkout/digital'
+      preLoaderRoute: typeof SlugCheckoutDigitalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/convite/$token': {
@@ -1606,6 +1626,7 @@ const rootRouteChildren: RootRouteChildren = {
   MesaTokenRoute: MesaTokenRoute,
   OrcamentoTokenRoute: OrcamentoTokenRoute,
   SlugIndexRoute: SlugIndexRoute,
+  SlugCheckoutDigitalRoute: SlugCheckoutDigitalRoute,
   ApiV1SplatRoute: ApiV1SplatRoute,
   ApiPublicAgendaLembretesRoute: ApiPublicAgendaLembretesRoute,
   ApiPublicAssinaturasCobrancasRoute: ApiPublicAssinaturasCobrancasRoute,
