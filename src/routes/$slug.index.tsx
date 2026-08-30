@@ -365,7 +365,10 @@ function PublicStorePage() {
       </header>
 
 
-      <main className="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:px-6">
+      <main
+        className="mx-auto w-full px-4 py-8 sm:px-6"
+        style={{ ...shellStyle, display: "flex", flexDirection: "column", gap: "var(--store-section-gap)" }}
+      >
         <InstallAppBanner storeName={store.name} />
 
         {/* Busca e filtros */}
