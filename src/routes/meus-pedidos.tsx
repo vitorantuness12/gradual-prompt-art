@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { CashbackCard } from "@/components/cliente/CashbackCard";
 import { CustomerOrderCard } from "@/components/cliente/CustomerOrderCard";
 import { NotificationPrefsCard } from "@/components/cliente/NotificationPrefsCard";
 import { PhoneLoginCard } from "@/components/cliente/PhoneLoginCard";
@@ -180,6 +181,8 @@ function CustomerAreaPage() {
           </div>
         ) : (
           <div className="space-y-6">
+            <CashbackCard session={session} />
+
             {history.data?.orders.length ? (
               <div className="space-y-3">
                 {history.data.orders.map((order) => (
