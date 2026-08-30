@@ -729,6 +729,8 @@ function CheckoutPage() {
           coupon_code: coupon?.code ?? null,
           cashback_used: cashbackApplied,
           referral_code: referralApplied,
+          upsell_items: upsellStats.items,
+          upsell_total: upsellStats.total,
           total,
           payment_method: payment,
           scheduled_for: scheduledFor,
