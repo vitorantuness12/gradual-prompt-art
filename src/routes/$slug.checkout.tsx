@@ -327,6 +327,18 @@ function CheckoutPage() {
     };
   }, [form.phone, form.email, slug, loadAccount]);
 
+  // Cashback em R$: o saldo utilizável já respeita validade e teto da loja,
+  // por isso vem do servidor em vez de ser calculado no cliente.
+  const cashbackQuery = useQuery({
+    queryKey: ["cashback", slug, form.phone.replace(/\D/g, "")],
+    enabled: form.phone.replace(/\D/g, "").length >= 10,
+    queryFn: () => publicCashbackStatus({ data: { storeSlug: slug, phone: form.phone } }),
+    staleTime: 30_000,
+  });
+  const cashback = cashbackQuery.data ?? null;
+
+
+
   // Recuperação de carrinho abandonado: com o telefone já informado, guardamos
   // o carrinho no servidor para poder enviar um único lembrete depois. Sem
   // telefone válido não há nada a guardar — e nada é enviado.
