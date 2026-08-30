@@ -12,13 +12,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { maskPhone } from "@/lib/masks";
 import { cn } from "@/lib/utils";
 import {
   contrastWarnings,
-  formatFooterPhone,
-  isValidFooterPhone,
   isValidHex,
+  footerColorsFromPrimary,
   paletteFromPrimary,
   THEME_PRESETS,
   type ButtonShape,
@@ -79,6 +77,12 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
     patch({ colors: { ...config.colors, [key]: value } });
   const setFooter = (partial: Partial<StoreThemeConfig["footer"]>) =>
     patch({ footer: { ...config.footer, ...partial } });
+  /** Uma escolha de cor ajusta a paleta inteira, inclusive o rodapé. */
+  const applyPrimary = (value: string) =>
+    patch({
+      colors: paletteFromPrimary(value),
+      footer: { ...config.footer, ...footerColorsFromPrimary(value) },
+    });
 
   return (
     <div className="space-y-6">
@@ -121,7 +125,7 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
                 title={color.label}
                 aria-label={color.label}
                 aria-pressed={selected}
-                onClick={() => patch({ colors: paletteFromPrimary(color.value) })}
+                onClick={() => applyPrimary(color.value)}
                 className={cn(
                   "size-9 rounded-full border-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   selected ? "border-foreground scale-110" : "border-border hover:scale-105",
@@ -137,7 +141,7 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
             id="color-primary"
             type="color"
             value={isValidHex(config.colors.primary) ? config.colors.primary : "#000000"}
-            onChange={(event) => patch({ colors: paletteFromPrimary(event.target.value) })}
+            onChange={(event) => applyPrimary(event.target.value)}
             className="h-9 w-10 cursor-pointer rounded border border-border bg-card"
             aria-label="Escolher outra cor"
           />
@@ -189,6 +193,16 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
                 </div>
               </div>
             ))}
+            <ColorField
+              label="Fundo do rodapé"
+              value={config.footer.background}
+              onChange={(value) => setFooter({ background: value })}
+            />
+            <ColorField
+              label="Texto do rodapé"
+              value={config.footer.text}
+              onChange={(value) => setFooter({ text: value })}
+            />
           </div>
         </details>
       </section>
@@ -349,90 +363,6 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
         ))}
       </section>
 
-      <Separator />
-
-      <section className="space-y-3">
-        <h3 className="text-sm font-semibold text-foreground">Rodapé da loja</h3>
-        <p className="text-xs text-muted-foreground">
-          Deixe em branco para usar os dados cadastrados da loja. O telefone é formatado automaticamente.
-        </p>
-        <div className="space-y-1">
-          <Label className="text-xs">Nome exibido</Label>
-          <Input
-            value={config.footer.name ?? ""}
-            placeholder="Nome da loja"
-            maxLength={80}
-            onChange={(event) => setFooter({ name: event.target.value || null })}
-          />
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Telefone</Label>
-          <Input
-            value={config.footer.phone ?? ""}
-            placeholder="(00) 00000-0000"
-            inputMode="tel"
-            maxLength={16}
-            onChange={(event) => {
-              const masked = maskPhone(event.target.value);
-              setFooter({ phone: masked || null });
-            }}
-          />
-          {!isValidFooterPhone(config.footer.phone) ? (
-            <p className="text-xs text-destructive">Telefone incompleto. Digite DDD + número.</p>
-          ) : null}
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Endereço</Label>
-          <Input
-            value={config.footer.address ?? ""}
-            placeholder="Rua, número — bairro, cidade/UF"
-            maxLength={160}
-            onChange={(event) => setFooter({ address: event.target.value || null })}
-          />
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Frase do rodapé</Label>
-          <Input
-            value={config.footer.note ?? ""}
-            placeholder="Feito com O Seu Pedido"
-            maxLength={120}
-            onChange={(event) => setFooter({ note: event.target.value || null })}
-          />
-          {!config.footer.note?.trim() ? (
-            <p className="text-xs text-muted-foreground">
-              Se estiver em branco, exibiremos "Feito com O Seu Pedido".
-            </p>
-          ) : null}
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <ColorField
-            label="Cor de fundo"
-            value={config.footer.background}
-            onChange={(value) => setFooter({ background: value })}
-          />
-          <ColorField
-            label="Cor do texto"
-            value={config.footer.text}
-            onChange={(value) => setFooter({ text: value })}
-          />
-        </div>
-        <div
-          className="rounded-lg border border-border p-3 text-center"
-          style={{
-            background: config.footer.background,
-            color: config.footer.text,
-          }}
-        >
-          <p className="text-sm font-semibold">{config.footer.name?.trim() || "Nome da loja"}</p>
-          <p className="mt-1 text-xs opacity-90">
-            {formatFooterPhone(config.footer.phone) || "(00) 00000-0000"}
-          </p>
-          <p className="mt-1 text-xs opacity-90">{config.footer.address?.trim() || "Endereço da loja"}</p>
-          <p className="mt-2 text-[10px] opacity-80">
-            {config.footer.note?.trim() || "Feito com O Seu Pedido"}
-          </p>
-        </div>
-      </section>
     </div>
   );
 }
