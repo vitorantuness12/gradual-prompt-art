@@ -831,8 +831,15 @@ function CheckoutPage() {
       if (identity.created) toast.success(identity.message);
 
       void navigate({ to: "/$slug/acompanhar", params: { slug }, search: { codigo: order.code } });
-    } catch {
-      toast.error("Não foi possível enviar o pedido. Tente novamente.");
+    } catch (cause) {
+      // Mostrar o motivo real evita que o cliente fique tentando às cegas.
+      const detail = cause instanceof Error ? cause.message : "";
+      console.error("[checkout] falha ao enviar pedido", cause);
+      toast.error(
+        detail
+          ? `Não foi possível enviar o pedido: ${detail}`
+          : "Não foi possível enviar o pedido. Tente novamente.",
+      );
     } finally {
       setSubmitting(false);
     }
