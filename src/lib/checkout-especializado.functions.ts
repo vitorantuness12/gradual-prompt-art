@@ -52,9 +52,9 @@ export const submitAgendamento = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { checkRateLimit } = await import("@/lib/security.server");
-    const limit = await checkRateLimit(supabaseAdmin, "checkout", data.phone);
-    if (!limit.allowed) return { ok: false, message: "Muitas tentativas. Aguarde alguns minutos." };
+    const { consumeRateLimit, rateLimitMessage } = await import("@/lib/security.server");
+    const limit = await consumeRateLimit("checkout", data.phone);
+    if (!limit.allowed) return { ok: false, message: rateLimitMessage(limit) };
 
     const { createAgendamento } = await import("@/lib/checkout-especializado.server");
     return createAgendamento(supabaseAdmin, data);
@@ -75,9 +75,9 @@ export const submitDigitalCheckout = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { checkRateLimit } = await import("@/lib/security.server");
-    const limit = await checkRateLimit(supabaseAdmin, "checkout", data.phone);
-    if (!limit.allowed) return { ok: false, message: "Muitas tentativas. Aguarde alguns minutos." };
+    const { consumeRateLimit, rateLimitMessage } = await import("@/lib/security.server");
+    const limit = await consumeRateLimit("checkout", data.phone);
+    if (!limit.allowed) return { ok: false, message: rateLimitMessage(limit) };
 
     const { createDigitalOrder } = await import("@/lib/checkout-especializado.server");
     return createDigitalOrder(supabaseAdmin, data);
@@ -125,9 +125,9 @@ export const submitStoreCheckout = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { checkRateLimit } = await import("@/lib/security.server");
-    const limit = await checkRateLimit(supabaseAdmin, "checkout", data.phone);
-    if (!limit.allowed) return { ok: false, message: "Muitas tentativas. Aguarde alguns minutos." };
+    const { consumeRateLimit, rateLimitMessage } = await import("@/lib/security.server");
+    const limit = await consumeRateLimit("checkout", data.phone);
+    if (!limit.allowed) return { ok: false, message: rateLimitMessage(limit) };
 
     const { createStoreOrder } = await import("@/lib/checkout-especializado.server");
     return createStoreOrder(supabaseAdmin, data);
