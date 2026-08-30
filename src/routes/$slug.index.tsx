@@ -696,21 +696,43 @@ function PublicStorePage() {
               </p>
               <p className="text-muted-foreground">{formatCurrency(cart.subtotal)}</p>
             </div>
-            {availability.accepting ? (
+            {!availability.accepting ? (
+              <Button disabled className="bg-accent text-accent-foreground">
+                <ShoppingBag className="mr-2 size-4" aria-hidden="true" />
+                Loja indisponível
+              </Button>
+            ) : quickCart ? (
+              <Button
+                type="button"
+                className="bg-accent text-accent-foreground hover:bg-accent/90"
+                onClick={() => setCartSheetOpen(true)}
+              >
+                <ShoppingBag className="mr-2 size-4" aria-hidden="true" />
+                Ver sacola
+              </Button>
+            ) : (
               <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
                 <Link to="/$slug/carrinho" params={{ slug }}>
                   <ShoppingBag className="mr-2 size-4" aria-hidden="true" />
                   Ver carrinho
                 </Link>
               </Button>
-            ) : (
-              <Button disabled className="bg-accent text-accent-foreground">
-                <ShoppingBag className="mr-2 size-4" aria-hidden="true" />
-                Loja indisponível
-              </Button>
             )}
           </div>
         </div>
+      ) : null}
+
+      {quickCart ? (
+        <CartSheet
+          open={cartSheetOpen}
+          onOpenChange={setCartSheetOpen}
+          slug={slug}
+          items={cart.items}
+          subtotal={cart.subtotal}
+          accepting={availability.accepting}
+          onSetQuantity={cart.setQuantity}
+          onRemove={cart.remove}
+        />
       ) : null}
 
       <div className="flex-1" aria-hidden="true" />
