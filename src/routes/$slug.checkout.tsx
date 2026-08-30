@@ -133,7 +133,6 @@ function CheckoutPage() {
   const couponState = useCartCoupon(slug, data?.store.id ?? null, cart.subtotal, cart.hydrated);
   const coupon = couponState.coupon;
   const checkingCoupon = couponState.checking;
-  const upsellSuggestions = useUpsellSuggestions(data, cart.items, { max: 4 });
 
 
   // Origem da venda: afiliado e UTMs vindos do link, guardados durante a sessão.
@@ -219,6 +218,10 @@ function CheckoutPage() {
     staleTime: 300_000,
   });
   const settings = checkoutSettingsQuery.data ?? DEFAULT_CHECKOUT_SETTINGS;
+  const upsellSuggestions = useUpsellSuggestions(data, cart.items, {
+    enabled: settings.upsellEnabled,
+    max: settings.upsellMaxItems,
+  });
   const persistIdentity = useServerFn(saveCheckoutIdentity);
 
 
