@@ -734,6 +734,27 @@ function PublicStorePage() {
           accepting={availability.accepting}
           onSetQuantity={cart.setQuantity}
           onRemove={cart.remove}
+          suggestions={upsell}
+          onAddSuggestion={(suggestion) =>
+            cart.add(
+              {
+                productId: suggestion.product.id,
+                name: suggestion.product.name,
+                unitPrice: suggestion.price,
+                maxQuantity: suggestion.maxQuantity,
+                fromUpsell: true,
+              },
+              1,
+            )
+          }
+          coupon={{
+            code: couponState.coupon?.code ?? null,
+            discount: couponState.discount,
+            checking: couponState.checking,
+            feedback: couponState.feedback,
+            apply: couponState.apply,
+            clear: couponState.clear,
+          }}
         />
       ) : null}
 
