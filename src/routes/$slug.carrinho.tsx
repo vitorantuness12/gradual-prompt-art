@@ -15,6 +15,7 @@ import { CheckoutThemeProvider } from "@/components/store/CheckoutThemeProvider"
 import { useCart } from "@/hooks/useCart";
 import { useCartCoupon } from "@/hooks/useCartCoupon";
 import { useStoreDocumentTitle } from "@/hooks/useStoreDocumentTitle";
+import { checkoutPathFor } from "@/lib/checkout-model";
 import { formatCurrency } from "@/lib/format";
 import { publicStoreQuery } from "@/lib/store-queries";
 import { storeAvailability } from "@/lib/store-config";
@@ -303,7 +304,7 @@ function StoreCartPage() {
             </div>
             {canCheckout ? (
               <Button asChild size="lg">
-                <Link to="/$slug/checkout" params={{ slug }}>
+                <Link to={checkoutPathFor(slug, data?.store ?? null)}>
                   Ir para o pagamento
                 </Link>
               </Button>

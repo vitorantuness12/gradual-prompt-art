@@ -121,10 +121,15 @@ export function checkoutPathFor(slug: string, store: CheckoutModelStore | null |
 }
 
 /**
- * Fase 1: apenas o modelo de delivery possui interface própria implementada.
- * Os demais compartilham o checkout atual até que suas telas específicas entrem.
+ * Todos os modelos já possuem interface própria: delivery segue no checkout
+ * original (intocado) e os demais têm telas dedicadas por segmento.
  */
-export const IMPLEMENTED_CHECKOUT_MODELS: CheckoutModel[] = ["delivery"];
+export const IMPLEMENTED_CHECKOUT_MODELS: CheckoutModel[] = [
+  "delivery",
+  "digital",
+  "agendamento",
+  "loja",
+];
 
 export function hasDedicatedScreen(model: CheckoutModel): boolean {
   return IMPLEMENTED_CHECKOUT_MODELS.includes(model);
