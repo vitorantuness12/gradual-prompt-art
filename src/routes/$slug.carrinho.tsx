@@ -275,6 +275,7 @@ function StoreCartPage() {
                     name: suggestion.product.name,
                     unitPrice: suggestion.price,
                     maxQuantity: suggestion.maxQuantity,
+                    fromUpsell: true,
                   },
                   1,
                 );
