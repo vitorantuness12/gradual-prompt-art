@@ -411,3 +411,107 @@ async function settleReferral(
 
   return rewards.referred;
 }
+
+/** Resultado da rotina de aviso de expiração de cashback. */
+export interface CashbackExpiryRunResult {
+  checked: number;
+  sent: number;
+  skipped: number;
+}
+
+/** Quantos dias antes do vencimento o cliente é avisado. */
+const EXPIRY_WARNING_DAYS = 3;
+
+/**
+ * Avisa por WhatsApp quem tem cashback prestes a vencer, com link da loja para
+ * resgatar antes do prazo.
+ *
+ * Regras que evitam incomodar o cliente:
+ * - apenas saldo positivo com vencimento nos próximos 3 dias;
+ * - um aviso por ciclo de validade (`cashback_expiry_notified_at` posterior ao
+ *   último crédito é tratado como já avisado);
+ * - o envio passa pelo `sendWhatsappMessage` como mensagem de marketing, então
+ *   o consentimento promocional continua sendo respeitado.
+ */
+export async function runCashbackExpiryReminders(
+  admin: Admin,
+  options: { baseUrl: string; limit?: number },
+): Promise<CashbackExpiryRunResult> {
+  const result: CashbackExpiryRunResult = { checked: 0, sent: 0, skipped: 0 };
+
+  const now = Date.now();
+  const deadline = new Date(now + EXPIRY_WARNING_DAYS * 86_400_000).toISOString();
+
+  const { data: accounts } = await admin
+    .from("loyalty_accounts")
+    .select(
+      "id, store_id, customer_id, cashback_balance, cashback_expires_at, cashback_expiry_notified_at, customer:customers(name, phone), store:stores(name, slug)",
+    )
+    .gt("cashback_balance", 0)
+    .not("cashback_expires_at", "is", null)
+    .gt("cashback_expires_at", new Date(now).toISOString())
+    .lte("cashback_expires_at", deadline)
+    .limit(options.limit ?? 200);
+
+  if (!accounts || accounts.length === 0) return result;
+
+  const { sendWhatsappMessage } = await import("@/lib/whatsapp/send.server");
+
+  for (const account of accounts) {
+    result.checked += 1;
+
+    const expiresAt = account.cashback_expires_at;
+    const notifiedAt = account.cashback_expiry_notified_at;
+    // Já avisado para esta validade: nada a fazer.
+    if (notifiedAt && expiresAt && new Date(notifiedAt).getTime() >= new Date(expiresAt).getTime() - EXPIRY_WARNING_DAYS * 86_400_000) {
+      result.skipped += 1;
+      continue;
+    }
+
+    const customer = account.customer as { name: string | null; phone: string | null } | null;
+    const store = account.store as { name: string; slug: string } | null;
+    const phone = customer?.phone ?? "";
+    if (!store || phone.replace(/\D/g, "").length < 10) {
+      result.skipped += 1;
+      continue;
+    }
+
+    const balance = toCents(Number(account.cashback_balance ?? 0));
+    const validade = expiresAt ? new Date(expiresAt).toLocaleDateString("pt-BR") : "";
+    const link = `${options.baseUrl.replace(/\/$/, "")}/${store.slug}`;
+    const body = [
+      `Oi${customer?.name ? ` ${customer.name.split(" ")[0]}` : ""}! Você tem R$ ${balance.toFixed(2)} de cashback na ${store.name}.`,
+      validade ? `O saldo vence em ${validade}.` : "",
+      `Use antes do prazo: ${link}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    try {
+      const outcome = await sendWhatsappMessage(admin, {
+        storeId: account.store_id,
+        phone,
+        body,
+        messageType: "marketing",
+        templateKey: "cashback_expirando",
+        customerId: account.customer_id,
+      });
+      if (!outcome.ok) {
+        result.skipped += 1;
+        continue;
+      }
+      result.sent += 1;
+    } catch (error) {
+      console.error("[cashback] falha no aviso de expiração", error);
+      result.skipped += 1;
+      continue;
+    }
+
+    await admin
+      .from("loyalty_accounts")
+      .update({ cashback_expiry_notified_at: new Date().toISOString() })
+      .eq("id", account.id);
+  }
+
+  return result;
+}
