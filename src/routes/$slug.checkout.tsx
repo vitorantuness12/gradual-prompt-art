@@ -526,10 +526,12 @@ function CheckoutPage() {
   const selected = options.find((option) => option.value === fulfillment) ?? null;
   const isDelivery = isDeliverySelected;
   const deliveryFee = isDelivery ? (estimate?.ok ? estimate.fee : Number(store.delivery_fee)) : 0;
-  const cashbackAvailable = account?.cashback ?? 0;
+  const cashbackAvailable = cashback?.enabled ? cashback.balance : (account?.cashback ?? 0);
   const discountFromCoupon = couponState.discount;
   const afterCoupon = Math.max(0, cart.subtotal - discountFromCoupon);
-  const cashbackApplied = useCashback ? Math.min(cashbackAvailable, afterCoupon) : 0;
+  // Teto de uso por pedido definido pelo lojista (ex.: no máximo 50% do valor).
+  const cashbackLimit = maxRedeemable(cashbackAvailable, afterCoupon, cashback?.maxPercentUse ?? 100);
+  const cashbackApplied = useCashback ? cashbackLimit : 0;
   const offers = (offersQuery.data ?? []).filter((offer) => offer.product);
   const bumpLines = offers
     .filter((offer) => acceptedOffers.includes(offer.id))
