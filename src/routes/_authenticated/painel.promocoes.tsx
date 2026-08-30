@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { DemoBadge } from "@/components/brand/DemoBadge";
 import { EmptyState, PageHeader } from "@/components/painel/PageHeader";
+import { RecuperacaoCard } from "@/components/painel/RecuperacaoCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
