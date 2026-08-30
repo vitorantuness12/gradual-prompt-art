@@ -206,6 +206,11 @@ function PromotionsPage() {
           ))}
         </div>
       )}
+
+      <section className="mt-8 space-y-3">
+        <h2 className="text-lg font-semibold text-foreground">Recuperação de vendas</h2>
+        <RecuperacaoCard storeId={storeId} />
+      </section>
     </div>
   );
 }
