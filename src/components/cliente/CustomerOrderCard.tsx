@@ -53,7 +53,25 @@ const OPEN_STATUSES = new Set([
 
 export function CustomerOrderCard({ order, session, onRepeat, repeating }: Props) {
   const [open, setOpen] = useState(false);
+  /** Periodicidade escolhida ao transformar este pedido em assinatura. */
+  const [period, setPeriod] = useState<SubscriptionPeriod>("month");
   const fetchDetail = useServerFn(customerOrderDetail);
+  const createSubscription = useServerFn(createSubscriptionFromOrder);
+  const queryClient = useQueryClient();
+
+  const subscribe = useMutation({
+    mutationFn: () => createSubscription({ data: { session, orderId: order.id, period } }),
+    onSuccess: (result) => {
+      if (result.ok) {
+        toast.success(result.message);
+        void queryClient.invalidateQueries({ queryKey: ["cliente-assinaturas", session] });
+      } else {
+        toast.error(result.message);
+      }
+    },
+    onError: () => toast.error("Não foi possível criar a assinatura agora."),
+  });
+
 
   const detail = useQuery({
     queryKey: ["cliente-pedido", order.id],
