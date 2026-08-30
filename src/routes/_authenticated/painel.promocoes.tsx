@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { DemoBadge } from "@/components/brand/DemoBadge";
 import { EmptyState, PageHeader } from "@/components/painel/PageHeader";
+import { AssinaturasPainelCard } from "@/components/painel/AssinaturasPainelCard";
 import { RecuperacaoCard } from "@/components/painel/RecuperacaoCard";
 import { RelatorioCrescimentoCard } from "@/components/painel/RelatorioCrescimentoCard";
 import { Button } from "@/components/ui/button";
@@ -214,6 +215,8 @@ function PromotionsPage() {
         <RecuperacaoCard storeId={storeId} />
 
         <RelatorioCrescimentoCard storeId={storeId} />
+
+        <AssinaturasPainelCard storeId={storeId} />
       </section>
     </div>
   );

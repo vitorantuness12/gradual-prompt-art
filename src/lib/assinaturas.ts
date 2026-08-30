@@ -106,3 +106,13 @@ export function parseItems(value: unknown): SubscriptionItem[] {
     })
     .filter((item): item is SubscriptionItem => item !== null);
 }
+
+/**
+ * Receita recorrente mensal equivalente (MRR) de uma assinatura.
+ * Semana ≈ 4,33 ciclos/mês, quinzena ≈ 2,03 (365/15/12), mês = 1.
+ */
+export function monthlyRecurringValue(period: string, total: number): number {
+  const value = Math.max(0, Number(total) || 0);
+  const cycles = period === "week" ? 365 / 7 / 12 : period === "biweek" ? 365 / 15 / 12 : 1;
+  return Math.round(value * cycles * 100) / 100;
+}
