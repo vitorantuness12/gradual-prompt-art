@@ -166,3 +166,82 @@ export const subscriptionPanelReport = createServerFn({ method: "POST" })
       daily: Array.from(buckets.values()),
     };
   });
+
+const stateInput = z.object({
+  storeId: z.string().uuid(),
+  subscriptionId: z.string().uuid(),
+  action: z.enum(["pause", "resume", "cancel"]),
+});
+
+/**
+ * O lojista pausa, retoma ou cancela uma assinatura direto do painel.
+ *
+ * A escrita usa o cliente autenticado (RLS da loja) e ainda confere
+ * `has_store_permission` na área de pedidos, então quem não administra a loja
+ * não altera assinatura de ninguém. O cliente é avisado por e-mail com o mesmo
+ * template usado quando ele mesmo altera em /meus-pedidos.
+ */
+export const updateStoreSubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => stateInput.parse(data))
+  .handler(async ({ data, context }): Promise<{ ok: boolean; message: string }> => {
+    const { data: allowed } = await context.supabase.rpc("has_store_permission", {
+      _store_id: data.storeId,
+      _user_id: context.userId,
+      _area: "orders",
+    });
+    if (allowed !== true) {
+      return { ok: false, message: "Você não tem permissão para alterar assinaturas desta loja." };
+    }
+
+    const { canManage, nextCycleDate } = await import("@/lib/assinaturas");
+
+    const { data: row } = await context.supabase
+      .from("customer_subscriptions")
+      .select("id, status, period, customer_name, customer_email, store:stores(name)")
+      .eq("id", data.subscriptionId)
+      .eq("store_id", data.storeId)
+      .maybeSingle();
+
+    if (!row) return { ok: false, message: "Assinatura não encontrada nesta loja." };
+    if (!canManage(row.status)) return { ok: false, message: "Esta assinatura já está encerrada." };
+
+    const now = new Date();
+    const patch =
+      data.action === "pause"
+        ? { paused_at: now.toISOString(), resumes_at: null, status: "paused" }
+        : data.action === "resume"
+          ? {
+              paused_at: null,
+              resumes_at: null,
+              status: "active",
+              next_order_at: nextCycleDate(row.period, now),
+            }
+          : { status: "canceled", canceled_at: now.toISOString(), next_order_at: null };
+
+    const { error } = await context.supabase
+      .from("customer_subscriptions")
+      .update(patch)
+      .eq("id", row.id)
+      .eq("store_id", data.storeId);
+
+    if (error) {
+      console.error("[assinaturas-painel] falha ao atualizar", error.message);
+      return { ok: false, message: "Não foi possível atualizar a assinatura agora." };
+    }
+
+    const store = row.store as { name: string } | null;
+    const { sendSubscriptionEmail } = await import("@/lib/assinaturas-email.server");
+    await sendSubscriptionEmail({
+      event: data.action === "pause" ? "paused" : data.action === "resume" ? "resumed" : "canceled",
+      to: row.customer_email,
+      customerName: row.customer_name,
+      storeName: store?.name ?? null,
+      period: row.period,
+      nextOrderAt: data.action === "resume" ? nextCycleDate(row.period, now) : null,
+    });
+
+    const label =
+      data.action === "pause" ? "pausada" : data.action === "resume" ? "retomada" : "cancelada";
+    return { ok: true, message: `Assinatura ${label}. O cliente foi avisado por e-mail.` };
+  });

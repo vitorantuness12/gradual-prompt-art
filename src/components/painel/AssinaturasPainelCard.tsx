@@ -18,8 +18,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SUBSCRIPTION_PERIOD_LABEL, SUBSCRIPTION_STATUS_LABEL } from "@/lib/assinaturas";
+import { toast } from "sonner";
+
 import {
   subscriptionPanelReport,
+  updateStoreSubscription,
   type SubscriptionPanelReport,
   type SubscriptionPanelRow,
 } from "@/lib/assinaturas-painel.functions";
@@ -169,8 +172,72 @@ function DailyCharts({ report }: { report: SubscriptionPanelReport }) {
   );
 }
 
+/** Ações do lojista em uma assinatura (pausar / retomar / cancelar). */
+function RowActions({
+  row,
+  storeId,
+  onDone,
+}: {
+  row: SubscriptionPanelRow;
+  storeId: string;
+  onDone: () => void;
+}) {
+  const update = useServerFn(updateStoreSubscription);
+  const [pending, setPending] = useState<"pause" | "resume" | "cancel" | null>(null);
+
+  const closed = row.status === "canceled" || row.status === "expired";
+  if (closed) return null;
+
+  const run = async (action: "pause" | "resume" | "cancel") => {
+    if (action === "cancel" && !window.confirm("Cancelar esta assinatura do cliente?")) return;
+    setPending(action);
+    try {
+      const result = await update({ data: { storeId, subscriptionId: row.id, action } });
+      if (result.ok) toast.success(result.message);
+      else toast.error(result.message);
+      onDone();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível atualizar agora.");
+    } finally {
+      setPending(null);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1">
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        disabled={pending !== null}
+        onClick={() => run(row.paused ? "resume" : "pause")}
+      >
+        {row.paused ? "Retomar" : "Pausar"}
+      </Button>
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        className="text-destructive hover:text-destructive"
+        disabled={pending !== null}
+        onClick={() => run("cancel")}
+      >
+        Cancelar
+      </Button>
+    </div>
+  );
+}
+
 /** Lista das assinaturas com status do próximo ciclo. */
-function SubscriptionList({ rows }: { rows: SubscriptionPanelRow[] }) {
+function SubscriptionList({
+  rows,
+  storeId,
+  onChanged,
+}: {
+  rows: SubscriptionPanelRow[];
+  storeId: string;
+  onChanged: () => void;
+}) {
   if (rows.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
@@ -195,7 +262,7 @@ function SubscriptionList({ rows }: { rows: SubscriptionPanelRow[] }) {
             ) : null}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="text-right">
               <p className="text-sm font-semibold text-foreground">{formatCurrency(row.total)}</p>
               <p className="text-xs text-muted-foreground">{nextCycleLabel(row)}</p>
@@ -211,12 +278,14 @@ function SubscriptionList({ rows }: { rows: SubscriptionPanelRow[] }) {
             >
               {SUBSCRIPTION_STATUS_LABEL[row.status] ?? row.status}
             </Badge>
+            <RowActions row={row} storeId={storeId} onDone={onChanged} />
           </div>
         </li>
       ))}
     </ul>
   );
 }
+
 
 /**
  * Painel de assinaturas recorrentes do lojista: quantas estão ativas, quanto
@@ -283,7 +352,11 @@ export function AssinaturasPainelCard({
           <>
             <Summary report={query.data} />
             <DailyCharts report={query.data} />
-            <SubscriptionList rows={query.data.subscriptions} />
+            <SubscriptionList
+              rows={query.data.subscriptions}
+              storeId={storeId}
+              onChanged={() => void query.refetch()}
+            />
           </>
         )}
       </CardContent>

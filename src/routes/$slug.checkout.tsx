@@ -202,6 +202,24 @@ function CheckoutPage() {
   const [referralInput, setReferralInput] = useState("");
   const [referralMessage, setReferralMessage] = useState<string | null>(null);
   const [referralApplied, setReferralApplied] = useState<string | null>(null);
+
+  // Convite "indique e ganhe": o link compartilhado chega como ?ind=CODIGO na
+  // loja e fica guardado até o cliente chegar no checkout. Lido no efeito para
+  // não quebrar a hidratação do SSR.
+  useEffect(() => {
+    try {
+      const fromUrl = new URLSearchParams(window.location.search).get("ind");
+      const code = (fromUrl ?? window.localStorage.getItem("osp:referral") ?? "")
+        .trim()
+        .toUpperCase();
+      if (!code) return;
+      if (fromUrl) window.localStorage.setItem("osp:referral", code);
+      setReferralInput((current) => current || code);
+    } catch {
+      // localStorage bloqueado: seguimos sem pré-preencher.
+    }
+  }, []);
+
   const [estimate, setEstimate] = useState<DeliveryEstimate | null>(null);
   const [estimating, setEstimating] = useState(false);
   const [isSearchingCep, setIsSearchingCep] = useState(false);
