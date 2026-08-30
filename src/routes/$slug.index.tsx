@@ -25,7 +25,7 @@ import { storeAvailability } from "@/lib/store-config";
 import { computeDynamicEta } from "@/lib/operacao";
 import { getStoreLoad } from "@/lib/operacao.functions";
 import { publicAppearanceQuery, publishedTheme } from "@/lib/store-theme-queries";
-import { footerColorsFromPrimary, isSectionVisibleNow, resolvedFooterConfig } from "@/lib/store-theme";
+import { isSectionVisibleNow, resolvedFooterColors, resolvedFooterConfig } from "@/lib/store-theme";
 import { publicStoreQuery, resolveSlugRedirect, type ProductRow } from "@/lib/store-queries";
 import { publicEntryPopupsQuery } from "@/lib/entry-popup-queries";
 import { isCampaignActive, selectCampaignProducts } from "@/lib/destaques";
@@ -705,8 +705,8 @@ function StoreFooter({
   cartActive: boolean;
 }) {
   const footer = resolvedFooterConfig(theme.footer, store);
-  // O rodapé sempre acompanha a cor principal da loja.
-  const footerColors = footerColorsFromPrimary(theme.colors.primary);
+  // Por padrão o rodapé segue a cor principal; respeita personalização do lojista.
+  const footerColors = resolvedFooterColors(theme.footer, theme.colors.primary);
   const hasContent = footer.name || footer.phone || footer.address;
 
   if (!hasContent) return null;

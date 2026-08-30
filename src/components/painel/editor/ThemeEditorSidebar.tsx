@@ -17,6 +17,7 @@ import {
   contrastWarnings,
   isValidHex,
   paletteFromPrimary,
+  resolvedFooterColors,
   THEME_PRESETS,
   type ButtonShape,
   type CardStyle,
@@ -74,8 +75,17 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
   const patch = (partial: Partial<StoreThemeConfig>) => onChange({ ...config, ...partial });
   const setColor = (key: keyof StoreThemeColors, value: string) =>
     patch({ colors: { ...config.colors, [key]: value } });
-  /** Uma escolha de cor ajusta a paleta inteira; o rodapé segue a cor principal na renderização. */
-  const applyPrimary = (value: string) => patch({ colors: paletteFromPrimary(value) });
+  const setFooter = (partial: Partial<StoreThemeConfig["footer"]>) =>
+    patch({ footer: { ...config.footer, ...partial } });
+  /** Uma escolha de cor ajusta a paleta inteira e o rodapé volta a seguir a cor principal. */
+  const applyPrimary = (value: string) =>
+    patch({
+      colors: paletteFromPrimary(value),
+      footer: { ...config.footer, background: null, text: null },
+    });
+  /** Cores efetivas do rodapé (personalizadas ou derivadas da cor principal). */
+  const footerColors = resolvedFooterColors(config.footer, config.colors.primary);
+  const footerCustomized = Boolean(config.footer.background || config.footer.text);
 
   return (
     <div className="space-y-6">
@@ -186,10 +196,33 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
                 </div>
               </div>
             ))}
+            <ColorField
+              label="Fundo do rodapé"
+              value={footerColors.background}
+              onChange={(value) => setFooter({ background: value })}
+            />
+            <ColorField
+              label="Texto do rodapé"
+              value={footerColors.text}
+              onChange={(value) => setFooter({ text: value })}
+            />
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            O rodapé acompanha automaticamente a cor principal da loja.
+            {footerCustomized
+              ? "O rodapé está com cores personalizadas."
+              : "O rodapé acompanha automaticamente a cor principal da loja."}
           </p>
+          {footerCustomized ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="mt-2"
+              onClick={() => setFooter({ background: null, text: null })}
+            >
+              Voltar a seguir a cor principal
+            </Button>
+          ) : null}
         </details>
       </section>
 
@@ -349,6 +382,24 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
         ))}
       </section>
 
+    </div>
+  );
+}
+
+function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  return (
+    <div className="space-y-1">
+      <Label className="text-xs">{label}</Label>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={isValidHex(value) ? value : "#000000"}
+          onChange={(event) => onChange(event.target.value)}
+          className="size-9 cursor-pointer rounded border border-border bg-transparent p-0"
+          aria-label={label}
+        />
+        <Input value={value} onChange={(event) => onChange(event.target.value)} className="font-mono text-xs" />
+      </div>
     </div>
   );
 }
