@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { z } from "zod";
 
 import { CouponFeedbackMessage } from "@/components/catalogo/CouponFeedbackMessage";
 import { toast } from "sonner";
@@ -12,15 +13,26 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckoutThemeProvider } from "@/components/store/CheckoutThemeProvider";
-import { useCart } from "@/hooks/useCart";
+import { UpsellSuggestions } from "@/components/store/UpsellSuggestions";
+import { buildLineId, seedCart, useCart, type CartItem } from "@/hooks/useCart";
 import { useCartCoupon } from "@/hooks/useCartCoupon";
+import { useUpsellSuggestions } from "@/hooks/useUpsellSuggestions";
 import { useStoreDocumentTitle } from "@/hooks/useStoreDocumentTitle";
+import { recuperarCarrinhoAbandonado } from "@/lib/carrinho-abandonado.functions";
 import { checkoutPathFor } from "@/lib/checkout-model";
 import { formatCurrency } from "@/lib/format";
 import { publicStoreQuery } from "@/lib/store-queries";
 import { storeAvailability } from "@/lib/store-config";
 
+const searchSchema = z.object({
+  /** Token do link enviado no lembrete de carrinho abandonado. */
+  retomar: z.string().trim().min(16).max(64).optional(),
+  /** Cupom sugerido no lembrete, aplicado automaticamente. */
+  cupom: z.string().trim().max(40).optional(),
+});
+
 export const Route = createFileRoute("/$slug/carrinho")({
+  validateSearch: searchSchema,
   head: ({ params }) => ({
     meta: [
       { title: `Carrinho — ${params.slug} | O Seu Pedido` },
@@ -40,6 +52,7 @@ export const Route = createFileRoute("/$slug/carrinho")({
 /** Página de conferência do carrinho, entre o catálogo e o checkout. */
 function StoreCartPage() {
   const { slug } = Route.useParams();
+  const { retomar, cupom } = Route.useSearch();
   const { data, isLoading } = useQuery(publicStoreQuery(slug));
   const store = data?.store ?? null;
   useStoreDocumentTitle(store?.name, "Carrinho");
@@ -50,6 +63,47 @@ function StoreCartPage() {
   const total = Math.max(0, cart.subtotal - couponState.discount);
   const availability = store ? storeAvailability(store) : null;
   const canCheckout = Boolean(availability?.accepting) && cart.count > 0;
+
+  const upsell = useUpsellSuggestions(data, cart.items, { max: 4 });
+
+  // Retomada do carrinho abandonado: o link do lembrete traz um token opaco.
+  const recovered = useRef(false);
+  const recover = useMutation({
+    mutationFn: (token: string) => recuperarCarrinhoAbandonado({ data: { token } }),
+    onSuccess: (result) => {
+      if (!result.ok || !store) {
+        toast.error(result.message);
+        return;
+      }
+      const items: CartItem[] = result.items.map((item) => ({
+        lineId: buildLineId(item),
+        productId: item.productId,
+        variantId: item.variantId ?? null,
+        variantName: item.variantName ?? null,
+        name: item.name,
+        unitPrice: item.unitPrice,
+        quantity: item.quantity,
+        notes: item.notes ?? null,
+        options: item.options ?? [],
+      }));
+      seedCart(slug, store.id, items);
+      window.dispatchEvent(new Event("focus"));
+      toast.success("Recuperamos seu carrinho. Confira antes de finalizar.");
+      const code = result.couponCode ?? cupom ?? null;
+      if (code) {
+        setCouponCode(code.toUpperCase());
+        void couponState.apply(code);
+      }
+    },
+    onError: () => toast.error("Não foi possível recuperar o carrinho."),
+  });
+
+  useEffect(() => {
+    if (!retomar || recovered.current || !store || !cart.hydrated) return;
+    recovered.current = true;
+    recover.mutate(retomar);
+  }, [retomar, store, cart.hydrated, recover]);
+
 
   if (isLoading) {
     return (
@@ -211,6 +265,24 @@ function StoreCartPage() {
                 })}
               </CardContent>
             </Card>
+
+            <UpsellSuggestions
+              suggestions={upsell}
+              onAdd={(suggestion) => {
+                cart.add(
+                  {
+                    productId: suggestion.product.id,
+                    name: suggestion.product.name,
+                    unitPrice: suggestion.price,
+                    maxQuantity: suggestion.maxQuantity,
+                  },
+                  1,
+                );
+                toast.success(`${suggestion.product.name} adicionado.`);
+              }}
+            />
+
+
 
             <Card className="border-border/70 shadow-sm">
               <CardContent className="space-y-3 py-6">

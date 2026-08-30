@@ -24,7 +24,9 @@ export type RateLimitBucket =
   | "data_request"
   | "historico"
   | "popup"
-  | "identify";
+  | "identify"
+  | "abandoned_cart"
+  | "abandoned_cart_open";
 
 const DEFAULTS: Record<RateLimitBucket, { limit: number; windowSeconds: number }> = {
   login: { limit: 10, windowSeconds: 300 },
@@ -39,7 +41,12 @@ const DEFAULTS: Record<RateLimitBucket, { limit: number; windowSeconds: number }
   historico: { limit: 30, windowSeconds: 300 },
   popup: { limit: 120, windowSeconds: 300 },
   identify: { limit: 12, windowSeconds: 600 },
+  // Salvamento do carrinho acontece com debounce, mas o cliente pode editar
+  // bastante antes de fechar; janela curta e limite generoso.
+  abandoned_cart: { limit: 60, windowSeconds: 300 },
+  abandoned_cart_open: { limit: 30, windowSeconds: 300 },
 };
+
 
 
 /** IP do chamador a partir dos cabeçalhos do proxy (fallback: "desconhecido"). */

@@ -33,6 +33,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { rememberOrder, useCart } from "@/hooks/useCart";
 import { useCartCoupon } from "@/hooks/useCartCoupon";
+import { useUpsellSuggestions } from "@/hooks/useUpsellSuggestions";
+import { UpsellSuggestions } from "@/components/store/UpsellSuggestions";
+import {
+  marcarCarrinhoRecuperado,
+  salvarCarrinhoAbandonado,
+} from "@/lib/carrinho-abandonado.functions";
+
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/lib/format";
 import { EMPTY_TRACKING, bumpPrice, parseTracking, type Tracking } from "@/lib/digitais";
@@ -127,6 +134,7 @@ function CheckoutPage() {
   const coupon = couponState.coupon;
   const checkingCoupon = couponState.checking;
 
+
   // Origem da venda: afiliado e UTMs vindos do link, guardados durante a sessão.
   useEffect(() => {
     const key = `origem:${slug}`;
@@ -210,6 +218,10 @@ function CheckoutPage() {
     staleTime: 300_000,
   });
   const settings = checkoutSettingsQuery.data ?? DEFAULT_CHECKOUT_SETTINGS;
+  const upsellSuggestions = useUpsellSuggestions(data, cart.items, {
+    enabled: settings.upsellEnabled,
+    max: settings.upsellMaxItems,
+  });
   const persistIdentity = useServerFn(saveCheckoutIdentity);
 
 
@@ -311,6 +323,52 @@ function CheckoutPage() {
       window.clearTimeout(timer);
     };
   }, [form.phone, form.email, slug, loadAccount]);
+
+  // Recuperação de carrinho abandonado: com o telefone já informado, guardamos
+  // o carrinho no servidor para poder enviar um único lembrete depois. Sem
+  // telefone válido não há nada a guardar — e nada é enviado.
+  const cartSignature = JSON.stringify(
+    cart.items.map((item) => [item.productId, item.variantId ?? "", item.quantity, item.unitPrice, item.notes ?? ""]),
+  );
+  useEffect(() => {
+    if (!cart.hydrated) return;
+    const digits = form.phone.replace(/\D/g, "");
+    if (digits.length < 10) return;
+
+    const timer = window.setTimeout(() => {
+      void salvarCarrinhoAbandonado({
+        data: {
+          storeSlug: slug,
+          phone: form.phone,
+          name: form.name.trim() || undefined,
+          notes: form.notes?.trim() || undefined,
+          couponCode: couponState.coupon?.code ?? undefined,
+          items: cart.items.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId ?? null,
+            variantName: item.variantName ?? null,
+            name: item.name,
+            unitPrice: item.unitPrice,
+            quantity: item.quantity,
+            notes: item.notes ?? null,
+            options: item.options ?? [],
+          })),
+          address: {
+            zipCode: form.zip || undefined,
+            street: form.street || undefined,
+            number: form.number || undefined,
+            complement: form.complement || undefined,
+            district: form.district || undefined,
+            reference: form.reference || undefined,
+          },
+        },
+      }).catch(() => undefined);
+    }, 1500);
+    return () => window.clearTimeout(timer);
+    // cartSignature resume o conteúdo do carrinho sem disparar a cada render.
+  }, [cartSignature, cart.hydrated, form.phone, slug]);
+
+
 
   // Calcula distância, prazo e frete assim que o endereço estiver utilizável.
   const zipDigits = form.zip.replace(/\D/g, "");
@@ -722,6 +780,11 @@ function CheckoutPage() {
         /* o programa de fidelidade nunca bloqueia a conclusão do pedido */
       }
 
+      // Pedido enviado: encerra o ciclo de recuperação (nada de lembrete).
+      void marcarCarrinhoRecuperado({
+        data: { storeSlug: store.slug, phone: form.phone, orderId: order.id },
+      }).catch(() => undefined);
+
       rememberOrder(slug, {
         code: order.code,
         storeId: store.id,
@@ -731,6 +794,7 @@ function CheckoutPage() {
         phone: form.phone.trim(),
       });
       cart.clear();
+
       couponState.clear();
       setReview(false);
       toast.success(`Pedido ${order.code} enviado para a loja!`);
@@ -1368,7 +1432,25 @@ function CheckoutPage() {
             </CardContent>
           </Card>
         ) : null}
+
+        <UpsellSuggestions
+          suggestions={upsellSuggestions}
+          onAdd={(suggestion) => {
+            cart.add(
+              {
+                productId: suggestion.product.id,
+                name: suggestion.product.name,
+                unitPrice: suggestion.price,
+                maxQuantity: suggestion.maxQuantity,
+              },
+              1,
+            );
+            toast.success(`${suggestion.product.name} adicionado.`);
+          }}
+        />
       </main>
+
+
 
       {/* Barra fixa com o total */}
       <div className="fixed inset-x-0 bottom-0 border-t border-border/70 bg-card/95 backdrop-blur">

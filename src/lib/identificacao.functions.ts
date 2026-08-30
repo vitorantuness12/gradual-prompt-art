@@ -24,6 +24,9 @@ export interface CheckoutSettings {
   trackingLinkDays: number;
   requireEmail: boolean;
   requireFullAddress: boolean;
+  /** Sugestões "leve também" no carrinho e no checkout. */
+  upsellEnabled: boolean;
+  upsellMaxItems: number;
 }
 
 export const DEFAULT_CHECKOUT_SETTINGS: CheckoutSettings = {
@@ -37,7 +40,10 @@ export const DEFAULT_CHECKOUT_SETTINGS: CheckoutSettings = {
   trackingLinkDays: 30,
   requireEmail: false,
   requireFullAddress: true,
+  upsellEnabled: true,
+  upsellMaxItems: 4,
 };
+
 
 export interface CustomerAddressOption {
   id: string;
@@ -113,6 +119,8 @@ async function loadSettings(storeId: string): Promise<CheckoutSettings> {
     trackingLinkDays: data.tracking_link_days,
     requireEmail: data.require_email,
     requireFullAddress: data.require_full_address,
+    upsellEnabled: data.upsell_enabled ?? true,
+    upsellMaxItems: Math.min(8, Math.max(0, data.upsell_max_items ?? 4)),
   };
 }
 
