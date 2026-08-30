@@ -50,6 +50,7 @@ import {
   joinProductionQueue,
   type CapacityResponse,
 } from "@/lib/producao.functions";
+import { enviarPedidoLoja } from "@/lib/pedido-loja.functions";
 import { maxRedeemable } from "@/lib/cashback";
 import { applyReferralCode, publicCashbackStatus } from "@/lib/cashback.functions";
 import { awardOrderLoyalty } from "@/lib/fidelidade.functions";
@@ -246,6 +247,7 @@ function CheckoutPage() {
     max: settings.upsellMaxItems,
   });
   const persistIdentity = useServerFn(saveCheckoutIdentity);
+  const sendOrder = useServerFn(enviarPedidoLoja);
 
 
   // Funil: registra os eventos do checkout com a origem da visita.
