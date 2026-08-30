@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Clock, Heart, History, MapPin, MessageCircle, Phone, Search, ShoppingBag, Sparkles, Star } from "lucide-react";
+import { Clock, Heart, History, Image as ImageIcon, MapPin, MessageCircle, Phone, Search, ShoppingBag, Sparkles, Star } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { DemoBadge } from "@/components/brand/DemoBadge";
@@ -868,16 +868,26 @@ function ProductCard({
           !stacked && imagePosition === "right" && "flex-row-reverse",
         )}
       >
-        {image && !compact ? (
+        {image ? (
           <img
             src={image}
             alt={product.name}
             loading="lazy"
             className={cn(
               "shrink-0 rounded-[var(--radius)] object-cover",
-              stacked ? "h-32 w-full sm:h-40" : "size-20 sm:size-24",
+              compact ? "size-14 sm:size-16" : stacked ? "h-32 w-full sm:h-40" : "size-20 sm:size-24",
             )}
           />
+        ) : !compact ? (
+          <div
+            aria-hidden="true"
+            className={cn(
+              "flex shrink-0 items-center justify-center rounded-[var(--radius)] bg-muted text-muted-foreground/60",
+              stacked ? "h-32 w-full sm:h-40" : "size-20 sm:size-24",
+            )}
+          >
+            <ImageIcon className="size-8" />
+          </div>
         ) : null}
 
         <div className="flex min-w-0 flex-1 flex-col">
