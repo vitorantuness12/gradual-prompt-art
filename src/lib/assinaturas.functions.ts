@@ -186,6 +186,23 @@ export const createSubscriptionFromOrder = createServerFn({ method: "POST" })
       return { ok: false, message: "Não foi possível criar a assinatura agora." };
     }
 
+    const { data: store } = await supabaseAdmin
+      .from("stores")
+      .select("name")
+      .eq("id", order.store_id)
+      .maybeSingle();
+
+    const { sendSubscriptionEmail } = await import("@/lib/assinaturas-email.server");
+    await sendSubscriptionEmail({
+      event: "created",
+      to: order.customer_email,
+      customerName: order.customer_name,
+      storeName: store?.name ?? "loja",
+      period: data.period,
+      nextOrderAt: nextCycleDate(data.period),
+      total: Math.round((subtotal + deliveryFee) * 100) / 100,
+    });
+
     return { ok: true, message: "Assinatura criada! O próximo pedido é gerado automaticamente." };
   });
 
@@ -202,7 +219,7 @@ export const updateSubscriptionState = createServerFn({ method: "POST" })
 
     const { data: row } = await supabaseAdmin
       .from("customer_subscriptions")
-      .select("id, status, period, customer_id")
+      .select("id, status, period, customer_id, customer_name, customer_email, amount, store:stores(name)")
       .eq("id", data.subscriptionId)
       .maybeSingle();
 
@@ -235,6 +252,17 @@ export const updateSubscriptionState = createServerFn({ method: "POST" })
       console.error("[assinaturas] falha ao atualizar assinatura", error.message);
       return { ok: false, message: "Não foi possível atualizar agora." };
     }
+
+    const { sendSubscriptionEmail } = await import("@/lib/assinaturas-email.server");
+    await sendSubscriptionEmail({
+      event: data.action === "pause" ? "paused" : data.action === "resume" ? "resumed" : "canceled",
+      to: row.customer_email,
+      customerName: row.customer_name,
+      storeName: (row.store as { name: string } | null)?.name ?? "loja",
+      period: row.period,
+      nextOrderAt: data.action === "resume" ? nextCycleDate(row.period, now) : null,
+      total: Number(row.amount ?? 0),
+    });
 
     const message =
       data.action === "pause"

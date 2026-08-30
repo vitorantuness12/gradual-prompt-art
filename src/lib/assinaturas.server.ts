@@ -233,6 +233,19 @@ export async function runRecurringOrders(
       orderCode: created.code,
       publicToken: created.publicToken,
     });
+
+    // Aviso por e-mail em paralelo ao WhatsApp: o cliente pode não ter zap.
+    const { sendSubscriptionEmail } = await import("@/lib/assinaturas-email.server");
+    await sendSubscriptionEmail({
+      event: "order_generated",
+      to: row.customer_email,
+      customerName: row.customer_name,
+      storeName: (row.store as { name: string } | null)?.name ?? "loja",
+      period: row.period,
+      nextOrderAt: nextCycleDate(row.period, now),
+      orderCode: created.code,
+      trackingToken: created.publicToken,
+    });
   }
 
   return result;
