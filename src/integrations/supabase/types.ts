@@ -1951,6 +1951,7 @@ export type Database = {
           delivery_type: string
           failed_attempts: number
           id: string
+          items: Json
           last_charge_at: string | null
           last_error: string | null
           last_order_at: string | null
@@ -1964,6 +1965,7 @@ export type Database = {
           quantity: number
           reactivated_at: string | null
           resumes_at: string | null
+          source_order_id: string | null
           started_at: string
           status: string
           store_id: string
@@ -1986,6 +1988,7 @@ export type Database = {
           delivery_type?: string
           failed_attempts?: number
           id?: string
+          items?: Json
           last_charge_at?: string | null
           last_error?: string | null
           last_order_at?: string | null
@@ -1999,6 +2002,7 @@ export type Database = {
           quantity?: number
           reactivated_at?: string | null
           resumes_at?: string | null
+          source_order_id?: string | null
           started_at?: string
           status?: string
           store_id: string
@@ -2021,6 +2025,7 @@ export type Database = {
           delivery_type?: string
           failed_attempts?: number
           id?: string
+          items?: Json
           last_charge_at?: string | null
           last_error?: string | null
           last_order_at?: string | null
@@ -2034,6 +2039,7 @@ export type Database = {
           quantity?: number
           reactivated_at?: string | null
           resumes_at?: string | null
+          source_order_id?: string | null
           started_at?: string
           status?: string
           store_id?: string
@@ -2054,6 +2060,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_subscriptions_source_order_id_fkey"
+            columns: ["source_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
           {
