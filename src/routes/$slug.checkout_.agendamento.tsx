@@ -148,7 +148,7 @@ function AgendamentoCheckout() {
       void navigate({
         to: "/$slug/acompanhar",
         params: { slug },
-        search: result.code ? { codigo: result.code } : {},
+        search: { codigo: result.code },
       });
     } catch {
       toast.error("Não foi possível concluir o agendamento agora.");
