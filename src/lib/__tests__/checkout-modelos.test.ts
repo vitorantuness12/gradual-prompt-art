@@ -31,8 +31,12 @@ describe("modelo de checkout por segmento", () => {
     expect(resolveCheckoutModel({ segment: "Curso online" })).toBe("digital");
   });
 
-  it("usa loja online como padrão seguro sem segmento nem delivery", () => {
-    expect(resolveCheckoutModel({})).toBe("loja");
+  it("mantém o checkout atual quando a loja não informou segmento", () => {
+    // Sem segmento o sistema já assume alimentação; o checkout não pode mudar.
+    expect(resolveCheckoutModel({})).toBe("delivery");
+  });
+
+  it("usa loja online como padrão seguro quando não há loja carregada", () => {
     expect(resolveCheckoutModel(null)).toBe("loja");
   });
 
