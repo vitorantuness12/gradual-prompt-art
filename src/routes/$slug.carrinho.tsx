@@ -266,6 +266,24 @@ function StoreCartPage() {
               </CardContent>
             </Card>
 
+            <UpsellSuggestions
+              suggestions={upsell}
+              onAdd={(suggestion) => {
+                cart.add(
+                  {
+                    productId: suggestion.product.id,
+                    name: suggestion.product.name,
+                    unitPrice: suggestion.price,
+                    maxQuantity: suggestion.maxQuantity,
+                  },
+                  1,
+                );
+                toast.success(`${suggestion.product.name} adicionado.`);
+              }}
+            />
+
+
+
             <Card className="border-border/70 shadow-sm">
               <CardContent className="space-y-3 py-6">
                 <div className="space-y-3 rounded-xl border border-border/70 bg-muted/40 p-3">
