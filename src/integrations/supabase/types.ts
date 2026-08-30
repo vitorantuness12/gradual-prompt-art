@@ -1419,16 +1419,22 @@ export type Database = {
       cron_tokens: {
         Row: {
           created_at: string
+          last_result: Json | null
+          last_run_at: string | null
           name: string
           token: string
         }
         Insert: {
           created_at?: string
+          last_result?: Json | null
+          last_run_at?: string | null
           name: string
           token: string
         }
         Update: {
           created_at?: string
+          last_result?: Json | null
+          last_run_at?: string | null
           name?: string
           token?: string
         }
@@ -3262,6 +3268,7 @@ export type Database = {
       loyalty_accounts: {
         Row: {
           cashback_balance: number
+          cashback_expires_at: string | null
           created_at: string
           customer_id: string
           id: string
@@ -3271,6 +3278,8 @@ export type Database = {
           points_earned: number
           points_redeemed: number
           referral_code: string | null
+          referral_count: number
+          referral_rewarded_at: string | null
           referred_by: string | null
           store_id: string
           tier_id: string | null
@@ -3279,6 +3288,7 @@ export type Database = {
         }
         Insert: {
           cashback_balance?: number
+          cashback_expires_at?: string | null
           created_at?: string
           customer_id: string
           id?: string
@@ -3288,6 +3298,8 @@ export type Database = {
           points_earned?: number
           points_redeemed?: number
           referral_code?: string | null
+          referral_count?: number
+          referral_rewarded_at?: string | null
           referred_by?: string | null
           store_id: string
           tier_id?: string | null
@@ -3296,6 +3308,7 @@ export type Database = {
         }
         Update: {
           cashback_balance?: number
+          cashback_expires_at?: string | null
           created_at?: string
           customer_id?: string
           id?: string
@@ -3305,6 +3318,8 @@ export type Database = {
           points_earned?: number
           points_redeemed?: number
           referral_code?: string | null
+          referral_count?: number
+          referral_rewarded_at?: string | null
           referred_by?: string | null
           store_id?: string
           tier_id?: string | null
@@ -3708,6 +3723,9 @@ export type Database = {
       loyalty_settings: {
         Row: {
           birthday_bonus_points: number
+          cashback_expiration_days: number
+          cashback_max_percent_use: number
+          cashback_min_order: number
           cashback_percent: number
           created_at: string
           currency_per_point: number
@@ -3720,6 +3738,9 @@ export type Database = {
           min_order_value: number
           points_expiration_days: number
           points_per_currency: number
+          referral_cashback_referred: number
+          referral_cashback_referrer: number
+          referral_enabled: boolean
           referral_points: number
           referred_points: number
           store_id: string
@@ -3729,6 +3750,9 @@ export type Database = {
         }
         Insert: {
           birthday_bonus_points?: number
+          cashback_expiration_days?: number
+          cashback_max_percent_use?: number
+          cashback_min_order?: number
           cashback_percent?: number
           created_at?: string
           currency_per_point?: number
@@ -3741,6 +3765,9 @@ export type Database = {
           min_order_value?: number
           points_expiration_days?: number
           points_per_currency?: number
+          referral_cashback_referred?: number
+          referral_cashback_referrer?: number
+          referral_enabled?: boolean
           referral_points?: number
           referred_points?: number
           store_id: string
@@ -3750,6 +3777,9 @@ export type Database = {
         }
         Update: {
           birthday_bonus_points?: number
+          cashback_expiration_days?: number
+          cashback_max_percent_use?: number
+          cashback_min_order?: number
           cashback_percent?: number
           created_at?: string
           currency_per_point?: number
@@ -3762,6 +3792,9 @@ export type Database = {
           min_order_value?: number
           points_expiration_days?: number
           points_per_currency?: number
+          referral_cashback_referred?: number
+          referral_cashback_referrer?: number
+          referral_enabled?: boolean
           referral_points?: number
           referred_points?: number
           store_id?: string
@@ -4530,6 +4563,7 @@ export type Database = {
           priority: number
           public_token: string
           quote_id: string | null
+          referral_code: string | null
           scheduled_for: string | null
           status: Database["public"]["Enums"]["order_status"]
           store_id: string
@@ -4582,6 +4616,7 @@ export type Database = {
           priority?: number
           public_token?: string
           quote_id?: string | null
+          referral_code?: string | null
           scheduled_for?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           store_id: string
@@ -4634,6 +4669,7 @@ export type Database = {
           priority?: number
           public_token?: string
           quote_id?: string | null
+          referral_code?: string | null
           scheduled_for?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           store_id?: string
@@ -9612,6 +9648,10 @@ export type Database = {
     Functions: {
       apply_stock_entry: { Args: { _entry_id: string }; Returns: Json }
       cash_session_summary: { Args: { _session_id: string }; Returns: Json }
+      claim_cron_run: {
+        Args: { _min_interval_seconds?: number; _name: string }
+        Returns: boolean
+      }
       consume_rate_limit: {
         Args: {
           _bucket: string
