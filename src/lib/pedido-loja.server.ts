@@ -17,15 +17,14 @@ export async function gravarPedidoLoja(
     return { ok: false, message: "Seu carrinho está vazio." };
   }
 
-  const { data: store } = await admin
-    .from("stores")
-    .select("id, is_active")
-    .eq("slug", input.storeSlug)
-    .maybeSingle();
-
-  if (!store || !store.is_active) {
-    return { ok: false, message: "Loja indisponível no momento." };
+  // Preço, promoção, cupom, frete e cashback são recalculados aqui: nada do
+  // que o visitante digitou como valor entra no banco.
+  const { precificarPedidoLoja } = await import("@/lib/pedido-loja-pricing.server");
+  const pricing = await precificarPedidoLoja(admin, input);
+  if (!pricing.ok) {
+    return { ok: false, message: pricing.message };
   }
+  const store = { id: pricing.storeId };
 
   const { data: order, error } = await admin
     .from("orders")
@@ -36,20 +35,20 @@ export async function gravarPedidoLoja(
       customer_email: input.customerEmail ?? null,
       type: input.type,
       table_number: input.tableNumber ?? null,
-      distance_km: input.distanceKm ?? null,
+      distance_km: pricing.distanceKm ?? input.distanceKm ?? null,
       delivery_lat: input.deliveryLat ?? null,
       delivery_lng: input.deliveryLng ?? null,
       address: input.address ?? null,
       notes: input.notes ?? null,
-      subtotal: input.subtotal,
-      delivery_fee: input.deliveryFee,
-      discount: input.discount,
-      coupon_code: input.couponCode ?? null,
-      cashback_used: input.cashbackUsed,
+      subtotal: pricing.subtotal,
+      delivery_fee: pricing.deliveryFee,
+      discount: pricing.discount,
+      coupon_code: pricing.couponCode,
+      cashback_used: pricing.cashbackUsed,
       referral_code: input.referralCode ?? null,
-      upsell_items: input.upsellItems,
-      upsell_total: input.upsellTotal,
-      total: input.total,
+      upsell_items: pricing.upsellItems,
+      upsell_total: pricing.upsellTotal,
+      total: pricing.total,
       payment_method: input.paymentMethod,
       scheduled_for: input.scheduledFor ?? null,
       channel: input.channel,
@@ -67,17 +66,17 @@ export async function gravarPedidoLoja(
   }
 
   const { error: itemsError } = await admin.from("order_items").insert(
-    input.items.map((item) => ({
+    pricing.items.map((item) => ({
       order_id: order.id,
       store_id: store.id,
       product_id: item.productId,
-      variant_id: item.variantId ?? null,
-      variant_name: item.variantName ?? null,
+      variant_id: item.variantId,
+      variant_name: item.variantName,
       product_name: item.productName,
       quantity: item.quantity,
       unit_price: item.unitPrice,
       total: item.unitPrice * item.quantity,
-      notes: item.notes ?? null,
+      notes: item.notes,
     })),
   );
 
@@ -87,7 +86,7 @@ export async function gravarPedidoLoja(
     return { ok: false, message: itemsError.message };
   }
 
-  const offers = input.offers ?? [];
+  const offers = pricing.offers;
   if (offers.length > 0) {
     await admin.from("order_items").insert(
       offers.map((line) => ({
@@ -115,5 +114,17 @@ export async function gravarPedidoLoja(
     }
   }
 
-  return { ok: true, message: "Pedido enviado.", id: order.id, code: order.code };
+  return {
+    ok: true,
+    message: "Pedido enviado.",
+    id: order.id,
+    code: order.code,
+    totals: {
+      subtotal: pricing.subtotal,
+      deliveryFee: pricing.deliveryFee,
+      discount: pricing.discount,
+      cashbackUsed: pricing.cashbackUsed,
+      total: pricing.total,
+    },
+  };
 }

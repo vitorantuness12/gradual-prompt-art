@@ -780,6 +780,11 @@ function CheckoutPage() {
               ]
                 .filter(Boolean)
                 .join(" | ") || null,
+            options: (item.options ?? []).map((option) => ({
+              groupName: option.groupName,
+              optionName: option.optionName,
+            })),
+            fromUpsell: item.fromUpsell === true,
           })),
           offers: bumpLines.map((line) => ({
             offerId: line.offerId,
@@ -797,8 +802,15 @@ function CheckoutPage() {
       }
 
       const order = { id: created.id, code: created.code };
+      // O servidor é a fonte da verdade dos valores; o cliente só reflete.
+      const finalTotal = created.totals?.total ?? total;
+      if (created.totals && Math.abs(created.totals.total - total) >= 0.01) {
+        toast.info(
+          `Confira: o valor final do pedido é ${formatCurrency(created.totals.total)} conforme os preços atuais da loja.`,
+        );
+      }
 
-      logCheckout("purchase", { amount: total, orderId: order.id, couponCode: coupon?.code ?? null });
+      logCheckout("purchase", { amount: finalTotal, orderId: order.id, couponCode: coupon?.code ?? null });
 
       // Fidelidade: credita pontos e cashback do pedido (silencioso em caso de falha).
       try {
@@ -819,7 +831,7 @@ function CheckoutPage() {
         code: order.code,
         storeId: store.id,
         storeName: store.name,
-        total,
+        total: finalTotal,
         createdAt: new Date().toISOString(),
         phone: form.phone.trim(),
       });

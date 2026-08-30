@@ -13,14 +13,23 @@ export type PedidoLojaType =
   | "scheduled"
   | "counter";
 
+/** Adicional escolhido; o preço vem do cadastro, nunca do navegador. */
+export interface PedidoLojaOptionInput {
+  groupName: string;
+  optionName: string;
+}
+
 export interface PedidoLojaItemInput {
   productId: string;
   variantId?: string | null;
   variantName?: string | null;
   productName: string;
   quantity: number;
+  /** Preço informado pelo navegador: usado apenas como referência; o servidor recalcula. */
   unitPrice: number;
   notes?: string | null;
+  options?: PedidoLojaOptionInput[];
+  fromUpsell?: boolean;
 }
 
 export interface PedidoLojaOfferInput {
@@ -68,4 +77,12 @@ export interface PedidoLojaResult {
   message: string;
   id?: string;
   code?: string;
+  /** Valores realmente gravados, recalculados no servidor. */
+  totals?: {
+    subtotal: number;
+    deliveryFee: number;
+    discount: number;
+    cashbackUsed: number;
+    total: number;
+  };
 }
