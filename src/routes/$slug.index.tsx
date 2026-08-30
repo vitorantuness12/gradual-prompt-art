@@ -642,7 +642,7 @@ function PublicStorePage() {
         />
       ) : null}
 
-      <div className="mx-auto w-full max-w-5xl px-4 pb-24 sm:px-6">
+      <div className="mx-auto w-full px-4 pb-24 sm:px-6" style={shellStyle}>
         <StoreReviews storeId={data.store.id} />
       </div>
 
@@ -668,7 +668,7 @@ function PublicStorePage() {
 
       {cart.hydrated && cart.count > 0 ? (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur">
-          <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+          <div className="mx-auto flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6" style={{ maxWidth: "var(--store-max-width)" }}>
             <div className="text-sm">
               <p className="font-medium text-foreground">
                 {cart.count} {cart.count === 1 ? "item" : "itens"}
@@ -733,7 +733,7 @@ function StoreFooter({
         paddingBottom: cartActive ? "5.5rem" : undefined,
       }}
     >
-      <div className="mx-auto max-w-5xl px-4 sm:px-6">
+      <div className="mx-auto w-full px-4 sm:px-6" style={{ maxWidth: "var(--store-max-width)" }}>
         {footer.name ? (
           <p className="text-base font-bold leading-tight sm:text-lg">{footer.name}</p>
         ) : null}
