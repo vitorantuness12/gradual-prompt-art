@@ -8,7 +8,7 @@
  * real de cashback; o que o visitante manda como valor é ignorado.
  */
 import type { DeliveryZoneRow } from "@/lib/delivery";
-import { n as bumpPrice } from "@/lib/digitais";
+import { bumpPrice } from "@/lib/digitais";
 import { quoteDelivery } from "@/lib/geo";
 import { maxRedeemable } from "@/lib/cashback";
 import type { PedidoLojaInput } from "@/lib/pedido-loja";
@@ -152,7 +152,7 @@ export async function precificarPedidoLoja(
       .eq("store_id", store.id)
       .in("product_id", productIds),
     admin.from("product_option_groups").select("id, product_id, name").in("product_id", productIds),
-    admin.from("product_options").select("id, group_id, name, price").in("product_id", productIds),
+    admin.from("product_options").select("id, group_id, name, price_delta").eq("store_id", store.id),
   ]);
 
   const problems: string[] = [];
@@ -172,7 +172,7 @@ export async function precificarPedidoLoja(
         (option.name ?? "").trim().toLowerCase() === optionName.trim().toLowerCase()
       );
     });
-    return match ? Number(match.price ?? 0) : null;
+    return match ? Number(match.price_delta ?? 0) : null;
   }
 
   for (const item of input.items) {
@@ -228,11 +228,18 @@ export async function precificarPedidoLoja(
   if (offerIds.length > 0) {
     const { data: offerRows } = await admin
       .from("checkout_offers")
-      .select("id, product_id, discount_percent, is_active, product:products(id, name, price)")
+      .select("id, product_id, discount_percent, is_active")
       .eq("store_id", store.id)
       .in("id", offerIds);
+    const offerProductIds = Array.from(
+      new Set((offerRows ?? []).map((row) => row.product_id).filter((id): id is string => Boolean(id))),
+    );
+    const { data: offerProducts } = offerProductIds.length
+      ? await admin.from("products").select("id, name, price").in("id", offerProductIds)
+      : { data: [] };
+    const offerProductById = new Map((offerProducts ?? []).map((row) => [row.id, row]));
     for (const row of offerRows ?? []) {
-      const product = row.product as { id: string; name: string; price: number | string } | null;
+      const product = row.product_id ? offerProductById.get(row.product_id) ?? null : null;
       if (!product || row.is_active === false) continue;
       pricedOffers.push({
         offerId: row.id,
