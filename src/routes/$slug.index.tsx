@@ -201,6 +201,8 @@ function PublicStorePage() {
       })
     : null;
   const layout = layoutForStore(store.segment, products);
+  /** Delivery, restaurantes, saúde e conveniência conferem a sacola sem sair do catálogo. */
+  const quickCart = quickCartEnabled(store.segment);
   const promos = products.filter((product) => hasPromo(product)).slice(0, 6);
   const recommended = products.filter((product) => product.is_featured && !hasPromo(product)).slice(0, 6);
   const contactNumber = (store.whatsapp || store.phone || "").replace(/\D/g, "");
