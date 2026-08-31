@@ -843,3 +843,183 @@ export async function createStoreOrder(admin: Admin, input: StoreCheckoutInput):
     publicToken: order.public_token,
   };
 }
+
+/* --------------------------- Assinatura recorrente ------------------------ */
+
+const SUBSCRIPTION_PERIOD_DAYS: Record<string, number> = {
+  weekly: 7,
+  biweekly: 14,
+  monthly: 30,
+  quarterly: 90,
+};
+
+export interface SubscriptionCheckoutInput extends CheckoutCustomer {
+  slug: string;
+  lines: CartLineInput[];
+  couponCode?: string | null;
+  paymentMethod: string;
+  period: "weekly" | "biweekly" | "monthly" | "quarterly";
+  fulfillment: "delivery" | "pickup";
+  address?: {
+    zip?: string | null;
+    street?: string | null;
+    number?: string | null;
+    district?: string | null;
+    city?: string | null;
+    state?: string | null;
+    complement?: string | null;
+  } | null;
+  distanceKm?: number | null;
+}
+
+/**
+ * Assinatura recorrente. Usa exatamente a mesma revalidação dos outros
+ * checkouts — preço do catálogo, promoção conferida e frete recalculado pelas
+ * zonas da loja — e é esse valor real que fica gravado na assinatura, para que
+ * as cobranças seguintes não herdem nada digitado pelo visitante.
+ */
+export async function createSubscriptionCheckout(
+  admin: Admin,
+  input: SubscriptionCheckoutInput,
+): Promise<CheckoutOutcome & { subscriptionId?: string }> {
+  const store = await loadStore(admin, input.slug);
+  if (!store) return { ok: false, message: "Loja não encontrada." };
+  if (!paymentAllowed(store, input.paymentMethod)) {
+    return { ok: false, message: "Forma de pagamento indisponível nesta loja." };
+  }
+  if (input.lines.length === 0) return { ok: false, message: "Escolha um plano para assinar." };
+
+  const { products, variants } = await loadCatalog(
+    admin,
+    store.id,
+    input.lines.map((line) => line.productId),
+  );
+  const notSubscription = products.filter((item) => item.kind && item.kind !== "subscription");
+  if (notSubscription.length > 0) {
+    return { ok: false, message: "Este checkout aceita apenas planos de assinatura." };
+  }
+
+  const check = revalidateCart(input.lines, products, variants);
+  if (!check.ok) return { ok: false, message: check.problems[0] ?? "Revise seu plano.", problems: check.problems };
+
+  let shipping = 0;
+  if (input.fulfillment === "delivery") {
+    const zones = await loadZones(admin, store.id);
+    const quote = quoteShipping(zones, {
+      subtotal: check.subtotal,
+      zip: input.address?.zip ?? null,
+      district: input.address?.district ?? null,
+      distanceKm: input.distanceKm ?? null,
+      weightGrams: check.weightGrams,
+    });
+    if (!quote.ok) return { ok: false, message: quote.message, problems: [quote.message] };
+    shipping = quote.fee;
+  }
+
+  const coupon = await couponDiscount(admin, store.id, input.couponCode, check.subtotal);
+  const totals = orderTotals({ subtotal: check.subtotal, shipping, discount: coupon.discount });
+  const first = check.lines[0]!;
+  const code = orderCode();
+
+  const { data: order, error } = await admin
+    .from("orders")
+    .insert({
+      store_id: store.id,
+      code,
+      type: input.fulfillment === "delivery" ? "delivery" : "pickup",
+      status: "awaiting_payment",
+      channel: "checkout_assinatura",
+      customer_name: input.name,
+      customer_phone: input.phone,
+      customer_email: input.email || null,
+      subtotal: totals.subtotal,
+      delivery_fee: totals.shipping,
+      discount: totals.discount,
+      total: totals.total,
+      coupon_code: coupon.code,
+      payment_method: input.paymentMethod,
+      payment_status: "pending",
+      address: input.fulfillment === "delivery" ? (input.address ?? null) : null,
+      notes: input.notes || null,
+      is_demo: store.is_demo,
+    })
+    .select("id, code, public_token")
+    .maybeSingle();
+  if (error || !order) return { ok: false, message: "Não foi possível criar a assinatura agora." };
+
+  await admin.from("order_items").insert(
+    check.lines.map((line) => ({
+      order_id: order.id,
+      store_id: store.id,
+      product_id: line.productId,
+      product_name: line.name,
+      variant_id: line.variantId,
+      variant_name: line.variantName,
+      quantity: line.quantity,
+      unit_price: line.unitPrice,
+      total: line.total,
+      notes: line.notes,
+    })),
+  );
+
+  const days = SUBSCRIPTION_PERIOD_DAYS[input.period] ?? 30;
+  const nextAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+
+  const { data: subscription } = await admin
+    .from("customer_subscriptions")
+    .insert({
+      store_id: store.id,
+      product_id: first.productId,
+      customer_name: input.name,
+      customer_phone: input.phone,
+      customer_email: input.email || null,
+      status: "active",
+      period: input.period,
+      // Valores autoritativos: recalculados agora, não os enviados pelo cliente.
+      quantity: first.quantity,
+      unit_price: first.unitPrice,
+      amount: totals.total,
+      delivery_fee: totals.shipping,
+      delivery_type: input.fulfillment,
+      delivery_address: input.fulfillment === "delivery" ? (input.address ?? null) : null,
+      notes: input.notes || null,
+      items: check.lines.map((line) => ({
+        productId: line.productId,
+        variantId: line.variantId,
+        name: line.name,
+        quantity: line.quantity,
+        unitPrice: line.unitPrice,
+        total: line.total,
+      })),
+      next_charge_at: nextAt,
+      next_order_at: nextAt,
+      current_period_end: nextAt,
+      source_order_id: order.id,
+      orders_count: 1,
+      last_order_at: new Date().toISOString(),
+    })
+    .select("id")
+    .maybeSingle();
+
+  const { ensureOrderCharge } = await import("@/lib/cobrancas.server");
+  await ensureOrderCharge(admin, {
+    storeId: store.id,
+    orderId: order.id,
+    method: input.paymentMethod,
+    amount: totals.total,
+    isDemo: store.is_demo,
+  });
+
+  if (subscription?.id) {
+    const { notifySubscription } = await import("@/lib/digitais.server");
+    await notifySubscription(admin, subscription.id, "assinatura_criada").catch(() => undefined);
+  }
+
+  return {
+    ok: true,
+    message: "Assinatura criada! Confirme o pagamento para começar o primeiro ciclo.",
+    code: order.code,
+    publicToken: order.public_token,
+    subscriptionId: subscription?.id,
+  };
+}
