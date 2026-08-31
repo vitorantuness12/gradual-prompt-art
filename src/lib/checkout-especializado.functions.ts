@@ -132,3 +132,37 @@ export const submitStoreCheckout = createServerFn({ method: "POST" })
     const { createStoreOrder } = await import("@/lib/checkout-especializado.server");
     return createStoreOrder(supabaseAdmin, data);
   });
+
+/** Assinatura recorrente: revalida preço, promoção e frete antes de gravar. */
+export const submitSubscriptionCheckout = createServerFn({ method: "POST" })
+  .inputValidator(
+    (
+      input: CustomerFields & {
+        slug: string;
+        lines: CartLineInput[];
+        couponCode?: string | null;
+        paymentMethod: string;
+        period: "weekly" | "biweekly" | "monthly" | "quarterly";
+        fulfillment: "delivery" | "pickup";
+        address?: {
+          zip?: string | null;
+          street?: string | null;
+          number?: string | null;
+          district?: string | null;
+          city?: string | null;
+          state?: string | null;
+          complement?: string | null;
+        } | null;
+        distanceKm?: number | null;
+      },
+    ) => input,
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { consumeRateLimit, rateLimitMessage } = await import("@/lib/security.server");
+    const limit = await consumeRateLimit("checkout", data.phone);
+    if (!limit.allowed) return { ok: false, message: rateLimitMessage(limit) };
+
+    const { createSubscriptionCheckout } = await import("@/lib/checkout-especializado.server");
+    return createSubscriptionCheckout(supabaseAdmin, data);
+  });
