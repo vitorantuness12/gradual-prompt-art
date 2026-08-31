@@ -5,6 +5,7 @@ import { Ban, Copy, FileText, Link2, Mail, Plus, RefreshCcw, RotateCcw, Undo2, U
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
+import { MembrosTab } from "@/components/painel/MembrosTab";
 import { PageHeader, StatCard } from "@/components/painel/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -82,8 +83,12 @@ function DigitalPage() {
           <TabsTrigger value="mensagens">Mensagens</TabsTrigger>
           <TabsTrigger value="reembolsos">Reembolsos</TabsTrigger>
           <TabsTrigger value="funil">Funil do checkout</TabsTrigger>
+          <TabsTrigger value="membros">Área de membros</TabsTrigger>
           <TabsTrigger value="fiscal">Nota fiscal</TabsTrigger>
         </TabsList>
+        <TabsContent value="membros">
+          <MembrosTab storeId={storeId} slug={slug} />
+        </TabsContent>
         <TabsContent value="entregas">
           <DeliveriesTab storeId={storeId} />
         </TabsContent>

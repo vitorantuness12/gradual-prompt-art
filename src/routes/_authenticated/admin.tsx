@@ -54,8 +54,11 @@ import {
 } from "@/lib/platform-integracoes.functions";
 import { INTEGRATION_STATUS_TONE, PLATFORM_STATUS_LABEL, providerFields } from "@/lib/platform-integrations";
 import type { PlatformIntegrationView } from "@/lib/platform-integrations.server";
+import { storeRuntimeUrl } from "@/lib/store-url";
 import {
+  adminCreateStore,
   adminDeleteStore,
+  adminEditStore,
   adminListAuditLogs,
   adminUpdateStore,
   endSupportAccess,
@@ -230,7 +233,10 @@ function StoresTab() {
   const updateFn = useServerFn(adminUpdateStore);
   const deleteFn = useServerFn(adminDeleteStore);
   const supportFn = useServerFn(startSupportAccess);
+  const createFn = useServerFn(adminCreateStore);
+  const editFn = useServerFn(adminEditStore);
   const [search, setSearch] = useState("");
+  const [editing, setEditing] = useState<string | null>(null);
   const [supportStore, setSupportStore] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [consent, setConsent] = useState("");
@@ -287,6 +293,40 @@ function StoresTab() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const create = useMutation({
+    mutationFn: (input: { name: string; slug: string; segment: string; checkoutType?: "digital" | "servico" | "produto" }) =>
+      createFn({ data: input }),
+    onSuccess: (result) => {
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
+      toast.success(result.message);
+      void queryClient.invalidateQueries({ queryKey: ["admin-stores"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const edit = useMutation({
+    mutationFn: (input: {
+      storeId: string;
+      name?: string;
+      slug?: string;
+      segment?: string;
+      checkoutType?: "digital" | "servico" | "produto";
+    }) => editFn({ data: input }),
+    onSuccess: (result) => {
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
+      toast.success(result.message);
+      setEditing(null);
+      void queryClient.invalidateQueries({ queryKey: ["admin-stores"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const support = useMutation({
     mutationFn: () => supportFn({ data: { storeId: supportStore!, reason, consentReference: consent, minutes: 30 } }),
     onSuccess: (result) => {
@@ -320,6 +360,7 @@ function StoresTab() {
         />
       </CardHeader>
       <CardContent>
+        <StoreCreateForm pending={create.isPending} onSubmit={(values) => create.mutate(values)} />
         {storesQuery.isLoading ? (
           <Skeleton className="h-32 rounded-xl" />
         ) : stores.length === 0 ? (
@@ -389,11 +430,28 @@ function StoresTab() {
                       >
                         Acesso de suporte
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditing(editing === store.id ? null : store.id)}
+                      >
+                        Editar
+                      </Button>
                       <Button variant="ghost" size="sm" onClick={() => remove.mutate(store.id)}>
                         Excluir
                       </Button>
                     </div>
                   </div>
+
+                  <StoreCheckoutLink slug={store.slug} />
+
+                  {editing === store.id ? (
+                    <StoreEditForm
+                      store={store}
+                      pending={edit.isPending}
+                      onSubmit={(values) => edit.mutate({ storeId: store.id, ...values })}
+                    />
+                  ) : null}
 
                   {supportStore === store.id ? (
                     <form
@@ -1910,3 +1968,166 @@ function IntegrationConfigDialog({ kind, provider, label, current, onClose, onSa
   );
 }
 
+
+
+/* ------------------------- Cadastro e edição de lojas --------------------- */
+
+type CheckoutTypeValue = "digital" | "servico" | "produto";
+
+const CHECKOUT_TYPE_LABEL: Record<CheckoutTypeValue, string> = {
+  produto: "Produto físico",
+  digital: "Produto digital",
+  servico: "Serviço / agendamento",
+};
+
+/** Link de checkout da loja, pronto para copiar e enviar ao lojista. */
+function StoreCheckoutLink({ slug }: { slug: string }) {
+  const url = storeRuntimeUrl(slug, "/checkout");
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <code className="rounded-lg bg-muted px-2 py-1 text-xs text-foreground">{url}</code>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => {
+          void navigator.clipboard.writeText(url);
+          toast.success("Link de checkout copiado.");
+        }}
+      >
+        Copiar link
+      </Button>
+    </div>
+  );
+}
+
+function StoreCreateForm({
+  onSubmit,
+  pending,
+}: {
+  onSubmit: (values: { name: string; slug: string; segment: string; checkoutType?: CheckoutTypeValue }) => void;
+  pending: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
+  const [segment, setSegment] = useState("delivery");
+  const [checkoutType, setCheckoutType] = useState<CheckoutTypeValue>("produto");
+
+  if (!open) {
+    return (
+      <Button type="button" size="sm" className="mb-4" onClick={() => setOpen(true)}>
+        Cadastrar loja
+      </Button>
+    );
+  }
+
+  return (
+    <form
+      className="mb-4 grid gap-3 rounded-xl border border-dashed border-border p-3 sm:grid-cols-2"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit({ name, slug, segment, checkoutType });
+      }}
+    >
+      <div className="grid gap-1.5">
+        <Label htmlFor="nova-loja-nome">Nome</Label>
+        <Input id="nova-loja-nome" value={name} onChange={(event) => setName(event.target.value)} required />
+      </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor="nova-loja-slug">Endereço (link)</Label>
+        <Input
+          id="nova-loja-slug"
+          value={slug}
+          onChange={(event) => setSlug(event.target.value.toLowerCase())}
+          placeholder="minha-loja"
+          required
+        />
+      </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor="nova-loja-segmento">Segmento</Label>
+        <Input id="nova-loja-segmento" value={segment} onChange={(event) => setSegment(event.target.value)} required />
+      </div>
+      <div className="grid gap-1.5">
+        <Label>Modelo de checkout</Label>
+        <Select value={checkoutType} onValueChange={(value) => setCheckoutType(value as CheckoutTypeValue)}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(CHECKOUT_TYPE_LABEL).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex items-center gap-2 sm:col-span-2">
+        <Button type="submit" size="sm" disabled={pending}>
+          Criar loja
+        </Button>
+        <Button type="button" size="sm" variant="ghost" onClick={() => setOpen(false)}>
+          Cancelar
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function StoreEditForm({
+  store,
+  onSubmit,
+  pending,
+}: {
+  store: { name: string; slug: string };
+  onSubmit: (values: { name: string; slug: string; segment?: string; checkoutType?: CheckoutTypeValue }) => void;
+  pending: boolean;
+}) {
+  const [name, setName] = useState(store.name);
+  const [slug, setSlug] = useState(store.slug);
+  const [checkoutType, setCheckoutType] = useState<CheckoutTypeValue>("produto");
+
+  return (
+    <form
+      className="grid gap-3 rounded-xl border border-dashed border-border p-3 sm:grid-cols-3"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit({ name, slug, checkoutType });
+      }}
+    >
+      <div className="grid gap-1.5">
+        <Label htmlFor={`edit-nome-${store.slug}`}>Nome</Label>
+        <Input id={`edit-nome-${store.slug}`} value={name} onChange={(event) => setName(event.target.value)} />
+      </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor={`edit-slug-${store.slug}`}>Endereço (link)</Label>
+        <Input
+          id={`edit-slug-${store.slug}`}
+          value={slug}
+          onChange={(event) => setSlug(event.target.value.toLowerCase())}
+        />
+      </div>
+      <div className="grid gap-1.5">
+        <Label>Modelo de checkout</Label>
+        <Select value={checkoutType} onValueChange={(value) => setCheckoutType(value as CheckoutTypeValue)}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(CHECKOUT_TYPE_LABEL).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="sm:col-span-3">
+        <Button type="submit" size="sm" disabled={pending}>
+          Salvar loja
+        </Button>
+      </div>
+    </form>
+  );
+}

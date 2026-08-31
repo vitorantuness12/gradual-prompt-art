@@ -23,6 +23,7 @@ import { Route as SlugIndexRouteImport } from './routes/$slug.index'
 import { Route as SlugAcompanharRouteImport } from './routes/$slug.acompanhar'
 import { Route as SlugCarrinhoRouteImport } from './routes/$slug.carrinho'
 import { Route as SlugCheckoutRouteImport } from './routes/$slug.checkout'
+import { Route as SlugMembrosRouteImport } from './routes/$slug.membros'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedCompletarCadastroRouteImport } from './routes/_authenticated/completar-cadastro'
 import { Route as AuthenticatedEntregadorRouteImport } from './routes/_authenticated/entregador'
@@ -49,6 +50,7 @@ import { Route as AuthenticatedPainelAgendamentosRouteImport } from './routes/_a
 import { Route as AuthenticatedPainelAssinaturaRouteImport } from './routes/_authenticated/painel.assinatura'
 import { Route as AuthenticatedPainelAvaliacoesRouteImport } from './routes/_authenticated/painel.avaliacoes'
 import { Route as AuthenticatedPainelClientesRouteImport } from './routes/_authenticated/painel.clientes'
+import { Route as AuthenticatedPainelCobrancasRouteImport } from './routes/_authenticated/painel.cobrancas'
 import { Route as AuthenticatedPainelConfiguracoesRouteImport } from './routes/_authenticated/painel.configuracoes'
 import { Route as AuthenticatedPainelDigitaisRouteImport } from './routes/_authenticated/painel.digitais'
 import { Route as AuthenticatedPainelEncomendasRouteImport } from './routes/_authenticated/painel.encomendas'
@@ -156,6 +158,11 @@ const SlugCarrinhoRoute = SlugCarrinhoRouteImport.update({
 const SlugCheckoutRoute = SlugCheckoutRouteImport.update({
   id: '/$slug/checkout',
   path: '/$slug/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SlugMembrosRoute = SlugMembrosRouteImport.update({
+  id: '/$slug/membros',
+  path: '/$slug/membros',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -295,6 +302,12 @@ const AuthenticatedPainelClientesRoute =
   AuthenticatedPainelClientesRouteImport.update({
     id: '/clientes',
     path: '/clientes',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
+const AuthenticatedPainelCobrancasRoute =
+  AuthenticatedPainelCobrancasRouteImport.update({
+    id: '/cobrancas',
+    path: '/cobrancas',
     getParentRoute: () => AuthenticatedPainelRoute,
   } as any)
 const AuthenticatedPainelConfiguracoesRoute =
@@ -539,6 +552,7 @@ export interface FileRoutesByFullPath {
   '/$slug/acompanhar': typeof SlugAcompanharRoute
   '/$slug/carrinho': typeof SlugCarrinhoRoute
   '/$slug/checkout': typeof SlugCheckoutRoute
+  '/$slug/membros': typeof SlugMembrosRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/completar-cadastro': typeof AuthenticatedCompletarCadastroRoute
   '/entregador': typeof AuthenticatedEntregadorRoute
@@ -565,6 +579,7 @@ export interface FileRoutesByFullPath {
   '/painel/assinatura': typeof AuthenticatedPainelAssinaturaRoute
   '/painel/avaliacoes': typeof AuthenticatedPainelAvaliacoesRoute
   '/painel/clientes': typeof AuthenticatedPainelClientesRoute
+  '/painel/cobrancas': typeof AuthenticatedPainelCobrancasRoute
   '/painel/configuracoes': typeof AuthenticatedPainelConfiguracoesRoute
   '/painel/digitais': typeof AuthenticatedPainelDigitaisRoute
   '/painel/encomendas': typeof AuthenticatedPainelEncomendasRoute
@@ -619,6 +634,7 @@ export interface FileRoutesByTo {
   '/$slug/acompanhar': typeof SlugAcompanharRoute
   '/$slug/carrinho': typeof SlugCarrinhoRoute
   '/$slug/checkout': typeof SlugCheckoutRoute
+  '/$slug/membros': typeof SlugMembrosRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/completar-cadastro': typeof AuthenticatedCompletarCadastroRoute
   '/entregador': typeof AuthenticatedEntregadorRoute
@@ -644,6 +660,7 @@ export interface FileRoutesByTo {
   '/painel/assinatura': typeof AuthenticatedPainelAssinaturaRoute
   '/painel/avaliacoes': typeof AuthenticatedPainelAvaliacoesRoute
   '/painel/clientes': typeof AuthenticatedPainelClientesRoute
+  '/painel/cobrancas': typeof AuthenticatedPainelCobrancasRoute
   '/painel/configuracoes': typeof AuthenticatedPainelConfiguracoesRoute
   '/painel/digitais': typeof AuthenticatedPainelDigitaisRoute
   '/painel/encomendas': typeof AuthenticatedPainelEncomendasRoute
@@ -700,6 +717,7 @@ export interface FileRoutesById {
   '/$slug/acompanhar': typeof SlugAcompanharRoute
   '/$slug/carrinho': typeof SlugCarrinhoRoute
   '/$slug/checkout': typeof SlugCheckoutRoute
+  '/$slug/membros': typeof SlugMembrosRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/completar-cadastro': typeof AuthenticatedCompletarCadastroRoute
   '/_authenticated/entregador': typeof AuthenticatedEntregadorRoute
@@ -726,6 +744,7 @@ export interface FileRoutesById {
   '/_authenticated/painel/assinatura': typeof AuthenticatedPainelAssinaturaRoute
   '/_authenticated/painel/avaliacoes': typeof AuthenticatedPainelAvaliacoesRoute
   '/_authenticated/painel/clientes': typeof AuthenticatedPainelClientesRoute
+  '/_authenticated/painel/cobrancas': typeof AuthenticatedPainelCobrancasRoute
   '/_authenticated/painel/configuracoes': typeof AuthenticatedPainelConfiguracoesRoute
   '/_authenticated/painel/digitais': typeof AuthenticatedPainelDigitaisRoute
   '/_authenticated/painel/encomendas': typeof AuthenticatedPainelEncomendasRoute
@@ -782,6 +801,7 @@ export interface FileRouteTypes {
     | '/$slug/acompanhar'
     | '/$slug/carrinho'
     | '/$slug/checkout'
+    | '/$slug/membros'
     | '/admin'
     | '/completar-cadastro'
     | '/entregador'
@@ -808,6 +828,7 @@ export interface FileRouteTypes {
     | '/painel/assinatura'
     | '/painel/avaliacoes'
     | '/painel/clientes'
+    | '/painel/cobrancas'
     | '/painel/configuracoes'
     | '/painel/digitais'
     | '/painel/encomendas'
@@ -862,6 +883,7 @@ export interface FileRouteTypes {
     | '/$slug/acompanhar'
     | '/$slug/carrinho'
     | '/$slug/checkout'
+    | '/$slug/membros'
     | '/admin'
     | '/completar-cadastro'
     | '/entregador'
@@ -887,6 +909,7 @@ export interface FileRouteTypes {
     | '/painel/assinatura'
     | '/painel/avaliacoes'
     | '/painel/clientes'
+    | '/painel/cobrancas'
     | '/painel/configuracoes'
     | '/painel/digitais'
     | '/painel/encomendas'
@@ -942,6 +965,7 @@ export interface FileRouteTypes {
     | '/$slug/acompanhar'
     | '/$slug/carrinho'
     | '/$slug/checkout'
+    | '/$slug/membros'
     | '/_authenticated/admin'
     | '/_authenticated/completar-cadastro'
     | '/_authenticated/entregador'
@@ -968,6 +992,7 @@ export interface FileRouteTypes {
     | '/_authenticated/painel/assinatura'
     | '/_authenticated/painel/avaliacoes'
     | '/_authenticated/painel/clientes'
+    | '/_authenticated/painel/cobrancas'
     | '/_authenticated/painel/configuracoes'
     | '/_authenticated/painel/digitais'
     | '/_authenticated/painel/encomendas'
@@ -1024,6 +1049,7 @@ export interface RootRouteChildren {
   SlugAcompanharRoute: typeof SlugAcompanharRoute
   SlugCarrinhoRoute: typeof SlugCarrinhoRoute
   SlugCheckoutRoute: typeof SlugCheckoutRoute
+  SlugMembrosRoute: typeof SlugMembrosRoute
   AgendamentoTokenRoute: typeof AgendamentoTokenRoute
   EncomendaTokenRoute: typeof EncomendaTokenRoute
   EntregaTokenRoute: typeof EntregaTokenRoute
@@ -1150,6 +1176,13 @@ declare module '@tanstack/react-router' {
       path: '/$slug/checkout'
       fullPath: '/$slug/checkout'
       preLoaderRoute: typeof SlugCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$slug/membros': {
+      id: '/$slug/membros'
+      path: '/$slug/membros'
+      fullPath: '/$slug/membros'
+      preLoaderRoute: typeof SlugMembrosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -1332,6 +1365,13 @@ declare module '@tanstack/react-router' {
       path: '/clientes'
       fullPath: '/painel/clientes'
       preLoaderRoute: typeof AuthenticatedPainelClientesRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
+    '/_authenticated/painel/cobrancas': {
+      id: '/_authenticated/painel/cobrancas'
+      path: '/cobrancas'
+      fullPath: '/painel/cobrancas'
+      preLoaderRoute: typeof AuthenticatedPainelCobrancasRouteImport
       parentRoute: typeof AuthenticatedPainelRoute
     }
     '/_authenticated/painel/configuracoes': {
@@ -1615,6 +1655,7 @@ interface AuthenticatedPainelRouteChildren {
   AuthenticatedPainelAssinaturaRoute: typeof AuthenticatedPainelAssinaturaRoute
   AuthenticatedPainelAvaliacoesRoute: typeof AuthenticatedPainelAvaliacoesRoute
   AuthenticatedPainelClientesRoute: typeof AuthenticatedPainelClientesRoute
+  AuthenticatedPainelCobrancasRoute: typeof AuthenticatedPainelCobrancasRoute
   AuthenticatedPainelConfiguracoesRoute: typeof AuthenticatedPainelConfiguracoesRoute
   AuthenticatedPainelDigitaisRoute: typeof AuthenticatedPainelDigitaisRoute
   AuthenticatedPainelEncomendasRoute: typeof AuthenticatedPainelEncomendasRoute
@@ -1646,6 +1687,7 @@ const AuthenticatedPainelRouteChildren: AuthenticatedPainelRouteChildren = {
   AuthenticatedPainelAssinaturaRoute: AuthenticatedPainelAssinaturaRoute,
   AuthenticatedPainelAvaliacoesRoute: AuthenticatedPainelAvaliacoesRoute,
   AuthenticatedPainelClientesRoute: AuthenticatedPainelClientesRoute,
+  AuthenticatedPainelCobrancasRoute: AuthenticatedPainelCobrancasRoute,
   AuthenticatedPainelConfiguracoesRoute: AuthenticatedPainelConfiguracoesRoute,
   AuthenticatedPainelDigitaisRoute: AuthenticatedPainelDigitaisRoute,
   AuthenticatedPainelEncomendasRoute: AuthenticatedPainelEncomendasRoute,
@@ -1722,6 +1764,7 @@ const rootRouteChildren: RootRouteChildren = {
   SlugAcompanharRoute: SlugAcompanharRoute,
   SlugCarrinhoRoute: SlugCarrinhoRoute,
   SlugCheckoutRoute: SlugCheckoutRoute,
+  SlugMembrosRoute: SlugMembrosRoute,
   AgendamentoTokenRoute: AgendamentoTokenRoute,
   EncomendaTokenRoute: EncomendaTokenRoute,
   EntregaTokenRoute: EntregaTokenRoute,

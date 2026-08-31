@@ -302,3 +302,120 @@ export const adminListAuditLogs = createServerFn({ method: "POST" })
       .limit(60);
     return data ?? [];
   });
+
+/** Cadastra uma loja pelo admin da plataforma (slug conferido no banco). */
+export const adminCreateStore = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        name: z.string().trim().min(2).max(80),
+        slug: z
+          .string()
+          .trim()
+          .toLowerCase()
+          .regex(/^[a-z0-9]([a-z0-9-]{1,28})[a-z0-9]$/, "Endereço inválido: use letras, números e hífen."),
+        segment: z.string().trim().min(2).max(40),
+        checkoutType: z.enum(["digital", "servico", "produto"]).optional(),
+        ownerEmail: z.string().trim().email().optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }): Promise<{ ok: boolean; message: string; storeId?: string }> => {
+    await assertSuperAdmin(context as never);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: available } = await supabaseAdmin.rpc("is_slug_available", { _slug: data.slug });
+    if (available !== true) return { ok: false, message: "Este endereço já está em uso ou é reservado." };
+
+    // O dono é opcional: quando informado, precisa já ter conta na plataforma.
+    let ownerId: string | null = null;
+    if (data.ownerEmail) {
+      const wanted = data.ownerEmail.toLowerCase();
+      const { data: users } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      const found = (users?.users ?? []).find((user) => (user.email ?? "").toLowerCase() === wanted);
+      if (!found) return { ok: false, message: "Não encontrei uma conta com esse e-mail." };
+      ownerId = found.id;
+    }
+
+    const { data: store, error } = await supabaseAdmin
+      .from("stores")
+      .insert({
+        name: data.name,
+        slug: data.slug,
+        segment: data.segment,
+        ...(data.checkoutType ? { checkout_type: data.checkoutType } : {}),
+        ...(ownerId ? { owner_id: ownerId } : {}),
+        is_active: true,
+      })
+      .select("id")
+      .maybeSingle();
+    if (error || !store) return { ok: false, message: "Não foi possível criar a loja." };
+
+    await supabaseAdmin.from("audit_logs").insert({
+      store_id: store.id,
+      user_id: (context as never as { userId: string }).userId,
+      action: "admin.loja_criada",
+      entity: "stores",
+      entity_id: store.id,
+      metadata: { slug: data.slug },
+    });
+
+    return { ok: true, message: "Loja criada.", storeId: store.id };
+  });
+
+/** Edita os dados básicos da loja e o modelo de checkout. */
+export const adminEditStore = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        storeId: z.string().uuid(),
+        name: z.string().trim().min(2).max(80).optional(),
+        slug: z
+          .string()
+          .trim()
+          .toLowerCase()
+          .regex(/^[a-z0-9]([a-z0-9-]{1,28})[a-z0-9]$/)
+          .optional(),
+        segment: z.string().trim().min(2).max(40).optional(),
+        checkoutType: z.enum(["digital", "servico", "produto"]).optional(),
+        isPublished: z.boolean().optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }): Promise<{ ok: boolean; message: string }> => {
+    await assertSuperAdmin(context as never);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    if (data.slug) {
+      const { data: available } = await supabaseAdmin.rpc("is_slug_available", {
+        _slug: data.slug,
+        _store_id: data.storeId,
+      });
+      if (available !== true) return { ok: false, message: "Este endereço já está em uso ou é reservado." };
+    }
+
+    const { error } = await supabaseAdmin
+      .from("stores")
+      .update({
+        ...(data.name ? { name: data.name } : {}),
+        ...(data.slug ? { slug: data.slug } : {}),
+        ...(data.segment ? { segment: data.segment } : {}),
+        ...(data.checkoutType ? { checkout_type: data.checkoutType } : {}),
+        ...(typeof data.isPublished === "boolean" ? { is_published: data.isPublished } : {}),
+      })
+      .eq("id", data.storeId);
+    if (error) return { ok: false, message: "Não foi possível salvar a loja." };
+
+    await supabaseAdmin.from("audit_logs").insert({
+      store_id: data.storeId,
+      user_id: (context as never as { userId: string }).userId,
+      action: "admin.loja_editada",
+      entity: "stores",
+      entity_id: data.storeId,
+      metadata: { slug: data.slug ?? null },
+    });
+
+    return { ok: true, message: "Loja atualizada." };
+  });
