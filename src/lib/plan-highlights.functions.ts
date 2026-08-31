@@ -30,18 +30,22 @@ function normalizeHighlights(value: unknown): string[] {
     .map((text) => text.replace(/^\s*[-*•\d.)\s]+/, "").trim())
     .filter((text) => text.length > 0)
     .map((text) => (text.length > 80 ? `${text.slice(0, 77).trimEnd()}...` : text))
-    .slice(0, 14);
+    // Teto alto: planos completos podem liberar quase 30 módulos e cada um vira um destaque.
+    .slice(0, 40);
 }
 
 const SYSTEM_PROMPT = [
   "Você escreve destaques curtos para cartões de preço de planos de um SaaS brasileiro de lojas online.",
-  "Receba os limites, recursos e módulos liberados do plano e devolva de 6 a 12 frases curtas (até 60 caracteres cada),",
+  "Receba os limites, recursos e módulos liberados do plano e devolva frases curtas (até 60 caracteres cada),",
   "em português, começando pelo benefício (não repita 'inclui' toda hora), sem emoji, sem ponto final.",
-  "Comece pelos limites e recursos mais atrativos e, em seguida, liste as FUNCIONALIDADES LIBERADAS:",
-  "cada módulo liberado deve virar um destaque próprio, usando o nome do módulo como veio na lista (ex.: 'Monitor de preparo (KDS)').",
+  "Comece pelos limites e recursos mais atrativos e, em seguida, liste TODAS as FUNCIONALIDADES LIBERADAS:",
+  "cada módulo liberado deve virar um destaque próprio, sem exceção e sem agrupar módulos na mesma frase,",
+  "usando o nome do módulo como veio na lista (ex.: 'Monitor de preparo (KDS)').",
+  "Portanto a lista final terá pelo menos um item por módulo recebido, mais os limites e recursos.",
   "Não invente módulos que não estejam na lista e não cite módulos ausentes.",
   "Ignore itens com valor zero ou não incluso. Devolva SOMENTE um JSON no formato {\"highlights\":[...]} sem markdown.",
 ].join(" ");
+
 
 
 function parseHighlights(raw: string): string[] {
