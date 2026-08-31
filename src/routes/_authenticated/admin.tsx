@@ -55,7 +55,9 @@ import {
 import { INTEGRATION_STATUS_TONE, PLATFORM_STATUS_LABEL, providerFields } from "@/lib/platform-integrations";
 import type { PlatformIntegrationView } from "@/lib/platform-integrations.server";
 import {
+  adminCreateStore,
   adminDeleteStore,
+  adminEditStore,
   adminListAuditLogs,
   adminUpdateStore,
   endSupportAccess,
@@ -230,7 +232,10 @@ function StoresTab() {
   const updateFn = useServerFn(adminUpdateStore);
   const deleteFn = useServerFn(adminDeleteStore);
   const supportFn = useServerFn(startSupportAccess);
+  const createFn = useServerFn(adminCreateStore);
+  const editFn = useServerFn(adminEditStore);
   const [search, setSearch] = useState("");
+  const [editing, setEditing] = useState<string | null>(null);
   const [supportStore, setSupportStore] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [consent, setConsent] = useState("");
@@ -287,6 +292,40 @@ function StoresTab() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const create = useMutation({
+    mutationFn: (input: { name: string; slug: string; segment: string; checkoutType?: "digital" | "servico" | "produto" }) =>
+      createFn({ data: input }),
+    onSuccess: (result) => {
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
+      toast.success(result.message);
+      void queryClient.invalidateQueries({ queryKey: ["admin-stores"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const edit = useMutation({
+    mutationFn: (input: {
+      storeId: string;
+      name?: string;
+      slug?: string;
+      segment?: string;
+      checkoutType?: "digital" | "servico" | "produto";
+    }) => editFn({ data: input }),
+    onSuccess: (result) => {
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
+      toast.success(result.message);
+      setEditing(null);
+      void queryClient.invalidateQueries({ queryKey: ["admin-stores"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const support = useMutation({
     mutationFn: () => supportFn({ data: { storeId: supportStore!, reason, consentReference: consent, minutes: 30 } }),
     onSuccess: (result) => {
@@ -320,6 +359,7 @@ function StoresTab() {
         />
       </CardHeader>
       <CardContent>
+        <StoreCreateForm pending={create.isPending} onSubmit={(values) => create.mutate(values)} />
         {storesQuery.isLoading ? (
           <Skeleton className="h-32 rounded-xl" />
         ) : stores.length === 0 ? (
@@ -389,11 +429,28 @@ function StoresTab() {
                       >
                         Acesso de suporte
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditing(editing === store.id ? null : store.id)}
+                      >
+                        Editar
+                      </Button>
                       <Button variant="ghost" size="sm" onClick={() => remove.mutate(store.id)}>
                         Excluir
                       </Button>
                     </div>
                   </div>
+
+                  <StoreCheckoutLink slug={store.slug} />
+
+                  {editing === store.id ? (
+                    <StoreEditForm
+                      store={store}
+                      pending={edit.isPending}
+                      onSubmit={(values) => edit.mutate({ storeId: store.id, ...values })}
+                    />
+                  ) : null}
 
                   {supportStore === store.id ? (
                     <form
