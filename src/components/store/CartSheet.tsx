@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sheet";
 import type { CartItem } from "@/hooks/useCart";
 import type { CouponFeedback } from "@/hooks/useCartCoupon";
+import { checkoutPathFor, type CheckoutModelStore } from "@/lib/checkout-model";
 import { formatCurrency } from "@/lib/format";
 import type { UpsellSuggestion } from "@/lib/upsell";
 
@@ -46,6 +47,8 @@ interface CartSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   slug: string;
+  /** Loja atual: decide para qual checkout o botão "Finalizar pedido" leva. */
+  store?: CheckoutModelStore | null;
   items: CartItem[];
   subtotal: number;
   accepting: boolean;
@@ -62,6 +65,7 @@ export function CartSheet({
   open,
   onOpenChange,
   slug,
+  store,
   items,
   subtotal,
   accepting,
@@ -218,7 +222,7 @@ export function CartSheet({
               className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
             >
               {accepting && items.length > 0 ? (
-                <Link to="/$slug/carrinho" params={{ slug }} onClick={() => onOpenChange(false)}>
+                <Link to={checkoutPathFor(slug, store ?? null)} onClick={() => onOpenChange(false)}>
                   Finalizar pedido
                 </Link>
               ) : (

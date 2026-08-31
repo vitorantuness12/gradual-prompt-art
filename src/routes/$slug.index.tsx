@@ -35,6 +35,7 @@ import {
   type CardStyle,
   type ImagePosition,
 } from "@/lib/store-theme";
+import { checkoutPathFor } from "@/lib/checkout-model";
 import { publicStoreQuery, resolveSlugRedirect, type ProductRow } from "@/lib/store-queries";
 import { publicEntryPopupsQuery } from "@/lib/entry-popup-queries";
 import { isCampaignActive, selectCampaignProducts } from "@/lib/destaques";
@@ -207,7 +208,8 @@ function PublicStorePage() {
     : null;
   const layout = layoutForStore(store.segment, products);
   /** Delivery, restaurantes, saúde e conveniência conferem a sacola sem sair do catálogo. */
-  const quickCart = quickCartEnabled(store.segment);
+  const digitalCheckout = checkoutPathFor(slug, store).endsWith("/checkout/digital");
+  const quickCart = !digitalCheckout && quickCartEnabled(store.segment);
   const promos = products.filter((product) => hasPromo(product)).slice(0, 6);
   const recommended = products.filter((product) => product.is_featured && !hasPromo(product)).slice(0, 6);
   const contactNumber = (store.whatsapp || store.phone || "").replace(/\D/g, "");
@@ -719,9 +721,11 @@ function PublicStorePage() {
               </Button>
             ) : (
               <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
-                <Link to="/$slug/carrinho" params={{ slug }}>
+                <Link to={checkoutPathFor(slug, store)}>
                   <ShoppingBag className="mr-2 size-4" aria-hidden="true" />
-                  Ver carrinho
+                  {store.segment && /curso|mentor|e-?book|software|digital|assinatura|infoprodut/i.test(store.segment)
+                    ? "Finalizar compra"
+                    : "Ver carrinho"}
                 </Link>
               </Button>
             )}
@@ -734,6 +738,7 @@ function PublicStorePage() {
           open={cartSheetOpen}
           onOpenChange={setCartSheetOpen}
           slug={slug}
+          store={store}
           items={cart.items}
           subtotal={cart.subtotal}
           accepting={availability.accepting}

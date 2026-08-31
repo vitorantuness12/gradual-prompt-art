@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { z } from "zod";
 
@@ -52,12 +52,23 @@ export const Route = createFileRoute("/$slug/carrinho")({
 /** Página de conferência do carrinho, entre o catálogo e o checkout. */
 function StoreCartPage() {
   const { slug } = Route.useParams();
+  const navigate = useNavigate();
   const { retomar, cupom } = Route.useSearch();
   const { data, isLoading } = useQuery(publicStoreQuery(slug));
   const store = data?.store ?? null;
   useStoreDocumentTitle(store?.name, "Carrinho");
 
   const cart = useCart(slug, store?.id ?? null);
+
+  // Produtos digitais têm checkout próprio (sem endereço/entrega): a etapa de
+  // carrinho genérica não faz sentido aqui, então pulamos direto para ele.
+  useEffect(() => {
+    if (!store) return;
+    const target = checkoutPathFor(slug, store);
+    if (target.endsWith("/checkout/digital")) {
+      void navigate({ to: target, replace: true });
+    }
+  }, [store, slug, navigate]);
   const [couponCode, setCouponCode] = useState("");
   const couponState = useCartCoupon(slug, store?.id ?? null, cart.subtotal, cart.hydrated);
   const total = Math.max(0, cart.subtotal - couponState.discount);
