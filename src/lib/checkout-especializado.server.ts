@@ -548,6 +548,17 @@ export async function createDigitalOrder(admin: Admin, input: DigitalCheckoutInp
     })),
   );
 
+  // Cobrança real: o pedido digital nasce com uma transação pendente que o
+  // lojista acompanha (e confirma) na tela de cobranças.
+  const { ensureOrderCharge } = await import("@/lib/cobrancas.server");
+  await ensureOrderCharge(admin, {
+    storeId: store.id,
+    orderId: order.id,
+    method: input.paymentMethod,
+    amount: totals.total,
+    isDemo: store.is_demo,
+  });
+
   return {
     ok: true,
     message: "Compra registrada! Assim que o pagamento for confirmado, liberamos seu acesso.",
