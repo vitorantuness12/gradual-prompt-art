@@ -138,10 +138,11 @@ export async function settleCharge(
       status: input.status,
       paid_at: input.status === "paid" ? now : null,
       refunded_at: input.status === "refunded" ? now : null,
-      refunded_amount: input.status === "refunded" ? Number(charge.amount ?? 0) : null,
+      ...(input.status === "refunded" ? { refunded_amount: Number(charge.amount ?? 0) } : {}),
       last_error: input.status === "failed" ? (input.note ?? "Pagamento não aprovado") : null,
     })
     .eq("id", charge.id);
+
 
   if (!charge.order_id) return { ok: true, message: "Cobrança atualizada." };
 
