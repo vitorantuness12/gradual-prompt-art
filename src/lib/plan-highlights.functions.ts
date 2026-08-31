@@ -144,11 +144,22 @@ export const generatePlanHighlights = createServerFn({ method: "POST" })
       }
 
       const json = (await response.json()) as { choices?: { message?: { content?: string } }[] };
-      const highlights = parseHighlights(json.choices?.[0]?.message?.content ?? "");
-      if (highlights.length === 0) {
+      const generated = parseHighlights(json.choices?.[0]?.message?.content ?? "");
+      if (generated.length === 0) {
         return { ok: false, highlights: [], message: "A IA não retornou destaques válidos. Tente novamente." };
       }
+
+      // A IA costuma parar antes de citar todos os módulos; completamos o que faltou
+      // para que nenhuma funcionalidade liberada fique fora dos destaques.
+      const normalized = new Set(generated.map((line) => line.toLowerCase()));
+      const missing = data.moduleLabels.filter((label) => {
+        const key = label.toLowerCase();
+        return ![...normalized].some((line) => line.includes(key));
+      });
+      const highlights = [...generated, ...missing].slice(0, 60);
+
       return { ok: true, highlights, message: `${highlights.length} destaques gerados.` };
+
     } catch {
       return { ok: false, highlights: [], message: "Falha ao contatar a IA. Tente novamente." };
     }
