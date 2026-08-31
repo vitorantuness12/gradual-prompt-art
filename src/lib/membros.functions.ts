@@ -16,7 +16,7 @@ export const loginMembro = createServerFn({ method: "POST" })
   .inputValidator((input: { slug: string; email: string; password: string }) => input)
   .handler(async ({ data }) => {
     const { consumeRateLimit, rateLimitMessage } = await import("@/lib/security.server");
-    const limit = await consumeRateLimit("membros_login", `${data.slug}:${data.email.toLowerCase()}`);
+    const limit = await consumeRateLimit("login", `${data.slug}:${data.email.toLowerCase()}`);
     if (!limit.allowed) return { ok: false, message: rateLimitMessage(limit) };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -157,8 +157,8 @@ export const salvarMaterial = createServerFn({ method: "POST" })
       product_id: data.productId,
       title,
       kind: data.kind,
-      url: data.kind === "link" ? data.url : null,
-      file_path: data.kind === "file" ? data.filePath : null,
+      url: data.kind === "link" ? (data.url ?? null) : null,
+      file_path: data.kind === "file" ? (data.filePath ?? null) : null,
     });
     if (error) return { ok: false, message: "Não foi possível salvar o material." };
     return { ok: true, message: "Material publicado para os membros." };

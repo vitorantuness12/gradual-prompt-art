@@ -1020,6 +1020,6 @@ export async function createSubscriptionCheckout(
     message: "Assinatura criada! Confirme o pagamento para começar o primeiro ciclo.",
     code: order.code,
     publicToken: order.public_token,
-    subscriptionId: subscription?.id,
+    ...(subscription?.id ? { subscriptionId: subscription.id } : {}),
   };
 }
