@@ -18,7 +18,20 @@ const inputSchema = z.object({
   moduleLabels: z.array(z.string().trim().max(80)).max(60).default([]),
 });
 
-const outputSchema = z.object({ highlights: z.array(z.string().trim().max(80)).max(14) });
+/** Tolerante de propósito: a IA às vezes devolve frases longas ou itens extras. */
+function normalizeHighlights(value: unknown): string[] {
+  const list = Array.isArray(value)
+    ? value
+    : Array.isArray((value as { highlights?: unknown } | null)?.highlights)
+      ? ((value as { highlights: unknown[] }).highlights)
+      : [];
+  return list
+    .map((item) => (typeof item === "string" ? item : typeof item === "object" && item && "text" in item ? String((item as { text: unknown }).text) : ""))
+    .map((text) => text.replace(/^\s*[-*•\d.)\s]+/, "").trim())
+    .filter((text) => text.length > 0)
+    .map((text) => (text.length > 80 ? `${text.slice(0, 77).trimEnd()}...` : text))
+    .slice(0, 14);
+}
 
 const SYSTEM_PROMPT = [
   "Você escreve destaques curtos para cartões de preço de planos de um SaaS brasileiro de lojas online.",
