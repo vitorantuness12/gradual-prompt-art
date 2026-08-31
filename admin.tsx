@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Sparkles } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
+
 
 import { DemoBadge } from "@/components/brand/DemoBadge";
 import { Logo } from "@/components/brand/Logo";
@@ -24,7 +24,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { INTEGRATIONS, PROVIDER_LABEL } from "@/lib/integrations";
+
 import {
+  deriveHighlightsFromDraft,
   FEATURE_CONTROLS,
   FEATURE_KEYS,
   LIMIT_KEYS,
@@ -43,7 +45,6 @@ import {
   type PlanModuleKey,
   type PlanRow,
 } from "@/lib/plans";
-import { generatePlanHighlights } from "@/lib/plan-highlights.functions";
 import {
   listPlatformIntegrations,
   savePlatformIntegration,
@@ -529,6 +530,48 @@ interface PlanDraft {
   modules: PlanModuleKey[];
   highlights: string;
 }
+
+/**
+ * Campo de destaques do plano preenchido automaticamente pela própria
+ * plataforma: sempre que os limites, recursos ou módulos mudam, o texto
+ * é recalculado a partir de deriveHighlightsFromDraft (sem IA). O usuário
+ * ainda pode editar o texto livremente depois.
+ */
+function PlanHighlightsField({
+  draft,
+  update,
+  rows,
+}: {
+  draft: PlanDraft;
+  update: (patch: Partial<PlanDraft>) => void;
+  rows: number;
+}) {
+  useEffect(() => {
+    const auto = deriveHighlightsFromDraft({
+      limits: draft.limits,
+      features: draft.features,
+      modules: normalizePlanModules(draft.modules),
+    }).join("\n");
+    if (auto !== draft.highlights) update({ highlights: auto });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft.limits, draft.features, draft.modules]);
+
+  return (
+    <div className="space-y-1.5">
+      <Label>Destaques (um por linha)</Label>
+      <Textarea
+        rows={rows}
+        value={draft.highlights}
+        onChange={(event) => update({ highlights: event.target.value })}
+      />
+      <p className="text-xs text-muted-foreground">
+        Gerado automaticamente a partir dos limites, recursos e módulos marcados acima. Você pode editar o texto livremente.
+      </p>
+    </div>
+  );
+}
+
+
 
 function emptyLimits(): Record<string, string> {
   return Object.fromEntries(LIMIT_KEYS.map((item) => [item.key, "0"]));
@@ -1049,57 +1092,6 @@ function PlanBasicFields({
   );
 }
 
-/**
- * Botão que chama a IA para gerar os destaques do plano a partir dos
- * limites, recursos e módulos já marcados no formulário, preenchendo o
- * textarea (o admin ainda pode editar antes de salvar).
- */
-function AiHighlightsButton({
-  draft,
-  update,
-}: {
-  draft: PlanDraft;
-  update: (patch: Partial<PlanDraft>) => void;
-}) {
-  const generateFn = useServerFn(generatePlanHighlights);
-  const generate = useMutation({
-    mutationFn: () =>
-      generateFn({
-        data: {
-          name: draft.name,
-          tagline: draft.tagline,
-          priceMonth: draft.priceMonth,
-          limits: draft.limits,
-          features: draft.features,
-          moduleLabels: normalizePlanModules(draft.modules).map((key) => PLAN_MODULE_LABEL[key]),
-        },
-      }),
-    onSuccess: (result) => {
-      if (!result.ok) {
-        toast.error(result.message);
-        return;
-      }
-      update({ highlights: result.highlights.join("\n") });
-      toast.success(result.message);
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
-  return (
-    <Button
-      type="button"
-      size="sm"
-      variant="outline"
-      className="gap-1.5"
-      disabled={generate.isPending || !draft.name.trim()}
-      onClick={() => generate.mutate()}
-    >
-      <Sparkles className="h-3.5 w-3.5" />
-      {generate.isPending ? "Gerando…" : "Gerar com IA"}
-    </Button>
-  );
-}
-
 /** Formulário de criação de plano — o plano ativo aparece na página inicial e em /planos. */
 function NewPlanCard({
   nextSortOrder,
@@ -1182,13 +1174,8 @@ function NewPlanCard({
       <CardContent className="space-y-3 text-sm">
         <PlanBasicFields draft={draft} errors={errors} update={update} showKey />
         <PlanCapabilityFields draft={draft} errors={errors} update={update} />
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between gap-2">
-            <Label>Destaques (um por linha)</Label>
-            <AiHighlightsButton draft={draft} update={update} />
-          </div>
-          <Textarea rows={4} value={draft.highlights} onChange={(event) => update({ highlights: event.target.value })} />
-        </div>
+        <PlanHighlightsField draft={draft} update={update} rows={4} />
+
         <div className="flex gap-2">
           <Button size="sm" onClick={submit} disabled={pending}>
             {pending ? "Criando…" : "Criar plano"}
@@ -1251,13 +1238,8 @@ function PlanEditor({
         <PlanBasicFields draft={draft} errors={errors} update={update} showKey={false} />
         <PlanCapabilityFields draft={draft} errors={errors} update={update} />
 
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between gap-2">
-            <Label>Destaques (um por linha)</Label>
-            <AiHighlightsButton draft={draft} update={update} />
-          </div>
-          <Textarea rows={3} value={draft.highlights} onChange={(event) => update({ highlights: event.target.value })} />
-        </div>
+        <PlanHighlightsField draft={draft} update={update} rows={3} />
+
 
         <div className="flex gap-2">
           <Button size="sm" onClick={submit} disabled={pending}>

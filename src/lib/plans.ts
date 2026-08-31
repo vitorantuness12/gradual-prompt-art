@@ -257,6 +257,41 @@ export function isOverLimit(current: number, limit: number): boolean {
   return current >= limit;
 }
 
+/**
+ * Gera automaticamente a lista de destaques do plano a partir do que já foi
+ * marcado no formulário (limites, recursos e módulos). Não usa IA — é uma
+ * função pura da própria plataforma, reaproveitando os rótulos já definidos
+ * em LIMIT_KEYS, FEATURE_KEYS e PLAN_MODULE_LABEL.
+ */
+export function deriveHighlightsFromDraft(input: {
+  limits: Record<string, string>;
+  features: Record<string, string>;
+  modules: PlanModuleKey[];
+}): string[] {
+  const highlights: string[] = [];
+
+  for (const item of LIMIT_KEYS) {
+    const raw = Number(input.limits[item.key] ?? "0");
+    if (!Number.isFinite(raw) || raw === 0) continue;
+    highlights.push(raw < 0 ? `${item.label}: ilimitado` : `${item.label}: até ${raw.toLocaleString("pt-BR")}`);
+  }
+
+  for (const item of FEATURE_KEYS) {
+    const raw = input.features[item.key] ?? "false";
+    if (raw === "false") continue;
+    highlights.push(`${item.label}: ${formatFeature(raw === "true" ? true : raw)}`);
+  }
+
+  const optionalModules = input.modules.filter((key) => !PLAN_ESSENTIAL_MODULES.includes(key));
+  if (optionalModules.length > 0) {
+    highlights.push(
+      `Módulos extras: ${optionalModules.map((key) => PLAN_MODULE_LABEL[key]).join(", ")}`,
+    );
+  }
+
+  return highlights;
+}
+
 /** Situações em que a loja continua operando normalmente. */
 export function isSubscriptionUsable(status: SubscriptionStatus | undefined): boolean {
   return status === "active" || status === "trialing" || status === "past_due";
