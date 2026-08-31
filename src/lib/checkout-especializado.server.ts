@@ -1012,7 +1012,7 @@ export async function createSubscriptionCheckout(
 
   if (subscription?.id) {
     const { notifySubscription } = await import("@/lib/digitais.server");
-    await notifySubscription(admin, subscription.id, "assinatura_criada").catch(() => undefined);
+    await notifySubscription(admin, subscription.id, "activated").catch(() => undefined);
   }
 
   return {
