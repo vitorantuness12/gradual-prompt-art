@@ -74,7 +74,7 @@ export const generatePlanHighlights = createServerFn({ method: "POST" })
       .filter(([, value]) => value && value !== "false")
       .map(([key, value]) => `${key}: ${value}`)
       .join("; ");
-    const modulesText = data.moduleLabels.join(", ");
+    const modulesText = data.moduleLabels.map((label) => `- ${label}`).join("\n");
 
     const prompt = [
       `Plano: ${data.name || "Sem nome"}`,
@@ -82,10 +82,13 @@ export const generatePlanHighlights = createServerFn({ method: "POST" })
       `Preço mensal: R$ ${data.priceMonth}`,
       limitsText ? `Limites incluídos: ${limitsText}` : null,
       featuresText ? `Recursos: ${featuresText}` : null,
-      modulesText ? `Módulos liberados no painel: ${modulesText}` : null,
+      modulesText
+        ? `Funcionalidades liberadas neste plano (cite cada uma como um destaque):\n${modulesText}`
+        : null,
     ]
       .filter(Boolean)
       .join("\n");
+
 
     try {
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
