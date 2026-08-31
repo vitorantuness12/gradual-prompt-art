@@ -18,7 +18,20 @@ const inputSchema = z.object({
   moduleLabels: z.array(z.string().trim().max(80)).max(60).default([]),
 });
 
-const outputSchema = z.object({ highlights: z.array(z.string().trim().max(80)).max(14) });
+/** Tolerante de propósito: a IA às vezes devolve frases longas ou itens extras. */
+function normalizeHighlights(value: unknown): string[] {
+  const list = Array.isArray(value)
+    ? value
+    : Array.isArray((value as { highlights?: unknown } | null)?.highlights)
+      ? ((value as { highlights: unknown[] }).highlights)
+      : [];
+  return list
+    .map((item) => (typeof item === "string" ? item : typeof item === "object" && item && "text" in item ? String((item as { text: unknown }).text) : ""))
+    .map((text) => text.replace(/^\s*[-*•\d.)\s]+/, "").trim())
+    .filter((text) => text.length > 0)
+    .map((text) => (text.length > 80 ? `${text.slice(0, 77).trimEnd()}...` : text))
+    .slice(0, 14);
+}
 
 const SYSTEM_PROMPT = [
   "Você escreve destaques curtos para cartões de preço de planos de um SaaS brasileiro de lojas online.",
@@ -32,21 +45,29 @@ const SYSTEM_PROMPT = [
 
 
 function parseHighlights(raw: string): string[] {
-  const cleaned = raw
-    .replace(/```json/gi, "")
-    .replace(/```/g, "")
-    .trim();
-  const start = cleaned.indexOf("{");
-  const end = cleaned.lastIndexOf("}");
-  if (start < 0 || end <= start) return [];
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(cleaned.slice(start, end + 1));
-  } catch {
-    return [];
+  const cleaned = raw.replace(/```json/gi, "").replace(/```/g, "").trim();
+  if (!cleaned) return [];
+
+  // 1) tenta JSON (objeto {"highlights":[...]} ou array puro)
+  const candidates: string[] = [];
+  const objStart = cleaned.indexOf("{");
+  const objEnd = cleaned.lastIndexOf("}");
+  if (objStart >= 0 && objEnd > objStart) candidates.push(cleaned.slice(objStart, objEnd + 1));
+  const arrStart = cleaned.indexOf("[");
+  const arrEnd = cleaned.lastIndexOf("]");
+  if (arrStart >= 0 && arrEnd > arrStart) candidates.push(cleaned.slice(arrStart, arrEnd + 1));
+
+  for (const candidate of candidates) {
+    try {
+      const result = normalizeHighlights(JSON.parse(candidate));
+      if (result.length > 0) return result;
+    } catch {
+      // tenta o próximo formato
+    }
   }
-  const shape = outputSchema.safeParse(parsed);
-  return shape.success ? shape.data.highlights.filter(Boolean) : [];
+
+  // 2) fallback: a IA respondeu em texto/lista simples
+  return normalizeHighlights(cleaned.split("\n"));
 }
 
 export const generatePlanHighlights = createServerFn({ method: "POST" })
@@ -97,6 +118,7 @@ export const generatePlanHighlights = createServerFn({ method: "POST" })
         body: JSON.stringify({
           model: "gpt-4o-mini",
           temperature: 0.4,
+          response_format: { type: "json_object" },
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
             { role: "user", content: prompt },
