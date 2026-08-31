@@ -49,6 +49,7 @@ import { Route as AuthenticatedPainelAgendamentosRouteImport } from './routes/_a
 import { Route as AuthenticatedPainelAssinaturaRouteImport } from './routes/_authenticated/painel.assinatura'
 import { Route as AuthenticatedPainelAvaliacoesRouteImport } from './routes/_authenticated/painel.avaliacoes'
 import { Route as AuthenticatedPainelClientesRouteImport } from './routes/_authenticated/painel.clientes'
+import { Route as AuthenticatedPainelCobrancasRouteImport } from './routes/_authenticated/painel.cobrancas'
 import { Route as AuthenticatedPainelConfiguracoesRouteImport } from './routes/_authenticated/painel.configuracoes'
 import { Route as AuthenticatedPainelDigitaisRouteImport } from './routes/_authenticated/painel.digitais'
 import { Route as AuthenticatedPainelEncomendasRouteImport } from './routes/_authenticated/painel.encomendas'
@@ -295,6 +296,12 @@ const AuthenticatedPainelClientesRoute =
   AuthenticatedPainelClientesRouteImport.update({
     id: '/clientes',
     path: '/clientes',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
+const AuthenticatedPainelCobrancasRoute =
+  AuthenticatedPainelCobrancasRouteImport.update({
+    id: '/cobrancas',
+    path: '/cobrancas',
     getParentRoute: () => AuthenticatedPainelRoute,
   } as any)
 const AuthenticatedPainelConfiguracoesRoute =
@@ -565,6 +572,7 @@ export interface FileRoutesByFullPath {
   '/painel/assinatura': typeof AuthenticatedPainelAssinaturaRoute
   '/painel/avaliacoes': typeof AuthenticatedPainelAvaliacoesRoute
   '/painel/clientes': typeof AuthenticatedPainelClientesRoute
+  '/painel/cobrancas': typeof AuthenticatedPainelCobrancasRoute
   '/painel/configuracoes': typeof AuthenticatedPainelConfiguracoesRoute
   '/painel/digitais': typeof AuthenticatedPainelDigitaisRoute
   '/painel/encomendas': typeof AuthenticatedPainelEncomendasRoute
@@ -644,6 +652,7 @@ export interface FileRoutesByTo {
   '/painel/assinatura': typeof AuthenticatedPainelAssinaturaRoute
   '/painel/avaliacoes': typeof AuthenticatedPainelAvaliacoesRoute
   '/painel/clientes': typeof AuthenticatedPainelClientesRoute
+  '/painel/cobrancas': typeof AuthenticatedPainelCobrancasRoute
   '/painel/configuracoes': typeof AuthenticatedPainelConfiguracoesRoute
   '/painel/digitais': typeof AuthenticatedPainelDigitaisRoute
   '/painel/encomendas': typeof AuthenticatedPainelEncomendasRoute
@@ -726,6 +735,7 @@ export interface FileRoutesById {
   '/_authenticated/painel/assinatura': typeof AuthenticatedPainelAssinaturaRoute
   '/_authenticated/painel/avaliacoes': typeof AuthenticatedPainelAvaliacoesRoute
   '/_authenticated/painel/clientes': typeof AuthenticatedPainelClientesRoute
+  '/_authenticated/painel/cobrancas': typeof AuthenticatedPainelCobrancasRoute
   '/_authenticated/painel/configuracoes': typeof AuthenticatedPainelConfiguracoesRoute
   '/_authenticated/painel/digitais': typeof AuthenticatedPainelDigitaisRoute
   '/_authenticated/painel/encomendas': typeof AuthenticatedPainelEncomendasRoute
@@ -808,6 +818,7 @@ export interface FileRouteTypes {
     | '/painel/assinatura'
     | '/painel/avaliacoes'
     | '/painel/clientes'
+    | '/painel/cobrancas'
     | '/painel/configuracoes'
     | '/painel/digitais'
     | '/painel/encomendas'
@@ -887,6 +898,7 @@ export interface FileRouteTypes {
     | '/painel/assinatura'
     | '/painel/avaliacoes'
     | '/painel/clientes'
+    | '/painel/cobrancas'
     | '/painel/configuracoes'
     | '/painel/digitais'
     | '/painel/encomendas'
@@ -968,6 +980,7 @@ export interface FileRouteTypes {
     | '/_authenticated/painel/assinatura'
     | '/_authenticated/painel/avaliacoes'
     | '/_authenticated/painel/clientes'
+    | '/_authenticated/painel/cobrancas'
     | '/_authenticated/painel/configuracoes'
     | '/_authenticated/painel/digitais'
     | '/_authenticated/painel/encomendas'
@@ -1334,6 +1347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPainelClientesRouteImport
       parentRoute: typeof AuthenticatedPainelRoute
     }
+    '/_authenticated/painel/cobrancas': {
+      id: '/_authenticated/painel/cobrancas'
+      path: '/cobrancas'
+      fullPath: '/painel/cobrancas'
+      preLoaderRoute: typeof AuthenticatedPainelCobrancasRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
     '/_authenticated/painel/configuracoes': {
       id: '/_authenticated/painel/configuracoes'
       path: '/configuracoes'
@@ -1615,6 +1635,7 @@ interface AuthenticatedPainelRouteChildren {
   AuthenticatedPainelAssinaturaRoute: typeof AuthenticatedPainelAssinaturaRoute
   AuthenticatedPainelAvaliacoesRoute: typeof AuthenticatedPainelAvaliacoesRoute
   AuthenticatedPainelClientesRoute: typeof AuthenticatedPainelClientesRoute
+  AuthenticatedPainelCobrancasRoute: typeof AuthenticatedPainelCobrancasRoute
   AuthenticatedPainelConfiguracoesRoute: typeof AuthenticatedPainelConfiguracoesRoute
   AuthenticatedPainelDigitaisRoute: typeof AuthenticatedPainelDigitaisRoute
   AuthenticatedPainelEncomendasRoute: typeof AuthenticatedPainelEncomendasRoute
@@ -1646,6 +1667,7 @@ const AuthenticatedPainelRouteChildren: AuthenticatedPainelRouteChildren = {
   AuthenticatedPainelAssinaturaRoute: AuthenticatedPainelAssinaturaRoute,
   AuthenticatedPainelAvaliacoesRoute: AuthenticatedPainelAvaliacoesRoute,
   AuthenticatedPainelClientesRoute: AuthenticatedPainelClientesRoute,
+  AuthenticatedPainelCobrancasRoute: AuthenticatedPainelCobrancasRoute,
   AuthenticatedPainelConfiguracoesRoute: AuthenticatedPainelConfiguracoesRoute,
   AuthenticatedPainelDigitaisRoute: AuthenticatedPainelDigitaisRoute,
   AuthenticatedPainelEncomendasRoute: AuthenticatedPainelEncomendasRoute,
