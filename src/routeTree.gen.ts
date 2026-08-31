@@ -23,6 +23,7 @@ import { Route as SlugIndexRouteImport } from './routes/$slug.index'
 import { Route as SlugAcompanharRouteImport } from './routes/$slug.acompanhar'
 import { Route as SlugCarrinhoRouteImport } from './routes/$slug.carrinho'
 import { Route as SlugCheckoutRouteImport } from './routes/$slug.checkout'
+import { Route as SlugMembrosRouteImport } from './routes/$slug.membros'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedCompletarCadastroRouteImport } from './routes/_authenticated/completar-cadastro'
 import { Route as AuthenticatedEntregadorRouteImport } from './routes/_authenticated/entregador'
@@ -157,6 +158,11 @@ const SlugCarrinhoRoute = SlugCarrinhoRouteImport.update({
 const SlugCheckoutRoute = SlugCheckoutRouteImport.update({
   id: '/$slug/checkout',
   path: '/$slug/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SlugMembrosRoute = SlugMembrosRouteImport.update({
+  id: '/$slug/membros',
+  path: '/$slug/membros',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -546,6 +552,7 @@ export interface FileRoutesByFullPath {
   '/$slug/acompanhar': typeof SlugAcompanharRoute
   '/$slug/carrinho': typeof SlugCarrinhoRoute
   '/$slug/checkout': typeof SlugCheckoutRoute
+  '/$slug/membros': typeof SlugMembrosRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/completar-cadastro': typeof AuthenticatedCompletarCadastroRoute
   '/entregador': typeof AuthenticatedEntregadorRoute
@@ -627,6 +634,7 @@ export interface FileRoutesByTo {
   '/$slug/acompanhar': typeof SlugAcompanharRoute
   '/$slug/carrinho': typeof SlugCarrinhoRoute
   '/$slug/checkout': typeof SlugCheckoutRoute
+  '/$slug/membros': typeof SlugMembrosRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/completar-cadastro': typeof AuthenticatedCompletarCadastroRoute
   '/entregador': typeof AuthenticatedEntregadorRoute
@@ -709,6 +717,7 @@ export interface FileRoutesById {
   '/$slug/acompanhar': typeof SlugAcompanharRoute
   '/$slug/carrinho': typeof SlugCarrinhoRoute
   '/$slug/checkout': typeof SlugCheckoutRoute
+  '/$slug/membros': typeof SlugMembrosRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/completar-cadastro': typeof AuthenticatedCompletarCadastroRoute
   '/_authenticated/entregador': typeof AuthenticatedEntregadorRoute
@@ -792,6 +801,7 @@ export interface FileRouteTypes {
     | '/$slug/acompanhar'
     | '/$slug/carrinho'
     | '/$slug/checkout'
+    | '/$slug/membros'
     | '/admin'
     | '/completar-cadastro'
     | '/entregador'
@@ -873,6 +883,7 @@ export interface FileRouteTypes {
     | '/$slug/acompanhar'
     | '/$slug/carrinho'
     | '/$slug/checkout'
+    | '/$slug/membros'
     | '/admin'
     | '/completar-cadastro'
     | '/entregador'
@@ -954,6 +965,7 @@ export interface FileRouteTypes {
     | '/$slug/acompanhar'
     | '/$slug/carrinho'
     | '/$slug/checkout'
+    | '/$slug/membros'
     | '/_authenticated/admin'
     | '/_authenticated/completar-cadastro'
     | '/_authenticated/entregador'
@@ -1037,6 +1049,7 @@ export interface RootRouteChildren {
   SlugAcompanharRoute: typeof SlugAcompanharRoute
   SlugCarrinhoRoute: typeof SlugCarrinhoRoute
   SlugCheckoutRoute: typeof SlugCheckoutRoute
+  SlugMembrosRoute: typeof SlugMembrosRoute
   AgendamentoTokenRoute: typeof AgendamentoTokenRoute
   EncomendaTokenRoute: typeof EncomendaTokenRoute
   EntregaTokenRoute: typeof EntregaTokenRoute
@@ -1163,6 +1176,13 @@ declare module '@tanstack/react-router' {
       path: '/$slug/checkout'
       fullPath: '/$slug/checkout'
       preLoaderRoute: typeof SlugCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$slug/membros': {
+      id: '/$slug/membros'
+      path: '/$slug/membros'
+      fullPath: '/$slug/membros'
+      preLoaderRoute: typeof SlugMembrosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -1744,6 +1764,7 @@ const rootRouteChildren: RootRouteChildren = {
   SlugAcompanharRoute: SlugAcompanharRoute,
   SlugCarrinhoRoute: SlugCarrinhoRoute,
   SlugCheckoutRoute: SlugCheckoutRoute,
+  SlugMembrosRoute: SlugMembrosRoute,
   AgendamentoTokenRoute: AgendamentoTokenRoute,
   EncomendaTokenRoute: EncomendaTokenRoute,
   EntregaTokenRoute: EntregaTokenRoute,
