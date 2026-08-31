@@ -597,7 +597,8 @@ function PlanHighlightsField({
         onChange={(event) => update({ highlights: event.target.value })}
       />
       <p className="text-xs text-muted-foreground">
-        A IA usa os limites, recursos e módulos marcados acima. Você pode editar o texto depois.
+        A IA usa os limites, recursos e módulos marcados acima e cria uma linha por funcionalidade
+        liberada. Depois de gerar ou editar, clique em "Salvar plano" para aparecer na homepage e em /planos.
       </p>
     </div>
   );
