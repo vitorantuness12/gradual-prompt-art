@@ -573,7 +573,8 @@ function PlanHighlightsField({
         return;
       }
       update({ highlights: result.highlights.join("\n") });
-      toast.success(result.message);
+      // A geração só preenche o campo: sem salvar, nada muda na homepage/planos.
+      toast.success(`${result.message} Clique em "Salvar plano" para publicar.`);
     } catch {
       toast.error("Não foi possível gerar os destaques agora.");
     } finally {
@@ -596,7 +597,8 @@ function PlanHighlightsField({
         onChange={(event) => update({ highlights: event.target.value })}
       />
       <p className="text-xs text-muted-foreground">
-        A IA usa os limites, recursos e módulos marcados acima. Você pode editar o texto depois.
+        A IA usa os limites, recursos e módulos marcados acima e cria uma linha por funcionalidade
+        liberada. Depois de gerar ou editar, clique em "Salvar plano" para aparecer na homepage e em /planos.
       </p>
     </div>
   );
@@ -1003,8 +1005,8 @@ function PlanModulesPreview({ draft }: { draft: PlanDraft }) {
         </p>
         {highlights.length > 0 ? (
           <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs text-muted-foreground">
-            {highlights.slice(0, 5).map((line) => (
-              <li key={line}>{line}</li>
+            {highlights.map((line, index) => (
+              <li key={`${index}-${line}`}>{line}</li>
             ))}
           </ul>
         ) : (
