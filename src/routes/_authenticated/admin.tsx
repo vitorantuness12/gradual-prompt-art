@@ -573,7 +573,8 @@ function PlanHighlightsField({
         return;
       }
       update({ highlights: result.highlights.join("\n") });
-      toast.success(result.message);
+      // A geração só preenche o campo: sem salvar, nada muda na homepage/planos.
+      toast.success(`${result.message} Clique em "Salvar plano" para publicar.`);
     } catch {
       toast.error("Não foi possível gerar os destaques agora.");
     } finally {
