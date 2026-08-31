@@ -118,6 +118,7 @@ export const generatePlanHighlights = createServerFn({ method: "POST" })
         body: JSON.stringify({
           model: "gpt-4o-mini",
           temperature: 0.4,
+          response_format: { type: "json_object" },
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
             { role: "user", content: prompt },
