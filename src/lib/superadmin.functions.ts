@@ -331,13 +331,11 @@ export const adminCreateStore = createServerFn({ method: "POST" })
     // O dono é opcional: quando informado, precisa já ter conta na plataforma.
     let ownerId: string | null = null;
     if (data.ownerEmail) {
-      const { data: profile } = await supabaseAdmin
-        .from("profiles")
-        .select("id")
-        .eq("email", data.ownerEmail)
-        .maybeSingle();
-      if (!profile?.id) return { ok: false, message: "Não encontrei uma conta com esse e-mail." };
-      ownerId = profile.id;
+      const wanted = data.ownerEmail.toLowerCase();
+      const { data: users } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      const found = (users?.users ?? []).find((user) => (user.email ?? "").toLowerCase() === wanted);
+      if (!found) return { ok: false, message: "Não encontrei uma conta com esse e-mail." };
+      ownerId = found.id;
     }
 
     const { data: store, error } = await supabaseAdmin
