@@ -615,7 +615,63 @@ export async function releaseDigitalForOrder(
     await notifyDeliveryReleased(admin, row.id, baseUrl());
   }
 
+  await provisionMemberAccess(admin, orderId);
+
   return { ok: true, released: pending.length, message: "Acesso liberado e instruções enviadas." };
+}
+
+/**
+ * Cria (quando ainda não existe) a conta do comprador na área de membros e
+ * envia o endereço de acesso com a senha padrão, pedindo a troca no primeiro
+ * acesso. Falhas aqui não desfazem a liberação do produto.
+ */
+async function provisionMemberAccess(admin: Admin, orderId: string): Promise<void> {
+  const { data: order } = await admin
+    .from("orders")
+    .select("id, store_id, customer_name, customer_email, store:stores(name, slug)")
+    .eq("id", orderId)
+    .maybeSingle();
+  const email = order?.customer_email ?? null;
+  const slug = (order as never as { store: { name: string; slug: string } | null } | null)?.store?.slug ?? null;
+  if (!order || !email || !slug) return;
+
+  const { ensureMemberAccount } = await import("@/lib/membros.server");
+  const { memberAreaUrl, DEFAULT_MEMBER_PASSWORD } = await import("@/lib/membros");
+  const account = await ensureMemberAccount(admin, { storeId: order.store_id, email });
+  if (!account.ok) return;
+
+  const url = memberAreaUrl(baseUrl(), slug);
+  const storeName = (order as never as { store: { name: string } | null }).store?.name ?? "a loja";
+  const { sendStoreEmail } = await import("@/lib/digitais.server");
+
+  const body = account.created
+    ? [
+        `Olá, ${order.customer_name ?? "tudo bem"}!`,
+        "",
+        `Seu acesso à área de membros de ${storeName} está liberado.`,
+        "",
+        `Endereço: ${url}`,
+        `E-mail: ${email}`,
+        `Senha padrão: ${DEFAULT_MEMBER_PASSWORD}`,
+        "",
+        "IMPORTANTE: por segurança, troque essa senha assim que entrar na sua conta.",
+      ].join("\n")
+    : [
+        `Olá, ${order.customer_name ?? "tudo bem"}!`,
+        "",
+        `Adicionamos o novo produto à sua área de membros de ${storeName}.`,
+        "",
+        `Endereço: ${url}`,
+        `E-mail: ${email}`,
+        "Use a senha que você já cadastrou.",
+      ].join("\n");
+
+  await sendStoreEmail(admin, order.store_id, {
+    to: email,
+    subject: account.created ? `Seu acesso à área de membros — ${storeName}` : `Novo produto na sua área de membros — ${storeName}`,
+    body,
+    event: "area_membros",
+  });
 }
 
 /* --------------------------- Loja online (físico) ------------------------- */
