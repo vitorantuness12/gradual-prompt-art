@@ -45,21 +45,29 @@ const SYSTEM_PROMPT = [
 
 
 function parseHighlights(raw: string): string[] {
-  const cleaned = raw
-    .replace(/```json/gi, "")
-    .replace(/```/g, "")
-    .trim();
-  const start = cleaned.indexOf("{");
-  const end = cleaned.lastIndexOf("}");
-  if (start < 0 || end <= start) return [];
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(cleaned.slice(start, end + 1));
-  } catch {
-    return [];
+  const cleaned = raw.replace(/```json/gi, "").replace(/```/g, "").trim();
+  if (!cleaned) return [];
+
+  // 1) tenta JSON (objeto {"highlights":[...]} ou array puro)
+  const candidates: string[] = [];
+  const objStart = cleaned.indexOf("{");
+  const objEnd = cleaned.lastIndexOf("}");
+  if (objStart >= 0 && objEnd > objStart) candidates.push(cleaned.slice(objStart, objEnd + 1));
+  const arrStart = cleaned.indexOf("[");
+  const arrEnd = cleaned.lastIndexOf("]");
+  if (arrStart >= 0 && arrEnd > arrStart) candidates.push(cleaned.slice(arrStart, arrEnd + 1));
+
+  for (const candidate of candidates) {
+    try {
+      const result = normalizeHighlights(JSON.parse(candidate));
+      if (result.length > 0) return result;
+    } catch {
+      // tenta o próximo formato
+    }
   }
-  const shape = outputSchema.safeParse(parsed);
-  return shape.success ? shape.data.highlights.filter(Boolean) : [];
+
+  // 2) fallback: a IA respondeu em texto/lista simples
+  return normalizeHighlights(cleaned.split("\n"));
 }
 
 export const generatePlanHighlights = createServerFn({ method: "POST" })
