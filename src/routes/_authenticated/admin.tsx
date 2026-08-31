@@ -1195,10 +1195,8 @@ function PlanEditor({
         <PlanBasicFields draft={draft} errors={errors} update={update} showKey={false} />
         <PlanCapabilityFields draft={draft} errors={errors} update={update} />
 
-        <div className="space-y-1.5">
-          <Label>Destaques (um por linha)</Label>
-          <Textarea rows={3} value={draft.highlights} onChange={(event) => update({ highlights: event.target.value })} />
-        </div>
+        <PlanHighlightsField draft={draft} update={update} rows={3} />
+
 
         <div className="flex gap-2">
           <Button size="sm" onClick={submit} disabled={pending}>
