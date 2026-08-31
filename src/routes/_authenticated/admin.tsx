@@ -557,9 +557,15 @@ function PlanHighlightsField({
           name: draft.name,
           tagline: draft.tagline,
           priceMonth: draft.priceMonth,
-          limits: draft.limits,
-          features: draft.features,
+          // Envia rótulos legíveis para a IA escrever com as palavras do painel.
+          limits: Object.fromEntries(
+            LIMIT_KEYS.map((item) => [item.label, draft.limits[item.key] ?? "0"]),
+          ),
+          features: Object.fromEntries(
+            FEATURE_KEYS.map((item) => [item.label, draft.features[item.key] ?? "false"]),
+          ),
           moduleLabels: normalizePlanModules(draft.modules).map((key) => PLAN_MODULE_LABEL[key]),
+
         },
       });
       if (!result.ok) {
