@@ -1129,10 +1129,8 @@ function NewPlanCard({
       <CardContent className="space-y-3 text-sm">
         <PlanBasicFields draft={draft} errors={errors} update={update} showKey />
         <PlanCapabilityFields draft={draft} errors={errors} update={update} />
-        <div className="space-y-1.5">
-          <Label>Destaques (um por linha)</Label>
-          <Textarea rows={4} value={draft.highlights} onChange={(event) => update({ highlights: event.target.value })} />
-        </div>
+        <PlanHighlightsField draft={draft} update={update} rows={4} />
+
         <div className="flex gap-2">
           <Button size="sm" onClick={submit} disabled={pending}>
             {pending ? "Criando…" : "Criar plano"}
