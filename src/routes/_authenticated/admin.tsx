@@ -25,6 +25,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { INTEGRATIONS, PROVIDER_LABEL } from "@/lib/integrations";
+import { generatePlanHighlights } from "@/lib/plan-highlights.functions";
+
 import {
   FEATURE_CONTROLS,
   FEATURE_KEYS,
