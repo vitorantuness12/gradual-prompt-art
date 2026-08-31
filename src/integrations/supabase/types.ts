@@ -3988,6 +3988,130 @@ export type Database = {
           },
         ]
       }
+      member_accounts: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          last_login_at: string | null
+          must_change_password: boolean
+          password_hash: string
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          last_login_at?: string | null
+          must_change_password?: boolean
+          password_hash: string
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          last_login_at?: string | null
+          must_change_password?: boolean
+          password_hash?: string
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_accounts_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_resources: {
+        Row: {
+          created_at: string
+          file_path: string | null
+          id: string
+          kind: string
+          product_id: string
+          sort_order: number
+          store_id: string
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          kind?: string
+          product_id: string
+          sort_order?: number
+          store_id: string
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          kind?: string
+          product_id?: string
+          sort_order?: number
+          store_id?: string
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_resources_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_resources_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          member_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          member_id: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          member_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_sessions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "member_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_profiles: {
         Row: {
           created_at: string
