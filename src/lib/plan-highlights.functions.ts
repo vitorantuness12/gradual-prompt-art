@@ -18,15 +18,18 @@ const inputSchema = z.object({
   moduleLabels: z.array(z.string().trim().max(80)).max(60).default([]),
 });
 
-const outputSchema = z.object({ highlights: z.array(z.string().trim().max(80)).max(6) });
+const outputSchema = z.object({ highlights: z.array(z.string().trim().max(80)).max(14) });
 
 const SYSTEM_PROMPT = [
   "Você escreve destaques curtos para cartões de preço de planos de um SaaS brasileiro de lojas online.",
-  "Receba os limites, recursos e módulos liberados do plano e devolva de 4 a 6 frases curtas (até 60 caracteres cada),",
+  "Receba os limites, recursos e módulos liberados do plano e devolva de 6 a 12 frases curtas (até 60 caracteres cada),",
   "em português, começando pelo benefício (não repita 'inclui' toda hora), sem emoji, sem ponto final.",
-  "Priorize o que é mais atrativo para o lojista: limites generosos, recursos exclusivos e módulos liberados.",
+  "Comece pelos limites e recursos mais atrativos e, em seguida, liste as FUNCIONALIDADES LIBERADAS:",
+  "cada módulo liberado deve virar um destaque próprio, usando o nome do módulo como veio na lista (ex.: 'Monitor de preparo (KDS)').",
+  "Não invente módulos que não estejam na lista e não cite módulos ausentes.",
   "Ignore itens com valor zero ou não incluso. Devolva SOMENTE um JSON no formato {\"highlights\":[...]} sem markdown.",
 ].join(" ");
+
 
 function parseHighlights(raw: string): string[] {
   const cleaned = raw
