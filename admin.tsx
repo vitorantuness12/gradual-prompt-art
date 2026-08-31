@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Sparkles } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
@@ -43,7 +42,6 @@ import {
   type PlanModuleKey,
   type PlanRow,
 } from "@/lib/plans";
-import { generatePlanHighlights } from "@/lib/plan-highlights.functions";
 import {
   listPlatformIntegrations,
   savePlatformIntegration,
@@ -52,6 +50,8 @@ import {
 } from "@/lib/platform-integracoes.functions";
 import { INTEGRATION_STATUS_TONE, PLATFORM_STATUS_LABEL, providerFields } from "@/lib/platform-integrations";
 import type { PlatformIntegrationView } from "@/lib/platform-integrations.server";
+import { generatePlanHighlights } from "@/lib/plan-highlights.functions";
+import { Sparkles } from "lucide-react";
 import {
   adminDeleteStore,
   adminListAuditLogs,
@@ -941,51 +941,6 @@ function PlanModulesPreview({ draft }: { draft: PlanDraft }) {
   );
 }
 
-/**
- * Botão que chama a IA para sugerir os destaques do plano a partir dos
- * limites, recursos e módulos já marcados no formulário. Substitui o texto
- * atual do campo pelas linhas sugeridas — o super admin ainda pode editar.
- */
-function AiHighlightsButton({ draft, update }: { draft: PlanDraft; update: (patch: Partial<PlanDraft>) => void }) {
-  const generateFn = useServerFn(generatePlanHighlights);
-
-  const generate = useMutation({
-    mutationFn: () =>
-      generateFn({
-        data: {
-          name: draft.name,
-          tagline: draft.tagline,
-          priceMonth: draft.priceMonth,
-          limits: draft.limits,
-          features: draft.features,
-          moduleLabels: normalizePlanModules(draft.modules).map((key) => PLAN_MODULE_LABEL[key]),
-        },
-      }),
-    onSuccess: (result) => {
-      if (!result.ok) {
-        toast.error(result.message);
-        return;
-      }
-      update({ highlights: result.highlights.join("\n") });
-      toast.success(result.message);
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
-  return (
-    <Button
-      type="button"
-      size="sm"
-      variant="outline"
-      onClick={() => generate.mutate()}
-      disabled={generate.isPending || !draft.name.trim()}
-    >
-      <Sparkles className="mr-1.5 size-3.5" aria-hidden="true" />
-      {generate.isPending ? "Gerando…" : "Gerar com IA"}
-    </Button>
-  );
-}
-
 /** Campos comuns de identidade/preço com mensagens de erro por campo. */
 function PlanBasicFields({
   draft,
@@ -1094,6 +1049,61 @@ function PlanBasicFields({
   );
 }
 
+/** Botão que usa IA para organizar os destaques do plano a partir dos limites, recursos e módulos já preenchidos. */
+function AiHighlightsButton({
+  draft,
+  onGenerated,
+}: {
+  draft: PlanDraft;
+  onGenerated: (text: string) => void;
+}) {
+  const generateFn = useServerFn(generatePlanHighlights);
+  const [loading, setLoading] = useState(false);
+
+  async function handleClick() {
+    setLoading(true);
+    try {
+      const limitsSummary = Object.entries(draft.limits as unknown as Record<string, unknown>)
+        .filter(([, value]) => value !== "" && value !== null && value !== undefined)
+        .map(([key, value]) => `${key}: ${String(value)}`);
+      const featuresSummary = Object.entries(draft.features as unknown as Record<string, unknown>)
+        .filter(([, enabled]) => Boolean(enabled))
+        .map(([key]) => key);
+      const modulesSummary = draft.modules.map(
+        (mod) => PLAN_MODULE_LABEL[mod as PlanModuleKey] ?? String(mod),
+      );
+
+      const result = await generateFn({
+        data: {
+          name: draft.name,
+          tagline: draft.tagline,
+          priceMonth: draft.priceMonth,
+          limitsSummary,
+          featuresSummary,
+          modulesSummary,
+        },
+      });
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
+      onGenerated(result.highlights.join("\n"));
+      toast.success("Destaques gerados com IA.");
+    } catch {
+      toast.error("Erro ao gerar destaques com IA.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Button type="button" size="sm" variant="outline" className="gap-1.5" onClick={handleClick} disabled={loading}>
+      <Sparkles className="h-3.5 w-3.5" />
+      {loading ? "Gerando…" : "Gerar com IA"}
+    </Button>
+  );
+}
+
 /** Formulário de criação de plano — o plano ativo aparece na página inicial e em /planos. */
 function NewPlanCard({
   nextSortOrder,
@@ -1179,7 +1189,7 @@ function NewPlanCard({
         <div className="space-y-1.5">
           <div className="flex items-center justify-between gap-2">
             <Label>Destaques (um por linha)</Label>
-            <AiHighlightsButton draft={draft} update={update} />
+            <AiHighlightsButton draft={draft} onGenerated={(text) => update({ highlights: text })} />
           </div>
           <Textarea rows={4} value={draft.highlights} onChange={(event) => update({ highlights: event.target.value })} />
         </div>
@@ -1248,7 +1258,7 @@ function PlanEditor({
         <div className="space-y-1.5">
           <div className="flex items-center justify-between gap-2">
             <Label>Destaques (um por linha)</Label>
-            <AiHighlightsButton draft={draft} update={update} />
+            <AiHighlightsButton draft={draft} onGenerated={(text) => update({ highlights: text })} />
           </div>
           <Textarea rows={3} value={draft.highlights} onChange={(event) => update({ highlights: event.target.value })} />
         </div>
