@@ -67,7 +67,7 @@ const SEGMENTS = [
   "Loja",
   "Assistência técnica",
   "Prestador de serviços",
-  "Curso",
+  "Produto digital",
   "Assinatura",
 ] as const;
 
