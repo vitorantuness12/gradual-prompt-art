@@ -1003,8 +1003,8 @@ function PlanModulesPreview({ draft }: { draft: PlanDraft }) {
         </p>
         {highlights.length > 0 ? (
           <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs text-muted-foreground">
-            {highlights.slice(0, 5).map((line) => (
-              <li key={line}>{line}</li>
+            {highlights.map((line, index) => (
+              <li key={`${index}-${line}`}>{line}</li>
             ))}
           </ul>
         ) : (
