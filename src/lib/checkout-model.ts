@@ -46,7 +46,9 @@ const ALLOWED_BY_SEGMENT: Record<SegmentGroupId, CheckoutModel[]> = {
   varejo: ["loja", "delivery"],
   conveniencia: ["loja", "delivery"],
   servicos: ["agendamento", "loja"],
-  digital: ["digital", "loja"],
+  // Loja digital não tem estoque físico nem endereço: existe só o checkout
+  // digital, sem escolha de modelo (a "aba" de troca some para este segmento).
+  digital: ["digital"],
   encomendas: ["delivery", "loja", "agendamento"],
 };
 
