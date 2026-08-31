@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState, type FormEvent } from "react";
 import { Sparkles } from "lucide-react";
+import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { DemoBadge } from "@/components/brand/DemoBadge";
@@ -43,6 +43,7 @@ import {
   type PlanModuleKey,
   type PlanRow,
 } from "@/lib/plans";
+import { generatePlanHighlights } from "@/lib/plan-highlights.functions";
 import {
   listPlatformIntegrations,
   savePlatformIntegration,
@@ -61,7 +62,6 @@ import {
   setPlatformRole,
   startSupportAccess,
 } from "@/lib/superadmin.functions";
-import { generatePlanHighlights } from "@/lib/plan-highlights.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: SuperAdminPage,
@@ -941,62 +941,6 @@ function PlanModulesPreview({ draft }: { draft: PlanDraft }) {
   );
 }
 
-/**
- * Botão que chama a IA para sugerir os destaques do plano com base nos
- * limites, recursos e módulos já marcados no formulário.
- */
-function AiHighlightsButton({
-  draft,
-  update,
-}: {
-  draft: PlanDraft;
-  update: (patch: Partial<PlanDraft>) => void;
-}) {
-  const generateFn = useServerFn(generatePlanHighlights);
-  const [loading, setLoading] = useState(false);
-
-  async function handleClick() {
-    setLoading(true);
-    try {
-      const moduleLabels = normalizePlanModules(draft.modules).map((key) => PLAN_MODULE_LABEL[key]);
-      const result = await generateFn({
-        data: {
-          name: draft.name,
-          tagline: draft.tagline,
-          priceMonth: draft.priceMonth,
-          limits: draft.limits,
-          features: draft.features,
-          moduleLabels,
-        },
-      });
-      if (!result.ok) {
-        toast.error(result.message);
-        return;
-      }
-      update({ highlights: result.highlights.join("\n") });
-      toast.success(result.message);
-    } catch {
-      toast.error("Falha ao gerar destaques. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <Button
-      type="button"
-      size="sm"
-      variant="outline"
-      className="h-7 gap-1.5 text-xs"
-      onClick={handleClick}
-      disabled={loading}
-    >
-      <Sparkles className="h-3.5 w-3.5" />
-      {loading ? "Gerando…" : "Gerar com IA"}
-    </Button>
-  );
-}
-
 /** Campos comuns de identidade/preço com mensagens de erro por campo. */
 function PlanBasicFields({
   draft,
@@ -1102,6 +1046,57 @@ function PlanBasicFields({
         </label>
       </div>
     </div>
+  );
+}
+
+/**
+ * Botão que chama a IA para gerar os destaques do plano a partir dos
+ * limites, recursos e módulos já marcados no formulário, preenchendo o
+ * textarea (o admin ainda pode editar antes de salvar).
+ */
+function AiHighlightsButton({
+  draft,
+  update,
+}: {
+  draft: PlanDraft;
+  update: (patch: Partial<PlanDraft>) => void;
+}) {
+  const generateFn = useServerFn(generatePlanHighlights);
+  const generate = useMutation({
+    mutationFn: () =>
+      generateFn({
+        data: {
+          name: draft.name,
+          tagline: draft.tagline,
+          priceMonth: draft.priceMonth,
+          limits: draft.limits,
+          features: draft.features,
+          moduleLabels: normalizePlanModules(draft.modules).map((key) => PLAN_MODULE_LABEL[key]),
+        },
+      }),
+    onSuccess: (result) => {
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
+      update({ highlights: result.highlights.join("\n") });
+      toast.success(result.message);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      className="gap-1.5"
+      disabled={generate.isPending || !draft.name.trim()}
+      onClick={() => generate.mutate()}
+    >
+      <Sparkles className="h-3.5 w-3.5" />
+      {generate.isPending ? "Gerando…" : "Gerar com IA"}
+    </Button>
   );
 }
 
