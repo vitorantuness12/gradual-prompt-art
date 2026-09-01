@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AcompanharRouteImport } from './routes/acompanhar'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as MembrosRouteImport } from './routes/membros'
 import { Route as MeusPedidosRouteImport } from './routes/meus-pedidos'
 import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
@@ -113,6 +114,11 @@ const AuthRoute = AuthRouteImport.update({
 const CookiesRoute = CookiesRouteImport.update({
   id: '/cookies',
   path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MembrosRoute = MembrosRouteImport.update({
+  id: '/membros',
+  path: '/membros',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MeusPedidosRoute = MeusPedidosRouteImport.update({
@@ -544,6 +550,7 @@ export interface FileRoutesByFullPath {
   '/acompanhar': typeof AcompanharRoute
   '/auth': typeof AuthRoute
   '/cookies': typeof CookiesRoute
+  '/membros': typeof MembrosRoute
   '/meus-pedidos': typeof MeusPedidosRoute
   '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -626,6 +633,7 @@ export interface FileRoutesByTo {
   '/acompanhar': typeof AcompanharRoute
   '/auth': typeof AuthRoute
   '/cookies': typeof CookiesRoute
+  '/membros': typeof MembrosRoute
   '/meus-pedidos': typeof MeusPedidosRoute
   '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -709,6 +717,7 @@ export interface FileRoutesById {
   '/acompanhar': typeof AcompanharRoute
   '/auth': typeof AuthRoute
   '/cookies': typeof CookiesRoute
+  '/membros': typeof MembrosRoute
   '/meus-pedidos': typeof MeusPedidosRoute
   '/planos': typeof PlanosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -793,6 +802,7 @@ export interface FileRouteTypes {
     | '/acompanhar'
     | '/auth'
     | '/cookies'
+    | '/membros'
     | '/meus-pedidos'
     | '/planos'
     | '/privacidade'
@@ -875,6 +885,7 @@ export interface FileRouteTypes {
     | '/acompanhar'
     | '/auth'
     | '/cookies'
+    | '/membros'
     | '/meus-pedidos'
     | '/planos'
     | '/privacidade'
@@ -957,6 +968,7 @@ export interface FileRouteTypes {
     | '/acompanhar'
     | '/auth'
     | '/cookies'
+    | '/membros'
     | '/meus-pedidos'
     | '/planos'
     | '/privacidade'
@@ -1041,6 +1053,7 @@ export interface RootRouteChildren {
   AcompanharRoute: typeof AcompanharRoute
   AuthRoute: typeof AuthRoute
   CookiesRoute: typeof CookiesRoute
+  MembrosRoute: typeof MembrosRoute
   MeusPedidosRoute: typeof MeusPedidosRoute
   PlanosRoute: typeof PlanosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
@@ -1113,6 +1126,13 @@ declare module '@tanstack/react-router' {
       path: '/cookies'
       fullPath: '/cookies'
       preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/membros': {
+      id: '/membros'
+      path: '/membros'
+      fullPath: '/membros'
+      preLoaderRoute: typeof MembrosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/meus-pedidos': {
@@ -1756,6 +1776,7 @@ const rootRouteChildren: RootRouteChildren = {
   AcompanharRoute: AcompanharRoute,
   AuthRoute: AuthRoute,
   CookiesRoute: CookiesRoute,
+  MembrosRoute: MembrosRoute,
   MeusPedidosRoute: MeusPedidosRoute,
   PlanosRoute: PlanosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
