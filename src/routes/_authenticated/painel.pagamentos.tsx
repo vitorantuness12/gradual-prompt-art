@@ -164,6 +164,11 @@ function PaymentsPage() {
       <PageHeader
         title="Pagamentos"
         description="Configure o recebimento por Pix e cartão e acompanhe todas as transações."
+        action={
+          <Button asChild variant="outline" size="sm">
+            <Link to="/painel/cobrancas">Cobranças</Link>
+          </Button>
+        }
       />
 
       <Tabs defaultValue="transacoes" className="space-y-4">
