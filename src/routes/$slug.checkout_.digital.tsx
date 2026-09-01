@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/hooks/useCart";
 import { useCartCoupon } from "@/hooks/useCartCoupon";
-import { submitDigitalCheckout } from "@/lib/checkout-especializado.functions";
+import { submitDigitalCheckout, submitSubscriptionCheckout } from "@/lib/checkout-especializado.functions";
 import { installmentOptions } from "@/lib/checkout-especializado";
 import { formatCurrency } from "@/lib/format";
 import { normalizePhoneBR } from "@/lib/phone";
@@ -40,6 +40,16 @@ export const Route = createFileRoute("/$slug/checkout_/digital")({
   }),
   component: DigitalCheckout,
 });
+
+/** Periodicidades aceitas pela assinatura recorrente (espelham o servidor). */
+type SubscriptionPeriod = "weekly" | "biweekly" | "monthly" | "quarterly";
+
+const PERIOD_LABEL: Record<SubscriptionPeriod, string> = {
+  weekly: "Semanal",
+  biweekly: "Quinzenal",
+  monthly: "Mensal",
+  quarterly: "Trimestral",
+};
 
 /** Formas de pagamento aceitas em produto digital: nada presencial. */
 const DIGITAL_METHODS = ["pix", "card_online"] as const;
@@ -82,6 +92,7 @@ function DigitalCheckout() {
   const cart = useCart(slug, storeId);
   const coupon = useCartCoupon(slug, storeId, cart.subtotal, cart.hydrated);
   const send = useServerFn(submitDigitalCheckout);
+  const sendSubscription = useServerFn(submitSubscriptionCheckout);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -93,6 +104,19 @@ function DigitalCheckout() {
   const [installments, setInstallments] = useState(1);
   const [couponOpen, setCouponOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [period, setPeriod] = useState<SubscriptionPeriod>("monthly");
+
+  /**
+   * Assinatura recorrente: só quando TODOS os itens do carrinho são planos.
+   * Misturar plano com compra única geraria cobrança recorrente indevida.
+   */
+  const isSubscription = useMemo(() => {
+    const catalog = store.data?.products ?? [];
+    if (cart.items.length === 0) return false;
+    return cart.items.every(
+      (item) => catalog.find((product) => product.id === item.productId)?.kind === "subscription",
+    );
+  }, [cart.items, store.data]);
 
   const total = Math.max(0, cart.subtotal - coupon.discount);
   const methods = parsePaymentMethods(store.data?.store.payment_methods);
@@ -134,24 +158,43 @@ function DigitalCheckout() {
 
     setSaving(true);
     try {
-      const result = await send({
-        data: {
-          slug,
-          lines: cart.items.map((item) => ({
-            productId: item.productId,
-            variantId: item.variantId ?? null,
-            quantity: item.quantity,
-            notes: item.notes ?? null,
-          })),
-          couponCode: coupon.coupon?.code ?? null,
-          paymentMethod: payment,
-          installments: payment === "card_online" ? installments : null,
-          name: name.trim(),
-          phone: parsedPhone.e164,
-          email: email.trim(),
-          notes: document.trim() ? `CPF/CNPJ: ${document.trim()}` : null,
-        },
-      });
+      const lines = cart.items.map((item) => ({
+        productId: item.productId,
+        variantId: item.variantId ?? null,
+        quantity: item.quantity,
+        notes: item.notes ?? null,
+      }));
+      const customer = {
+        name: name.trim(),
+        phone: parsedPhone.e164,
+        email: email.trim(),
+        notes: document.trim() ? `CPF/CNPJ: ${document.trim()}` : null,
+      };
+
+      // O servidor revalida preço, cupom e frete nos dois fluxos: o que o
+      // visitante vê é conferência, nunca a fonte do valor cobrado.
+      const result = isSubscription
+        ? await sendSubscription({
+            data: {
+              slug,
+              lines,
+              couponCode: coupon.coupon?.code ?? null,
+              paymentMethod: payment,
+              period,
+              fulfillment: "pickup" as const,
+              ...customer,
+            },
+          })
+        : await send({
+            data: {
+              slug,
+              lines,
+              couponCode: coupon.coupon?.code ?? null,
+              paymentMethod: payment,
+              installments: payment === "card_online" ? installments : null,
+              ...customer,
+            },
+          });
       if (!result.ok) {
         toast.error(result.message);
         (result.problems ?? []).slice(1).forEach((problem) => toast.error(problem));
@@ -292,6 +335,33 @@ function DigitalCheckout() {
                 </div>
               </div>
             </div>
+
+            {/* Periodicidade: só aparece quando o carrinho é 100% assinatura */}
+            {isSubscription ? (
+              <div className="space-y-2 border-t border-border pt-5">
+                <SectionTitle>Periodicidade da assinatura</SectionTitle>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {(Object.keys(PERIOD_LABEL) as SubscriptionPeriod[]).map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      aria-pressed={period === key}
+                      onClick={() => setPeriod(key)}
+                      className={
+                        period === key
+                          ? "rounded-xl border-2 border-primary bg-primary/5 px-3 py-2 text-sm font-semibold text-foreground"
+                          : "rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground hover:border-primary/40"
+                      }
+                    >
+                      {PERIOD_LABEL[key]}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  A cobrança se repete nesse intervalo e você pode cancelar quando quiser.
+                </p>
+              </div>
+            ) : null}
 
             {/* Oferta */}
             <div className="space-y-2 border-t border-border pt-5">

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -164,6 +164,11 @@ function PaymentsPage() {
       <PageHeader
         title="Pagamentos"
         description="Configure o recebimento por Pix e cartão e acompanhe todas as transações."
+        actions={
+          <Button asChild variant="outline" size="sm">
+            <Link to="/painel/cobrancas">Cobranças</Link>
+          </Button>
+        }
       />
 
       <Tabs defaultValue="transacoes" className="space-y-4">

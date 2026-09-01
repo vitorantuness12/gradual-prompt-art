@@ -34,6 +34,8 @@ export interface TrackedOrder {
   storeSlug: string;
   items: Array<{ name: string; quantity: number; total: number; notes: string | null }>;
   timeline: Array<{ status: string; createdAt: string; reason: string | null }>;
+  /** Cobrança do pedido, quando já houver transação registrada. */
+  charge: { status: string; method: string | null; amount: number; paidAt: string | null } | null;
 }
 
 function onlyDigits(value: string) {
@@ -72,6 +74,14 @@ export const trackOrder = createServerFn({ method: "POST" })
       .eq("order_id", match.id)
       .order("created_at", { ascending: true });
 
+    const { data: charge } = await supabaseAdmin
+      .from("payments")
+      .select("status, method, amount, paid_at")
+      .eq("order_id", match.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
     const store = match.store as { name: string; slug: string } | null;
 
     return {
@@ -101,6 +111,14 @@ export const trackOrder = createServerFn({ method: "POST" })
           total: Number(item.total),
           notes: item.notes,
         })),
+        charge: charge
+          ? {
+              status: String(charge.status),
+              method: charge.method ? String(charge.method) : null,
+              amount: Number(charge.amount ?? 0),
+              paidAt: charge.paid_at ? String(charge.paid_at) : null,
+            }
+          : null,
         timeline: (history ?? []).map((entry) => ({
           status: entry.status,
           createdAt: entry.created_at,

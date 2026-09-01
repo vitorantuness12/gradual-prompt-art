@@ -40,6 +40,13 @@ export const Route = createFileRoute("/$slug/acompanhar")({
   component: StoreTrackPage,
 });
 
+const CHARGE_STATUS_LABEL: Record<string, string> = {
+  pending: "Aguardando pagamento",
+  paid: "Pagamento confirmado",
+  refunded: "Reembolsada",
+  failed: "Pagamento recusado",
+};
+
 function StoreTrackPage() {
   const { slug } = Route.useParams();
   const { codigo } = Route.useSearch();
@@ -214,7 +221,16 @@ function StoreTrackPage() {
                 />
               ) : null}
 
-
+              {order.charge ? (
+                <div className="rounded-xl border border-border bg-card p-3 text-sm">
+                  <p className="font-medium text-foreground">Cobrança</p>
+                  <p className="mt-1 text-muted-foreground">
+                    {CHARGE_STATUS_LABEL[order.charge.status] ?? order.charge.status} ·{" "}
+                    {order.charge.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                    {order.charge.method ? ` · ${order.charge.method}` : ""}
+                  </p>
+                </div>
+              ) : null}
 
               {finished ? null : (
                 <ol className="space-y-3">

@@ -282,6 +282,14 @@ export async function buildDetail(
     order_items: Array<{ product_name: string; quantity: number; total: number; notes: string | null }> | null;
   };
 
+  const { data: charge } = await admin
+    .from("payments")
+    .select("status, method, amount, paid_at")
+    .eq("order_id", order.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   const { data: history } = await admin
     .from("order_status_history")
     .select("status, created_at, reason")
@@ -315,6 +323,14 @@ export async function buildDetail(
       total: Number(item.total),
       notes: item.notes,
     })),
+    charge: charge
+      ? {
+          status: String(charge.status),
+          method: charge.method ? String(charge.method) : null,
+          amount: Number(charge.amount ?? 0),
+          paidAt: charge.paid_at ? String(charge.paid_at) : null,
+        }
+      : null,
     timeline: (history ?? []).map((entry) => ({
       status: entry.status,
       createdAt: entry.created_at,
