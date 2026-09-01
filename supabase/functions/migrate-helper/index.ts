@@ -6,11 +6,12 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const MAX_PAGE_SIZE = 1_000;
 const SAFE_TABLE_NAME = /^[a-z][a-z0-9_]{0,62}$/;
+const IMPORTABLE_TABLES = new Set(["store_features", "store_sections"]);
 
 const cors = {
   "Access-Control-Allow-Origin": "https://oseupedido.com.br",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -22,7 +23,9 @@ function jsonResponse(body: unknown, status = 200): Response {
 
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response(null, { headers: cors });
-  if (request.method !== "GET") return jsonResponse({ error: "method_not_allowed" }, 405);
+  if (request.method !== "GET" && request.method !== "POST") {
+    return jsonResponse({ error: "method_not_allowed" }, 405);
+  }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const publishableKey = Deno.env.get("SUPABASE_ANON_KEY");
@@ -52,8 +55,42 @@ Deno.serve(async (request) => {
 
     const url = new URL(request.url);
     const action = url.searchParams.get("action") ?? "ping";
-    if (action === "ping") return jsonResponse({ ok: true });
+    if (action === "ping") {
+      if (request.method !== "GET") return jsonResponse({ error: "method_not_allowed" }, 405);
+      return jsonResponse({ ok: true });
+    }
+
+    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    if (action === "import") {
+      if (request.method !== "POST") return jsonResponse({ error: "method_not_allowed" }, 405);
+
+      const body: unknown = await request.json();
+      if (typeof body !== "object" || body === null || Array.isArray(body)) {
+        return jsonResponse({ error: "invalid_body" }, 400);
+      }
+
+      const payload = body as Record<string, unknown>;
+      const table = typeof payload.table === "string" ? payload.table : "";
+      const rows = payload.rows;
+      if (!IMPORTABLE_TABLES.has(table)) return jsonResponse({ error: "table_not_importable" }, 400);
+      if (!Array.isArray(rows) || rows.length === 0 || rows.length > MAX_PAGE_SIZE) {
+        return jsonResponse({ error: "invalid_rows", max_rows: MAX_PAGE_SIZE }, 400);
+      }
+      if (rows.some((row) => typeof row !== "object" || row === null || Array.isArray(row))) {
+        return jsonResponse({ error: "invalid_row" }, 400);
+      }
+
+      const { error } = await adminClient.from(table).upsert(rows, { onConflict: "id" });
+      if (error) return jsonResponse({ error: "import_failed", detail: error.message }, 400);
+
+      return jsonResponse({ ok: true, table, imported_count: rows.length });
+    }
+
     if (action !== "export") return jsonResponse({ error: "unknown_action" }, 400);
+    if (request.method !== "GET") return jsonResponse({ error: "method_not_allowed" }, 405);
 
     const table = url.searchParams.get("table") ?? "";
     if (!SAFE_TABLE_NAME.test(table)) return jsonResponse({ error: "invalid_table" }, 400);
@@ -65,9 +102,6 @@ Deno.serve(async (request) => {
       ? Math.min(Math.max(requestedLimit, 1), MAX_PAGE_SIZE)
       : MAX_PAGE_SIZE;
 
-    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
     const { data, error, count } = await adminClient
       .from(table)
       .select("*", { count: "exact" })
