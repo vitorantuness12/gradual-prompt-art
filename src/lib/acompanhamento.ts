@@ -82,6 +82,8 @@ export interface TrackedOrderDetail {
   address: OrderAddress | null;
   items: Array<{ name: string; quantity: number; total: number; notes: string | null }>;
   timeline: Array<{ status: string; createdAt: string; reason: string | null }>;
+  /** Cobrança gerada para o pedido, quando existir (Pix, cartão, etc.). */
+  charge: { status: string; method: string | null; amount: number; paidAt: string | null } | null;
 }
 
 export interface OrderSummaryView {
