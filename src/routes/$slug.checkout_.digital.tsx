@@ -41,6 +41,16 @@ export const Route = createFileRoute("/$slug/checkout_/digital")({
   component: DigitalCheckout,
 });
 
+/** Periodicidades aceitas pela assinatura recorrente (espelham o servidor). */
+type SubscriptionPeriod = "weekly" | "biweekly" | "monthly" | "quarterly";
+
+const PERIOD_LABEL: Record<SubscriptionPeriod, string> = {
+  weekly: "Semanal",
+  biweekly: "Quinzenal",
+  monthly: "Mensal",
+  quarterly: "Trimestral",
+};
+
 /** Formas de pagamento aceitas em produto digital: nada presencial. */
 const DIGITAL_METHODS = ["pix", "card_online"] as const;
 
@@ -325,6 +335,33 @@ function DigitalCheckout() {
                 </div>
               </div>
             </div>
+
+            {/* Periodicidade: só aparece quando o carrinho é 100% assinatura */}
+            {isSubscription ? (
+              <div className="space-y-2 border-t border-border pt-5">
+                <SectionTitle>Periodicidade da assinatura</SectionTitle>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {(Object.keys(PERIOD_LABEL) as SubscriptionPeriod[]).map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      aria-pressed={period === key}
+                      onClick={() => setPeriod(key)}
+                      className={
+                        period === key
+                          ? "rounded-xl border-2 border-primary bg-primary/5 px-3 py-2 text-sm font-semibold text-foreground"
+                          : "rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground hover:border-primary/40"
+                      }
+                    >
+                      {PERIOD_LABEL[key]}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  A cobrança se repete nesse intervalo e você pode cancelar quando quiser.
+                </p>
+              </div>
+            ) : null}
 
             {/* Oferta */}
             <div className="space-y-2 border-t border-border pt-5">
