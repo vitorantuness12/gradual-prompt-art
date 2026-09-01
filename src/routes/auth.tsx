@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Bike, Eye, EyeOff, LogIn, Store, UserRound, UserPlus } from "lucide-react";
+import { ArrowLeft, Bike, Eye, EyeOff, GraduationCap, LogIn, Store, UserRound, UserPlus } from "lucide-react";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -467,6 +467,17 @@ function AuthPage() {
                 <UserPlus className="h-6 w-6 text-accent" aria-hidden />
                 <p className="mt-3 text-lg font-semibold">Ainda não tenho conta</p>
                 <p className="mt-1 text-sm text-muted-foreground">Criar cadastro gratuito.</p>
+              </Link>
+            </div>
+
+            <div className="mt-4">
+              <Link
+                to="/membros"
+                preload="intent"
+                className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-border/70 bg-card/50 p-4 text-center text-sm font-medium text-foreground transition hover:border-primary hover:text-primary"
+              >
+                <GraduationCap className="h-4 w-4" aria-hidden />
+                Já comprei um curso ou produto digital — acessar
               </Link>
             </div>
 
