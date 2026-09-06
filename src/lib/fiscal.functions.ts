@@ -71,6 +71,11 @@ const saveInput = z.object({
   taxRegime: z.string().trim().max(40).optional(),
   taxPercent: z.number().min(0).max(100),
   defaultDescription: z.string().trim().max(400).optional(),
+  legalName: z.string().trim().max(160).optional(),
+  tradeName: z.string().trim().max(160).optional(),
+  invoiceModel: z.string().trim().max(20).optional(),
+  invoiceSeries: z.string().trim().max(10).optional(),
+  nextInvoiceNumber: z.number().int().min(1).max(9_999_999).optional(),
   /** Vazio mantém a credencial já salva. */
   apiKey: z.string().trim().max(4000).optional(),
   companyId: z.string().trim().max(120).optional(),
@@ -99,6 +104,11 @@ export const saveFiscalSettings = createServerFn({ method: "POST" })
         tax_regime: data.taxRegime || null,
         tax_percent: data.taxPercent,
         default_description: data.defaultDescription || null,
+        legal_name: data.legalName || null,
+        trade_name: data.tradeName || null,
+        invoice_model: data.invoiceModel || "nfse",
+        invoice_series: data.invoiceSeries || "1",
+        next_invoice_number: data.nextInvoiceNumber ?? 1,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "store_id" },
@@ -287,12 +297,20 @@ export const issueFiscalInvoice = createServerFn({ method: "POST" })
     const description =
       data.description || settings.data?.default_description || `Pedido ${order.code ?? order.id.slice(0, 8)}`;
 
+    // Numeração sequencial controlada pela loja (o emissor pode sobrescrever depois).
+    const series = settings.data?.invoice_series ?? "1";
+    const model = settings.data?.invoice_model ?? "nfse";
+    const nextNumber = Number(settings.data?.next_invoice_number ?? 1);
+
     const { data: invoice, error: insertError } = await supabaseAdmin
       .from("fiscal_invoices")
       .insert({
         store_id: data.storeId,
         order_id: order.id,
         provider,
+        model,
+        series,
+        number: String(nextNumber),
         amount,
         tax_amount: Number(((amount * taxPercent) / 100).toFixed(2)),
         status: "pending",
@@ -303,6 +321,11 @@ export const issueFiscalInvoice = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (insertError || !invoice) return { ok: false, message: `Não foi possível registrar a nota: ${insertError?.message}` };
+
+    await supabaseAdmin
+      .from("fiscal_settings")
+      .update({ next_invoice_number: nextNumber + 1 })
+      .eq("store_id", data.storeId);
 
     const extra = (credentials.data?.extra ?? {}) as Record<string, unknown>;
     const result = await issueWithProvider(
