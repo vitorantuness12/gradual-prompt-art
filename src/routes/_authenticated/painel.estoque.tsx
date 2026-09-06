@@ -10,6 +10,7 @@ import { BatchesTab } from "@/components/varejo/BatchesTab";
 import { ReservationsTab } from "@/components/varejo/ReservationsTab";
 import { ReturnsTab } from "@/components/varejo/ReturnsTab";
 import { StockEntriesTab } from "@/components/varejo/StockEntriesTab";
+import { SupplierPurchasesReport } from "@/components/varejo/SupplierPurchasesReport";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
