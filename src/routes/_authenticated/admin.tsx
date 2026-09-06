@@ -152,6 +152,10 @@ function SuperAdminPage() {
           <TabsContent value="plans" className="mt-6">
             <PlansTab />
           </TabsContent>
+          <TabsContent value="billing" className="mt-6">
+            <PlanBillingTab />
+          </TabsContent>
+
           <TabsContent value="content" className="mt-6">
             <ContentTab />
           </TabsContent>
