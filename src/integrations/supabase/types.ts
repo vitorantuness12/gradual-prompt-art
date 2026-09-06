@@ -2895,10 +2895,13 @@ export type Database = {
       }
       fiscal_invoices: {
         Row: {
+          access_key: string | null
           amount: number
+          base_amount: number
           created_at: string
           customer_document: string | null
           customer_name: string | null
+          deduction_amount: number
           description: string | null
           error_message: string | null
           external_id: string | null
@@ -2915,13 +2918,17 @@ export type Database = {
           subscription_id: string | null
           tax_amount: number
           updated_at: string
+          verification_code: string | null
           xml_url: string | null
         }
         Insert: {
+          access_key?: string | null
           amount?: number
+          base_amount?: number
           created_at?: string
           customer_document?: string | null
           customer_name?: string | null
+          deduction_amount?: number
           description?: string | null
           error_message?: string | null
           external_id?: string | null
@@ -2938,13 +2945,17 @@ export type Database = {
           subscription_id?: string | null
           tax_amount?: number
           updated_at?: string
+          verification_code?: string | null
           xml_url?: string | null
         }
         Update: {
+          access_key?: string | null
           amount?: number
+          base_amount?: number
           created_at?: string
           customer_document?: string | null
           customer_name?: string | null
+          deduction_amount?: number
           description?: string | null
           error_message?: string | null
           external_id?: string | null
@@ -2961,6 +2972,7 @@ export type Database = {
           subscription_id?: string | null
           tax_amount?: number
           updated_at?: string
+          verification_code?: string | null
           xml_url?: string | null
         }
         Relationships: [
@@ -2999,8 +3011,11 @@ export type Database = {
           company_email: string | null
           company_phone: string | null
           created_at: string
+          deduction_percent: number
           default_description: string | null
+          discount_reduces_base: boolean
           environment: string
+          include_shipping_in_base: boolean
           invoice_model: string
           invoice_series: string
           legal_name: string | null
@@ -3012,6 +3027,7 @@ export type Database = {
           store_id: string
           tax_percent: number
           tax_regime: string | null
+          tax_retained: boolean
           trade_name: string | null
           updated_at: string
         }
@@ -3026,8 +3042,11 @@ export type Database = {
           company_email?: string | null
           company_phone?: string | null
           created_at?: string
+          deduction_percent?: number
           default_description?: string | null
+          discount_reduces_base?: boolean
           environment?: string
+          include_shipping_in_base?: boolean
           invoice_model?: string
           invoice_series?: string
           legal_name?: string | null
@@ -3039,6 +3058,7 @@ export type Database = {
           store_id: string
           tax_percent?: number
           tax_regime?: string | null
+          tax_retained?: boolean
           trade_name?: string | null
           updated_at?: string
         }
@@ -3053,8 +3073,11 @@ export type Database = {
           company_email?: string | null
           company_phone?: string | null
           created_at?: string
+          deduction_percent?: number
           default_description?: string | null
+          discount_reduces_base?: boolean
           environment?: string
+          include_shipping_in_base?: boolean
           invoice_model?: string
           invoice_series?: string
           legal_name?: string | null
@@ -3066,6 +3089,7 @@ export type Database = {
           store_id?: string
           tax_percent?: number
           tax_regime?: string | null
+          tax_retained?: boolean
           trade_name?: string | null
           updated_at?: string
         }
