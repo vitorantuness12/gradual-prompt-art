@@ -2859,16 +2859,19 @@ export type Database = {
           customer_name: string | null
           description: string | null
           error_message: string | null
+          external_id: string | null
           id: string
           issued_at: string | null
           number: string | null
           order_id: string | null
           pdf_url: string | null
+          provider: string | null
           status: string
           store_id: string
           subscription_id: string | null
           tax_amount: number
           updated_at: string
+          xml_url: string | null
         }
         Insert: {
           amount?: number
@@ -2877,16 +2880,19 @@ export type Database = {
           customer_name?: string | null
           description?: string | null
           error_message?: string | null
+          external_id?: string | null
           id?: string
           issued_at?: string | null
           number?: string | null
           order_id?: string | null
           pdf_url?: string | null
+          provider?: string | null
           status?: string
           store_id: string
           subscription_id?: string | null
           tax_amount?: number
           updated_at?: string
+          xml_url?: string | null
         }
         Update: {
           amount?: number
@@ -2895,16 +2901,19 @@ export type Database = {
           customer_name?: string | null
           description?: string | null
           error_message?: string | null
+          external_id?: string | null
           id?: string
           issued_at?: string | null
           number?: string | null
           order_id?: string | null
           pdf_url?: string | null
+          provider?: string | null
           status?: string
           store_id?: string
           subscription_id?: string | null
           tax_amount?: number
           updated_at?: string
+          xml_url?: string | null
         }
         Relationships: [
           {
@@ -2933,38 +2942,47 @@ export type Database = {
       fiscal_settings: {
         Row: {
           auto_issue: boolean
+          cnae: string | null
           cnpj: string | null
           created_at: string
           default_description: string | null
+          environment: string
           municipal_registration: string | null
           provider: string
           service_code: string | null
           store_id: string
           tax_percent: number
+          tax_regime: string | null
           updated_at: string
         }
         Insert: {
           auto_issue?: boolean
+          cnae?: string | null
           cnpj?: string | null
           created_at?: string
           default_description?: string | null
+          environment?: string
           municipal_registration?: string | null
           provider?: string
           service_code?: string | null
           store_id: string
           tax_percent?: number
+          tax_regime?: string | null
           updated_at?: string
         }
         Update: {
           auto_issue?: boolean
+          cnae?: string | null
           cnpj?: string | null
           created_at?: string
           default_description?: string | null
+          environment?: string
           municipal_registration?: string | null
           provider?: string
           service_code?: string | null
           store_id?: string
           tax_percent?: number
+          tax_regime?: string | null
           updated_at?: string
         }
         Relationships: [
