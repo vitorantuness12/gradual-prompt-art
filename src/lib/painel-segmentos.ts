@@ -84,10 +84,10 @@ export const FEATURE_LABEL: Record<FeatureKey, string> = {
 /** Grupos visuais do menu lateral, na ordem de exibição. */
 export const FEATURE_GROUPS: { title: string; keys: FeatureKey[] }[] = [
   { title: "Operação", keys: ["dashboard", "pedidos", "encomendas", "pdv", "salao", "kds", "agendamentos"] },
-  { title: "Catálogo", keys: ["produtos", "estoque", "digitais", "personalizar"] },
+  { title: "Catálogo", keys: ["produtos", "estoque", "inteligencia", "digitais", "personalizar"] },
   { title: "Logística", keys: ["entregas", "entregadores", "frete"] },
   { title: "Clientes", keys: ["clientes", "avaliacoes", "promocoes", "marketing", "fidelidade"] },
-  { title: "Gestão", keys: ["relatorios", "pagamentos", "fiscal"] },
+  { title: "Gestão", keys: ["relatorios", "metas", "pagamentos", "fiscal"] },
   { title: "Canais", keys: ["whatsapp", "impressao", "integracoes"] },
   { title: "Conta", keys: ["equipe", "assinatura", "privacidade", "configuracoes", "suporte"] },
 ];
