@@ -251,6 +251,13 @@ export function AffiliatesTab({ storeId, storeSlug }: Props) {
           })}
         </div>
       )}
+
+      <AffiliatePayoutsPanel
+        storeId={storeId}
+        affiliates={affiliates.data ?? []}
+        earnedByCode={earnedByCode}
+      />
     </div>
   );
 }
+
