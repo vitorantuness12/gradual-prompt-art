@@ -536,14 +536,16 @@ function StockPage() {
               />
             </TabsContent>
 
-            <TabsContent value="entradas" className="pt-4">
+            <TabsContent value="entradas" className="space-y-4 pt-4">
               <StockEntriesTab
                 storeId={storeId!}
                 products={data.products}
                 data={retail ?? EMPTY_RETAIL}
                 onChanged={refresh}
               />
+              <SupplierPurchasesReport storeId={storeId!} data={retail ?? EMPTY_RETAIL} />
             </TabsContent>
+
 
             <TabsContent value="devolucoes" className="pt-4">
               <ReturnsTab
