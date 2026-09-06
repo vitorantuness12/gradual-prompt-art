@@ -53,7 +53,9 @@ function SubscriptionPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("subscription_invoices")
-        .select("id, number, amount, status, due_at, paid_at, hosted_url, period_start, period_end")
+        .select(
+          "id, number, amount, status, due_at, paid_at, hosted_url, period_start, period_end, refunded_amount, method",
+        )
         .eq("store_id", storeId!)
         .order("created_at", { ascending: false })
         .limit(12);
