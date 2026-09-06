@@ -280,11 +280,18 @@ function SubscriptionPage() {
                           ? `Paga em ${formatDate(invoice.paid_at)}`
                           : invoice.due_at
                             ? `Vence em ${formatDate(invoice.due_at)}`
-                            : invoice.status}
+                            : (PLAN_INVOICE_STATUS_LABEL[invoice.status] ?? invoice.status)}
+                        {Number(invoice.refunded_amount ?? 0) > 0
+                          ? ` · reembolsado ${formatCurrency(Number(invoice.refunded_amount))}`
+                          : ""}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
+                      <Badge variant={PLAN_INVOICE_STATUS_TONE[invoice.status] ?? "secondary"}>
+                        {PLAN_INVOICE_STATUS_LABEL[invoice.status] ?? invoice.status}
+                      </Badge>
                       <span className="font-medium text-foreground">{formatCurrency(Number(invoice.amount))}</span>
+
                       {invoice.hosted_url ? (
                         <a
                           href={invoice.hosted_url}
