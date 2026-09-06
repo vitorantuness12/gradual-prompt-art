@@ -43,7 +43,7 @@ export const getGoalsOverview = createServerFn({ method: "GET" })
       supabase.from("stores").select("name").eq("id", data.storeId).maybeSingle(),
       supabase
         .from("channel_settings")
-        .select("is_active")
+        .select("is_enabled")
         .eq("store_id", data.storeId)
         .eq("channel", "whatsapp")
         .maybeSingle(),
@@ -55,7 +55,7 @@ export const getGoalsOverview = createServerFn({ method: "GET" })
       goals,
       progress: computeGoalsProgress(orders ?? [], goals),
       storeName: store?.name ?? "sua loja",
-      channelReady: Boolean(channel?.is_active),
+      channelReady: Boolean(channel?.is_enabled),
     };
   });
 
