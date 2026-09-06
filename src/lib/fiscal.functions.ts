@@ -440,6 +440,8 @@ export const refreshFiscalInvoice = createServerFn({ method: "POST" })
         number: result.number,
         pdf_url: result.pdfUrl,
         xml_url: result.xmlUrl,
+        access_key: result.accessKey ?? null,
+        verification_code: result.verificationCode ?? null,
         error_message: result.ok ? null : result.message,
         issued_at: result.status === "issued" ? new Date().toISOString() : null,
         updated_at: new Date().toISOString(),
