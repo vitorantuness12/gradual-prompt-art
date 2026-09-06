@@ -43,20 +43,21 @@ export const AUTOMATION_CHANNELS = [
 
 /** Configuração extra guardada em `config` (jsonb). */
 export interface AutomationConfig {
-  message?: string;
-  couponCode?: string;
-  inactiveDays?: number;
+  message?: string | undefined;
+  couponCode?: string | undefined;
+  inactiveDays?: number | undefined;
   /** Somente clientes que aceitaram receber mensagens. */
-  requireConsent?: boolean;
+  requireConsent?: boolean | undefined;
 }
 
 export function readAutomationConfig(value: unknown): AutomationConfig {
   if (!value || typeof value !== "object") return {};
   const raw = value as Record<string, unknown>;
+  const days = Number(raw["inactiveDays"]);
   return {
     message: typeof raw["message"] === "string" ? raw["message"] : undefined,
     couponCode: typeof raw["couponCode"] === "string" ? raw["couponCode"] : undefined,
-    inactiveDays: Number.isFinite(Number(raw["inactiveDays"])) ? Number(raw["inactiveDays"]) : undefined,
+    inactiveDays: Number.isFinite(days) && days > 0 ? days : undefined,
     requireConsent: raw["requireConsent"] !== false,
   };
 }
