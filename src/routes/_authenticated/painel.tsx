@@ -33,7 +33,9 @@ import {
   Store,
   Tag,
   UserCog,
+  Target,
   Users,
+  Wand2,
 } from "lucide-react";
 
 import { DemoBadge } from "@/components/brand/DemoBadge";
@@ -50,6 +52,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useActiveStore } from "@/hooks/useMyStores";
+import { useNewOrderAlert } from "@/hooks/useNewOrderAlert";
 import { useStoreFeatures } from "@/hooks/useStoreFeatures";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,6 +62,10 @@ import { planAllowsModule } from "@/lib/plans";
 
 export const Route = createFileRoute("/_authenticated/painel")({
   component: PainelLayout,
+  head: () => ({
+    // O painel tem manifesto próprio para o app instalado abrir direto nos pedidos.
+    links: [{ rel: "manifest", href: "/manifest-painel.webmanifest" }],
+  }),
 });
 
 
@@ -72,6 +79,7 @@ const NAV: Record<FeatureKey, { to: string; label: string; icon: typeof LayoutDa
   agendamentos: { to: "/painel/agendamentos", label: "Agenda", icon: CalendarClock },
   produtos: { to: "/painel/produtos", label: "Catálogo", icon: Package },
   estoque: { to: "/painel/estoque", label: "Estoque", icon: Boxes },
+  inteligencia: { to: "/painel/inteligencia", label: "Catálogo inteligente", icon: Wand2 },
   digitais: { to: "/painel/digitais", label: "Produtos digitais", icon: Download },
   personalizar: { to: "/painel/personalizar", label: "Personalizar loja", icon: Paintbrush },
   entregas: { to: "/painel/entregas", label: "Entregas", icon: Bike },
@@ -83,6 +91,7 @@ const NAV: Record<FeatureKey, { to: string; label: string; icon: typeof LayoutDa
   marketing: { to: "/painel/marketing", label: "Marketing automático", icon: Megaphone },
   fidelidade: { to: "/painel/fidelidade", label: "Fidelidade e CRM", icon: Gift },
   relatorios: { to: "/painel/relatorios", label: "Relatórios", icon: BarChart3 },
+  metas: { to: "/painel/metas", label: "Metas e resumo", icon: Target },
   pagamentos: { to: "/painel/pagamentos", label: "Financeiro", icon: CreditCard },
   fiscal: { to: "/painel/fiscal", label: "Nota fiscal", icon: FileText },
   whatsapp: { to: "/painel/whatsapp", label: "WhatsApp da loja", icon: MessageSquare },
@@ -101,6 +110,12 @@ function PainelLayout() {
   const { memberships, active, selectStore, isLoading } = useActiveStore();
   const { data: config } = useStoreFeatures(active?.storeId, active?.store.segment);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+
+  // Aviso sonoro + notificação quando um pedido novo entra.
+  useNewOrderAlert(active?.storeId, () => {
+    void queryClient.invalidateQueries({ queryKey: ["orders"] });
+    void queryClient.invalidateQueries({ queryKey: ["painel-resumo"] });
+  });
 
   const subscriptionQuery = useSubscription(active?.storeId);
   const plan = subscriptionQuery.data?.plan ?? null;
