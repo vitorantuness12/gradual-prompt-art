@@ -101,6 +101,8 @@ function LoyaltyPage() {
             <TabsTrigger value="recompensas">Recompensas</TabsTrigger>
             <TabsTrigger value="missoes">Missões</TabsTrigger>
             <TabsTrigger value="campanhas">Campanhas</TabsTrigger>
+            <TabsTrigger value="automacoes">Automações</TabsTrigger>
+            <TabsTrigger value="indicacoes">Indicações</TabsTrigger>
             <TabsTrigger value="carteiras">Carteiras</TabsTrigger>
             <TabsTrigger value="bloqueios">Bloqueios</TabsTrigger>
           </TabsList>
@@ -122,6 +124,12 @@ function LoyaltyPage() {
           </TabsContent>
           <TabsContent value="campanhas">
             <CampaignsTab storeId={storeId} />
+          </TabsContent>
+          <TabsContent value="automacoes">
+            <AutomationRulesTab storeId={storeId} />
+          </TabsContent>
+          <TabsContent value="indicacoes">
+            <AffiliatesTab storeId={storeId} storeSlug={active?.slug} />
           </TabsContent>
           <TabsContent value="carteiras">
             <WalletsTab storeId={storeId} />
