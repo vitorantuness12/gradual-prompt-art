@@ -70,63 +70,9 @@
   --font-display: "Sora", system-ui, sans-serif;
 }
 
+/* Tema claro: é o tema base do sistema (padrão). */
 :root {
   --radius: 1rem;
-  --background: hsl(220 20% 6%);
-  --foreground: hsl(0 0% 98%);
-  --card: hsl(220 20% 10%);
-  --card-foreground: hsl(0 0% 98%);
-  --popover: hsl(220 20% 10%);
-  --popover-foreground: hsl(0 0% 98%);
-  --primary: hsl(0 84% 50%);
-  --primary-foreground: hsl(0 0% 100%);
-  --primary-glow: hsl(0 84% 60%);
-  --brand: hsl(0 84% 50%);
-  --brand-foreground: hsl(0 0% 100%);
-  --secondary: hsl(220 20% 14%);
-  --secondary-foreground: hsl(0 0% 90%);
-  --muted: hsl(220 15% 18%);
-  --muted-foreground: hsl(220 10% 55%);
-  --accent: hsl(0 70% 40%);
-  --accent-foreground: hsl(0 0% 100%);
-  --success: hsl(152 55% 45%);
-  --success-foreground: hsl(0 0% 100%);
-  --warning: hsl(42 92% 58%);
-  --warning-foreground: hsl(30 40% 12%);
-  --destructive: hsl(0 84% 60%);
-  --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(220 15% 18%);
-  --input: hsl(220 15% 18%);
-  --ring: hsl(0 84% 50%);
-  --chart-1: hsl(0 84% 50%);
-  --chart-2: hsl(0 84% 60%);
-  --chart-3: hsl(152 55% 45%);
-  --chart-4: hsl(42 92% 58%);
-  --chart-5: hsl(220 10% 55%);
-  --sidebar: hsl(220 20% 8%);
-  --sidebar-foreground: hsl(0 0% 98%);
-  --sidebar-primary: hsl(0 84% 50%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(220 20% 14%);
-  --sidebar-accent-foreground: hsl(0 0% 98%);
-  --sidebar-border: hsl(220 15% 18%);
-  --sidebar-ring: hsl(0 84% 50%);
-
-  --gradient-primary: linear-gradient(135deg, hsl(0 84% 50%) 0%, hsl(0 70% 35%) 100%);
-  --gradient-hero: linear-gradient(180deg, hsl(220 20% 6%) 0%, hsl(220 25% 10%) 50%, hsl(0 60% 12%) 100%);
-  --gradient-card: linear-gradient(180deg, hsl(220 20% 12%) 0%, hsl(220 20% 8%) 100%);
-  --gradient-glass: linear-gradient(135deg, hsla(0, 0%, 100%, 0.1) 0%, hsla(0, 0%, 100%, 0.02) 100%);
-
-  --shadow-glow: 0 0 60px -12px hsl(0 84% 50% / 0.5);
-  --shadow-glow-sm: 0 0 30px -8px hsl(0 84% 50% / 0.4);
-  --shadow-card: 0 25px 50px -12px hsl(0 0% 0% / 0.5);
-  --shadow-elevated: 0 20px 40px -15px hsl(0 0% 0% / 0.7);
-}
-
-
-/* Tema claro: aplicado quando a classe .light está no <html>. O tema base é escuro. */
-.light {
-  color-scheme: light;
   --background: hsl(0 0% 100%);
   --foreground: hsl(220 25% 12%);
   --card: hsl(0 0% 100%);
@@ -167,16 +113,53 @@
   --sidebar-border: hsl(220 16% 88%);
   --sidebar-ring: hsl(0 84% 50%);
 
+  --gradient-primary: linear-gradient(135deg, hsl(0 84% 50%) 0%, hsl(0 70% 35%) 100%);
   --gradient-hero: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 25% 97%) 50%, hsl(0 60% 96%) 100%);
   --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 20% 97%) 100%);
   --gradient-glass: linear-gradient(135deg, hsla(220, 20%, 10%, 0.06) 0%, hsla(220, 20%, 10%, 0.02) 100%);
 
+  --shadow-glow: 0 0 60px -12px hsl(0 84% 50% / 0.5);
+  --shadow-glow-sm: 0 0 30px -8px hsl(0 84% 50% / 0.4);
   --shadow-card: 0 25px 50px -12px hsl(220 25% 12% / 0.12);
   --shadow-elevated: 0 20px 40px -15px hsl(220 25% 12% / 0.18);
 }
 
+/* Tema escuro: aplicado quando a classe .dark está no <html>. */
 .dark {
   color-scheme: dark;
+  --background: hsl(220 20% 6%);
+  --foreground: hsl(0 0% 98%);
+  --card: hsl(220 20% 10%);
+  --card-foreground: hsl(0 0% 98%);
+  --popover: hsl(220 20% 10%);
+  --popover-foreground: hsl(0 0% 98%);
+  --secondary: hsl(220 20% 14%);
+  --secondary-foreground: hsl(0 0% 90%);
+  --muted: hsl(220 15% 18%);
+  --muted-foreground: hsl(220 10% 55%);
+  --accent: hsl(0 70% 40%);
+  --accent-foreground: hsl(0 0% 100%);
+  --success: hsl(152 55% 45%);
+  --warning: hsl(42 92% 58%);
+  --destructive: hsl(0 84% 60%);
+  --border: hsl(220 15% 18%);
+  --input: hsl(220 15% 18%);
+  --chart-2: hsl(0 84% 60%);
+  --chart-3: hsl(152 55% 45%);
+  --chart-4: hsl(42 92% 58%);
+  --chart-5: hsl(220 10% 55%);
+  --sidebar: hsl(220 20% 8%);
+  --sidebar-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(220 20% 14%);
+  --sidebar-accent-foreground: hsl(0 0% 98%);
+  --sidebar-border: hsl(220 15% 18%);
+
+  --gradient-hero: linear-gradient(180deg, hsl(220 20% 6%) 0%, hsl(220 25% 10%) 50%, hsl(0 60% 12%) 100%);
+  --gradient-card: linear-gradient(180deg, hsl(220 20% 12%) 0%, hsl(220 20% 8%) 100%);
+  --gradient-glass: linear-gradient(135deg, hsla(0, 0%, 100%, 0.1) 0%, hsla(0, 0%, 100%, 0.02) 100%);
+
+  --shadow-card: 0 25px 50px -12px hsl(0 0% 0% / 0.5);
+  --shadow-elevated: 0 20px 40px -15px hsl(0 0% 0% / 0.7);
 }
 
 @layer base {
