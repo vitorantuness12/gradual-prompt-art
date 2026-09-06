@@ -64,6 +64,7 @@ import { Route as AuthenticatedPainelFiscalRouteImport } from './routes/_authent
 import { Route as AuthenticatedPainelFreteRouteImport } from './routes/_authenticated/painel.frete'
 import { Route as AuthenticatedPainelImpressaoRouteImport } from './routes/_authenticated/painel.impressao'
 import { Route as AuthenticatedPainelIntegracoesRouteImport } from './routes/_authenticated/painel.integracoes'
+import { Route as AuthenticatedPainelInteligenciaRouteImport } from './routes/_authenticated/painel.inteligencia'
 import { Route as AuthenticatedPainelKdsRouteImport } from './routes/_authenticated/painel.kds'
 import { Route as AuthenticatedPainelMarketingRouteImport } from './routes/_authenticated/painel.marketing'
 import { Route as AuthenticatedPainelPagamentosRouteImport } from './routes/_authenticated/painel.pagamentos'
@@ -391,6 +392,12 @@ const AuthenticatedPainelIntegracoesRoute =
     path: '/integracoes',
     getParentRoute: () => AuthenticatedPainelRoute,
   } as any)
+const AuthenticatedPainelInteligenciaRoute =
+  AuthenticatedPainelInteligenciaRouteImport.update({
+    id: '/inteligencia',
+    path: '/inteligencia',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
 const AuthenticatedPainelKdsRoute = AuthenticatedPainelKdsRouteImport.update({
   id: '/kds',
   path: '/kds',
@@ -619,6 +626,7 @@ export interface FileRoutesByFullPath {
   '/painel/frete': typeof AuthenticatedPainelFreteRoute
   '/painel/impressao': typeof AuthenticatedPainelImpressaoRoute
   '/painel/integracoes': typeof AuthenticatedPainelIntegracoesRoute
+  '/painel/inteligencia': typeof AuthenticatedPainelInteligenciaRoute
   '/painel/kds': typeof AuthenticatedPainelKdsRoute
   '/painel/marketing': typeof AuthenticatedPainelMarketingRoute
   '/painel/pagamentos': typeof AuthenticatedPainelPagamentosRoute
@@ -704,6 +712,7 @@ export interface FileRoutesByTo {
   '/painel/frete': typeof AuthenticatedPainelFreteRoute
   '/painel/impressao': typeof AuthenticatedPainelImpressaoRoute
   '/painel/integracoes': typeof AuthenticatedPainelIntegracoesRoute
+  '/painel/inteligencia': typeof AuthenticatedPainelInteligenciaRoute
   '/painel/kds': typeof AuthenticatedPainelKdsRoute
   '/painel/marketing': typeof AuthenticatedPainelMarketingRoute
   '/painel/pagamentos': typeof AuthenticatedPainelPagamentosRoute
@@ -792,6 +801,7 @@ export interface FileRoutesById {
   '/_authenticated/painel/frete': typeof AuthenticatedPainelFreteRoute
   '/_authenticated/painel/impressao': typeof AuthenticatedPainelImpressaoRoute
   '/_authenticated/painel/integracoes': typeof AuthenticatedPainelIntegracoesRoute
+  '/_authenticated/painel/inteligencia': typeof AuthenticatedPainelInteligenciaRoute
   '/_authenticated/painel/kds': typeof AuthenticatedPainelKdsRoute
   '/_authenticated/painel/marketing': typeof AuthenticatedPainelMarketingRoute
   '/_authenticated/painel/pagamentos': typeof AuthenticatedPainelPagamentosRoute
@@ -880,6 +890,7 @@ export interface FileRouteTypes {
     | '/painel/frete'
     | '/painel/impressao'
     | '/painel/integracoes'
+    | '/painel/inteligencia'
     | '/painel/kds'
     | '/painel/marketing'
     | '/painel/pagamentos'
@@ -965,6 +976,7 @@ export interface FileRouteTypes {
     | '/painel/frete'
     | '/painel/impressao'
     | '/painel/integracoes'
+    | '/painel/inteligencia'
     | '/painel/kds'
     | '/painel/marketing'
     | '/painel/pagamentos'
@@ -1052,6 +1064,7 @@ export interface FileRouteTypes {
     | '/_authenticated/painel/frete'
     | '/_authenticated/painel/impressao'
     | '/_authenticated/painel/integracoes'
+    | '/_authenticated/painel/inteligencia'
     | '/_authenticated/painel/kds'
     | '/_authenticated/painel/marketing'
     | '/_authenticated/painel/pagamentos'
@@ -1517,6 +1530,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPainelIntegracoesRouteImport
       parentRoute: typeof AuthenticatedPainelRoute
     }
+    '/_authenticated/painel/inteligencia': {
+      id: '/_authenticated/painel/inteligencia'
+      path: '/inteligencia'
+      fullPath: '/painel/inteligencia'
+      preLoaderRoute: typeof AuthenticatedPainelInteligenciaRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
     '/_authenticated/painel/kds': {
       id: '/_authenticated/painel/kds'
       path: '/kds'
@@ -1748,6 +1768,7 @@ interface AuthenticatedPainelRouteChildren {
   AuthenticatedPainelFreteRoute: typeof AuthenticatedPainelFreteRoute
   AuthenticatedPainelImpressaoRoute: typeof AuthenticatedPainelImpressaoRoute
   AuthenticatedPainelIntegracoesRoute: typeof AuthenticatedPainelIntegracoesRoute
+  AuthenticatedPainelInteligenciaRoute: typeof AuthenticatedPainelInteligenciaRoute
   AuthenticatedPainelKdsRoute: typeof AuthenticatedPainelKdsRoute
   AuthenticatedPainelMarketingRoute: typeof AuthenticatedPainelMarketingRoute
   AuthenticatedPainelPagamentosRoute: typeof AuthenticatedPainelPagamentosRoute
@@ -1782,6 +1803,7 @@ const AuthenticatedPainelRouteChildren: AuthenticatedPainelRouteChildren = {
   AuthenticatedPainelFreteRoute: AuthenticatedPainelFreteRoute,
   AuthenticatedPainelImpressaoRoute: AuthenticatedPainelImpressaoRoute,
   AuthenticatedPainelIntegracoesRoute: AuthenticatedPainelIntegracoesRoute,
+  AuthenticatedPainelInteligenciaRoute: AuthenticatedPainelInteligenciaRoute,
   AuthenticatedPainelKdsRoute: AuthenticatedPainelKdsRoute,
   AuthenticatedPainelMarketingRoute: AuthenticatedPainelMarketingRoute,
   AuthenticatedPainelPagamentosRoute: AuthenticatedPainelPagamentosRoute,
