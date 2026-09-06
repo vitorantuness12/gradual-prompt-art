@@ -132,7 +132,7 @@ export async function runMarketingAutomations(admin: Admin): Promise<AutomationR
       .from("message_logs")
       .select("contact")
       .eq("store_id", rule.store_id)
-      .eq("template_key", rule.event)
+      .eq("event", rule.event)
       .gte("created_at", dayStart);
     const alreadyToday = new Set((sentToday ?? []).map((row) => row.contact));
 
@@ -181,9 +181,10 @@ export async function runMarketingAutomations(admin: Admin): Promise<AutomationR
         store_id: rule.store_id,
         channel: rule.channel,
         contact,
-        template_key: rule.event,
-        body,
-        status: ok ? "sent" : "failed",
+        event: rule.event,
+        direction: "out",
+        level: ok ? "info" : "error",
+        payload: { body },
       });
     }
 
