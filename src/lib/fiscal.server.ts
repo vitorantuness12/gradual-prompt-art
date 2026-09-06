@@ -236,7 +236,7 @@ async function checkNfeIo(
   const status = (text(invoice["flowStatus"]) ?? "").toLowerCase();
   return {
     ok: true,
-    status: status.includes("issued") ? "issued" : status.includes("cancel") ? "cancelled" as never : status.includes("error") ? "error" : "pending",
+    status: status.includes("issued") ? "issued" : status.includes("error") || status.includes("cancel") ? "error" : "pending",
     externalId,
     number: text(invoice["number"]),
     pdfUrl: text(invoice["pdfUrl"]),
@@ -270,9 +270,7 @@ async function issueEnotas(
       cnae: input.cnae ?? undefined,
       itemListaServicoLC116: input.serviceCode ?? undefined,
       descricao: input.description,
-      aliquotaIss: input.taxPercent,
-januario: undefined,
-    },
+      aliquotaIss: input.taxPercent,    },
     valorTotal: Number(input.amount.toFixed(2)),
   };
 
@@ -315,7 +313,7 @@ async function checkEnotas(
     number: text(result.body["numero"]),
     pdfUrl: text(result.body["linkDownloadPDF"]),
     xmlUrl: text(result.body["linkDownloadXML"]),
-    message: text(result.body["motivoStatus"]) ?? status || "consulta concluída",
+    message: text(result.body["motivoStatus"]) ?? (status || "consulta concluída"),
   };
 }
 
