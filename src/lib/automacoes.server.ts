@@ -72,14 +72,16 @@ export async function sendMessage(
  * Proteções: só clientes com consentimento, nunca bloqueados, e no máximo um
  * envio por cliente/regra por dia (registrado em `message_logs`).
  */
-export async function runMarketingAutomations(admin: Admin): Promise<AutomationRunResult> {
+export async function runMarketingAutomations(admin: Admin, storeId?: string): Promise<AutomationRunResult> {
   const result: AutomationRunResult = { ok: true, rules: 0, sent: 0, skipped: 0, byEvent: {} };
 
-  const { data: rules } = await admin
+  let rulesQuery = admin
     .from("automation_rules")
     .select("*")
     .eq("is_active", true)
     .in("event", ["birthday", "inactive", "post_purchase"]);
+  if (storeId) rulesQuery = rulesQuery.eq("store_id", storeId);
+  const { data: rules } = await rulesQuery;
 
   result.rules = rules?.length ?? 0;
   if (!rules?.length) return result;
