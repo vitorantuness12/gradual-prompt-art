@@ -131,6 +131,8 @@ function SuperAdminPage() {
             <TabsTrigger value="stores">Lojas</TabsTrigger>
             <TabsTrigger value="users">Usuários</TabsTrigger>
             <TabsTrigger value="plans">Planos</TabsTrigger>
+            <TabsTrigger value="billing">Cobrança</TabsTrigger>
+
             <TabsTrigger value="content">Conteúdo</TabsTrigger>
             <TabsTrigger value="support">Suporte</TabsTrigger>
             <TabsTrigger value="logs">Logs e incidentes</TabsTrigger>
