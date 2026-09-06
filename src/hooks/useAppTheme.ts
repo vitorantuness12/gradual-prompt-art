@@ -10,20 +10,20 @@ export type AppTheme = "light" | "dark";
 
 const STORAGE_KEY = "osp:tema";
 const listeners = new Set<(theme: AppTheme) => void>();
-let current: AppTheme = "dark";
+let current: AppTheme = "light";
 
 function apply(theme: AppTheme) {
   if (typeof document === "undefined") return;
-  // O tema base do sistema é escuro; a classe .light aplica a paleta clara.
-  document.documentElement.classList.toggle("light", theme === "light");
+  // O tema base do sistema é claro; a classe .dark aplica a paleta escura.
   document.documentElement.classList.toggle("dark", theme === "dark");
+  document.documentElement.classList.remove("light");
 }
 
 export function readStoredTheme(): AppTheme {
-  if (typeof window === "undefined") return "dark";
+  if (typeof window === "undefined") return "light";
   const saved = window.localStorage.getItem(STORAGE_KEY);
   if (saved === "light" || saved === "dark") return saved;
-  return "dark";
+  return "light";
 }
 
 export function setAppTheme(theme: AppTheme) {
