@@ -18,6 +18,7 @@ import {
   LayoutDashboard,
   LifeBuoy,
   LogOut,
+  Megaphone,
   MessageSquare,
   MonitorPlay,
   Package,
