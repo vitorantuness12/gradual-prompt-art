@@ -6,6 +6,7 @@ import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 
+import { PlanBillingTab } from "@/components/admin/PlanBillingTab";
 import { DemoBadge } from "@/components/brand/DemoBadge";
 import { Logo } from "@/components/brand/Logo";
 import { EvolutionAdminPanel } from "@/components/painel/EvolutionAdminPanel";
