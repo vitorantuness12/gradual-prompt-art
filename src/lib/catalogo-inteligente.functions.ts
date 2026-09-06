@@ -1,7 +1,9 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 import {
   buildSortedOrder,
   catalogIntelligenceKey,
@@ -20,28 +22,20 @@ import {
 
 const storeInput = z.object({ storeId: z.string().uuid() });
 
+type AuthedClient = SupabaseClient<Database>;
+
 /** Garante que quem chamou é da equipe da loja e pode mexer no catálogo. */
-async function assertStaff(
-  supabase: Awaited<ReturnType<typeof requireSupabaseAuth.options.server>> extends never
-    ? never
-    : { rpc: (name: string, args: Record<string, unknown>) => Promise<{ data: unknown }> },
-  storeId: string,
-  userId: string,
-) {
+async function assertStaff(supabase: AuthedClient, storeId: string, userId: string) {
   const { data } = await supabase.rpc("is_store_staff", { _store_id: storeId, _user_id: userId });
   if (data !== true) throw new Error("Sem permissão para esta loja.");
 }
 
-interface OrderLinesResult {
-  lines: SoldLine[];
-}
-
 /** Itens vendidos (pedidos válidos) no período informado. */
 async function soldLines(
-  supabase: ReturnType<typeof createAuthedClient>,
+  supabase: AuthedClient,
   storeId: string,
   windowDays: number,
-): Promise<OrderLinesResult> {
+): Promise<{ lines: SoldLine[] }> {
   const since = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString();
   const { data: orders } = await supabase
     .from("orders")
@@ -64,20 +58,11 @@ async function soldLines(
   return { lines: items ?? [] };
 }
 
-/** Tipo auxiliar do cliente autenticado injetado pelo middleware. */
-type AuthedContext = { supabase: ReturnType<typeof createAuthedClient>; userId: string };
-function createAuthedClient() {
-  // Apenas para inferência de tipo — o cliente real vem do middleware.
-  return null as unknown as import("@supabase/supabase-js").SupabaseClient<
-    import("@/integrations/supabase/types").Database
-  >;
-}
-
 export const getCatalogIntelligence = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => storeInput.parse(data))
   .handler(async ({ data, context }): Promise<CatalogIntelligenceOverview> => {
-    const { supabase, userId } = context as unknown as AuthedContext;
+    const { supabase, userId } = context;
     await assertStaff(supabase, data.storeId, userId);
 
     const { data: settingsRow } = await supabase
@@ -119,7 +104,7 @@ export const saveCatalogIntelligence = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => settingsInput.parse(data))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as unknown as AuthedContext;
+    const { supabase, userId } = context;
     await assertStaff(supabase, data.storeId, userId);
 
     const { error } = await supabase.from("catalog_ai_settings").upsert(
@@ -143,7 +128,7 @@ export const applyBestSellerOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => storeInput.parse(data))
   .handler(async ({ data, context }): Promise<{ ok: boolean; changed: number; message: string }> => {
-    const { supabase, userId } = context as unknown as AuthedContext;
+    const { supabase, userId } = context;
     await assertStaff(supabase, data.storeId, userId);
 
     const { data: settingsRow } = await supabase
