@@ -526,11 +526,13 @@ export type Database = {
       automation_rules: {
         Row: {
           channel: string
+          config: Json
           created_at: string
           delay_minutes: number
           event: string
           id: string
           is_active: boolean
+          name: string | null
           respect_business_hours: boolean
           store_id: string
           template_key: string
@@ -538,11 +540,13 @@ export type Database = {
         }
         Insert: {
           channel?: string
+          config?: Json
           created_at?: string
           delay_minutes?: number
           event: string
           id?: string
           is_active?: boolean
+          name?: string | null
           respect_business_hours?: boolean
           store_id: string
           template_key: string
@@ -550,11 +554,13 @@ export type Database = {
         }
         Update: {
           channel?: string
+          config?: Json
           created_at?: string
           delay_minutes?: number
           event?: string
           id?: string
           is_active?: boolean
+          name?: string | null
           respect_business_hours?: boolean
           store_id?: string
           template_key?: string
@@ -2148,30 +2154,66 @@ export type Database = {
       }
       data_requests: {
         Row: {
+          contact: string | null
           created_at: string
+          customer_id: string | null
           details: Json
+          handled_at: string | null
+          handled_by: string | null
           id: string
           kind: string
+          note: string | null
           status: string
+          store_id: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
+          contact?: string | null
           created_at?: string
+          customer_id?: string | null
           details?: Json
+          handled_at?: string | null
+          handled_by?: string | null
           id?: string
           kind: string
+          note?: string | null
           status?: string
+          store_id?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
+          contact?: string | null
           created_at?: string
+          customer_id?: string | null
           details?: Json
+          handled_at?: string | null
+          handled_by?: string | null
           id?: string
           kind?: string
+          note?: string | null
           status?: string
+          store_id?: string | null
+          updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "data_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_requests_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       deliveries: {
         Row: {
@@ -2862,10 +2904,12 @@ export type Database = {
           external_id: string | null
           id: string
           issued_at: string | null
+          model: string | null
           number: string | null
           order_id: string | null
           pdf_url: string | null
           provider: string | null
+          series: string | null
           status: string
           store_id: string
           subscription_id: string | null
@@ -2883,10 +2927,12 @@ export type Database = {
           external_id?: string | null
           id?: string
           issued_at?: string | null
+          model?: string | null
           number?: string | null
           order_id?: string | null
           pdf_url?: string | null
           provider?: string | null
+          series?: string | null
           status?: string
           store_id: string
           subscription_id?: string | null
@@ -2904,10 +2950,12 @@ export type Database = {
           external_id?: string | null
           id?: string
           issued_at?: string | null
+          model?: string | null
           number?: string | null
           order_id?: string | null
           pdf_url?: string | null
           provider?: string | null
+          series?: string | null
           status?: string
           store_id?: string
           subscription_id?: string | null
@@ -2941,48 +2989,84 @@ export type Database = {
       }
       fiscal_settings: {
         Row: {
+          address_city: string | null
+          address_line: string | null
+          address_state: string | null
+          address_zip: string | null
           auto_issue: boolean
           cnae: string | null
           cnpj: string | null
+          company_email: string | null
+          company_phone: string | null
           created_at: string
           default_description: string | null
           environment: string
+          invoice_model: string
+          invoice_series: string
+          legal_name: string | null
           municipal_registration: string | null
+          next_invoice_number: number
           provider: string
           service_code: string | null
+          state_registration: string | null
           store_id: string
           tax_percent: number
           tax_regime: string | null
+          trade_name: string | null
           updated_at: string
         }
         Insert: {
+          address_city?: string | null
+          address_line?: string | null
+          address_state?: string | null
+          address_zip?: string | null
           auto_issue?: boolean
           cnae?: string | null
           cnpj?: string | null
+          company_email?: string | null
+          company_phone?: string | null
           created_at?: string
           default_description?: string | null
           environment?: string
+          invoice_model?: string
+          invoice_series?: string
+          legal_name?: string | null
           municipal_registration?: string | null
+          next_invoice_number?: number
           provider?: string
           service_code?: string | null
+          state_registration?: string | null
           store_id: string
           tax_percent?: number
           tax_regime?: string | null
+          trade_name?: string | null
           updated_at?: string
         }
         Update: {
+          address_city?: string | null
+          address_line?: string | null
+          address_state?: string | null
+          address_zip?: string | null
           auto_issue?: boolean
           cnae?: string | null
           cnpj?: string | null
+          company_email?: string | null
+          company_phone?: string | null
           created_at?: string
           default_description?: string | null
           environment?: string
+          invoice_model?: string
+          invoice_series?: string
+          legal_name?: string | null
           municipal_registration?: string | null
+          next_invoice_number?: number
           provider?: string
           service_code?: string | null
+          state_registration?: string | null
           store_id?: string
           tax_percent?: number
           tax_regime?: string | null
+          trade_name?: string | null
           updated_at?: string
         }
         Relationships: [
