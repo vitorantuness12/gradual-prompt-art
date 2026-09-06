@@ -228,11 +228,11 @@ export const createOrderRefund = createServerFn({ method: "POST" })
 
     await supabaseAdmin.from("audit_logs").insert({
       store_id: data.storeId,
-      actor_id: context.userId,
+      user_id: context.userId,
       action: "order.refund",
       entity: "orders",
       entity_id: order.id,
-      details: { amount, method: data.method, reason: data.reason ?? null, full: isFull },
+      metadata: { amount, method: data.method, reason: data.reason ?? null, full: isFull },
     });
 
     return {
