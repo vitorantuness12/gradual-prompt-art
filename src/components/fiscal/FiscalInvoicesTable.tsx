@@ -7,6 +7,7 @@ import {
   FISCAL_PROVIDER_LABEL,
   FISCAL_STATUS_LABEL,
   FISCAL_STATUS_TONE,
+  INVOICE_MODEL_LABEL,
   fiscalInvoicesKey,
   type FiscalInvoiceRow,
 } from "@/lib/fiscal";
@@ -64,6 +65,18 @@ export function FiscalInvoicesTable({ storeId, invoices }: FiscalInvoicesTablePr
                   {new Date(invoice.created_at).toLocaleString("pt-BR")} · {formatCurrency(Number(invoice.amount ?? 0))}
                   {invoice.customer_name ? ` · ${invoice.customer_name}` : ""}
                 </p>
+                <p className="text-xs text-muted-foreground">
+                  {INVOICE_MODEL_LABEL[invoice.model ?? "nfse"] ?? invoice.model} · série {invoice.series ?? "1"} · base{" "}
+                  {formatCurrency(Number(invoice.base_amount ?? 0))} · imposto {formatCurrency(Number(invoice.tax_amount ?? 0))}
+                </p>
+                {invoice.access_key && (
+                  <p className="break-all text-xs text-muted-foreground">
+                    Chave de acesso: <span className="font-mono text-foreground">{invoice.access_key}</span>
+                  </p>
+                )}
+                {invoice.verification_code && (
+                  <p className="text-xs text-muted-foreground">Código de verificação: {invoice.verification_code}</p>
+                )}
                 {invoice.error_message && <p className="text-xs text-destructive">{invoice.error_message}</p>}
               </div>
               <div className="flex flex-wrap gap-2 md:justify-end">
