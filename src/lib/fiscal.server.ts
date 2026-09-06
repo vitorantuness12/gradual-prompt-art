@@ -99,7 +99,6 @@ async function issueFocus(
 
   const payload = {
     data_emissao: new Date().toISOString(),
-    prestador: { cnpj: undefined },
     tomador: {
       cpf: input.customerDocument && input.customerDocument.length === 11 ? input.customerDocument : undefined,
       cnpj: input.customerDocument && input.customerDocument.length === 14 ? input.customerDocument : undefined,
@@ -125,7 +124,7 @@ async function issueFocus(
     },
   );
 
-  if (!result.ok) return { ...errorResult(shortError(result.raw, result.body, result.status)) };
+  if (!result.ok) return errorResult(shortError(result.raw, result.body, result.status));
 
   const status = text(result.body["status"]) ?? "processando_autorizacao";
   return {
