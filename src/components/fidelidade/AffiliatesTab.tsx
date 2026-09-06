@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Copy, Trash2 } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
+import { AffiliatePayoutsPanel } from "@/components/fidelidade/AffiliatePayoutsPanel";
 import { EmptyState } from "@/components/painel/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -69,6 +70,17 @@ export function AffiliatesTab({ storeId, storeSlug }: Props) {
       return map;
     },
   });
+
+  /** Comissão acumulada por código, base do controle de pagamentos. */
+  const earnedByCode = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const affiliate of affiliates.data ?? []) {
+      const key = affiliate.code.toUpperCase();
+      const revenue = sales.data?.get(key)?.total ?? 0;
+      map.set(key, (revenue * Number(affiliate.commission_percent ?? 0)) / 100);
+    }
+    return map;
+  }, [affiliates.data, sales.data]);
 
   const refresh = async () => {
     await queryClient.invalidateQueries({ queryKey: ["afiliados-loja", storeId] });
@@ -251,6 +263,13 @@ export function AffiliatesTab({ storeId, storeSlug }: Props) {
           })}
         </div>
       )}
+
+      <AffiliatePayoutsPanel
+        storeId={storeId}
+        affiliates={affiliates.data ?? []}
+        earnedByCode={earnedByCode}
+      />
     </div>
   );
 }
+
