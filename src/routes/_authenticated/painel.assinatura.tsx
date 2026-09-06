@@ -14,6 +14,7 @@ import { canManage, useActiveStore } from "@/hooks/useMyStores";
 import { usePlans, useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { PLAN_INVOICE_STATUS_LABEL, PLAN_INVOICE_STATUS_TONE } from "@/lib/planos-cobranca";
 import {
   FEATURE_KEYS,
   LIMIT_KEYS,
