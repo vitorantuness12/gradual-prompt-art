@@ -68,10 +68,20 @@ export function BestSellersCard({ storeId, overview }: BestSellersCardProps) {
           </ol>
         )}
 
-        <Button variant="outline" onClick={() => apply.mutate()} disabled={apply.isPending}>
+        <Button
+          variant="outline"
+          onClick={() => apply.mutate()}
+          disabled={apply.isPending || !overview.settings.autosortEnabled}
+        >
           <ArrowUpDown className="mr-2 size-4" aria-hidden="true" />
           {apply.isPending ? "Reorganizando..." : "Aplicar ordem na vitrine"}
         </Button>
+        {!overview.settings.autosortEnabled ? (
+          <p className="text-sm text-muted-foreground">
+            Para aplicar a ordem, ligue "Deixar os mais vendidos no topo" ao lado e salve.
+          </p>
+        ) : null}
+
         {overview.settings.lastSortRunAt ? (
           <p className="text-xs text-muted-foreground">
             Última reorganização em{" "}
