@@ -60,6 +60,7 @@ import { Route as AuthenticatedPainelEntregasRouteImport } from './routes/_authe
 import { Route as AuthenticatedPainelEquipeRouteImport } from './routes/_authenticated/painel.equipe'
 import { Route as AuthenticatedPainelEstoqueRouteImport } from './routes/_authenticated/painel.estoque'
 import { Route as AuthenticatedPainelFidelidadeRouteImport } from './routes/_authenticated/painel.fidelidade'
+import { Route as AuthenticatedPainelFiscalRouteImport } from './routes/_authenticated/painel.fiscal'
 import { Route as AuthenticatedPainelFreteRouteImport } from './routes/_authenticated/painel.frete'
 import { Route as AuthenticatedPainelImpressaoRouteImport } from './routes/_authenticated/painel.impressao'
 import { Route as AuthenticatedPainelIntegracoesRouteImport } from './routes/_authenticated/painel.integracoes'
@@ -364,6 +365,12 @@ const AuthenticatedPainelFidelidadeRoute =
     path: '/fidelidade',
     getParentRoute: () => AuthenticatedPainelRoute,
   } as any)
+const AuthenticatedPainelFiscalRoute =
+  AuthenticatedPainelFiscalRouteImport.update({
+    id: '/fiscal',
+    path: '/fiscal',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
 const AuthenticatedPainelFreteRoute =
   AuthenticatedPainelFreteRouteImport.update({
     id: '/frete',
@@ -595,6 +602,7 @@ export interface FileRoutesByFullPath {
   '/painel/equipe': typeof AuthenticatedPainelEquipeRoute
   '/painel/estoque': typeof AuthenticatedPainelEstoqueRoute
   '/painel/fidelidade': typeof AuthenticatedPainelFidelidadeRoute
+  '/painel/fiscal': typeof AuthenticatedPainelFiscalRoute
   '/painel/frete': typeof AuthenticatedPainelFreteRoute
   '/painel/impressao': typeof AuthenticatedPainelImpressaoRoute
   '/painel/integracoes': typeof AuthenticatedPainelIntegracoesRoute
@@ -677,6 +685,7 @@ export interface FileRoutesByTo {
   '/painel/equipe': typeof AuthenticatedPainelEquipeRoute
   '/painel/estoque': typeof AuthenticatedPainelEstoqueRoute
   '/painel/fidelidade': typeof AuthenticatedPainelFidelidadeRoute
+  '/painel/fiscal': typeof AuthenticatedPainelFiscalRoute
   '/painel/frete': typeof AuthenticatedPainelFreteRoute
   '/painel/impressao': typeof AuthenticatedPainelImpressaoRoute
   '/painel/integracoes': typeof AuthenticatedPainelIntegracoesRoute
@@ -762,6 +771,7 @@ export interface FileRoutesById {
   '/_authenticated/painel/equipe': typeof AuthenticatedPainelEquipeRoute
   '/_authenticated/painel/estoque': typeof AuthenticatedPainelEstoqueRoute
   '/_authenticated/painel/fidelidade': typeof AuthenticatedPainelFidelidadeRoute
+  '/_authenticated/painel/fiscal': typeof AuthenticatedPainelFiscalRoute
   '/_authenticated/painel/frete': typeof AuthenticatedPainelFreteRoute
   '/_authenticated/painel/impressao': typeof AuthenticatedPainelImpressaoRoute
   '/_authenticated/painel/integracoes': typeof AuthenticatedPainelIntegracoesRoute
@@ -847,6 +857,7 @@ export interface FileRouteTypes {
     | '/painel/equipe'
     | '/painel/estoque'
     | '/painel/fidelidade'
+    | '/painel/fiscal'
     | '/painel/frete'
     | '/painel/impressao'
     | '/painel/integracoes'
@@ -929,6 +940,7 @@ export interface FileRouteTypes {
     | '/painel/equipe'
     | '/painel/estoque'
     | '/painel/fidelidade'
+    | '/painel/fiscal'
     | '/painel/frete'
     | '/painel/impressao'
     | '/painel/integracoes'
@@ -1013,6 +1025,7 @@ export interface FileRouteTypes {
     | '/_authenticated/painel/equipe'
     | '/_authenticated/painel/estoque'
     | '/_authenticated/painel/fidelidade'
+    | '/_authenticated/painel/fiscal'
     | '/_authenticated/painel/frete'
     | '/_authenticated/painel/impressao'
     | '/_authenticated/painel/integracoes'
@@ -1450,6 +1463,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPainelFidelidadeRouteImport
       parentRoute: typeof AuthenticatedPainelRoute
     }
+    '/_authenticated/painel/fiscal': {
+      id: '/_authenticated/painel/fiscal'
+      path: '/fiscal'
+      fullPath: '/painel/fiscal'
+      preLoaderRoute: typeof AuthenticatedPainelFiscalRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
     '/_authenticated/painel/frete': {
       id: '/_authenticated/painel/frete'
       path: '/frete'
@@ -1684,6 +1704,7 @@ interface AuthenticatedPainelRouteChildren {
   AuthenticatedPainelEquipeRoute: typeof AuthenticatedPainelEquipeRoute
   AuthenticatedPainelEstoqueRoute: typeof AuthenticatedPainelEstoqueRoute
   AuthenticatedPainelFidelidadeRoute: typeof AuthenticatedPainelFidelidadeRoute
+  AuthenticatedPainelFiscalRoute: typeof AuthenticatedPainelFiscalRoute
   AuthenticatedPainelFreteRoute: typeof AuthenticatedPainelFreteRoute
   AuthenticatedPainelImpressaoRoute: typeof AuthenticatedPainelImpressaoRoute
   AuthenticatedPainelIntegracoesRoute: typeof AuthenticatedPainelIntegracoesRoute
@@ -1716,6 +1737,7 @@ const AuthenticatedPainelRouteChildren: AuthenticatedPainelRouteChildren = {
   AuthenticatedPainelEquipeRoute: AuthenticatedPainelEquipeRoute,
   AuthenticatedPainelEstoqueRoute: AuthenticatedPainelEstoqueRoute,
   AuthenticatedPainelFidelidadeRoute: AuthenticatedPainelFidelidadeRoute,
+  AuthenticatedPainelFiscalRoute: AuthenticatedPainelFiscalRoute,
   AuthenticatedPainelFreteRoute: AuthenticatedPainelFreteRoute,
   AuthenticatedPainelImpressaoRoute: AuthenticatedPainelImpressaoRoute,
   AuthenticatedPainelIntegracoesRoute: AuthenticatedPainelIntegracoesRoute,
