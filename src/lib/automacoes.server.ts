@@ -17,7 +17,7 @@ export interface AutomationRunResult {
 const digits = (value: string | null | undefined) => (value ?? "").replace(/\D/g, "");
 
 /** Envia a mensagem pelo canal configurado; sem credencial, apenas registra. */
-async function sendMessage(
+export async function sendMessage(
   admin: Admin,
   storeId: string,
   channel: string,
