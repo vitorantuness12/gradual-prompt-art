@@ -6,6 +6,7 @@ import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 
+import { PlanBillingTab } from "@/components/admin/PlanBillingTab";
 import { DemoBadge } from "@/components/brand/DemoBadge";
 import { Logo } from "@/components/brand/Logo";
 import { EvolutionAdminPanel } from "@/components/painel/EvolutionAdminPanel";
@@ -131,6 +132,8 @@ function SuperAdminPage() {
             <TabsTrigger value="stores">Lojas</TabsTrigger>
             <TabsTrigger value="users">Usuários</TabsTrigger>
             <TabsTrigger value="plans">Planos</TabsTrigger>
+            <TabsTrigger value="billing">Cobrança</TabsTrigger>
+
             <TabsTrigger value="content">Conteúdo</TabsTrigger>
             <TabsTrigger value="support">Suporte</TabsTrigger>
             <TabsTrigger value="logs">Logs e incidentes</TabsTrigger>
@@ -150,6 +153,10 @@ function SuperAdminPage() {
           <TabsContent value="plans" className="mt-6">
             <PlansTab />
           </TabsContent>
+          <TabsContent value="billing" className="mt-6">
+            <PlanBillingTab />
+          </TabsContent>
+
           <TabsContent value="content" className="mt-6">
             <ContentTab />
           </TabsContent>

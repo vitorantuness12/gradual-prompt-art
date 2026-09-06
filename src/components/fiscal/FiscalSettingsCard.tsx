@@ -19,6 +19,7 @@ import {
   type FiscalConfig,
 } from "@/lib/fiscal";
 import { saveFiscalSettings, testFiscalProvider } from "@/lib/fiscal.functions";
+import { FiscalBaseFields } from "@/components/fiscal/FiscalBaseFields";
 
 export interface FiscalSettingsCardProps {
   storeId: string;
@@ -42,6 +43,11 @@ interface FormState {
   tradeName: string;
   invoiceSeries: string;
   nextInvoiceNumber: string;
+  invoiceModel: string;
+  deductionPercent: string;
+  includeShippingInBase: boolean;
+  discountReducesBase: boolean;
+  taxRetained: boolean;
 }
 
 function initialForm(config: FiscalConfig): FormState {
@@ -63,6 +69,11 @@ function initialForm(config: FiscalConfig): FormState {
     tradeName: settings?.trade_name ?? "",
     invoiceSeries: settings?.invoice_series ?? "1",
     nextInvoiceNumber: String(settings?.next_invoice_number ?? 1),
+    invoiceModel: settings?.invoice_model ?? "nfse",
+    deductionPercent: String(settings?.deduction_percent ?? 0),
+    includeShippingInBase: settings?.include_shipping_in_base ?? true,
+    discountReducesBase: settings?.discount_reduces_base ?? true,
+    taxRetained: settings?.tax_retained ?? false,
   };
 }
 
@@ -100,6 +111,11 @@ export function FiscalSettingsCard({ storeId, config }: FiscalSettingsCardProps)
           tradeName: form.tradeName,
           invoiceSeries: form.invoiceSeries,
           nextInvoiceNumber: Number(form.nextInvoiceNumber) || 1,
+          invoiceModel: form.invoiceModel,
+          deductionPercent: Number(form.deductionPercent.replace(",", ".")) || 0,
+          includeShippingInBase: form.includeShippingInBase,
+          discountReducesBase: form.discountReducesBase,
+          taxRetained: form.taxRetained,
         },
       });
       if (!result.ok) throw new Error(result.message);
@@ -231,6 +247,18 @@ export function FiscalSettingsCard({ storeId, config }: FiscalSettingsCardProps)
             <Input value={form.cnae} onChange={(event) => update("cnae", event.target.value)} />
           </div>
         </div>
+
+        <FiscalBaseFields
+          values={{
+            invoiceModel: form.invoiceModel,
+            deductionPercent: form.deductionPercent,
+            includeShippingInBase: form.includeShippingInBase,
+            discountReducesBase: form.discountReducesBase,
+            taxRetained: form.taxRetained,
+            taxPercent: form.taxPercent,
+          }}
+          onChange={(key, value) => update(key, value as never)}
+        />
 
         <div className="grid gap-2">
           <Label>Descrição padrão da nota</Label>

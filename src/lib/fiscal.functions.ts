@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { FiscalConfig, FiscalInvoiceRow, FiscalOrderOption } from "@/lib/fiscal";
+import { calcFiscalBase, type FiscalConfig, type FiscalInvoiceRow, type FiscalOrderOption } from "@/lib/fiscal";
 
 /**
  * Pontes RPC do módulo de Nota fiscal.
@@ -79,6 +79,10 @@ const saveInput = z.object({
   /** Vazio mantém a credencial já salva. */
   apiKey: z.string().trim().max(4000).optional(),
   companyId: z.string().trim().max(120).optional(),
+  deductionPercent: z.number().min(0).max(100).optional(),
+  includeShippingInBase: z.boolean().optional(),
+  discountReducesBase: z.boolean().optional(),
+  taxRetained: z.boolean().optional(),
 });
 
 /** Salva a configuração fiscal e, quando informada, a credencial do emissor. */
@@ -109,6 +113,10 @@ export const saveFiscalSettings = createServerFn({ method: "POST" })
         invoice_model: data.invoiceModel || "nfse",
         invoice_series: data.invoiceSeries || "1",
         next_invoice_number: data.nextInvoiceNumber ?? 1,
+        deduction_percent: data.deductionPercent ?? 0,
+        include_shipping_in_base: data.includeShippingInBase ?? true,
+        discount_reduces_base: data.discountReducesBase ?? true,
+        tax_retained: data.taxRetained ?? false,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "store_id" },
@@ -257,7 +265,7 @@ export const issueFiscalInvoice = createServerFn({ method: "POST" })
 
     const { data: order } = await supabaseAdmin
       .from("orders")
-      .select("id, code, customer_name, customer_email, total, store_id")
+      .select("id, code, customer_name, customer_email, total, subtotal, delivery_fee, discount, store_id")
       .eq("id", data.orderId)
       .eq("store_id", data.storeId)
       .maybeSingle();
@@ -294,6 +302,21 @@ export const issueFiscalInvoice = createServerFn({ method: "POST" })
     const environment = settings.data?.environment ?? "homologacao";
     const taxPercent = Number(settings.data?.tax_percent ?? 0);
     const amount = Number(order.total ?? 0);
+    // Base de cálculo conforme os parâmetros da loja (frete, desconto e deduções).
+    const breakdown = calcFiscalBase(
+      {
+        subtotal: Number(order.subtotal ?? 0),
+        deliveryFee: Number(order.delivery_fee ?? 0),
+        discount: Number(order.discount ?? 0),
+        total: amount,
+      },
+      {
+        includeShipping: settings.data?.include_shipping_in_base ?? true,
+        discountReducesBase: settings.data?.discount_reduces_base ?? true,
+        deductionPercent: Number(settings.data?.deduction_percent ?? 0),
+        taxPercent,
+      },
+    );
     const description =
       data.description || settings.data?.default_description || `Pedido ${order.code ?? order.id.slice(0, 8)}`;
 
@@ -312,7 +335,9 @@ export const issueFiscalInvoice = createServerFn({ method: "POST" })
         series,
         number: String(nextNumber),
         amount,
-        tax_amount: Number(((amount * taxPercent) / 100).toFixed(2)),
+        base_amount: breakdown.base,
+        deduction_amount: breakdown.deduction,
+        tax_amount: breakdown.tax,
         status: "pending",
         customer_name: data.customerName || order.customer_name,
         customer_document: data.customerDocument ? data.customerDocument.replace(/\D/g, "") : null,
@@ -336,8 +361,10 @@ export const issueFiscalInvoice = createServerFn({ method: "POST" })
       },
       {
         reference: invoice.id,
-        amount,
+        amount: breakdown.base,
         taxPercent,
+        deductionAmount: breakdown.deduction,
+        taxRetained: settings.data?.tax_retained ?? false,
         description,
         serviceCode: settings.data?.service_code ?? null,
         cnae: settings.data?.cnae ?? null,
@@ -356,6 +383,8 @@ export const issueFiscalInvoice = createServerFn({ method: "POST" })
         number: result.number,
         pdf_url: result.pdfUrl,
         xml_url: result.xmlUrl,
+        access_key: result.accessKey ?? null,
+        verification_code: result.verificationCode ?? null,
         error_message: result.ok ? null : result.message,
         issued_at: result.status === "issued" ? new Date().toISOString() : null,
         updated_at: new Date().toISOString(),
@@ -411,6 +440,8 @@ export const refreshFiscalInvoice = createServerFn({ method: "POST" })
         number: result.number,
         pdf_url: result.pdfUrl,
         xml_url: result.xmlUrl,
+        access_key: result.accessKey ?? null,
+        verification_code: result.verificationCode ?? null,
         error_message: result.ok ? null : result.message,
         issued_at: result.status === "issued" ? new Date().toISOString() : null,
         updated_at: new Date().toISOString(),

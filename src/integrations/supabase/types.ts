@@ -8919,50 +8919,68 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          created_by: string | null
           due_at: string | null
           external_id: string | null
           hosted_url: string | null
           id: string
+          method: string | null
+          note: string | null
           number: string | null
           paid_at: string | null
           period_end: string | null
           period_start: string | null
           provider: string
+          refunded_amount: number
+          refunded_at: string | null
           status: string
           store_id: string
           subscription_id: string | null
+          updated_at: string
         }
         Insert: {
           amount?: number
           created_at?: string
+          created_by?: string | null
           due_at?: string | null
           external_id?: string | null
           hosted_url?: string | null
           id?: string
+          method?: string | null
+          note?: string | null
           number?: string | null
           paid_at?: string | null
           period_end?: string | null
           period_start?: string | null
           provider?: string
+          refunded_amount?: number
+          refunded_at?: string | null
           status?: string
           store_id: string
           subscription_id?: string | null
+          updated_at?: string
         }
         Update: {
           amount?: number
           created_at?: string
+          created_by?: string | null
           due_at?: string | null
           external_id?: string | null
           hosted_url?: string | null
           id?: string
+          method?: string | null
+          note?: string | null
           number?: string | null
           paid_at?: string | null
           period_end?: string | null
           period_start?: string | null
           provider?: string
+          refunded_amount?: number
+          refunded_at?: string | null
           status?: string
           store_id?: string
           subscription_id?: string | null
+          updated_at?: string
         }
         Relationships: [
           {

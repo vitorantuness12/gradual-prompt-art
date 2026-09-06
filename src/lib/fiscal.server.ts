@@ -25,6 +25,10 @@ export interface FiscalDocumentInput {
   customerDocument: string | null;
   customerEmail: string | null;
   environment: string;
+  /** Valor deduzido da base de cálculo (materiais, subempreitada etc.). */
+  deductionAmount?: number;
+  /** Imposto retido pelo tomador. */
+  taxRetained?: boolean;
 }
 
 export interface FiscalIssueResult {
@@ -35,6 +39,10 @@ export interface FiscalIssueResult {
   number: string | null;
   pdfUrl: string | null;
   xmlUrl: string | null;
+  /** Chave de acesso da nota (quando o emissor devolve). */
+  accessKey?: string | null;
+  /** Código de verificação para consulta na prefeitura. */
+  verificationCode?: string | null;
   message: string;
 }
 
@@ -108,7 +116,8 @@ async function issueFocus(
     servico: {
       aliquota: input.taxPercent / 100,
       discriminacao: input.description,
-      iss_retido: false,
+      iss_retido: input.taxRetained ?? false,
+      valor_deducoes: Number((input.deductionAmount ?? 0).toFixed(2)),
       item_lista_servico: input.serviceCode ?? undefined,
       codigo_cnae: input.cnae ?? undefined,
       valor_servicos: Number(input.amount.toFixed(2)),
@@ -134,6 +143,8 @@ async function issueFocus(
     number: text(result.body["numero"]),
     pdfUrl: text(result.body["caminho_danfse"]),
     xmlUrl: text(result.body["caminho_xml_nota_fiscal"]),
+    accessKey: text(result.body["chave_nfse"]) ?? text(result.body["numero_rps"]),
+    verificationCode: text(result.body["codigo_verificacao"]),
     message: status === "autorizado" ? "Nota autorizada." : "Nota enviada, aguardando autorização da prefeitura.",
   };
 }
@@ -171,6 +182,8 @@ async function checkFocus(
     number: text(result.body["numero"]),
     pdfUrl: text(result.body["caminho_danfse"]),
     xmlUrl: text(result.body["caminho_xml_nota_fiscal"]),
+    accessKey: text(result.body["chave_nfse"]),
+    verificationCode: text(result.body["codigo_verificacao"]),
     message: status === "autorizado" ? "Nota autorizada." : "Ainda em processamento no emissor.",
   };
 }
@@ -195,7 +208,9 @@ async function issueNfeIo(
     cityServiceCode: input.serviceCode ?? undefined,
     description: input.description,
     servicesAmount: Number(input.amount.toFixed(2)),
+    deductionsAmount: Number((input.deductionAmount ?? 0).toFixed(2)),
     issAggregation: false,
+    issWithheld: input.taxRetained ?? false,
   };
 
   const result = await request(
@@ -217,6 +232,8 @@ async function issueNfeIo(
     number: text(invoice["number"]),
     pdfUrl: text(invoice["pdfUrl"]),
     xmlUrl: text(invoice["xmlUrl"]),
+    accessKey: text(invoice["accessKey"]) ?? text(invoice["checkCode"]),
+    verificationCode: text(invoice["checkCode"]),
     message: status.includes("issued") ? "Nota emitida." : "Nota enviada, aguardando o emissor.",
   };
 }
@@ -240,6 +257,8 @@ async function checkNfeIo(
     number: text(invoice["number"]),
     pdfUrl: text(invoice["pdfUrl"]),
     xmlUrl: text(invoice["xmlUrl"]),
+    accessKey: text(invoice["accessKey"]) ?? text(invoice["checkCode"]),
+    verificationCode: text(invoice["checkCode"]),
     message: status || "consulta concluída",
   };
 }
@@ -269,7 +288,10 @@ async function issueEnotas(
       cnae: input.cnae ?? undefined,
       itemListaServicoLC116: input.serviceCode ?? undefined,
       descricao: input.description,
-      aliquotaIss: input.taxPercent,    },
+      aliquotaIss: input.taxPercent,
+      valorDeducoes: Number((input.deductionAmount ?? 0).toFixed(2)),
+      issRetidoFonte: input.taxRetained ?? false,
+    },
     valorTotal: Number(input.amount.toFixed(2)),
   };
 
@@ -312,6 +334,8 @@ async function checkEnotas(
     number: text(result.body["numero"]),
     pdfUrl: text(result.body["linkDownloadPDF"]),
     xmlUrl: text(result.body["linkDownloadXML"]),
+    accessKey: text(result.body["chaveAcesso"]) ?? text(result.body["codigoVerificacao"]),
+    verificationCode: text(result.body["codigoVerificacao"]),
     message: text(result.body["motivoStatus"]) ?? (status || "consulta concluída"),
   };
 }
