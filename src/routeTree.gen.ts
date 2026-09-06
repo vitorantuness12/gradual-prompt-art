@@ -67,6 +67,7 @@ import { Route as AuthenticatedPainelIntegracoesRouteImport } from './routes/_au
 import { Route as AuthenticatedPainelInteligenciaRouteImport } from './routes/_authenticated/painel.inteligencia'
 import { Route as AuthenticatedPainelKdsRouteImport } from './routes/_authenticated/painel.kds'
 import { Route as AuthenticatedPainelMarketingRouteImport } from './routes/_authenticated/painel.marketing'
+import { Route as AuthenticatedPainelMetasRouteImport } from './routes/_authenticated/painel.metas'
 import { Route as AuthenticatedPainelPagamentosRouteImport } from './routes/_authenticated/painel.pagamentos'
 import { Route as AuthenticatedPainelPdvRouteImport } from './routes/_authenticated/painel.pdv'
 import { Route as AuthenticatedPainelPedidosRouteImport } from './routes/_authenticated/painel.pedidos'
@@ -410,6 +411,12 @@ const AuthenticatedPainelMarketingRoute =
     path: '/marketing',
     getParentRoute: () => AuthenticatedPainelRoute,
   } as any)
+const AuthenticatedPainelMetasRoute =
+  AuthenticatedPainelMetasRouteImport.update({
+    id: '/metas',
+    path: '/metas',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
 const AuthenticatedPainelPagamentosRoute =
   AuthenticatedPainelPagamentosRouteImport.update({
     id: '/pagamentos',
@@ -635,6 +642,7 @@ export interface FileRoutesByFullPath {
   '/painel/inteligencia': typeof AuthenticatedPainelInteligenciaRoute
   '/painel/kds': typeof AuthenticatedPainelKdsRoute
   '/painel/marketing': typeof AuthenticatedPainelMarketingRoute
+  '/painel/metas': typeof AuthenticatedPainelMetasRoute
   '/painel/pagamentos': typeof AuthenticatedPainelPagamentosRoute
   '/painel/pdv': typeof AuthenticatedPainelPdvRoute
   '/painel/pedidos': typeof AuthenticatedPainelPedidosRoute
@@ -722,6 +730,7 @@ export interface FileRoutesByTo {
   '/painel/inteligencia': typeof AuthenticatedPainelInteligenciaRoute
   '/painel/kds': typeof AuthenticatedPainelKdsRoute
   '/painel/marketing': typeof AuthenticatedPainelMarketingRoute
+  '/painel/metas': typeof AuthenticatedPainelMetasRoute
   '/painel/pagamentos': typeof AuthenticatedPainelPagamentosRoute
   '/painel/pdv': typeof AuthenticatedPainelPdvRoute
   '/painel/pedidos': typeof AuthenticatedPainelPedidosRoute
@@ -812,6 +821,7 @@ export interface FileRoutesById {
   '/_authenticated/painel/inteligencia': typeof AuthenticatedPainelInteligenciaRoute
   '/_authenticated/painel/kds': typeof AuthenticatedPainelKdsRoute
   '/_authenticated/painel/marketing': typeof AuthenticatedPainelMarketingRoute
+  '/_authenticated/painel/metas': typeof AuthenticatedPainelMetasRoute
   '/_authenticated/painel/pagamentos': typeof AuthenticatedPainelPagamentosRoute
   '/_authenticated/painel/pdv': typeof AuthenticatedPainelPdvRoute
   '/_authenticated/painel/pedidos': typeof AuthenticatedPainelPedidosRoute
@@ -902,6 +912,7 @@ export interface FileRouteTypes {
     | '/painel/inteligencia'
     | '/painel/kds'
     | '/painel/marketing'
+    | '/painel/metas'
     | '/painel/pagamentos'
     | '/painel/pdv'
     | '/painel/pedidos'
@@ -989,6 +1000,7 @@ export interface FileRouteTypes {
     | '/painel/inteligencia'
     | '/painel/kds'
     | '/painel/marketing'
+    | '/painel/metas'
     | '/painel/pagamentos'
     | '/painel/pdv'
     | '/painel/pedidos'
@@ -1078,6 +1090,7 @@ export interface FileRouteTypes {
     | '/_authenticated/painel/inteligencia'
     | '/_authenticated/painel/kds'
     | '/_authenticated/painel/marketing'
+    | '/_authenticated/painel/metas'
     | '/_authenticated/painel/pagamentos'
     | '/_authenticated/painel/pdv'
     | '/_authenticated/painel/pedidos'
@@ -1564,6 +1577,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPainelMarketingRouteImport
       parentRoute: typeof AuthenticatedPainelRoute
     }
+    '/_authenticated/painel/metas': {
+      id: '/_authenticated/painel/metas'
+      path: '/metas'
+      fullPath: '/painel/metas'
+      preLoaderRoute: typeof AuthenticatedPainelMetasRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
     '/_authenticated/painel/pagamentos': {
       id: '/_authenticated/painel/pagamentos'
       path: '/pagamentos'
@@ -1791,6 +1811,7 @@ interface AuthenticatedPainelRouteChildren {
   AuthenticatedPainelInteligenciaRoute: typeof AuthenticatedPainelInteligenciaRoute
   AuthenticatedPainelKdsRoute: typeof AuthenticatedPainelKdsRoute
   AuthenticatedPainelMarketingRoute: typeof AuthenticatedPainelMarketingRoute
+  AuthenticatedPainelMetasRoute: typeof AuthenticatedPainelMetasRoute
   AuthenticatedPainelPagamentosRoute: typeof AuthenticatedPainelPagamentosRoute
   AuthenticatedPainelPdvRoute: typeof AuthenticatedPainelPdvRoute
   AuthenticatedPainelPedidosRoute: typeof AuthenticatedPainelPedidosRoute
@@ -1826,6 +1847,7 @@ const AuthenticatedPainelRouteChildren: AuthenticatedPainelRouteChildren = {
   AuthenticatedPainelInteligenciaRoute: AuthenticatedPainelInteligenciaRoute,
   AuthenticatedPainelKdsRoute: AuthenticatedPainelKdsRoute,
   AuthenticatedPainelMarketingRoute: AuthenticatedPainelMarketingRoute,
+  AuthenticatedPainelMetasRoute: AuthenticatedPainelMetasRoute,
   AuthenticatedPainelPagamentosRoute: AuthenticatedPainelPagamentosRoute,
   AuthenticatedPainelPdvRoute: AuthenticatedPainelPdvRoute,
   AuthenticatedPainelPedidosRoute: AuthenticatedPainelPedidosRoute,
