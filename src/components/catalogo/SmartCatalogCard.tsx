@@ -1,26 +1,16 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { SmartSortSettings } from "@/components/catalogo/SmartSortSettings";
+import { SmartUpsellSettings } from "@/components/catalogo/SmartUpsellSettings";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import {
   AUTOSORT_SCOPES,
-  AUTOSORT_WINDOWS,
   catalogIntelligenceKey,
-  type AutosortScope,
   type CatalogIntelligenceOverview,
 } from "@/lib/catalogo-inteligente";
 import {
@@ -33,7 +23,10 @@ export interface SmartCatalogCardProps {
   overview: CatalogIntelligenceOverview;
 }
 
-/** Configuração das sugestões automáticas e da ordem da vitrine. */
+/**
+ * Escolha do lojista: usar ou não o catálogo inteligente e, quando usa,
+ * decidir entre sugestões de "leve também", vitrine pelos mais vendidos ou as duas.
+ */
 export function SmartCatalogCard({ storeId, overview }: SmartCatalogCardProps) {
   const queryClient = useQueryClient();
   const saveFn = useServerFn(saveCatalogIntelligence);
@@ -47,6 +40,10 @@ export function SmartCatalogCard({ storeId, overview }: SmartCatalogCardProps) {
     autosortWindowDays: overview.settings.autosortWindowDays,
     autosortScope: overview.settings.autosortScope,
   });
+  // Ligado enquanto qualquer uma das duas partes estiver em uso.
+  const [master, setMaster] = useState(
+    overview.settings.upsellAiEnabled || overview.settings.autosortEnabled,
+  );
 
   function refresh() {
     void queryClient.invalidateQueries({ queryKey: catalogIntelligenceKey(storeId) });
@@ -55,7 +52,16 @@ export function SmartCatalogCard({ storeId, overview }: SmartCatalogCardProps) {
   }
 
   const save = useMutation({
-    mutationFn: () => saveFn({ data: { storeId, ...form } }),
+    mutationFn: () =>
+      saveFn({
+        data: {
+          storeId,
+          ...form,
+          // Desligar o interruptor geral desliga as duas partes de uma vez.
+          upsellAiEnabled: master && form.upsellAiEnabled,
+          autosortEnabled: master && form.autosortEnabled,
+        },
+      }),
     onSuccess: () => {
       toast.success("Preferências salvas.");
       refresh();
@@ -73,135 +79,106 @@ export function SmartCatalogCard({ storeId, overview }: SmartCatalogCardProps) {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  function toggleMaster(checked: boolean) {
+    setMaster(checked);
+    // Ao ligar pela primeira vez, deixamos as sugestões como escolha inicial.
+    if (checked && !form.upsellAiEnabled && !form.autosortEnabled) {
+      setForm((state) => ({ ...state, upsellAiEnabled: true }));
+    }
+  }
+
+  const scopeHint = AUTOSORT_SCOPES.find((scope) => scope.value === form.autosortScope)?.hint;
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Sugestões de "leve também"</CardTitle>
+        <CardTitle className="text-base">Catálogo inteligente</CardTitle>
         <CardDescription>
-          A inteligência artificial olha o seu catálogo e monta combinações que aparecem na sacola do
-          cliente. Você pode remover qualquer combinação depois, no próprio item.
+          Use se quiser: você decide entre sugerir itens que combinam, deixar os mais vendidos no topo
+          da vitrine, ou as duas coisas juntas.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="flex items-center justify-between gap-4 rounded-xl border border-border/70 p-3">
           <div>
-            <p className="text-sm font-medium">Mostrar sugestões na sacola</p>
+            <p className="text-sm font-medium">Usar o catálogo inteligente</p>
             <p className="text-sm text-muted-foreground">
-              {overview.productsWithSuggestions} de {overview.productCount} itens já têm combinação.
+              Desligado, sua loja continua exatamente como você organizou na mão.
             </p>
           </div>
           <Switch
-            checked={form.upsellAiEnabled}
-            onCheckedChange={(checked) => setForm((state) => ({ ...state, upsellAiEnabled: checked }))}
-            aria-label="Mostrar sugestões na sacola"
+            checked={master}
+            onCheckedChange={toggleMaster}
+            aria-label="Usar o catálogo inteligente"
           />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="upsell-max">Máximo de sugestões por item</Label>
-            <Select
-              value={String(form.upsellMax)}
-              onValueChange={(value) => setForm((state) => ({ ...state, upsellMax: Number(value) }))}
-            >
-              <SelectTrigger id="upsell-max">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {[1, 2, 3, 4, 5, 6, 8].map((value) => (
-                  <SelectItem key={value} value={String(value)}>
-                    {value} {value === 1 ? "sugestão" : "sugestões"}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        {master ? (
+          <div className="space-y-5">
+            <div className="flex items-center justify-between gap-4 rounded-xl border border-border/70 p-3">
+              <div>
+                <p className="text-sm font-medium">Sugerir itens que combinam</p>
+                <p className="text-sm text-muted-foreground">
+                  {overview.productsWithSuggestions} de {overview.productCount} itens já têm combinação.
+                </p>
+              </div>
+              <Switch
+                checked={form.upsellAiEnabled}
+                onCheckedChange={(checked) =>
+                  setForm((state) => ({ ...state, upsellAiEnabled: checked }))
+                }
+                aria-label="Sugerir itens que combinam"
+              />
+            </div>
+
+            {form.upsellAiEnabled ? (
+              <SmartUpsellSettings
+                upsellMax={form.upsellMax}
+                aiNotes={form.aiNotes}
+                aiAvailable={overview.aiAvailable}
+                generating={generate.isPending}
+                onChangeMax={(value) => setForm((state) => ({ ...state, upsellMax: value }))}
+                onChangeNotes={(value) => setForm((state) => ({ ...state, aiNotes: value }))}
+                onGenerate={() => generate.mutate()}
+              />
+            ) : null}
+
+            <div className="flex items-center justify-between gap-4 rounded-xl border border-border/70 p-3">
+              <div>
+                <p className="text-sm font-medium">Deixar os mais vendidos no topo</p>
+                <p className="text-sm text-muted-foreground">{scopeHint}</p>
+              </div>
+              <Switch
+                checked={form.autosortEnabled}
+                onCheckedChange={(checked) =>
+                  setForm((state) => ({ ...state, autosortEnabled: checked }))
+                }
+                aria-label="Deixar os mais vendidos no topo"
+              />
+            </div>
+
+            {form.autosortEnabled ? (
+              <SmartSortSettings
+                autosortWindowDays={form.autosortWindowDays}
+                autosortScope={form.autosortScope}
+                onChangeWindow={(value) =>
+                  setForm((state) => ({ ...state, autosortWindowDays: value }))
+                }
+                onChangeScope={(value) => setForm((state) => ({ ...state, autosortScope: value }))}
+              />
+            ) : null}
+
+            {!form.upsellAiEnabled && !form.autosortEnabled ? (
+              <p className="text-sm text-muted-foreground">
+                Escolha ao menos uma das duas opções acima para o catálogo inteligente fazer efeito.
+              </p>
+            ) : null}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="autosort-window">Período de vendas analisado</Label>
-            <Select
-              value={String(form.autosortWindowDays)}
-              onValueChange={(value) =>
-                setForm((state) => ({ ...state, autosortWindowDays: Number(value) }))
-              }
-            >
-              <SelectTrigger id="autosort-window">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {AUTOSORT_WINDOWS.map((option) => (
-                  <SelectItem key={option.value} value={String(option.value)}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="ai-notes">Dicas para a inteligência artificial (opcional)</Label>
-          <Textarea
-            id="ai-notes"
-            value={form.aiNotes}
-            maxLength={600}
-            placeholder="Ex.: sempre sugerir bebida com prato principal e sobremesa no fim."
-            onChange={(event) => setForm((state) => ({ ...state, aiNotes: event.target.value }))}
-          />
-        </div>
-
-        <div className="flex items-center justify-between gap-4 rounded-xl border border-border/70 p-3">
-          <div>
-            <p className="text-sm font-medium">Reorganizar a vitrine pelos mais vendidos</p>
-            <p className="text-sm text-muted-foreground">
-              {AUTOSORT_SCOPES.find((scope) => scope.value === form.autosortScope)?.hint}
-            </p>
-          </div>
-          <Switch
-            checked={form.autosortEnabled}
-            onCheckedChange={(checked) => setForm((state) => ({ ...state, autosortEnabled: checked }))}
-            aria-label="Reorganizar a vitrine pelos mais vendidos"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="autosort-scope">Onde reorganizar</Label>
-          <Select
-            value={form.autosortScope}
-            onValueChange={(value) =>
-              setForm((state) => ({ ...state, autosortScope: value as AutosortScope }))
-            }
-          >
-            <SelectTrigger id="autosort-scope">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {AUTOSORT_SCOPES.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={() => save.mutate()} disabled={save.isPending}>
-            {save.isPending ? "Salvando..." : "Salvar preferências"}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => generate.mutate()}
-            disabled={generate.isPending || !overview.aiAvailable}
-          >
-            <Sparkles className="mr-2 size-4" aria-hidden="true" />
-            {generate.isPending ? "Montando combinações..." : "Gerar combinações com IA"}
-          </Button>
-        </div>
-        {!overview.aiAvailable ? (
-          <p className="text-sm text-destructive">
-            A inteligência artificial ainda não está configurada nesta conta.
-          </p>
         ) : null}
+
+        <Button onClick={() => save.mutate()} disabled={save.isPending}>
+          {save.isPending ? "Salvando..." : "Salvar preferências"}
+        </Button>
       </CardContent>
     </Card>
   );
