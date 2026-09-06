@@ -88,6 +88,7 @@ import { Route as ApiPublicCrmAutomacoesRouteImport } from './routes/api/public/
 import { Route as ApiPublicEncomendasLembretesRouteImport } from './routes/api/public/encomendas/lembretes'
 import { Route as ApiPublicEvolutionInstanceKeyRouteImport } from './routes/api/public/evolution/$instanceKey'
 import { Route as ApiPublicIntegracoesRetentativasRouteImport } from './routes/api/public/integracoes/retentativas'
+import { Route as ApiPublicMetasResumoRouteImport } from './routes/api/public/metas/resumo'
 import { Route as ApiPublicNotificacoesPushRouteImport } from './routes/api/public/notificacoes/push'
 import { Route as ApiPublicPagamentosProviderRouteImport } from './routes/api/public/pagamentos/$provider'
 import { Route as ApiPublicV1SplatRouteImport } from './routes/api/public/v1/$'
@@ -532,6 +533,11 @@ const ApiPublicIntegracoesRetentativasRoute =
     path: '/api/public/integracoes/retentativas',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicMetasResumoRoute = ApiPublicMetasResumoRouteImport.update({
+  id: '/api/public/metas/resumo',
+  path: '/api/public/metas/resumo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicNotificacoesPushRoute =
   ApiPublicNotificacoesPushRouteImport.update({
     id: '/api/public/notificacoes/push',
@@ -651,6 +657,7 @@ export interface FileRoutesByFullPath {
   '/api/public/encomendas/lembretes': typeof ApiPublicEncomendasLembretesRoute
   '/api/public/evolution/$instanceKey': typeof ApiPublicEvolutionInstanceKeyRoute
   '/api/public/integracoes/retentativas': typeof ApiPublicIntegracoesRetentativasRoute
+  '/api/public/metas/resumo': typeof ApiPublicMetasResumoRoute
   '/api/public/notificacoes/push': typeof ApiPublicNotificacoesPushRoute
   '/api/public/pagamentos/$provider': typeof ApiPublicPagamentosProviderRoute
   '/api/public/v1/$': typeof ApiPublicV1SplatRoute
@@ -737,6 +744,7 @@ export interface FileRoutesByTo {
   '/api/public/encomendas/lembretes': typeof ApiPublicEncomendasLembretesRoute
   '/api/public/evolution/$instanceKey': typeof ApiPublicEvolutionInstanceKeyRoute
   '/api/public/integracoes/retentativas': typeof ApiPublicIntegracoesRetentativasRoute
+  '/api/public/metas/resumo': typeof ApiPublicMetasResumoRoute
   '/api/public/notificacoes/push': typeof ApiPublicNotificacoesPushRoute
   '/api/public/pagamentos/$provider': typeof ApiPublicPagamentosProviderRoute
   '/api/public/v1/$': typeof ApiPublicV1SplatRoute
@@ -826,6 +834,7 @@ export interface FileRoutesById {
   '/api/public/encomendas/lembretes': typeof ApiPublicEncomendasLembretesRoute
   '/api/public/evolution/$instanceKey': typeof ApiPublicEvolutionInstanceKeyRoute
   '/api/public/integracoes/retentativas': typeof ApiPublicIntegracoesRetentativasRoute
+  '/api/public/metas/resumo': typeof ApiPublicMetasResumoRoute
   '/api/public/notificacoes/push': typeof ApiPublicNotificacoesPushRoute
   '/api/public/pagamentos/$provider': typeof ApiPublicPagamentosProviderRoute
   '/api/public/v1/$': typeof ApiPublicV1SplatRoute
@@ -915,6 +924,7 @@ export interface FileRouteTypes {
     | '/api/public/encomendas/lembretes'
     | '/api/public/evolution/$instanceKey'
     | '/api/public/integracoes/retentativas'
+    | '/api/public/metas/resumo'
     | '/api/public/notificacoes/push'
     | '/api/public/pagamentos/$provider'
     | '/api/public/v1/$'
@@ -1001,6 +1011,7 @@ export interface FileRouteTypes {
     | '/api/public/encomendas/lembretes'
     | '/api/public/evolution/$instanceKey'
     | '/api/public/integracoes/retentativas'
+    | '/api/public/metas/resumo'
     | '/api/public/notificacoes/push'
     | '/api/public/pagamentos/$provider'
     | '/api/public/v1/$'
@@ -1089,6 +1100,7 @@ export interface FileRouteTypes {
     | '/api/public/encomendas/lembretes'
     | '/api/public/evolution/$instanceKey'
     | '/api/public/integracoes/retentativas'
+    | '/api/public/metas/resumo'
     | '/api/public/notificacoes/push'
     | '/api/public/pagamentos/$provider'
     | '/api/public/v1/$'
@@ -1134,6 +1146,7 @@ export interface RootRouteChildren {
   ApiPublicEncomendasLembretesRoute: typeof ApiPublicEncomendasLembretesRoute
   ApiPublicEvolutionInstanceKeyRoute: typeof ApiPublicEvolutionInstanceKeyRoute
   ApiPublicIntegracoesRetentativasRoute: typeof ApiPublicIntegracoesRetentativasRoute
+  ApiPublicMetasResumoRoute: typeof ApiPublicMetasResumoRoute
   ApiPublicNotificacoesPushRoute: typeof ApiPublicNotificacoesPushRoute
   ApiPublicPagamentosProviderRoute: typeof ApiPublicPagamentosProviderRoute
   ApiPublicV1SplatRoute: typeof ApiPublicV1SplatRoute
@@ -1698,6 +1711,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIntegracoesRetentativasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/metas/resumo': {
+      id: '/api/public/metas/resumo'
+      path: '/api/public/metas/resumo'
+      fullPath: '/api/public/metas/resumo'
+      preLoaderRoute: typeof ApiPublicMetasResumoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/notificacoes/push': {
       id: '/api/public/notificacoes/push'
       path: '/api/public/notificacoes/push'
@@ -1892,6 +1912,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicEncomendasLembretesRoute: ApiPublicEncomendasLembretesRoute,
   ApiPublicEvolutionInstanceKeyRoute: ApiPublicEvolutionInstanceKeyRoute,
   ApiPublicIntegracoesRetentativasRoute: ApiPublicIntegracoesRetentativasRoute,
+  ApiPublicMetasResumoRoute: ApiPublicMetasResumoRoute,
   ApiPublicNotificacoesPushRoute: ApiPublicNotificacoesPushRoute,
   ApiPublicPagamentosProviderRoute: ApiPublicPagamentosProviderRoute,
   ApiPublicV1SplatRoute: ApiPublicV1SplatRoute,

@@ -52,7 +52,7 @@ export const Route = createFileRoute("/api/public/metas/resumo")({
 
         await supabaseAdmin
           .from("cron_tokens")
-          .update({ last_result: result as unknown as Record<string, unknown> })
+          .update({ last_result: { ...result } })
           .eq("name", CRON_NAME);
 
         return new Response(JSON.stringify(result), {
