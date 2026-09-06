@@ -64,8 +64,10 @@ import { Route as AuthenticatedPainelFiscalRouteImport } from './routes/_authent
 import { Route as AuthenticatedPainelFreteRouteImport } from './routes/_authenticated/painel.frete'
 import { Route as AuthenticatedPainelImpressaoRouteImport } from './routes/_authenticated/painel.impressao'
 import { Route as AuthenticatedPainelIntegracoesRouteImport } from './routes/_authenticated/painel.integracoes'
+import { Route as AuthenticatedPainelInteligenciaRouteImport } from './routes/_authenticated/painel.inteligencia'
 import { Route as AuthenticatedPainelKdsRouteImport } from './routes/_authenticated/painel.kds'
 import { Route as AuthenticatedPainelMarketingRouteImport } from './routes/_authenticated/painel.marketing'
+import { Route as AuthenticatedPainelMetasRouteImport } from './routes/_authenticated/painel.metas'
 import { Route as AuthenticatedPainelPagamentosRouteImport } from './routes/_authenticated/painel.pagamentos'
 import { Route as AuthenticatedPainelPdvRouteImport } from './routes/_authenticated/painel.pdv'
 import { Route as AuthenticatedPainelPedidosRouteImport } from './routes/_authenticated/painel.pedidos'
@@ -87,6 +89,7 @@ import { Route as ApiPublicCrmAutomacoesRouteImport } from './routes/api/public/
 import { Route as ApiPublicEncomendasLembretesRouteImport } from './routes/api/public/encomendas/lembretes'
 import { Route as ApiPublicEvolutionInstanceKeyRouteImport } from './routes/api/public/evolution/$instanceKey'
 import { Route as ApiPublicIntegracoesRetentativasRouteImport } from './routes/api/public/integracoes/retentativas'
+import { Route as ApiPublicMetasResumoRouteImport } from './routes/api/public/metas/resumo'
 import { Route as ApiPublicNotificacoesPushRouteImport } from './routes/api/public/notificacoes/push'
 import { Route as ApiPublicPagamentosProviderRouteImport } from './routes/api/public/pagamentos/$provider'
 import { Route as ApiPublicV1SplatRouteImport } from './routes/api/public/v1/$'
@@ -391,6 +394,12 @@ const AuthenticatedPainelIntegracoesRoute =
     path: '/integracoes',
     getParentRoute: () => AuthenticatedPainelRoute,
   } as any)
+const AuthenticatedPainelInteligenciaRoute =
+  AuthenticatedPainelInteligenciaRouteImport.update({
+    id: '/inteligencia',
+    path: '/inteligencia',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
 const AuthenticatedPainelKdsRoute = AuthenticatedPainelKdsRouteImport.update({
   id: '/kds',
   path: '/kds',
@@ -400,6 +409,12 @@ const AuthenticatedPainelMarketingRoute =
   AuthenticatedPainelMarketingRouteImport.update({
     id: '/marketing',
     path: '/marketing',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
+const AuthenticatedPainelMetasRoute =
+  AuthenticatedPainelMetasRouteImport.update({
+    id: '/metas',
+    path: '/metas',
     getParentRoute: () => AuthenticatedPainelRoute,
   } as any)
 const AuthenticatedPainelPagamentosRoute =
@@ -525,6 +540,11 @@ const ApiPublicIntegracoesRetentativasRoute =
     path: '/api/public/integracoes/retentativas',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicMetasResumoRoute = ApiPublicMetasResumoRouteImport.update({
+  id: '/api/public/metas/resumo',
+  path: '/api/public/metas/resumo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicNotificacoesPushRoute =
   ApiPublicNotificacoesPushRouteImport.update({
     id: '/api/public/notificacoes/push',
@@ -619,8 +639,10 @@ export interface FileRoutesByFullPath {
   '/painel/frete': typeof AuthenticatedPainelFreteRoute
   '/painel/impressao': typeof AuthenticatedPainelImpressaoRoute
   '/painel/integracoes': typeof AuthenticatedPainelIntegracoesRoute
+  '/painel/inteligencia': typeof AuthenticatedPainelInteligenciaRoute
   '/painel/kds': typeof AuthenticatedPainelKdsRoute
   '/painel/marketing': typeof AuthenticatedPainelMarketingRoute
+  '/painel/metas': typeof AuthenticatedPainelMetasRoute
   '/painel/pagamentos': typeof AuthenticatedPainelPagamentosRoute
   '/painel/pdv': typeof AuthenticatedPainelPdvRoute
   '/painel/pedidos': typeof AuthenticatedPainelPedidosRoute
@@ -643,6 +665,7 @@ export interface FileRoutesByFullPath {
   '/api/public/encomendas/lembretes': typeof ApiPublicEncomendasLembretesRoute
   '/api/public/evolution/$instanceKey': typeof ApiPublicEvolutionInstanceKeyRoute
   '/api/public/integracoes/retentativas': typeof ApiPublicIntegracoesRetentativasRoute
+  '/api/public/metas/resumo': typeof ApiPublicMetasResumoRoute
   '/api/public/notificacoes/push': typeof ApiPublicNotificacoesPushRoute
   '/api/public/pagamentos/$provider': typeof ApiPublicPagamentosProviderRoute
   '/api/public/v1/$': typeof ApiPublicV1SplatRoute
@@ -704,8 +727,10 @@ export interface FileRoutesByTo {
   '/painel/frete': typeof AuthenticatedPainelFreteRoute
   '/painel/impressao': typeof AuthenticatedPainelImpressaoRoute
   '/painel/integracoes': typeof AuthenticatedPainelIntegracoesRoute
+  '/painel/inteligencia': typeof AuthenticatedPainelInteligenciaRoute
   '/painel/kds': typeof AuthenticatedPainelKdsRoute
   '/painel/marketing': typeof AuthenticatedPainelMarketingRoute
+  '/painel/metas': typeof AuthenticatedPainelMetasRoute
   '/painel/pagamentos': typeof AuthenticatedPainelPagamentosRoute
   '/painel/pdv': typeof AuthenticatedPainelPdvRoute
   '/painel/pedidos': typeof AuthenticatedPainelPedidosRoute
@@ -728,6 +753,7 @@ export interface FileRoutesByTo {
   '/api/public/encomendas/lembretes': typeof ApiPublicEncomendasLembretesRoute
   '/api/public/evolution/$instanceKey': typeof ApiPublicEvolutionInstanceKeyRoute
   '/api/public/integracoes/retentativas': typeof ApiPublicIntegracoesRetentativasRoute
+  '/api/public/metas/resumo': typeof ApiPublicMetasResumoRoute
   '/api/public/notificacoes/push': typeof ApiPublicNotificacoesPushRoute
   '/api/public/pagamentos/$provider': typeof ApiPublicPagamentosProviderRoute
   '/api/public/v1/$': typeof ApiPublicV1SplatRoute
@@ -792,8 +818,10 @@ export interface FileRoutesById {
   '/_authenticated/painel/frete': typeof AuthenticatedPainelFreteRoute
   '/_authenticated/painel/impressao': typeof AuthenticatedPainelImpressaoRoute
   '/_authenticated/painel/integracoes': typeof AuthenticatedPainelIntegracoesRoute
+  '/_authenticated/painel/inteligencia': typeof AuthenticatedPainelInteligenciaRoute
   '/_authenticated/painel/kds': typeof AuthenticatedPainelKdsRoute
   '/_authenticated/painel/marketing': typeof AuthenticatedPainelMarketingRoute
+  '/_authenticated/painel/metas': typeof AuthenticatedPainelMetasRoute
   '/_authenticated/painel/pagamentos': typeof AuthenticatedPainelPagamentosRoute
   '/_authenticated/painel/pdv': typeof AuthenticatedPainelPdvRoute
   '/_authenticated/painel/pedidos': typeof AuthenticatedPainelPedidosRoute
@@ -816,6 +844,7 @@ export interface FileRoutesById {
   '/api/public/encomendas/lembretes': typeof ApiPublicEncomendasLembretesRoute
   '/api/public/evolution/$instanceKey': typeof ApiPublicEvolutionInstanceKeyRoute
   '/api/public/integracoes/retentativas': typeof ApiPublicIntegracoesRetentativasRoute
+  '/api/public/metas/resumo': typeof ApiPublicMetasResumoRoute
   '/api/public/notificacoes/push': typeof ApiPublicNotificacoesPushRoute
   '/api/public/pagamentos/$provider': typeof ApiPublicPagamentosProviderRoute
   '/api/public/v1/$': typeof ApiPublicV1SplatRoute
@@ -880,8 +909,10 @@ export interface FileRouteTypes {
     | '/painel/frete'
     | '/painel/impressao'
     | '/painel/integracoes'
+    | '/painel/inteligencia'
     | '/painel/kds'
     | '/painel/marketing'
+    | '/painel/metas'
     | '/painel/pagamentos'
     | '/painel/pdv'
     | '/painel/pedidos'
@@ -904,6 +935,7 @@ export interface FileRouteTypes {
     | '/api/public/encomendas/lembretes'
     | '/api/public/evolution/$instanceKey'
     | '/api/public/integracoes/retentativas'
+    | '/api/public/metas/resumo'
     | '/api/public/notificacoes/push'
     | '/api/public/pagamentos/$provider'
     | '/api/public/v1/$'
@@ -965,8 +997,10 @@ export interface FileRouteTypes {
     | '/painel/frete'
     | '/painel/impressao'
     | '/painel/integracoes'
+    | '/painel/inteligencia'
     | '/painel/kds'
     | '/painel/marketing'
+    | '/painel/metas'
     | '/painel/pagamentos'
     | '/painel/pdv'
     | '/painel/pedidos'
@@ -989,6 +1023,7 @@ export interface FileRouteTypes {
     | '/api/public/encomendas/lembretes'
     | '/api/public/evolution/$instanceKey'
     | '/api/public/integracoes/retentativas'
+    | '/api/public/metas/resumo'
     | '/api/public/notificacoes/push'
     | '/api/public/pagamentos/$provider'
     | '/api/public/v1/$'
@@ -1052,8 +1087,10 @@ export interface FileRouteTypes {
     | '/_authenticated/painel/frete'
     | '/_authenticated/painel/impressao'
     | '/_authenticated/painel/integracoes'
+    | '/_authenticated/painel/inteligencia'
     | '/_authenticated/painel/kds'
     | '/_authenticated/painel/marketing'
+    | '/_authenticated/painel/metas'
     | '/_authenticated/painel/pagamentos'
     | '/_authenticated/painel/pdv'
     | '/_authenticated/painel/pedidos'
@@ -1076,6 +1113,7 @@ export interface FileRouteTypes {
     | '/api/public/encomendas/lembretes'
     | '/api/public/evolution/$instanceKey'
     | '/api/public/integracoes/retentativas'
+    | '/api/public/metas/resumo'
     | '/api/public/notificacoes/push'
     | '/api/public/pagamentos/$provider'
     | '/api/public/v1/$'
@@ -1121,6 +1159,7 @@ export interface RootRouteChildren {
   ApiPublicEncomendasLembretesRoute: typeof ApiPublicEncomendasLembretesRoute
   ApiPublicEvolutionInstanceKeyRoute: typeof ApiPublicEvolutionInstanceKeyRoute
   ApiPublicIntegracoesRetentativasRoute: typeof ApiPublicIntegracoesRetentativasRoute
+  ApiPublicMetasResumoRoute: typeof ApiPublicMetasResumoRoute
   ApiPublicNotificacoesPushRoute: typeof ApiPublicNotificacoesPushRoute
   ApiPublicPagamentosProviderRoute: typeof ApiPublicPagamentosProviderRoute
   ApiPublicV1SplatRoute: typeof ApiPublicV1SplatRoute
@@ -1517,6 +1556,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPainelIntegracoesRouteImport
       parentRoute: typeof AuthenticatedPainelRoute
     }
+    '/_authenticated/painel/inteligencia': {
+      id: '/_authenticated/painel/inteligencia'
+      path: '/inteligencia'
+      fullPath: '/painel/inteligencia'
+      preLoaderRoute: typeof AuthenticatedPainelInteligenciaRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
     '/_authenticated/painel/kds': {
       id: '/_authenticated/painel/kds'
       path: '/kds'
@@ -1529,6 +1575,13 @@ declare module '@tanstack/react-router' {
       path: '/marketing'
       fullPath: '/painel/marketing'
       preLoaderRoute: typeof AuthenticatedPainelMarketingRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
+    '/_authenticated/painel/metas': {
+      id: '/_authenticated/painel/metas'
+      path: '/metas'
+      fullPath: '/painel/metas'
+      preLoaderRoute: typeof AuthenticatedPainelMetasRouteImport
       parentRoute: typeof AuthenticatedPainelRoute
     }
     '/_authenticated/painel/pagamentos': {
@@ -1678,6 +1731,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIntegracoesRetentativasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/metas/resumo': {
+      id: '/api/public/metas/resumo'
+      path: '/api/public/metas/resumo'
+      fullPath: '/api/public/metas/resumo'
+      preLoaderRoute: typeof ApiPublicMetasResumoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/notificacoes/push': {
       id: '/api/public/notificacoes/push'
       path: '/api/public/notificacoes/push'
@@ -1748,8 +1808,10 @@ interface AuthenticatedPainelRouteChildren {
   AuthenticatedPainelFreteRoute: typeof AuthenticatedPainelFreteRoute
   AuthenticatedPainelImpressaoRoute: typeof AuthenticatedPainelImpressaoRoute
   AuthenticatedPainelIntegracoesRoute: typeof AuthenticatedPainelIntegracoesRoute
+  AuthenticatedPainelInteligenciaRoute: typeof AuthenticatedPainelInteligenciaRoute
   AuthenticatedPainelKdsRoute: typeof AuthenticatedPainelKdsRoute
   AuthenticatedPainelMarketingRoute: typeof AuthenticatedPainelMarketingRoute
+  AuthenticatedPainelMetasRoute: typeof AuthenticatedPainelMetasRoute
   AuthenticatedPainelPagamentosRoute: typeof AuthenticatedPainelPagamentosRoute
   AuthenticatedPainelPdvRoute: typeof AuthenticatedPainelPdvRoute
   AuthenticatedPainelPedidosRoute: typeof AuthenticatedPainelPedidosRoute
@@ -1782,8 +1844,10 @@ const AuthenticatedPainelRouteChildren: AuthenticatedPainelRouteChildren = {
   AuthenticatedPainelFreteRoute: AuthenticatedPainelFreteRoute,
   AuthenticatedPainelImpressaoRoute: AuthenticatedPainelImpressaoRoute,
   AuthenticatedPainelIntegracoesRoute: AuthenticatedPainelIntegracoesRoute,
+  AuthenticatedPainelInteligenciaRoute: AuthenticatedPainelInteligenciaRoute,
   AuthenticatedPainelKdsRoute: AuthenticatedPainelKdsRoute,
   AuthenticatedPainelMarketingRoute: AuthenticatedPainelMarketingRoute,
+  AuthenticatedPainelMetasRoute: AuthenticatedPainelMetasRoute,
   AuthenticatedPainelPagamentosRoute: AuthenticatedPainelPagamentosRoute,
   AuthenticatedPainelPdvRoute: AuthenticatedPainelPdvRoute,
   AuthenticatedPainelPedidosRoute: AuthenticatedPainelPedidosRoute,
@@ -1870,6 +1934,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicEncomendasLembretesRoute: ApiPublicEncomendasLembretesRoute,
   ApiPublicEvolutionInstanceKeyRoute: ApiPublicEvolutionInstanceKeyRoute,
   ApiPublicIntegracoesRetentativasRoute: ApiPublicIntegracoesRetentativasRoute,
+  ApiPublicMetasResumoRoute: ApiPublicMetasResumoRoute,
   ApiPublicNotificacoesPushRoute: ApiPublicNotificacoesPushRoute,
   ApiPublicPagamentosProviderRoute: ApiPublicPagamentosProviderRoute,
   ApiPublicV1SplatRoute: ApiPublicV1SplatRoute,

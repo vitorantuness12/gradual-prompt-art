@@ -702,6 +702,59 @@ export type Database = {
           },
         ]
       }
+      catalog_ai_settings: {
+        Row: {
+          ai_notes: string | null
+          autosort_enabled: boolean
+          autosort_scope: string
+          autosort_window_days: number
+          created_at: string
+          id: string
+          last_ai_run_at: string | null
+          last_sort_run_at: string | null
+          store_id: string
+          updated_at: string
+          upsell_ai_enabled: boolean
+          upsell_max: number
+        }
+        Insert: {
+          ai_notes?: string | null
+          autosort_enabled?: boolean
+          autosort_scope?: string
+          autosort_window_days?: number
+          created_at?: string
+          id?: string
+          last_ai_run_at?: string | null
+          last_sort_run_at?: string | null
+          store_id: string
+          updated_at?: string
+          upsell_ai_enabled?: boolean
+          upsell_max?: number
+        }
+        Update: {
+          ai_notes?: string | null
+          autosort_enabled?: boolean
+          autosort_scope?: string
+          autosort_window_days?: number
+          created_at?: string
+          id?: string
+          last_ai_run_at?: string | null
+          last_sort_run_at?: string | null
+          store_id?: string
+          updated_at?: string
+          upsell_ai_enabled?: boolean
+          upsell_max?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_ai_settings_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: true
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           archived_at: string | null
@@ -7747,6 +7800,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "store_features_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: true
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_goals: {
+        Row: {
+          created_at: string
+          daily_revenue_goal: number
+          daily_summary_enabled: boolean
+          id: string
+          last_summary_at: string | null
+          monthly_orders_goal: number
+          monthly_revenue_goal: number
+          store_id: string
+          summary_hour: number
+          summary_whatsapp: string | null
+          ticket_goal: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_revenue_goal?: number
+          daily_summary_enabled?: boolean
+          id?: string
+          last_summary_at?: string | null
+          monthly_orders_goal?: number
+          monthly_revenue_goal?: number
+          store_id: string
+          summary_hour?: number
+          summary_whatsapp?: string | null
+          ticket_goal?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_revenue_goal?: number
+          daily_summary_enabled?: boolean
+          id?: string
+          last_summary_at?: string | null
+          monthly_orders_goal?: number
+          monthly_revenue_goal?: number
+          store_id?: string
+          summary_hour?: number
+          summary_whatsapp?: string | null
+          ticket_goal?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_goals_store_id_fkey"
             columns: ["store_id"]
             isOneToOne: true
             referencedRelation: "stores"
