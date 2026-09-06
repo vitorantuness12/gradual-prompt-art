@@ -173,3 +173,149 @@ export const applyBestSellerOrder = createServerFn({ method: "POST" })
   });
 
 export { catalogIntelligenceKey };
+
+interface AiPair {
+  base: string;
+  suggested: string[];
+}
+
+/** Lê a resposta da IA com tolerância a formatos diferentes. */
+function parsePairs(raw: string): AiPair[] {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    const list = Array.isArray(parsed)
+      ? parsed
+      : ((parsed as { pares?: unknown[]; pairs?: unknown[] }).pares ??
+        (parsed as { pairs?: unknown[] }).pairs ??
+        []);
+    if (!Array.isArray(list)) return [];
+    return list
+      .map((item) => {
+        const row = item as { base?: unknown; sugestoes?: unknown; suggested?: unknown };
+        const suggested = Array.isArray(row.sugestoes)
+          ? row.sugestoes
+          : Array.isArray(row.suggested)
+            ? row.suggested
+            : [];
+        return {
+          base: String(row.base ?? "").trim(),
+          suggested: suggested.map((value) => String(value).trim()).filter(Boolean),
+        };
+      })
+      .filter((pair) => pair.base && pair.suggested.length > 0);
+  } catch {
+    return [];
+  }
+}
+
+function normalizeName(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+/**
+ * Pede à IA combinações de itens ("leve também") e grava em product_related.
+ * As sugestões continuam sob controle do lojista: são gravadas como
+ * relacionamentos normais, que ele pode remover no item.
+ */
+export const generateUpsellSuggestions = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => storeInput.parse(data))
+  .handler(async ({ data, context }): Promise<{ ok: boolean; created: number; message: string }> => {
+    const { supabase, userId } = context;
+    await assertStaff(supabase, data.storeId, userId);
+
+    const apiKey = process.env["OPENAI_API_KEY"];
+    if (!apiKey) return { ok: false, created: 0, message: "Chave da IA não configurada." };
+
+    const { data: settingsRow } = await supabase
+      .from("catalog_ai_settings")
+      .select("*")
+      .eq("store_id", data.storeId)
+      .maybeSingle();
+    const settings = readIntelligenceSettings(settingsRow);
+
+    const [{ data: products }, { data: categories }] = await Promise.all([
+      supabase
+        .from("products")
+        .select("id, name, price, kind, category_id, is_available")
+        .eq("store_id", data.storeId)
+        .limit(300),
+      supabase.from("categories").select("id, name").eq("store_id", data.storeId),
+    ]);
+
+    const usable = (products ?? []).filter(
+      (product) => product.is_available !== false && (!product.kind || product.kind === "product" || product.kind === "combo"),
+    );
+    if (usable.length < 2) return { ok: false, created: 0, message: "Cadastre pelo menos dois itens disponíveis." };
+
+    const categoryName = new Map((categories ?? []).map((category) => [category.id, category.name]));
+    const catalogText = usable
+      .map(
+        (product) =>
+          `- ${product.name} | R$ ${Number(product.price ?? 0).toFixed(2)} | ${
+            product.category_id ? (categoryName.get(product.category_id) ?? "sem categoria") : "sem categoria"
+          }`,
+      )
+      .join("\n");
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        temperature: 0.3,
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content:
+              "Você monta combinações de venda para um catálogo brasileiro. Responda somente JSON no formato " +
+              '{"pares":[{"base":"nome exato do item","sugestoes":["nome exato","nome exato"]}]}. ' +
+              "Use apenas nomes que existem na lista recebida, nunca repita o próprio item como sugestão e " +
+              `no máximo ${settings.upsellMax} sugestões por item. Combine itens que fazem sentido juntos (bebida com prato, acompanhamento, sobremesa, acessório).`,
+          },
+          {
+            role: "user",
+            content: `Catálogo:\n${catalogText}\n\nObservações do lojista: ${settings.aiNotes || "nenhuma"}`,
+          },
+        ],
+      }),
+    });
+
+    if (response.status === 429) return { ok: false, created: 0, message: "Muitas chamadas à IA. Tente em instantes." };
+    if (!response.ok) return { ok: false, created: 0, message: "A IA não respondeu agora. Tente novamente." };
+
+    const payload = (await response.json()) as { choices?: { message?: { content?: string } }[] };
+    const pairs = parsePairs(payload.choices?.[0]?.message?.content ?? "");
+    if (pairs.length === 0) return { ok: false, created: 0, message: "A IA não retornou combinações válidas." };
+
+    const byName = new Map(usable.map((product) => [normalizeName(product.name), product.id]));
+    const rows: { store_id: string; product_id: string; related_product_id: string; sort_order: number }[] = [];
+
+    for (const pair of pairs) {
+      const baseId = byName.get(normalizeName(pair.base));
+      if (!baseId) continue;
+      pair.suggested.slice(0, settings.upsellMax).forEach((name, index) => {
+        const targetId = byName.get(normalizeName(name));
+        if (!targetId || targetId === baseId) return;
+        rows.push({ store_id: data.storeId, product_id: baseId, related_product_id: targetId, sort_order: index + 1 });
+      });
+    }
+
+    if (rows.length === 0) return { ok: false, created: 0, message: "Nenhuma combinação pôde ser aplicada." };
+
+    const { error } = await supabase
+      .from("product_related")
+      .upsert(rows, { onConflict: "product_id,related_product_id", ignoreDuplicates: true });
+    if (error) throw new Error(error.message);
+
+    await supabase
+      .from("catalog_ai_settings")
+      .upsert({ store_id: data.storeId, last_ai_run_at: new Date().toISOString() }, { onConflict: "store_id" });
+
+    return { ok: true, created: rows.length, message: `${rows.length} combinações sugeridas pela IA.` };
+  });
