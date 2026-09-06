@@ -65,6 +65,7 @@ import { Route as AuthenticatedPainelFreteRouteImport } from './routes/_authenti
 import { Route as AuthenticatedPainelImpressaoRouteImport } from './routes/_authenticated/painel.impressao'
 import { Route as AuthenticatedPainelIntegracoesRouteImport } from './routes/_authenticated/painel.integracoes'
 import { Route as AuthenticatedPainelKdsRouteImport } from './routes/_authenticated/painel.kds'
+import { Route as AuthenticatedPainelMarketingRouteImport } from './routes/_authenticated/painel.marketing'
 import { Route as AuthenticatedPainelPagamentosRouteImport } from './routes/_authenticated/painel.pagamentos'
 import { Route as AuthenticatedPainelPdvRouteImport } from './routes/_authenticated/painel.pdv'
 import { Route as AuthenticatedPainelPedidosRouteImport } from './routes/_authenticated/painel.pedidos'
@@ -395,6 +396,12 @@ const AuthenticatedPainelKdsRoute = AuthenticatedPainelKdsRouteImport.update({
   path: '/kds',
   getParentRoute: () => AuthenticatedPainelRoute,
 } as any)
+const AuthenticatedPainelMarketingRoute =
+  AuthenticatedPainelMarketingRouteImport.update({
+    id: '/marketing',
+    path: '/marketing',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
 const AuthenticatedPainelPagamentosRoute =
   AuthenticatedPainelPagamentosRouteImport.update({
     id: '/pagamentos',
@@ -613,6 +620,7 @@ export interface FileRoutesByFullPath {
   '/painel/impressao': typeof AuthenticatedPainelImpressaoRoute
   '/painel/integracoes': typeof AuthenticatedPainelIntegracoesRoute
   '/painel/kds': typeof AuthenticatedPainelKdsRoute
+  '/painel/marketing': typeof AuthenticatedPainelMarketingRoute
   '/painel/pagamentos': typeof AuthenticatedPainelPagamentosRoute
   '/painel/pdv': typeof AuthenticatedPainelPdvRoute
   '/painel/pedidos': typeof AuthenticatedPainelPedidosRoute
@@ -697,6 +705,7 @@ export interface FileRoutesByTo {
   '/painel/impressao': typeof AuthenticatedPainelImpressaoRoute
   '/painel/integracoes': typeof AuthenticatedPainelIntegracoesRoute
   '/painel/kds': typeof AuthenticatedPainelKdsRoute
+  '/painel/marketing': typeof AuthenticatedPainelMarketingRoute
   '/painel/pagamentos': typeof AuthenticatedPainelPagamentosRoute
   '/painel/pdv': typeof AuthenticatedPainelPdvRoute
   '/painel/pedidos': typeof AuthenticatedPainelPedidosRoute
@@ -784,6 +793,7 @@ export interface FileRoutesById {
   '/_authenticated/painel/impressao': typeof AuthenticatedPainelImpressaoRoute
   '/_authenticated/painel/integracoes': typeof AuthenticatedPainelIntegracoesRoute
   '/_authenticated/painel/kds': typeof AuthenticatedPainelKdsRoute
+  '/_authenticated/painel/marketing': typeof AuthenticatedPainelMarketingRoute
   '/_authenticated/painel/pagamentos': typeof AuthenticatedPainelPagamentosRoute
   '/_authenticated/painel/pdv': typeof AuthenticatedPainelPdvRoute
   '/_authenticated/painel/pedidos': typeof AuthenticatedPainelPedidosRoute
@@ -871,6 +881,7 @@ export interface FileRouteTypes {
     | '/painel/impressao'
     | '/painel/integracoes'
     | '/painel/kds'
+    | '/painel/marketing'
     | '/painel/pagamentos'
     | '/painel/pdv'
     | '/painel/pedidos'
@@ -955,6 +966,7 @@ export interface FileRouteTypes {
     | '/painel/impressao'
     | '/painel/integracoes'
     | '/painel/kds'
+    | '/painel/marketing'
     | '/painel/pagamentos'
     | '/painel/pdv'
     | '/painel/pedidos'
@@ -1041,6 +1053,7 @@ export interface FileRouteTypes {
     | '/_authenticated/painel/impressao'
     | '/_authenticated/painel/integracoes'
     | '/_authenticated/painel/kds'
+    | '/_authenticated/painel/marketing'
     | '/_authenticated/painel/pagamentos'
     | '/_authenticated/painel/pdv'
     | '/_authenticated/painel/pedidos'
@@ -1511,6 +1524,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPainelKdsRouteImport
       parentRoute: typeof AuthenticatedPainelRoute
     }
+    '/_authenticated/painel/marketing': {
+      id: '/_authenticated/painel/marketing'
+      path: '/marketing'
+      fullPath: '/painel/marketing'
+      preLoaderRoute: typeof AuthenticatedPainelMarketingRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
     '/_authenticated/painel/pagamentos': {
       id: '/_authenticated/painel/pagamentos'
       path: '/pagamentos'
@@ -1729,6 +1749,7 @@ interface AuthenticatedPainelRouteChildren {
   AuthenticatedPainelImpressaoRoute: typeof AuthenticatedPainelImpressaoRoute
   AuthenticatedPainelIntegracoesRoute: typeof AuthenticatedPainelIntegracoesRoute
   AuthenticatedPainelKdsRoute: typeof AuthenticatedPainelKdsRoute
+  AuthenticatedPainelMarketingRoute: typeof AuthenticatedPainelMarketingRoute
   AuthenticatedPainelPagamentosRoute: typeof AuthenticatedPainelPagamentosRoute
   AuthenticatedPainelPdvRoute: typeof AuthenticatedPainelPdvRoute
   AuthenticatedPainelPedidosRoute: typeof AuthenticatedPainelPedidosRoute
@@ -1762,6 +1783,7 @@ const AuthenticatedPainelRouteChildren: AuthenticatedPainelRouteChildren = {
   AuthenticatedPainelImpressaoRoute: AuthenticatedPainelImpressaoRoute,
   AuthenticatedPainelIntegracoesRoute: AuthenticatedPainelIntegracoesRoute,
   AuthenticatedPainelKdsRoute: AuthenticatedPainelKdsRoute,
+  AuthenticatedPainelMarketingRoute: AuthenticatedPainelMarketingRoute,
   AuthenticatedPainelPagamentosRoute: AuthenticatedPainelPagamentosRoute,
   AuthenticatedPainelPdvRoute: AuthenticatedPainelPdvRoute,
   AuthenticatedPainelPedidosRoute: AuthenticatedPainelPedidosRoute,
