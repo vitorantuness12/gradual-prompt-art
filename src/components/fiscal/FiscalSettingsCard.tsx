@@ -38,6 +38,10 @@ interface FormState {
   defaultDescription: string;
   apiKey: string;
   companyId: string;
+  legalName: string;
+  tradeName: string;
+  invoiceSeries: string;
+  nextInvoiceNumber: string;
 }
 
 function initialForm(config: FiscalConfig): FormState {
@@ -55,6 +59,10 @@ function initialForm(config: FiscalConfig): FormState {
     defaultDescription: settings?.default_description ?? "",
     apiKey: "",
     companyId: config.connection.companyId ?? "",
+    legalName: settings?.legal_name ?? "",
+    tradeName: settings?.trade_name ?? "",
+    invoiceSeries: settings?.invoice_series ?? "1",
+    nextInvoiceNumber: String(settings?.next_invoice_number ?? 1),
   };
 }
 
@@ -88,6 +96,10 @@ export function FiscalSettingsCard({ storeId, config }: FiscalSettingsCardProps)
           defaultDescription: form.defaultDescription,
           apiKey: form.apiKey,
           companyId: form.companyId,
+          legalName: form.legalName,
+          tradeName: form.tradeName,
+          invoiceSeries: form.invoiceSeries,
+          nextInvoiceNumber: Number(form.nextInvoiceNumber) || 1,
         },
       });
       if (!result.ok) throw new Error(result.message);
@@ -171,6 +183,22 @@ export function FiscalSettingsCard({ storeId, config }: FiscalSettingsCardProps)
         )}
 
         <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-2">
+            <Label>Razão social</Label>
+            <Input value={form.legalName} onChange={(event) => update("legalName", event.target.value)} placeholder="Nome da empresa no CNPJ" />
+          </div>
+          <div className="grid gap-2">
+            <Label>Nome fantasia</Label>
+            <Input value={form.tradeName} onChange={(event) => update("tradeName", event.target.value)} placeholder="Como a loja é conhecida" />
+          </div>
+          <div className="grid gap-2">
+            <Label>Série da nota</Label>
+            <Input value={form.invoiceSeries} onChange={(event) => update("invoiceSeries", event.target.value)} />
+          </div>
+          <div className="grid gap-2">
+            <Label>Próximo número</Label>
+            <Input value={form.nextInvoiceNumber} onChange={(event) => update("nextInvoiceNumber", event.target.value)} inputMode="numeric" />
+          </div>
           <div className="grid gap-2">
             <Label>CNPJ</Label>
             <Input value={form.cnpj} onChange={(event) => update("cnpj", event.target.value)} placeholder="00.000.000/0000-00" />

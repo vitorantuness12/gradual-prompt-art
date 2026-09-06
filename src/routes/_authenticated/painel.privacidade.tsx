@@ -6,12 +6,14 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/painel/PageHeader";
+import { PrivacyRequestsCard } from "@/components/painel/PrivacyRequestsCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteMyAccount, exportMyData } from "@/lib/privacidade.functions";
+import { useActiveStore } from "@/hooks/useMyStores";
 
 export const Route = createFileRoute("/_authenticated/painel/privacidade")({
   component: PrivacyPage,
@@ -25,6 +27,7 @@ export const Route = createFileRoute("/_authenticated/painel/privacidade")({
 
 function PrivacyPage() {
   const navigate = useNavigate();
+  const { active } = useActiveStore();
   const exportFn = useServerFn(exportMyData);
   const deleteFn = useServerFn(deleteMyAccount);
   const [confirmation, setConfirmation] = useState("");
@@ -123,6 +126,12 @@ function PrivacyPage() {
           </CardContent>
         </Card>
       </div>
+
+      {active?.storeId ? (
+        <div className="mt-6">
+          <PrivacyRequestsCard storeId={active.storeId} />
+        </div>
+      ) : null}
 
       <Card className="mt-6 border-border/70 shadow-sm">
         <CardHeader>

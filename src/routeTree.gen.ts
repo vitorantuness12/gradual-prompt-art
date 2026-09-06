@@ -82,6 +82,7 @@ import { Route as ApiPublicAssinaturasCobrancasRouteImport } from './routes/api/
 import { Route as ApiPublicAssinaturasPedidosRouteImport } from './routes/api/public/assinaturas/pedidos'
 import { Route as ApiPublicCarrinhoLembretesRouteImport } from './routes/api/public/carrinho/lembretes'
 import { Route as ApiPublicCashbackExpiracaoRouteImport } from './routes/api/public/cashback/expiracao'
+import { Route as ApiPublicCrmAutomacoesRouteImport } from './routes/api/public/crm/automacoes'
 import { Route as ApiPublicEncomendasLembretesRouteImport } from './routes/api/public/encomendas/lembretes'
 import { Route as ApiPublicEvolutionInstanceKeyRouteImport } from './routes/api/public/evolution/$instanceKey'
 import { Route as ApiPublicIntegracoesRetentativasRouteImport } from './routes/api/public/integracoes/retentativas'
@@ -494,6 +495,11 @@ const ApiPublicCashbackExpiracaoRoute =
     path: '/api/public/cashback/expiracao',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCrmAutomacoesRoute = ApiPublicCrmAutomacoesRouteImport.update({
+  id: '/api/public/crm/automacoes',
+  path: '/api/public/crm/automacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicEncomendasLembretesRoute =
   ApiPublicEncomendasLembretesRouteImport.update({
     id: '/api/public/encomendas/lembretes',
@@ -625,6 +631,7 @@ export interface FileRoutesByFullPath {
   '/api/public/assinaturas/pedidos': typeof ApiPublicAssinaturasPedidosRoute
   '/api/public/carrinho/lembretes': typeof ApiPublicCarrinhoLembretesRoute
   '/api/public/cashback/expiracao': typeof ApiPublicCashbackExpiracaoRoute
+  '/api/public/crm/automacoes': typeof ApiPublicCrmAutomacoesRoute
   '/api/public/encomendas/lembretes': typeof ApiPublicEncomendasLembretesRoute
   '/api/public/evolution/$instanceKey': typeof ApiPublicEvolutionInstanceKeyRoute
   '/api/public/integracoes/retentativas': typeof ApiPublicIntegracoesRetentativasRoute
@@ -708,6 +715,7 @@ export interface FileRoutesByTo {
   '/api/public/assinaturas/pedidos': typeof ApiPublicAssinaturasPedidosRoute
   '/api/public/carrinho/lembretes': typeof ApiPublicCarrinhoLembretesRoute
   '/api/public/cashback/expiracao': typeof ApiPublicCashbackExpiracaoRoute
+  '/api/public/crm/automacoes': typeof ApiPublicCrmAutomacoesRoute
   '/api/public/encomendas/lembretes': typeof ApiPublicEncomendasLembretesRoute
   '/api/public/evolution/$instanceKey': typeof ApiPublicEvolutionInstanceKeyRoute
   '/api/public/integracoes/retentativas': typeof ApiPublicIntegracoesRetentativasRoute
@@ -794,6 +802,7 @@ export interface FileRoutesById {
   '/api/public/assinaturas/pedidos': typeof ApiPublicAssinaturasPedidosRoute
   '/api/public/carrinho/lembretes': typeof ApiPublicCarrinhoLembretesRoute
   '/api/public/cashback/expiracao': typeof ApiPublicCashbackExpiracaoRoute
+  '/api/public/crm/automacoes': typeof ApiPublicCrmAutomacoesRoute
   '/api/public/encomendas/lembretes': typeof ApiPublicEncomendasLembretesRoute
   '/api/public/evolution/$instanceKey': typeof ApiPublicEvolutionInstanceKeyRoute
   '/api/public/integracoes/retentativas': typeof ApiPublicIntegracoesRetentativasRoute
@@ -880,6 +889,7 @@ export interface FileRouteTypes {
     | '/api/public/assinaturas/pedidos'
     | '/api/public/carrinho/lembretes'
     | '/api/public/cashback/expiracao'
+    | '/api/public/crm/automacoes'
     | '/api/public/encomendas/lembretes'
     | '/api/public/evolution/$instanceKey'
     | '/api/public/integracoes/retentativas'
@@ -963,6 +973,7 @@ export interface FileRouteTypes {
     | '/api/public/assinaturas/pedidos'
     | '/api/public/carrinho/lembretes'
     | '/api/public/cashback/expiracao'
+    | '/api/public/crm/automacoes'
     | '/api/public/encomendas/lembretes'
     | '/api/public/evolution/$instanceKey'
     | '/api/public/integracoes/retentativas'
@@ -1048,6 +1059,7 @@ export interface FileRouteTypes {
     | '/api/public/assinaturas/pedidos'
     | '/api/public/carrinho/lembretes'
     | '/api/public/cashback/expiracao'
+    | '/api/public/crm/automacoes'
     | '/api/public/encomendas/lembretes'
     | '/api/public/evolution/$instanceKey'
     | '/api/public/integracoes/retentativas'
@@ -1092,6 +1104,7 @@ export interface RootRouteChildren {
   ApiPublicAssinaturasPedidosRoute: typeof ApiPublicAssinaturasPedidosRoute
   ApiPublicCarrinhoLembretesRoute: typeof ApiPublicCarrinhoLembretesRoute
   ApiPublicCashbackExpiracaoRoute: typeof ApiPublicCashbackExpiracaoRoute
+  ApiPublicCrmAutomacoesRoute: typeof ApiPublicCrmAutomacoesRoute
   ApiPublicEncomendasLembretesRoute: typeof ApiPublicEncomendasLembretesRoute
   ApiPublicEvolutionInstanceKeyRoute: typeof ApiPublicEvolutionInstanceKeyRoute
   ApiPublicIntegracoesRetentativasRoute: typeof ApiPublicIntegracoesRetentativasRoute
@@ -1617,6 +1630,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCashbackExpiracaoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/crm/automacoes': {
+      id: '/api/public/crm/automacoes'
+      path: '/api/public/crm/automacoes'
+      fullPath: '/api/public/crm/automacoes'
+      preLoaderRoute: typeof ApiPublicCrmAutomacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/encomendas/lembretes': {
       id: '/api/public/encomendas/lembretes'
       path: '/api/public/encomendas/lembretes'
@@ -1824,6 +1844,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAssinaturasPedidosRoute: ApiPublicAssinaturasPedidosRoute,
   ApiPublicCarrinhoLembretesRoute: ApiPublicCarrinhoLembretesRoute,
   ApiPublicCashbackExpiracaoRoute: ApiPublicCashbackExpiracaoRoute,
+  ApiPublicCrmAutomacoesRoute: ApiPublicCrmAutomacoesRoute,
   ApiPublicEncomendasLembretesRoute: ApiPublicEncomendasLembretesRoute,
   ApiPublicEvolutionInstanceKeyRoute: ApiPublicEvolutionInstanceKeyRoute,
   ApiPublicIntegracoesRetentativasRoute: ApiPublicIntegracoesRetentativasRoute,

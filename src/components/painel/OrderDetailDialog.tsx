@@ -78,6 +78,7 @@ function addressText(address: unknown): string | null {
 }
 
 import { OrderTimeline } from "@/components/painel/OrderTimeline";
+import { RefundSection } from "@/components/painel/RefundSection";
 
 export function OrderDetailDialog({ order, storeId, couriers, onOpenChange }: Props) {
   const queryClient = useQueryClient();
@@ -426,6 +427,8 @@ export function OrderDetailDialog({ order, storeId, couriers, onOpenChange }: Pr
                 ))}
               </div>
             </div>
+
+            {storeId ? <RefundSection storeId={storeId} orderId={order.id} /> : null}
 
             <div className="flex flex-wrap gap-2">
               <Button
