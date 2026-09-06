@@ -279,7 +279,7 @@ export const runMarketingNow = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { runMarketingAutomations } = await import("@/lib/automacoes.server");
 
-    const result = await runMarketingAutomations(supabaseAdmin);
+    const result = await runMarketingAutomations(supabaseAdmin, data.storeId);
     return {
       ok: true,
       message: `Envio concluído: ${result.sent} mensagem(ns) enviada(s), ${result.skipped} pulada(s).`,
