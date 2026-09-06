@@ -4,6 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
+import { AffiliatesTab } from "@/components/fidelidade/AffiliatesTab";
+import { AutomationRulesTab } from "@/components/fidelidade/AutomationRulesTab";
 import { EmptyState, PageHeader } from "@/components/painel/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -129,7 +131,7 @@ function LoyaltyPage() {
             <AutomationRulesTab storeId={storeId} />
           </TabsContent>
           <TabsContent value="indicacoes">
-            <AffiliatesTab storeId={storeId} storeSlug={active?.slug} />
+            <AffiliatesTab storeId={storeId} storeSlug={active?.store.slug} />
           </TabsContent>
           <TabsContent value="carteiras">
             <WalletsTab storeId={storeId} />
