@@ -1,6 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect } from "react";
-import { toast } from "sonner";
+import { useCallback } from "react";
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 
 import {
@@ -13,7 +12,6 @@ import {
   ClipboardList,
   CreditCard,
   FileText,
-  Download,
   Gift,
   LayoutDashboard,
   LifeBuoy,
@@ -53,11 +51,10 @@ import {
 } from "@/components/ui/select";
 import { useActiveStore } from "@/hooks/useMyStores";
 import { useNewOrderAlert } from "@/hooks/useNewOrderAlert";
-import { useStoreFeatures } from "@/hooks/useStoreFeatures";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { ROLE_LABEL } from "@/lib/format";
-import { FEATURE_GROUPS, FEATURE_LABEL, isFeatureEnabled, type FeatureKey } from "@/lib/painel-segmentos";
+import { FEATURE_GROUPS, type FeatureKey } from "@/lib/painel-segmentos";
 import { planAllowsModule } from "@/lib/plans";
 
 export const Route = createFileRoute("/_authenticated/painel")({
@@ -80,7 +77,6 @@ const NAV: Record<FeatureKey, { to: string; label: string; icon: typeof LayoutDa
   produtos: { to: "/painel/produtos", label: "Catálogo", icon: Package },
   estoque: { to: "/painel/estoque", label: "Estoque", icon: Boxes },
   inteligencia: { to: "/painel/inteligencia", label: "Catálogo inteligente", icon: Wand2 },
-  digitais: { to: "/painel/digitais", label: "Produtos digitais", icon: Download },
   personalizar: { to: "/painel/personalizar", label: "Personalizar loja", icon: Paintbrush },
   entregas: { to: "/painel/entregas", label: "Entregas", icon: Bike },
   entregadores: { to: "/painel/entregadores", label: "Entregadores", icon: Bike },
@@ -108,7 +104,6 @@ function PainelLayout() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { memberships, active, selectStore, isLoading } = useActiveStore();
-  const { data: config } = useStoreFeatures(active?.storeId, active?.store.segment);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   // Aviso sonoro + notificação quando um pedido novo entra.
@@ -121,15 +116,13 @@ function PainelLayout() {
   const plan = subscriptionQuery.data?.plan ?? null;
   const planLoaded = !subscriptionQuery.isLoading;
 
-  const enabled = config?.features ?? [];
-  /** Um módulo aparece no menu quando o ramo o ativa E o plano o libera. */
+  /** Um módulo aparece no menu quando o plano contratado o libera. */
   const allowsModule = useCallback(
     (key: FeatureKey) => {
-      if (config && !isFeatureEnabled(enabled, key)) return false;
       if (!planLoaded || !plan) return true;
       return planAllowsModule(plan, key);
     },
-    [config, enabled, plan, planLoaded],
+    [plan, planLoaded],
   );
 
   const groups = FEATURE_GROUPS.map((group) => ({
@@ -138,21 +131,14 @@ function PainelLayout() {
   })).filter((group) => group.items.length > 0);
 
   useEffect(() => {
-    if (!config) return;
     const entry = (Object.entries(NAV) as [FeatureKey, { to: string }][]).find(
       ([, item]) => item.to !== "/painel" && pathname.startsWith(item.to),
     );
     if (!entry) return;
     const key = entry[0];
     if (allowsModule(key)) return;
-    const blockedByPlan = planLoaded && plan !== null && !planAllowsModule(plan, key);
-    toast.info(
-      blockedByPlan
-        ? `${FEATURE_LABEL[key]} não está incluído no plano ${plan?.name ?? "atual"}.`
-        : `${FEATURE_LABEL[key]} está desativado para o seu ramo de atividade.`,
-    );
-    void navigate({ to: blockedByPlan ? "/painel/assinatura" : "/painel", replace: true });
-  }, [config, allowsModule, plan, planLoaded, pathname, navigate]);
+    void navigate({ to: "/painel/assinatura", replace: true });
+  }, [allowsModule, pathname, navigate]);
 
   async function handleSignOut() {
     await queryClient.cancelQueries();

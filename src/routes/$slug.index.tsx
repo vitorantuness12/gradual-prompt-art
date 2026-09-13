@@ -208,8 +208,7 @@ function PublicStorePage() {
     : null;
   const layout = layoutForStore(store.segment, products);
   /** Delivery, restaurantes, saúde e conveniência conferem a sacola sem sair do catálogo. */
-  const digitalCheckout = checkoutPathFor(slug, store).endsWith("/checkout/digital");
-  const quickCart = !digitalCheckout && quickCartEnabled(store.segment);
+  const quickCart = quickCartEnabled(store.segment);
   const promos = products.filter((product) => hasPromo(product)).slice(0, 6);
   const recommended = products.filter((product) => product.is_featured && !hasPromo(product)).slice(0, 6);
   const contactNumber = (store.whatsapp || store.phone || "").replace(/\D/g, "");
@@ -723,9 +722,7 @@ function PublicStorePage() {
               <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
                 <Link to={checkoutPathFor(slug, store)}>
                   <ShoppingBag className="mr-2 size-4" aria-hidden="true" />
-                  {store.segment && /curso|mentor|e-?book|software|digital|assinatura|infoprodut/i.test(store.segment)
-                    ? "Finalizar compra"
-                    : "Ver carrinho"}
+                  Ver carrinho
                 </Link>
               </Button>
             )}

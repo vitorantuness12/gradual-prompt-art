@@ -1,19 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { SlidersHorizontal } from "lucide-react";
-import { useState } from "react";
 
 import { DemoBadge } from "@/components/brand/DemoBadge";
-import { BusinessSetupDialog } from "@/components/painel/BusinessSetupDialog";
 import { EmptyState, PageHeader, StatCard } from "@/components/painel/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveStore } from "@/hooks/useMyStores";
-import { useStoreFeatures } from "@/hooks/useStoreFeatures";
 import { supabase } from "@/integrations/supabase/client";
 import { ORDER_STATUS_LABEL, formatCurrency, formatDateTime } from "@/lib/format";
-import { FEATURE_LABEL, isFeatureEnabled, segmentGroupById, type FeatureKey } from "@/lib/painel-segmentos";
+import { FEATURE_LABEL, suggestSegmentGroup, type FeatureKey } from "@/lib/painel-segmentos";
 
 export const Route = createFileRoute("/_authenticated/painel/")({
   component: OverviewPage,
@@ -29,7 +25,6 @@ const SHORTCUT_PATH: Record<FeatureKey, string> = {
   agendamentos: "/painel/agendamentos",
   produtos: "/painel/produtos",
   estoque: "/painel/estoque",
-  digitais: "/painel/digitais",
   personalizar: "/painel/personalizar",
   entregas: "/painel/entregas",
   entregadores: "/painel/entregadores",
@@ -57,9 +52,7 @@ const SHORTCUT_PATH: Record<FeatureKey, string> = {
 function OverviewPage() {
   const { active } = useActiveStore();
   const storeId = active?.storeId;
-  const [setupOpen, setSetupOpen] = useState(false);
-  const { data: config } = useStoreFeatures(storeId, active?.store.segment);
-  const group = segmentGroupById(config?.segment);
+  const segment = suggestSegmentGroup(active?.store.segment);
 
   const { data, isLoading } = useQuery({
     queryKey: ["overview", storeId],
@@ -76,7 +69,7 @@ function OverviewPage() {
     },
   });
 
-  const showAgenda = Boolean(config && isFeatureEnabled(config.features, "agendamentos"));
+  const showAgenda = Boolean(active?.store.accepts_scheduling);
 
   const { data: appointments } = useQuery({
     queryKey: ["overview-agenda", storeId],
@@ -108,7 +101,7 @@ function OverviewPage() {
   const inKitchen = orders.filter((order) => order.status === "preparing").length;
   const onRoute = orders.filter((order) => order.status === "out_for_delivery").length;
   const newCustomers = new Set(todayOrders.map((order) => order.customer_name)).size;
-  const kind = group?.dashboard ?? "alimentacao";
+  const kind = segment === "alimentacao" ? "alimentacao" : "varejo";
 
   const cards: { label: string; value: string }[] = [
     { label: "Pedidos hoje", value: String(todayOrders.length) },
@@ -118,16 +111,13 @@ function OverviewPage() {
     cards.push({ label: "Em preparo", value: String(inKitchen) }, { label: "Saiu para entrega", value: String(onRoute) });
   } else if (kind === "varejo") {
     cards.push({ label: "Ticket médio", value: formatCurrency(average) }, { label: "Aguardando confirmação", value: String(pending) });
-  } else if (kind === "servicos") {
-    cards.push(
-      { label: "Agendamentos hoje", value: String(appointments?.length ?? 0) },
-      { label: "Clientes atendidos hoje", value: String(newCustomers) },
-    );
   } else {
     cards.push({ label: "Ticket médio", value: formatCurrency(average) }, { label: "Vendas concluídas", value: String(valid.length) });
   }
 
-  const shortcuts = (group?.highlights ?? []).filter((key) => !config || isFeatureEnabled(config.features, key)).slice(0, 4);
+  const shortcuts: FeatureKey[] = segment === "alimentacao"
+    ? ["pedidos", "pdv", "kds", "agendamentos"]
+    : ["produtos", "estoque", "pedidos", "agendamentos"];
 
   return (
     <div>
@@ -144,23 +134,6 @@ function OverviewPage() {
           ) : null
         }
       />
-
-      <Card className="mb-6 border-primary/30 bg-primary/5">
-        <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-foreground">Adaptar painel ao meu ramo</p>
-            <p className="text-sm text-muted-foreground">
-              {group
-                ? `Ramo atual: ${group.label}${config?.configured ? "" : " (sugestão automática)"}`
-                : "Escolha o ramo de atividade para ajustar o menu."}
-            </p>
-          </div>
-          <Button size="sm" onClick={() => setSetupOpen(true)} disabled={!storeId}>
-            <SlidersHorizontal className="mr-2 size-4" aria-hidden="true" />
-            Configurar funções do meu negócio
-          </Button>
-        </CardContent>
-      </Card>
 
       {shortcuts.length > 0 ? (
         <div className="mb-6 flex flex-wrap gap-2">
@@ -235,8 +208,6 @@ function OverviewPage() {
           )}
         </CardContent>
       </Card>
-
-      <BusinessSetupDialog open={setupOpen} onOpenChange={setSetupOpen} storeId={storeId} config={config} />
     </div>
   );
 }

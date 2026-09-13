@@ -273,11 +273,11 @@ describe("delivery permanece no fluxo original", () => {
     expect(checkoutPathFor("pizzaria", store)).toBe("/pizzaria/checkout");
   });
 
-  it("encaminha serviços e digitais para suas telas próprias", () => {
+  it("mantém agendamento explícito e desativa o checkout digital antigo", () => {
     expect(
       checkoutPathFor("barbearia", {
         segment: "barbearia",
-        checkout_type: null,
+        checkout_type: "agendamento",
         accepts_delivery: false,
         accepts_scheduling: true,
         accepts_dine_in: false,
@@ -291,6 +291,6 @@ describe("delivery permanece no fluxo original", () => {
         accepts_scheduling: false,
         accepts_dine_in: false,
       }),
-    ).toBe("/curso/checkout/digital");
+    ).toBe("/curso/checkout/loja");
   });
 });
