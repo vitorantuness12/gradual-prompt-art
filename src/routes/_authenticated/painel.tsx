@@ -107,9 +107,17 @@ function PainelLayout() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   // Aviso sonoro + notificação quando um pedido novo entra.
-  useNewOrderAlert(active?.storeId, () => {
-    void queryClient.invalidateQueries({ queryKey: ["orders"] });
-    void queryClient.invalidateQueries({ queryKey: ["painel-resumo"] });
+  useNewOrderAlert(active?.storeId, {
+    onOrder: () => {
+      void queryClient.invalidateQueries({ queryKey: ["orders"] });
+      void queryClient.invalidateQueries({ queryKey: ["encomendas-producao"] });
+      void queryClient.invalidateQueries({ queryKey: ["painel-resumo"] });
+    },
+    onAppointment: () => {
+      void queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      void queryClient.invalidateQueries({ queryKey: ["painel-resumo"] });
+    },
+    onNotification: () => void queryClient.invalidateQueries({ queryKey: ["notifications"] }),
   });
 
   const subscriptionQuery = useSubscription(active?.storeId);

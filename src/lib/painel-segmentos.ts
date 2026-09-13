@@ -52,7 +52,7 @@ export const ESSENTIAL_FEATURES: FeatureKey[] = [
 export const FEATURE_LABEL: Record<FeatureKey, string> = {
   dashboard: "Dashboard",
   pedidos: "Pedidos",
-  encomendas: "Encomendas e eventos",
+  encomendas: "Encomendas",
   pdv: "PDV / Caixa",
   salao: "Mesas",
   kds: "KDS",
@@ -115,8 +115,8 @@ export const SEGMENT_GROUPS: SegmentGroup[] = [
     label: "Alimentação e delivery rápido",
     description: "Pedidos em tempo real, cozinha e entregas.",
     examples: ["Restaurante", "Hamburgueria", "Pizzaria", "Açaí", "Pastelaria", "Marmitaria", "Doceria", "Padaria"],
-    hidden: ["encomendas"],
-    highlights: ["pedidos", "pdv", "kds", "agendamentos", "entregas"],
+    hidden: [],
+    highlights: ["pedidos", "encomendas", "pdv", "kds", "agendamentos", "entregas"],
     dashboard: "alimentacao",
   },
   {
@@ -124,8 +124,8 @@ export const SEGMENT_GROUPS: SegmentGroup[] = [
     label: "Varejo e lojas físicas/online",
     description: "Vitrine, estoque e vendas no balcão.",
     examples: ["Roupas", "Calçados", "Eletrônicos", "Utilidades", "Tabacaria", "Cosméticos", "Presentes"],
-    hidden: ["salao", "kds", "encomendas"],
-    highlights: ["produtos", "estoque", "pedidos"],
+    hidden: ["salao", "kds"],
+    highlights: ["produtos", "estoque", "pedidos", "encomendas", "agendamentos"],
     dashboard: "varejo",
   },
   {
@@ -133,8 +133,8 @@ export const SEGMENT_GROUPS: SegmentGroup[] = [
     label: "Saúde e conveniência",
     description: "Alto giro de itens com entrega rápida.",
     examples: ["Drogaria", "Farmácia", "Mercadinho", "Hortifruti", "Açougue", "Pet shop"],
-    hidden: ["salao", "kds", "encomendas"],
-    highlights: ["pdv", "estoque", "entregas"],
+    hidden: ["salao", "kds"],
+    highlights: ["pdv", "estoque", "encomendas", "agendamentos", "entregas"],
     dashboard: "varejo",
   },
 ];
