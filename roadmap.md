@@ -22,7 +22,7 @@ Ordem combinada com o usuário: um bloco por vez.
 - [x] Validar roteamento, menu público e Agenda por testes automatizados; painel autenticado depende de sessão externa
 
 ## Agendamentos e encomendas por ramo
-- [ ] Reformular Agenda para reservas, serviços pet e retirada/entrega programada
-- [ ] Reformular Encomendas para entradas pela loja e pelo painel
-- [ ] Adicionar avisos em tempo real e notificações para ambos os fluxos
+- [x] Reformular Agenda para reservas, serviços pet e retirada/entrega programada
+- [x] Reformular Encomendas para entradas pela loja e pelo painel
+- [x] Adicionar avisos em tempo real e notificações para ambos os fluxos
 - [ ] Validar as duas páginas e seus fluxos principais

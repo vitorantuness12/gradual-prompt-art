@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { PageHeader, StatCard } from "@/components/painel/PageHeader";
+import { PreorderQueueTab } from "@/components/encomendas/PreorderQueueTab";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,16 +44,16 @@ export const Route = createFileRoute("/_authenticated/painel/encomendas")({
   component: EncomendasPage,
   head: () => ({
     meta: [
-      { title: "Encomendas e eventos | O Seu Pedido" },
+      { title: "Encomendas | O Seu Pedido" },
       {
         name: "description",
         content:
-          "Orçamentos com aprovação do cliente, sinal de 50%, checklist de produção e calendário de capacidade por dia.",
+          "Gerencie pedidos antecipados, itens sob encomenda, kits e grandes pedidos.",
       },
-      { property: "og:title", content: "Encomendas e eventos | O Seu Pedido" },
+      { property: "og:title", content: "Encomendas | O Seu Pedido" },
       {
         property: "og:description",
-        content: "Proposta, aprovação, sinal e produção das suas encomendas em um só lugar.",
+        content: "Pedidos antecipados, aprovação, sinal e produção em um só lugar.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -70,20 +71,27 @@ interface QuoteItemForm {
 function EncomendasPage() {
   const { active } = useActiveStore();
   const storeId = active?.storeId;
+  const segment = (active?.store.segment ?? "").toLowerCase();
+  const examples = segment.includes("pet") || segment.includes("veter")
+    ? "Kits, rações especiais e produtos sob encomenda"
+    : segment.includes("merc") || segment.includes("farm") || segment.includes("drogar")
+      ? "Cestas, kits, compras programadas e itens sob encomenda"
+      : "Eventos, grandes pedidos, kits e itens preparados sob encomenda";
 
   if (!storeId) return <Skeleton className="h-64 rounded-2xl" />;
 
   return (
     <div>
       <PageHeader
-        title="Encomendas e eventos"
-        description="Proposta aprovada pelo cliente, sinal de 50%, ficha de produção e capacidade por dia."
+        title="Encomendas"
+        description={`${examples}. Receba pela loja online ou cadastre no painel.`}
       />
       <Tabs defaultValue="orcamentos">
         <TabsList className="mb-4 flex flex-wrap">
           <TabsTrigger value="orcamentos">Orçamentos</TabsTrigger>
           <TabsTrigger value="producao">Ficha de produção</TabsTrigger>
           <TabsTrigger value="calendario">Calendário de capacidade</TabsTrigger>
+          <TabsTrigger value="fila">Fila de espera</TabsTrigger>
           <TabsTrigger value="auditoria">Histórico</TabsTrigger>
           <TabsTrigger value="regras">Regras</TabsTrigger>
         </TabsList>
@@ -95,6 +103,9 @@ function EncomendasPage() {
         </TabsContent>
         <TabsContent value="calendario">
           <CalendarTab storeId={storeId} />
+        </TabsContent>
+        <TabsContent value="fila">
+          <PreorderQueueTab storeId={storeId} />
         </TabsContent>
         <TabsContent value="auditoria">
           <AuditTab storeId={storeId} />

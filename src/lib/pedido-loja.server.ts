@@ -114,6 +114,18 @@ export async function gravarPedidoLoja(
     }
   }
 
+  if (input.scheduledFor) {
+    await admin.from("notifications").insert({
+      store_id: store.id,
+      order_id: order.id,
+      channel: "painel",
+      event: "preorder.created",
+      title: "Nova encomenda pela loja",
+      body: `${input.customerName} · pedido ${order.code}`,
+      payload: { source: "loja_online", scheduled_for: input.scheduledFor },
+    });
+  }
+
   return {
     ok: true,
     message: "Pedido enviado.",

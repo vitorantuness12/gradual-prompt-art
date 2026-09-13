@@ -70,10 +70,11 @@ function AppointmentsPage() {
     queryKey: ["appointments", storeId],
     enabled: Boolean(storeId),
     queryFn: async () => {
+      if (!storeId) return [];
       const { data: rows, error } = await supabase
         .from("appointments")
         .select("*")
-        .eq("store_id", storeId!)
+        .eq("store_id", storeId)
         .order("starts_at", { ascending: true });
       if (error) throw new Error(error.message);
       return rows ?? [];
