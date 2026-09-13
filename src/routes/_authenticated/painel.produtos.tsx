@@ -77,7 +77,8 @@ function CatalogPage() {
   const { active } = useActiveStore();
   const storeId = active?.storeId;
   const { data, isLoading } = useCatalog(storeId);
-  const preset = catalogPreset(suggestSegmentGroup(active?.store.segment));
+  const segment = suggestSegmentGroup(active?.store.segment);
+  const preset = catalogPreset(segment);
   const refresh = useCatalogRefresh(storeId);
   const queryClient = useQueryClient();
   const { data: retail } = useQuery({
@@ -413,7 +414,7 @@ function CatalogPage() {
             {storeId ? (
               <AiCatalogTab
                 storeId={storeId}
-                segment={featuresConfig?.segment ?? "alimentacao"}
+                segment={segment}
                 categories={data.categories}
                 productCount={data.products.length}
                 onChanged={refresh}
@@ -441,7 +442,7 @@ function CatalogPage() {
           product={editing}
           kinds={preset.kinds}
           defaultKind={preset.defaultKind}
-          segment={featuresConfig?.segment ?? "alimentacao"}
+          segment={segment}
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           onChanged={refresh}

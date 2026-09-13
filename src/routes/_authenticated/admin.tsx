@@ -301,7 +301,7 @@ function StoresTab() {
   });
 
   const create = useMutation({
-    mutationFn: (input: { name: string; slug: string; segment: string; checkoutType?: "digital" | "servico" | "produto" }) =>
+    mutationFn: (input: { name: string; slug: string; segment: string; checkoutType?: "servico" | "produto" }) =>
       createFn({ data: input }),
     onSuccess: (result) => {
       if (!result.ok) {
@@ -320,7 +320,7 @@ function StoresTab() {
       name?: string;
       slug?: string;
       segment?: string;
-      checkoutType?: "digital" | "servico" | "produto";
+      checkoutType?: "servico" | "produto";
     }) => editFn({ data: input }),
     onSuccess: (result) => {
       if (!result.ok) {
@@ -1979,11 +1979,10 @@ function IntegrationConfigDialog({ kind, provider, label, current, onClose, onSa
 
 /* ------------------------- Cadastro e edição de lojas --------------------- */
 
-type CheckoutTypeValue = "digital" | "servico" | "produto";
+type CheckoutTypeValue = "servico" | "produto";
 
 const CHECKOUT_TYPE_LABEL: Record<CheckoutTypeValue, string> = {
   produto: "Produto físico",
-  digital: "Produto digital",
   servico: "Serviço / agendamento",
 };
 

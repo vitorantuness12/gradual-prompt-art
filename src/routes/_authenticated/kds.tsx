@@ -22,7 +22,6 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useFeatureGuard } from "@/hooks/useFeatureGuard";
 import { useExclusiveShell, useOnlineStatus, useTicker } from "@/hooks/useExclusiveShell";
 import { setAppTheme, useAppTheme } from "@/hooks/useAppTheme";
 import { useActiveStore } from "@/hooks/useMyStores";
@@ -75,7 +74,6 @@ export const Route = createFileRoute("/_authenticated/kds")({
 const ACTIVE_STATUSES = ["pending", "confirmed", "preparing", "ready", "out_for_delivery"] as const;
 
 function KdsScreen() {
-  useFeatureGuard("kds");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { active } = useActiveStore();

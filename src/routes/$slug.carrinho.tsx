@@ -19,6 +19,7 @@ import { useCartCoupon } from "@/hooks/useCartCoupon";
 import { useUpsellSuggestions } from "@/hooks/useUpsellSuggestions";
 import { useStoreDocumentTitle } from "@/hooks/useStoreDocumentTitle";
 import { recuperarCarrinhoAbandonado } from "@/lib/carrinho-abandonado.functions";
+import { checkoutPathFor } from "@/lib/checkout-model";
 import { formatCurrency } from "@/lib/format";
 import { publicStoreQuery } from "@/lib/store-queries";
 import { storeAvailability } from "@/lib/store-config";

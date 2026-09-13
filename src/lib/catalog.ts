@@ -15,8 +15,6 @@ export const PRODUCT_KINDS: { value: ProductKind; label: string; hint: string }[
   { value: "product", label: "Produto", hint: "Item físico com preço e estoque." },
   { value: "service", label: "Serviço", hint: "Atendimento com duração e agenda." },
   { value: "preorder", label: "Encomenda", hint: "Entrega em data futura, com sinal." },
-  { value: "subscription", label: "Assinatura", hint: "Cobrança recorrente com benefícios." },
-  { value: "digital", label: "Digital", hint: "Arquivo ou link liberado após o pagamento." },
   { value: "combo", label: "Combo / kit", hint: "Conjunto formado por outros itens." },
 ];
 

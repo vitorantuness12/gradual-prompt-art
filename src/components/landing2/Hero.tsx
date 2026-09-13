@@ -101,7 +101,7 @@ const Hero = () => {
                 transition={{ duration: 1.5, repeat: Infinity }}
               />
               <span className="text-sm text-muted-foreground">
-                Delivery • Agendamentos • Produtos digitais • Varejo
+                Delivery • Pizzarias • Mercados • Farmácias • Pet shops
               </span>
             </motion.div>
 

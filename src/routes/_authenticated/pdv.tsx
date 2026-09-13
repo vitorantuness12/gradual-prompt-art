@@ -34,7 +34,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useFeatureGuard } from "@/hooks/useFeatureGuard";
 import { useExclusiveShell, useOnlineStatus, useTicker } from "@/hooks/useExclusiveShell";
 import { setAppTheme, useAppTheme } from "@/hooks/useAppTheme";
 import { useActiveStore } from "@/hooks/useMyStores";
@@ -92,7 +91,6 @@ export const Route = createFileRoute("/_authenticated/pdv")({
 });
 
 function PosScreen() {
-  useFeatureGuard("pdv");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { active } = useActiveStore();

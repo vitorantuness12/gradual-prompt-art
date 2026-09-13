@@ -153,7 +153,7 @@ const features = [
     icon: Plug,
     title: "Integrações",
     description:
-      "Conecte pagamentos, WhatsApp, marketplaces por APIs oficiais, mapas, cobranças recorrentes, produtos digitais, analytics e sistemas externos.",
+      "Conecte pagamentos, WhatsApp, marketplaces por APIs oficiais, mapas, analytics e sistemas externos.",
   },
   {
     icon: Code,
@@ -196,18 +196,6 @@ const features = [
     title: "Lotes, validade e venda por peso",
     description:
       "Controle lotes com saída FEFO, alertas de vencimento, relatório de perdas e venda fracionada por peso com etiqueta de balança.",
-  },
-  {
-    icon: Download,
-    title: "Produtos digitais protegidos",
-    description:
-      "Entrega por link expirável com limite de downloads, área do comprador, order bump, upsell e links de afiliado com UTM.",
-  },
-  {
-    icon: Repeat,
-    title: "Assinaturas recorrentes",
-    description:
-      "Cobrança automática com retentativa, controle de inadimplência, reativação, reembolsos e avisos por e-mail e WhatsApp.",
   },
   {
     icon: Route,
