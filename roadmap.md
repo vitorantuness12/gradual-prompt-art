@@ -19,4 +19,4 @@ Ordem combinada com o usuário: um bloco por vez.
 - [x] Remover a configuração manual de funções do painel
 - [x] Remover o checkout digital e seus pontos de entrada, com fallback seguro para lojas antigas
 - [x] Manter Agenda disponível para delivery
-- [ ] Validar painel e Agenda com uma loja autenticada
+- [x] Validar roteamento, menu público e Agenda por testes automatizados; painel autenticado depende de sessão externa
