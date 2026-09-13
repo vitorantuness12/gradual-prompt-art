@@ -15,7 +15,7 @@ const extractInput = z.object({
   images: z.array(z.string().max(8_000_000)).max(4).default([]),
   text: z.string().trim().max(20_000).default(""),
   segment: z
-    .enum(["alimentacao", "varejo", "conveniencia", "servicos", "digital", "encomendas"])
+    .enum(["alimentacao", "varejo", "conveniencia"])
     .default("alimentacao"),
 });
 
@@ -23,7 +23,7 @@ export interface AiCatalogItem {
   name: string;
   description: string | null;
   categoryName: string | null;
-  kind: "product" | "service" | "preorder" | "subscription" | "digital" | "combo";
+  kind: "product" | "service" | "preorder" | "combo";
   price: number;
   promoPrice: number | null;
   unit: string;
@@ -35,7 +35,7 @@ const itemSchema = z.object({
   name: z.string().trim().min(2).max(120),
   description: z.string().trim().max(400).nullish(),
   categoryName: z.string().trim().max(80).nullish(),
-  kind: z.enum(["product", "service", "preorder", "subscription", "digital", "combo"]).default("product"),
+  kind: z.enum(["product", "service", "preorder", "combo"]).default("product"),
   price: z.coerce.number().min(0).default(0),
   promoPrice: z.coerce.number().min(0).nullish(),
   unit: z.string().trim().max(20).default("un"),
@@ -47,7 +47,7 @@ const SYSTEM_PROMPT = [
   "Você extrai catálogos de lojas brasileiras a partir de imagens ou textos.",
   "Devolva SOMENTE um JSON no formato {\"items\":[...]} sem comentários e sem markdown.",
   "Cada item: name, description, categoryName, kind, price, promoPrice, unit, durationMinutes, tags.",
-  "kind deve ser um de: product, service, preorder, subscription, digital, combo.",
+  "kind deve ser um de: product, service, preorder, combo.",
   "Preços em número decimal com ponto (54.90). Se não houver preço, use 0.",
   "promoPrice só quando houver preço promocional explícito, senão null.",
   "categoryName é a seção do cardápio/lista (ex.: Pizzas, Bebidas); null se não houver.",

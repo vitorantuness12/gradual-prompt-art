@@ -100,7 +100,6 @@ function OverviewPage() {
   const average = valid.length > 0 ? revenue / valid.length : 0;
   const inKitchen = orders.filter((order) => order.status === "preparing").length;
   const onRoute = orders.filter((order) => order.status === "out_for_delivery").length;
-  const newCustomers = new Set(todayOrders.map((order) => order.customer_name)).size;
   const kind = segment === "alimentacao" ? "alimentacao" : "varejo";
 
   const cards: { label: string; value: string }[] = [
