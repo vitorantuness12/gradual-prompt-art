@@ -316,7 +316,7 @@ export const adminCreateStore = createServerFn({ method: "POST" })
           .toLowerCase()
           .regex(/^[a-z0-9]([a-z0-9-]{1,28})[a-z0-9]$/, "Endereço inválido: use letras, números e hífen."),
         segment: z.string().trim().min(2).max(40),
-        checkoutType: z.enum(["digital", "servico", "produto"]).optional(),
+        checkoutType: z.enum(["agendamento", "loja"]).optional(),
         ownerEmail: z.string().trim().email().optional(),
       })
       .parse(data),
@@ -379,7 +379,7 @@ export const adminEditStore = createServerFn({ method: "POST" })
           .regex(/^[a-z0-9]([a-z0-9-]{1,28})[a-z0-9]$/)
           .optional(),
         segment: z.string().trim().min(2).max(40).optional(),
-        checkoutType: z.enum(["digital", "servico", "produto"]).optional(),
+        checkoutType: z.enum(["agendamento", "loja"]).optional(),
         isPublished: z.boolean().optional(),
       })
       .parse(data),

@@ -9,25 +9,23 @@
  * 1. `stores.checkout_type`, quando preenchido pelo lojista e compatível com o segmento.
  * 2. Sugestão pelo segmento da loja.
  * 3. `delivery` quando a loja tem configuração de alimentação/entrega/mesa.
- * 4. `loja` (produtos físicos) como padrão seguro.
+ * 4. `loja` (produtos físicos) como padrão seguro para configurações antigas.
  */
 
 import { suggestSegmentGroup, type SegmentGroupId } from "@/lib/painel-segmentos";
 
-export const CHECKOUT_MODELS = ["delivery", "digital", "agendamento", "loja"] as const;
+export const CHECKOUT_MODELS = ["delivery", "agendamento", "loja"] as const;
 
 export type CheckoutModel = (typeof CHECKOUT_MODELS)[number];
 
 export const CHECKOUT_MODEL_LABEL: Record<CheckoutModel, string> = {
   delivery: "Delivery e restaurantes",
-  digital: "Produtos digitais",
   agendamento: "Serviços e agendamentos",
   loja: "Loja online (produtos físicos)",
 };
 
 export const CHECKOUT_MODEL_DESCRIPTION: Record<CheckoutModel, string> = {
   delivery: "Endereço, entrega, retirada, mesa, adicionais e taxa de entrega. Modelo atual, sem alterações.",
-  digital: "Cursos, mentorias, e-books e assinaturas: acesso, oferta e liberação digital.",
   agendamento: "Serviço, profissional, data e horário com validação de disponibilidade.",
   loja: "Variações, estoque, endereço de entrega e frete para produtos físicos.",
 };
@@ -35,21 +33,15 @@ export const CHECKOUT_MODEL_DESCRIPTION: Record<CheckoutModel, string> = {
 /** Caminho público de cada modelo, relativo à loja (`/{slug}`). */
 export const CHECKOUT_MODEL_PATH: Record<CheckoutModel, string> = {
   delivery: "/checkout",
-  digital: "/checkout/digital",
   agendamento: "/checkout/agendamento",
   loja: "/checkout/loja",
 };
 
 /** Modelos que fazem sentido em cada ramo de atividade. */
 const ALLOWED_BY_SEGMENT: Record<SegmentGroupId, CheckoutModel[]> = {
-  alimentacao: ["delivery", "loja"],
+  alimentacao: ["delivery", "loja", "agendamento"],
   varejo: ["loja", "delivery"],
-  conveniencia: ["loja", "delivery"],
-  servicos: ["agendamento", "loja"],
-  // Loja digital não tem estoque físico nem endereço: existe só o checkout
-  // digital, sem escolha de modelo (a "aba" de troca some para este segmento).
-  digital: ["digital"],
-  encomendas: ["delivery", "loja", "agendamento"],
+  conveniencia: ["loja", "delivery", "agendamento"],
 };
 
 export interface CheckoutModelStore {
@@ -65,21 +57,7 @@ export interface CheckoutModelStore {
  * `suggestSegmentGroup` prioriza alimentação e, por isso, "barbearia" cai em
  * alimentação por causa do trecho "bar". Aqui a leitura precisa ser exata.
  */
-const CHECKOUT_KEYWORDS: { group: SegmentGroupId; terms: string[] }[] = [
-  {
-    group: "servicos",
-    terms: ["barbe", "salão", "salao", "clínic", "clinic", "consult", "estét", "estet", "tosa", "manicure", "massag"],
-  },
-  { group: "digital", terms: ["curso", "mentor", "e-book", "ebook", "software", "digital", "assinatura", "infoprodut"] },
-];
-
 function segmentGroupOf(store: CheckoutModelStore): SegmentGroupId {
-  const term = (store.segment ?? "").trim().toLowerCase();
-  if (term) {
-    for (const rule of CHECKOUT_KEYWORDS) {
-      if (rule.terms.some((keyword) => term.includes(keyword))) return rule.group;
-    }
-  }
   return suggestSegmentGroup(store.segment);
 }
 
@@ -128,7 +106,6 @@ export function checkoutPathFor(slug: string, store: CheckoutModelStore | null |
  */
 export const IMPLEMENTED_CHECKOUT_MODELS: CheckoutModel[] = [
   "delivery",
-  "digital",
   "agendamento",
   "loja",
 ];

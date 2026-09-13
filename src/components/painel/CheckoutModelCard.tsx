@@ -33,8 +33,8 @@ export function CheckoutModelCard({ storeId, store, editable, onSaved }: Checkou
   const current = resolveCheckoutModel(store);
   const automatic = !store.checkout_type;
 
-  // Segmentos com um único modelo compatível (ex.: produtos digitais) não têm
-  // escolha real — a troca de modelo não faz sentido e o card só confundiria.
+  // Segmentos com um único modelo compatível não têm escolha real — a troca
+  // de modelo não faz sentido e o card só confundiria.
   if (options.length <= 1) return null;
 
   const save = useMutation({

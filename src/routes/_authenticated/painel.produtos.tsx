@@ -40,8 +40,8 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { persistOrder, useCatalog, useCatalogRefresh, type ProductRow } from "@/hooks/useCatalog";
 import { useActiveStore } from "@/hooks/useMyStores";
-import { useStoreFeatures } from "@/hooks/useStoreFeatures";
 import { catalogPreset, catalogTabLabel } from "@/lib/catalogo-segmento";
+import { suggestSegmentGroup } from "@/lib/painel-segmentos";
 import { supabase } from "@/integrations/supabase/client";
 import {
   PRODUCT_KINDS,
@@ -77,8 +77,8 @@ function CatalogPage() {
   const { active } = useActiveStore();
   const storeId = active?.storeId;
   const { data, isLoading } = useCatalog(storeId);
-  const { data: featuresConfig } = useStoreFeatures(storeId, active?.store.segment ?? null);
-  const preset = catalogPreset(featuresConfig?.segment);
+  const segment = suggestSegmentGroup(active?.store.segment);
+  const preset = catalogPreset(segment);
   const refresh = useCatalogRefresh(storeId);
   const queryClient = useQueryClient();
   const { data: retail } = useQuery({
@@ -414,7 +414,7 @@ function CatalogPage() {
             {storeId ? (
               <AiCatalogTab
                 storeId={storeId}
-                segment={featuresConfig?.segment ?? "alimentacao"}
+                segment={segment}
                 categories={data.categories}
                 productCount={data.products.length}
                 onChanged={refresh}
@@ -442,7 +442,7 @@ function CatalogPage() {
           product={editing}
           kinds={preset.kinds}
           defaultKind={preset.defaultKind}
-          segment={featuresConfig?.segment ?? "alimentacao"}
+          segment={segment}
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           onChanged={refresh}

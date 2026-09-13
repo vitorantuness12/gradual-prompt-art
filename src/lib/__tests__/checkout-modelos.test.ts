@@ -23,12 +23,12 @@ describe("modelo de checkout por segmento", () => {
     expect(resolveCheckoutModel({ segment: "Restaurante", accepts_dine_in: true })).toBe("delivery");
   });
 
-  it("sugere agendamento para serviços", () => {
-    expect(resolveCheckoutModel({ segment: "Barbearia" })).toBe("agendamento");
+  it("mantém serviços antigos no checkout principal", () => {
+    expect(resolveCheckoutModel({ segment: "Barbearia" })).toBe("delivery");
   });
 
-  it("sugere checkout digital para infoprodutos", () => {
-    expect(resolveCheckoutModel({ segment: "Curso online" })).toBe("digital");
+  it("envia configurações digitais antigas para o checkout seguro de loja", () => {
+    expect(resolveCheckoutModel({ segment: "Curso online", checkout_type: "digital" })).toBe("loja");
   });
 
   it("mantém o checkout atual quando a loja não informou segmento", () => {
@@ -45,8 +45,8 @@ describe("modelo de checkout por segmento", () => {
   });
 
   it("ignora escolha incompatível e volta para o modelo do segmento", () => {
-    // Barbearia não pode usar checkout digital.
-    expect(resolveCheckoutModel({ segment: "Barbearia", checkout_type: "digital" })).toBe("agendamento");
+    // Valores digitais antigos não podem reativar o checkout removido.
+    expect(resolveCheckoutModel({ segment: "Barbearia", checkout_type: "digital" })).toBe("delivery");
     // Valor inválido salvo no banco não quebra a loja.
     expect(resolveCheckoutModel({ segment: "Hamburgueria", checkout_type: "xpto", accepts_delivery: true })).toBe(
       "delivery",
@@ -54,7 +54,7 @@ describe("modelo de checkout por segmento", () => {
   });
 
   it("oferece apenas modelos compatíveis ao lojista", () => {
-    expect(allowedCheckoutModels({ segment: "Barbearia" })).toContain("agendamento");
+    expect(allowedCheckoutModels({ segment: "Hamburgueria" })).toContain("agendamento");
     expect(allowedCheckoutModels({ segment: "Barbearia" })).not.toContain("digital");
     expect(allowedCheckoutModels({ segment: "Loja de roupas" })).not.toContain("agendamento");
   });

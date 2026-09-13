@@ -59,7 +59,7 @@ const fallbackPlans: PricingCard[] = [
       "API REST, webhooks e integrações avançadas",
       "KDS e impressão setorizada",
       "Encomendas com orçamento e produção",
-      "Produtos digitais e assinaturas recorrentes",
+      "Agenda e lembretes para pedidos programados",
       "Suporte prioritário",
     ],
     cta: "Falar com um consultor",

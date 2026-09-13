@@ -10,7 +10,6 @@ export const FEATURE_KEYS = [
   "produtos",
   "estoque",
   "inteligencia",
-  "digitais",
   "personalizar",
   "entregas",
   "entregadores",
@@ -60,7 +59,6 @@ export const FEATURE_LABEL: Record<FeatureKey, string> = {
   produtos: "Catálogo",
   estoque: "Estoque",
   inteligencia: "Catálogo inteligente",
-  digitais: "Produtos digitais",
   personalizar: "Personalizar loja",
   entregas: "Entregas",
   entregadores: "Entregadores",
@@ -88,7 +86,7 @@ export const FEATURE_LABEL: Record<FeatureKey, string> = {
 /** Grupos visuais do menu lateral, na ordem de exibição. */
 export const FEATURE_GROUPS: { title: string; keys: FeatureKey[] }[] = [
   { title: "Operação", keys: ["dashboard", "pedidos", "encomendas", "pdv", "salao", "kds", "agendamentos"] },
-  { title: "Catálogo", keys: ["produtos", "estoque", "inteligencia", "digitais", "personalizar"] },
+  { title: "Catálogo", keys: ["produtos", "estoque", "inteligencia", "personalizar"] },
   { title: "Logística", keys: ["entregas", "entregadores", "frete"] },
   { title: "Clientes", keys: ["clientes", "avaliacoes", "promocoes", "marketing", "fidelidade"] },
   { title: "Gestão", keys: ["relatorios", "metas", "pagamentos", "fiscal"] },
@@ -96,7 +94,7 @@ export const FEATURE_GROUPS: { title: string; keys: FeatureKey[] }[] = [
   { title: "Conta", keys: ["equipe", "assinatura", "privacidade", "configuracoes", "suporte"] },
 ];
 
-export type SegmentGroupId = "alimentacao" | "varejo" | "conveniencia" | "servicos" | "digital" | "encomendas";
+export type SegmentGroupId = "alimentacao" | "varejo" | "conveniencia";
 
 export interface SegmentGroup {
   id: SegmentGroupId;
@@ -108,7 +106,7 @@ export interface SegmentGroup {
   /** Funções em destaque no dashboard. */
   highlights: FeatureKey[];
   /** Estilo de cards do dashboard. */
-  dashboard: "alimentacao" | "varejo" | "servicos" | "digital";
+  dashboard: "alimentacao" | "varejo";
 }
 
 export const SEGMENT_GROUPS: SegmentGroup[] = [
@@ -117,8 +115,8 @@ export const SEGMENT_GROUPS: SegmentGroup[] = [
     label: "Alimentação e delivery rápido",
     description: "Pedidos em tempo real, cozinha e entregas.",
     examples: ["Restaurante", "Hamburgueria", "Pizzaria", "Açaí", "Pastelaria", "Marmitaria", "Doceria", "Padaria"],
-    hidden: ["digitais", "encomendas"],
-    highlights: ["pedidos", "pdv", "kds", "salao", "entregas"],
+    hidden: ["encomendas"],
+    highlights: ["pedidos", "pdv", "kds", "agendamentos", "entregas"],
     dashboard: "alimentacao",
   },
   {
@@ -126,7 +124,7 @@ export const SEGMENT_GROUPS: SegmentGroup[] = [
     label: "Varejo e lojas físicas/online",
     description: "Vitrine, estoque e vendas no balcão.",
     examples: ["Roupas", "Calçados", "Eletrônicos", "Utilidades", "Tabacaria", "Cosméticos", "Presentes"],
-    hidden: ["salao", "kds", "agendamentos", "digitais", "encomendas"],
+    hidden: ["salao", "kds", "encomendas"],
     highlights: ["produtos", "estoque", "pedidos"],
     dashboard: "varejo",
   },
@@ -135,46 +133,8 @@ export const SEGMENT_GROUPS: SegmentGroup[] = [
     label: "Saúde e conveniência",
     description: "Alto giro de itens com entrega rápida.",
     examples: ["Drogaria", "Farmácia", "Mercadinho", "Hortifruti", "Açougue", "Pet shop"],
-    hidden: ["salao", "kds", "agendamentos", "digitais", "encomendas"],
+    hidden: ["salao", "kds", "encomendas"],
     highlights: ["pdv", "estoque", "entregas"],
-    dashboard: "varejo",
-  },
-  {
-    id: "servicos",
-    label: "Serviços e agendamentos",
-    description: "Agenda por profissional e relacionamento.",
-    examples: ["Barbearia", "Salão de beleza", "Clínica", "Consultório", "Estética", "Banho e tosa"],
-    hidden: ["salao", "kds", "entregas", "entregadores", "frete", "impressao", "estoque", "digitais", "encomendas"],
-    highlights: ["agendamentos", "clientes", "produtos"],
-    dashboard: "servicos",
-  },
-  {
-    id: "digital",
-    label: "Produtos digitais e infoprodutos",
-    description: "Vendas online sem estoque nem entrega.",
-    examples: ["Curso online", "Mentoria", "E-book", "Consultoria", "Software"],
-    hidden: [
-      "pdv",
-      "salao",
-      "kds",
-      "estoque",
-      "entregas",
-      "entregadores",
-      "frete",
-      "impressao",
-      "agendamentos",
-      "encomendas",
-    ],
-    highlights: ["digitais", "produtos", "pagamentos"],
-    dashboard: "digital",
-  },
-  {
-    id: "encomendas",
-    label: "Encomendas e eventos",
-    description: "Pedidos programados com data de entrega.",
-    examples: ["Confeitaria", "Buffet", "Aluguel de equipamentos", "Decoração"],
-    hidden: ["salao", "kds", "entregadores", "frete", "digitais"],
-    highlights: ["encomendas", "agendamentos", "pedidos"],
     dashboard: "varejo",
   },
 ];
@@ -190,10 +150,8 @@ const KEYWORDS: { group: SegmentGroupId; terms: string[] }[] = [
     terms: ["restaur", "hamb", "pizza", "açaí", "acai", "pastel", "marmit", "doce", "padar", "lanch", "bar", "food"],
   },
   { group: "conveniencia", terms: ["drogar", "farm", "mercad", "hortifruti", "açougue", "acougue", "pet"] },
-  { group: "servicos", terms: ["barbe", "salão", "salao", "clínic", "clinic", "consult", "estét", "estet", "tosa"] },
-  { group: "digital", terms: ["curso", "mentor", "e-book", "ebook", "software", "digital", "assinatura"] },
-  { group: "encomendas", terms: ["confeit", "buffet", "aluguel", "decora", "encomend", "event"] },
-  { group: "varejo", terms: ["roupa", "calçad", "calcad", "eletr", "utilidad", "tabac", "cosmét", "cosmet", "present", "loja"] },
+  { group: "alimentacao", terms: ["café", "cafe", "cafeter", "padar"] },
+  { group: "varejo", terms: ["loja"] },
 ];
 
 export function suggestSegmentGroup(rawSegment: string | null | undefined): SegmentGroupId {

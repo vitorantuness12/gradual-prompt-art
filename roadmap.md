@@ -13,3 +13,10 @@ Ordem combinada com o usuário: um bloco por vez.
 - Motor de automações (`src/lib/automacoes.server.ts`) e cron `/api/public/crm/automacoes`
 - Cobrança de planos manual no admin (`src/lib/planos-cobranca.functions.ts`)
 - Notas fiscais, estornos, LGPD, afiliados
+
+## Foco nos segmentos principais
+- [x] Manter apenas os seis segmentos de alimentação, conveniência e pet shop na apresentação
+- [x] Remover a configuração manual de funções do painel
+- [x] Remover o checkout digital e seus pontos de entrada, com fallback seguro para lojas antigas
+- [x] Manter Agenda disponível para delivery
+- [x] Validar roteamento, menu público e Agenda por testes automatizados; painel autenticado depende de sessão externa

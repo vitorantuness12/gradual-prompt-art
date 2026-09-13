@@ -32,7 +32,7 @@ const RULES: { keywords: string[]; suggestion: Suggestion }[] = [
     suggestion: {
       model: "Painel Agenda & Serviços",
       description: "Serviços com duração, agenda por profissional e confirmação do cliente.",
-      modules: ["Agendamentos", "Serviços", "Clientes", "Promoções", "Relatórios"],
+      modules: ["Agenda", "Pedidos", "Clientes", "Promoções", "Relatórios"],
     },
   },
   {
@@ -68,13 +68,13 @@ export function SegmentFinder() {
         Qual é o seu negócio?
       </Label>
       <p className="mt-1 text-sm text-muted-foreground">
-        Digite o segmento (ex.: pizzaria, barbearia, mercado) e veja o modelo de painel sugerido.
+        Digite o segmento (ex.: pizzaria, mercado ou pet shop) e veja o modelo de painel sugerido.
       </p>
       <Input
         id="segmento"
         value={value}
         onChange={(event) => setValue(event.target.value)}
-        placeholder="Pizzaria, barbearia, pet shop..."
+        placeholder="Pizzaria, mercado, pet shop..."
         className="mt-4 h-12 rounded-xl bg-background/70 text-base"
         autoComplete="off"
       />

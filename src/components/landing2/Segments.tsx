@@ -6,12 +6,6 @@ import {
   Stethoscope,
   Dog,
   CupSoda,
-  Scissors,
-  Shirt,
-  Wrench,
-  CalendarClock,
-  GraduationCap,
-  Repeat,
 } from "lucide-react";
 
 const segments = [
@@ -44,36 +38,6 @@ const segments = [
     icon: CupSoda,
     title: "Cafeterias e padarias",
     description: "QR Code nas mesas, comandas e encomendas agendadas.",
-  },
-  {
-    icon: Scissors,
-    title: "Salões e barbearias",
-    description: "Agendamento por profissional, horários e sinais.",
-  },
-  {
-    icon: Shirt,
-    title: "Lojas de roupas e varejo",
-    description: "Catálogo com fotos, variações, PDV e entrega.",
-  },
-  {
-    icon: Wrench,
-    title: "Assistências técnicas",
-    description: "Ordens por agendamento, status e histórico do cliente.",
-  },
-  {
-    icon: CalendarClock,
-    title: "Serviços com agendamento",
-    description: "Reservas, horários, profissionais e confirmações.",
-  },
-  {
-    icon: GraduationCap,
-    title: "Cursos e produtos digitais",
-    description: "Venda de itens digitais com pagamento online.",
-  },
-  {
-    icon: Repeat,
-    title: "Assinaturas e encomendas",
-    description: "Pedidos futuros, recorrência e personalizações.",
   },
 ];
 

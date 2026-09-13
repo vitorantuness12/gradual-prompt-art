@@ -42,7 +42,6 @@ import { Route as LojaSplatRouteImport } from './routes/loja.$'
 import { Route as MesaTokenRouteImport } from './routes/mesa.$token'
 import { Route as OrcamentoTokenRouteImport } from './routes/orcamento.$token'
 import { Route as SlugCheckoutAgendamentoRouteImport } from './routes/$slug.checkout_.agendamento'
-import { Route as SlugCheckoutDigitalRouteImport } from './routes/$slug.checkout_.digital'
 import { Route as SlugCheckoutLojaRouteImport } from './routes/$slug.checkout_.loja'
 import { Route as AuthenticatedConviteTokenRouteImport } from './routes/_authenticated/convite.$token'
 import { Route as AuthenticatedEntregadorStatusRouteImport } from './routes/_authenticated/entregador_.status'
@@ -53,7 +52,6 @@ import { Route as AuthenticatedPainelAvaliacoesRouteImport } from './routes/_aut
 import { Route as AuthenticatedPainelClientesRouteImport } from './routes/_authenticated/painel.clientes'
 import { Route as AuthenticatedPainelCobrancasRouteImport } from './routes/_authenticated/painel.cobrancas'
 import { Route as AuthenticatedPainelConfiguracoesRouteImport } from './routes/_authenticated/painel.configuracoes'
-import { Route as AuthenticatedPainelDigitaisRouteImport } from './routes/_authenticated/painel.digitais'
 import { Route as AuthenticatedPainelEncomendasRouteImport } from './routes/_authenticated/painel.encomendas'
 import { Route as AuthenticatedPainelEntregadoresRouteImport } from './routes/_authenticated/painel.entregadores'
 import { Route as AuthenticatedPainelEntregasRouteImport } from './routes/_authenticated/painel.entregas'
@@ -264,11 +262,6 @@ const SlugCheckoutAgendamentoRoute = SlugCheckoutAgendamentoRouteImport.update({
   path: '/$slug/checkout/agendamento',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SlugCheckoutDigitalRoute = SlugCheckoutDigitalRouteImport.update({
-  id: '/$slug/checkout_/digital',
-  path: '/$slug/checkout/digital',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SlugCheckoutLojaRoute = SlugCheckoutLojaRouteImport.update({
   id: '/$slug/checkout_/loja',
   path: '/$slug/checkout/loja',
@@ -326,12 +319,6 @@ const AuthenticatedPainelConfiguracoesRoute =
   AuthenticatedPainelConfiguracoesRouteImport.update({
     id: '/configuracoes',
     path: '/configuracoes',
-    getParentRoute: () => AuthenticatedPainelRoute,
-  } as any)
-const AuthenticatedPainelDigitaisRoute =
-  AuthenticatedPainelDigitaisRouteImport.update({
-    id: '/digitais',
-    path: '/digitais',
     getParentRoute: () => AuthenticatedPainelRoute,
   } as any)
 const AuthenticatedPainelEncomendasRoute =
@@ -618,7 +605,6 @@ export interface FileRoutesByFullPath {
   '/orcamento/$token': typeof OrcamentoTokenRoute
   '/$slug/': typeof SlugIndexRoute
   '/$slug/checkout/agendamento': typeof SlugCheckoutAgendamentoRoute
-  '/$slug/checkout/digital': typeof SlugCheckoutDigitalRoute
   '/$slug/checkout/loja': typeof SlugCheckoutLojaRoute
   '/convite/$token': typeof AuthenticatedConviteTokenRoute
   '/entregador/status': typeof AuthenticatedEntregadorStatusRoute
@@ -628,7 +614,6 @@ export interface FileRoutesByFullPath {
   '/painel/clientes': typeof AuthenticatedPainelClientesRoute
   '/painel/cobrancas': typeof AuthenticatedPainelCobrancasRoute
   '/painel/configuracoes': typeof AuthenticatedPainelConfiguracoesRoute
-  '/painel/digitais': typeof AuthenticatedPainelDigitaisRoute
   '/painel/encomendas': typeof AuthenticatedPainelEncomendasRoute
   '/painel/entregadores': typeof AuthenticatedPainelEntregadoresRoute
   '/painel/entregas': typeof AuthenticatedPainelEntregasRoute
@@ -706,7 +691,6 @@ export interface FileRoutesByTo {
   '/orcamento/$token': typeof OrcamentoTokenRoute
   '/$slug': typeof SlugIndexRoute
   '/$slug/checkout/agendamento': typeof SlugCheckoutAgendamentoRoute
-  '/$slug/checkout/digital': typeof SlugCheckoutDigitalRoute
   '/$slug/checkout/loja': typeof SlugCheckoutLojaRoute
   '/convite/$token': typeof AuthenticatedConviteTokenRoute
   '/entregador/status': typeof AuthenticatedEntregadorStatusRoute
@@ -716,7 +700,6 @@ export interface FileRoutesByTo {
   '/painel/clientes': typeof AuthenticatedPainelClientesRoute
   '/painel/cobrancas': typeof AuthenticatedPainelCobrancasRoute
   '/painel/configuracoes': typeof AuthenticatedPainelConfiguracoesRoute
-  '/painel/digitais': typeof AuthenticatedPainelDigitaisRoute
   '/painel/encomendas': typeof AuthenticatedPainelEncomendasRoute
   '/painel/entregadores': typeof AuthenticatedPainelEntregadoresRoute
   '/painel/entregas': typeof AuthenticatedPainelEntregasRoute
@@ -797,7 +780,6 @@ export interface FileRoutesById {
   '/orcamento/$token': typeof OrcamentoTokenRoute
   '/$slug/': typeof SlugIndexRoute
   '/$slug/checkout_/agendamento': typeof SlugCheckoutAgendamentoRoute
-  '/$slug/checkout_/digital': typeof SlugCheckoutDigitalRoute
   '/$slug/checkout_/loja': typeof SlugCheckoutLojaRoute
   '/_authenticated/convite/$token': typeof AuthenticatedConviteTokenRoute
   '/_authenticated/entregador_/status': typeof AuthenticatedEntregadorStatusRoute
@@ -807,7 +789,6 @@ export interface FileRoutesById {
   '/_authenticated/painel/clientes': typeof AuthenticatedPainelClientesRoute
   '/_authenticated/painel/cobrancas': typeof AuthenticatedPainelCobrancasRoute
   '/_authenticated/painel/configuracoes': typeof AuthenticatedPainelConfiguracoesRoute
-  '/_authenticated/painel/digitais': typeof AuthenticatedPainelDigitaisRoute
   '/_authenticated/painel/encomendas': typeof AuthenticatedPainelEncomendasRoute
   '/_authenticated/painel/entregadores': typeof AuthenticatedPainelEntregadoresRoute
   '/_authenticated/painel/entregas': typeof AuthenticatedPainelEntregasRoute
@@ -888,7 +869,6 @@ export interface FileRouteTypes {
     | '/orcamento/$token'
     | '/$slug/'
     | '/$slug/checkout/agendamento'
-    | '/$slug/checkout/digital'
     | '/$slug/checkout/loja'
     | '/convite/$token'
     | '/entregador/status'
@@ -898,7 +878,6 @@ export interface FileRouteTypes {
     | '/painel/clientes'
     | '/painel/cobrancas'
     | '/painel/configuracoes'
-    | '/painel/digitais'
     | '/painel/encomendas'
     | '/painel/entregadores'
     | '/painel/entregas'
@@ -976,7 +955,6 @@ export interface FileRouteTypes {
     | '/orcamento/$token'
     | '/$slug'
     | '/$slug/checkout/agendamento'
-    | '/$slug/checkout/digital'
     | '/$slug/checkout/loja'
     | '/convite/$token'
     | '/entregador/status'
@@ -986,7 +964,6 @@ export interface FileRouteTypes {
     | '/painel/clientes'
     | '/painel/cobrancas'
     | '/painel/configuracoes'
-    | '/painel/digitais'
     | '/painel/encomendas'
     | '/painel/entregadores'
     | '/painel/entregas'
@@ -1066,7 +1043,6 @@ export interface FileRouteTypes {
     | '/orcamento/$token'
     | '/$slug/'
     | '/$slug/checkout_/agendamento'
-    | '/$slug/checkout_/digital'
     | '/$slug/checkout_/loja'
     | '/_authenticated/convite/$token'
     | '/_authenticated/entregador_/status'
@@ -1076,7 +1052,6 @@ export interface FileRouteTypes {
     | '/_authenticated/painel/clientes'
     | '/_authenticated/painel/cobrancas'
     | '/_authenticated/painel/configuracoes'
-    | '/_authenticated/painel/digitais'
     | '/_authenticated/painel/encomendas'
     | '/_authenticated/painel/entregadores'
     | '/_authenticated/painel/entregas'
@@ -1147,7 +1122,6 @@ export interface RootRouteChildren {
   OrcamentoTokenRoute: typeof OrcamentoTokenRoute
   SlugIndexRoute: typeof SlugIndexRoute
   SlugCheckoutAgendamentoRoute: typeof SlugCheckoutAgendamentoRoute
-  SlugCheckoutDigitalRoute: typeof SlugCheckoutDigitalRoute
   SlugCheckoutLojaRoute: typeof SlugCheckoutLojaRoute
   ApiV1SplatRoute: typeof ApiV1SplatRoute
   ApiPublicAgendaLembretesRoute: typeof ApiPublicAgendaLembretesRoute
@@ -1402,13 +1376,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugCheckoutAgendamentoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/$slug/checkout_/digital': {
-      id: '/$slug/checkout_/digital'
-      path: '/$slug/checkout/digital'
-      fullPath: '/$slug/checkout/digital'
-      preLoaderRoute: typeof SlugCheckoutDigitalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/$slug/checkout_/loja': {
       id: '/$slug/checkout_/loja'
       path: '/$slug/checkout/loja'
@@ -1477,13 +1444,6 @@ declare module '@tanstack/react-router' {
       path: '/configuracoes'
       fullPath: '/painel/configuracoes'
       preLoaderRoute: typeof AuthenticatedPainelConfiguracoesRouteImport
-      parentRoute: typeof AuthenticatedPainelRoute
-    }
-    '/_authenticated/painel/digitais': {
-      id: '/_authenticated/painel/digitais'
-      path: '/digitais'
-      fullPath: '/painel/digitais'
-      preLoaderRoute: typeof AuthenticatedPainelDigitaisRouteImport
       parentRoute: typeof AuthenticatedPainelRoute
     }
     '/_authenticated/painel/encomendas': {
@@ -1797,7 +1757,6 @@ interface AuthenticatedPainelRouteChildren {
   AuthenticatedPainelClientesRoute: typeof AuthenticatedPainelClientesRoute
   AuthenticatedPainelCobrancasRoute: typeof AuthenticatedPainelCobrancasRoute
   AuthenticatedPainelConfiguracoesRoute: typeof AuthenticatedPainelConfiguracoesRoute
-  AuthenticatedPainelDigitaisRoute: typeof AuthenticatedPainelDigitaisRoute
   AuthenticatedPainelEncomendasRoute: typeof AuthenticatedPainelEncomendasRoute
   AuthenticatedPainelEntregadoresRoute: typeof AuthenticatedPainelEntregadoresRoute
   AuthenticatedPainelEntregasRoute: typeof AuthenticatedPainelEntregasRoute
@@ -1833,7 +1792,6 @@ const AuthenticatedPainelRouteChildren: AuthenticatedPainelRouteChildren = {
   AuthenticatedPainelClientesRoute: AuthenticatedPainelClientesRoute,
   AuthenticatedPainelCobrancasRoute: AuthenticatedPainelCobrancasRoute,
   AuthenticatedPainelConfiguracoesRoute: AuthenticatedPainelConfiguracoesRoute,
-  AuthenticatedPainelDigitaisRoute: AuthenticatedPainelDigitaisRoute,
   AuthenticatedPainelEncomendasRoute: AuthenticatedPainelEncomendasRoute,
   AuthenticatedPainelEntregadoresRoute: AuthenticatedPainelEntregadoresRoute,
   AuthenticatedPainelEntregasRoute: AuthenticatedPainelEntregasRoute,
@@ -1922,7 +1880,6 @@ const rootRouteChildren: RootRouteChildren = {
   OrcamentoTokenRoute: OrcamentoTokenRoute,
   SlugIndexRoute: SlugIndexRoute,
   SlugCheckoutAgendamentoRoute: SlugCheckoutAgendamentoRoute,
-  SlugCheckoutDigitalRoute: SlugCheckoutDigitalRoute,
   SlugCheckoutLojaRoute: SlugCheckoutLojaRoute,
   ApiV1SplatRoute: ApiV1SplatRoute,
   ApiPublicAgendaLembretesRoute: ApiPublicAgendaLembretesRoute,

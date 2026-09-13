@@ -26,11 +26,6 @@ const integrations = [
     logo: "https://logodownload.org/wp-content/uploads/2015/04/whatsapp-logo-1.png",
     description: "Notificações e atendimento pela API oficial",
   },
-  {
-    name: "Hotmart",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Hotmart_logo.svg/2560px-Hotmart_logo.svg.png",
-    description: "Produtos digitais e assinaturas",
-  },
 ];
 
 const containerVariants = {

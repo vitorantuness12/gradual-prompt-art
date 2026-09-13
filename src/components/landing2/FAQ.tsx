@@ -68,11 +68,6 @@ const faqs = [
       "A agenda controla profissionais, bloqueios, encaixes e lista de espera, envia lembretes automáticos por WhatsApp 24h e 2h antes, permite o cliente remarcar pelo link e calcula comissões e repasses.",
   },
   {
-    question: "Vendo produtos digitais e assinaturas?",
-    answer:
-      "Sim. A entrega usa link expirável com limite de downloads, área do comprador e cobrança recorrente com retentativa, inadimplência, reativação e reembolso.",
-  },
-  {
     question: "Meus dados ficam protegidos?",
     answer:
       "Cada loja acessa somente os próprios dados, com permissões por função, trilha de auditoria das ações críticas e ferramentas de exportação e exclusão de dados conforme a LGPD.",
