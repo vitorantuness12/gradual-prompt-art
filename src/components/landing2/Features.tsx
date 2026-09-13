@@ -26,8 +26,6 @@ import {
   ScanBarcode,
   CalendarCheck,
   RotateCcw,
-  Download,
-  Repeat,
   Route,
   Scale,
   ShieldCheck,

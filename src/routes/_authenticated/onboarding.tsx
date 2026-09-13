@@ -55,20 +55,12 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
 });
 
 const SEGMENTS = [
-  "Restaurante",
-  "Pizzaria",
-  "Lanchonete",
-  "Cafeteria",
-  "Mercado",
-  "Farmácia",
-  "Pet shop",
-  "Salão de beleza",
-  "Barbearia",
-  "Loja",
-  "Assistência técnica",
-  "Prestador de serviços",
-  "Produto digital",
-  "Assinatura",
+  "Restaurante e delivery",
+  "Pizzaria e hamburgueria",
+  "Mercado e mercearia",
+  "Farmácia e conveniência",
+  "Pet shop e clínica veterinária",
+  "Cafeteria e padaria",
 ] as const;
 
 const TIMEZONES = [

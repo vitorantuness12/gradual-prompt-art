@@ -42,10 +42,6 @@ const ALLOWED_BY_SEGMENT: Record<SegmentGroupId, CheckoutModel[]> = {
   alimentacao: ["delivery", "loja", "agendamento"],
   varejo: ["loja", "delivery"],
   conveniencia: ["loja", "delivery", "agendamento"],
-  servicos: ["delivery", "loja", "agendamento"],
-  // Configurações antigas de cursos passam para uma compra física segura.
-  digital: ["loja", "delivery"],
-  encomendas: ["delivery", "loja", "agendamento"],
 };
 
 export interface CheckoutModelStore {
@@ -61,15 +57,7 @@ export interface CheckoutModelStore {
  * `suggestSegmentGroup` prioriza alimentação e, por isso, "barbearia" cai em
  * alimentação por causa do trecho "bar". Aqui a leitura precisa ser exata.
  */
-const CHECKOUT_KEYWORDS: { group: SegmentGroupId; terms: string[] }[] = [];
-
 function segmentGroupOf(store: CheckoutModelStore): SegmentGroupId {
-  const term = (store.segment ?? "").trim().toLowerCase();
-  if (term) {
-    for (const rule of CHECKOUT_KEYWORDS) {
-      if (rule.terms.some((keyword) => term.includes(keyword))) return rule.group;
-    }
-  }
   return suggestSegmentGroup(store.segment);
 }
 
