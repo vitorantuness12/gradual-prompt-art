@@ -15,8 +15,8 @@ Ordem combinada com o usuário: um bloco por vez.
 - Notas fiscais, estornos, LGPD, afiliados
 
 ## Foco nos segmentos principais
-- [ ] Manter apenas os seis segmentos de alimentação, conveniência e pet shop na apresentação
-- [ ] Remover a configuração manual de funções do painel
-- [ ] Remover o checkout digital e seus pontos de entrada, com fallback seguro para lojas antigas
-- [ ] Manter Agenda disponível para delivery
-- [ ] Validar home, loja, carrinho, painel e Agenda
+- [x] Manter apenas os seis segmentos de alimentação, conveniência e pet shop na apresentação
+- [x] Remover a configuração manual de funções do painel
+- [x] Remover o checkout digital e seus pontos de entrada, com fallback seguro para lojas antigas
+- [x] Manter Agenda disponível para delivery
+- [ ] Validar painel e Agenda com uma loja autenticada
