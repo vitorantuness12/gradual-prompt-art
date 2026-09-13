@@ -20,3 +20,9 @@ Ordem combinada com o usuário: um bloco por vez.
 - [x] Remover o checkout digital e seus pontos de entrada, com fallback seguro para lojas antigas
 - [x] Manter Agenda disponível para delivery
 - [x] Validar roteamento, menu público e Agenda por testes automatizados; painel autenticado depende de sessão externa
+
+## Agendamentos e encomendas por ramo
+- [ ] Reformular Agenda para reservas, serviços pet e retirada/entrega programada
+- [ ] Reformular Encomendas para entradas pela loja e pelo painel
+- [ ] Adicionar avisos em tempo real e notificações para ambos os fluxos
+- [ ] Validar as duas páginas e seus fluxos principais
