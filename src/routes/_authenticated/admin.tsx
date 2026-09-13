@@ -301,7 +301,7 @@ function StoresTab() {
   });
 
   const create = useMutation({
-    mutationFn: (input: { name: string; slug: string; segment: string; checkoutType?: "servico" | "produto" }) =>
+    mutationFn: (input: { name: string; slug: string; segment: string; checkoutType?: "agendamento" | "loja" }) =>
       createFn({ data: input }),
     onSuccess: (result) => {
       if (!result.ok) {
@@ -320,7 +320,7 @@ function StoresTab() {
       name?: string;
       slug?: string;
       segment?: string;
-      checkoutType?: "servico" | "produto";
+      checkoutType?: "agendamento" | "loja";
     }) => editFn({ data: input }),
     onSuccess: (result) => {
       if (!result.ok) {
@@ -1979,11 +1979,11 @@ function IntegrationConfigDialog({ kind, provider, label, current, onClose, onSa
 
 /* ------------------------- Cadastro e edição de lojas --------------------- */
 
-type CheckoutTypeValue = "servico" | "produto";
+type CheckoutTypeValue = "agendamento" | "loja";
 
 const CHECKOUT_TYPE_LABEL: Record<CheckoutTypeValue, string> = {
-  produto: "Produto físico",
-  servico: "Serviço / agendamento",
+  loja: "Pedidos e produtos",
+  agendamento: "Pedidos com agendamento",
 };
 
 /** Link de checkout da loja, pronto para copiar e enviar ao lojista. */
@@ -2018,7 +2018,7 @@ function StoreCreateForm({
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [segment, setSegment] = useState("delivery");
-  const [checkoutType, setCheckoutType] = useState<CheckoutTypeValue>("produto");
+  const [checkoutType, setCheckoutType] = useState<CheckoutTypeValue>("loja");
 
   if (!open) {
     return (
@@ -2092,7 +2092,7 @@ function StoreEditForm({
 }) {
   const [name, setName] = useState(store.name);
   const [slug, setSlug] = useState(store.slug);
-  const [checkoutType, setCheckoutType] = useState<CheckoutTypeValue>("produto");
+  const [checkoutType, setCheckoutType] = useState<CheckoutTypeValue>("loja");
 
   return (
     <form
