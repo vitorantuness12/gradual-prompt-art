@@ -25,4 +25,4 @@ Ordem combinada com o usuário: um bloco por vez.
 - [x] Reformular Agenda para reservas, serviços pet e retirada/entrega programada
 - [x] Reformular Encomendas para entradas pela loja e pelo painel
 - [x] Adicionar avisos em tempo real e notificações para ambos os fluxos
-- [ ] Validar as duas páginas e seus fluxos principais
+- [x] Validar as duas páginas e seus fluxos principais
