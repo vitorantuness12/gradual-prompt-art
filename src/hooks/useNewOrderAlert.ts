@@ -47,45 +47,76 @@ function soundEnabled() {
   return window.localStorage.getItem(NEW_ORDER_SOUND_KEY) !== "0";
 }
 
-/**
- * Avisa o lojista quando um pedido novo entra: som, aviso na tela e
- * notificação do sistema quando o painel está em segundo plano.
- */
-export function useNewOrderAlert(storeId: string | undefined, onNewOrder?: () => void) {
-  const callbackRef = useRef(onNewOrder);
-  callbackRef.current = onNewOrder;
+interface CommerceAlertCallbacks {
+  onOrder?: () => void;
+  onAppointment?: () => void;
+  onNotification?: () => void;
+}
+
+function announce(title: string, description: string | undefined, tag: string) {
+  toast.success(title, { description });
+  if (soundEnabled()) void playNewOrderChime();
+
+  if (
+    typeof Notification !== "undefined" &&
+    Notification.permission === "granted" &&
+    document.visibilityState !== "visible"
+  ) {
+    new Notification(title, {
+      body: description ?? "Abra o painel para conferir.",
+      icon: "/app-icon-192.png",
+      tag,
+    });
+  }
+}
+
+/** Avisa imediatamente sobre pedidos, encomendas e agendamentos novos. */
+export function useNewOrderAlert(storeId: string | undefined, callbacks: CommerceAlertCallbacks = {}) {
+  const callbackRef = useRef(callbacks);
+  callbackRef.current = callbacks;
 
   useEffect(() => {
     if (!storeId) return;
 
     const channel = supabase
-      .channel(`novos-pedidos-${storeId}`)
+      .channel(`movimentos-loja-${storeId}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "orders", filter: `store_id=eq.${storeId}` },
         (payload) => {
-          const order = payload.new as { code?: string; customer_name?: string; total?: number };
-          const label = order.code ? `Pedido #${order.code}` : "Pedido novo";
-
-          toast.success(`${label} recebido`, {
-            description: order.customer_name ? `Cliente: ${order.customer_name}` : undefined,
-          });
-
-          if (soundEnabled()) void playNewOrderChime();
-
-          if (
-            typeof Notification !== "undefined" &&
-            Notification.permission === "granted" &&
-            document.visibilityState !== "visible"
-          ) {
-            new Notification(`${label} recebido`, {
-              body: order.customer_name ? `Cliente: ${order.customer_name}` : "Abra o painel para preparar.",
-              icon: "/app-icon-192.png",
-              tag: `pedido-${order.code ?? Date.now()}`,
-            });
-          }
-
-          callbackRef.current?.();
+          const order = payload.new as {
+            code?: string;
+            customer_name?: string;
+            channel?: string;
+            scheduled_for?: string | null;
+          };
+          // O agendamento gera um pedido financeiro e, logo depois, a marcação.
+          // O aviso específico vem do INSERT em appointments para não tocar duas vezes.
+          if (order.channel === "checkout_agendamento") return;
+          const isPreorder = order.channel === "encomenda" || Boolean(order.scheduled_for);
+          const kind = isPreorder ? "Nova encomenda" : "Novo pedido";
+          announce(
+            order.code ? `${kind} #${order.code}` : kind,
+            order.customer_name ? `Cliente: ${order.customer_name}` : undefined,
+            `${isPreorder ? "encomenda" : "pedido"}-${order.code ?? Date.now()}`,
+          );
+          callbackRef.current.onOrder?.();
+          callbackRef.current.onNotification?.();
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "appointments", filter: `store_id=eq.${storeId}` },
+        (payload) => {
+          const appointment = payload.new as { id?: string; customer_name?: string; starts_at?: string };
+          const when = appointment.starts_at ? new Date(appointment.starts_at).toLocaleString("pt-BR") : undefined;
+          announce(
+            "Novo agendamento recebido",
+            [appointment.customer_name, when].filter(Boolean).join(" · ") || undefined,
+            `agendamento-${appointment.id ?? Date.now()}`,
+          );
+          callbackRef.current.onAppointment?.();
+          callbackRef.current.onNotification?.();
         },
       )
       .subscribe();

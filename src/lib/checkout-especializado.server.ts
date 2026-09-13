@@ -383,6 +383,16 @@ export async function createAgendamento(admin: Admin, input: AgendamentoInput): 
     return { ok: false, message: "Não foi possível reservar o horário. Tente novamente." };
   }
 
+  await admin.from("notifications").insert({
+    store_id: store.id,
+    order_id: order.id,
+    channel: "painel",
+    event: "appointment.created",
+    title: "Novo agendamento",
+    body: `${input.name} agendou para ${new Date(slot.startsAt).toLocaleString("pt-BR")}.`,
+    payload: { appointment_id: appointment.id, starts_at: slot.startsAt },
+  });
+
   await notifyAppointmentConfirmation(admin, appointment.id);
 
   return {

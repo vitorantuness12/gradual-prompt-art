@@ -273,6 +273,16 @@ export const convertQuoteToOrder = createServerFn({ method: "POST" })
       .update({ status: "converted", order_id: order.id })
       .eq("id", quote.id);
 
+    await supabaseAdmin.from("notifications").insert({
+      store_id: quote.store_id,
+      order_id: order.id,
+      channel: "painel",
+      event: "preorder.created",
+      title: "Nova encomenda confirmada",
+      body: `${quote.customer_name} · ${code}`,
+      payload: { quote_id: quote.id, source: "painel" },
+    });
+
     return {
       ok: true,
       orderId: order.id,
