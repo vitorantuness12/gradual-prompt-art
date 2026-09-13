@@ -167,7 +167,6 @@ const Hero = () => {
                 "Saúde",
                 "Varejo",
                 "Pet",
-                "Infoprodutos",
               ].map((label) => (
                 <span
                   key={label}
