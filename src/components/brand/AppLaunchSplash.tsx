@@ -33,7 +33,7 @@ export function AppLaunchSplash() {
     >
       <div className="app-launch-splash__glow" />
       <img
-        src={branding?.pwaIconUrl ?? "/app-icon-512.png"}
+        src={branding?.pwaIconUrl ?? "/pedium-app-icon-512.png"}
         alt=""
         className="app-launch-splash__icon"
         fetchPriority="high"

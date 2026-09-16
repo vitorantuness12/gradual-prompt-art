@@ -17,8 +17,8 @@ export const Route = createFileRoute("/api/public/manifest")({
         const storeSlug = url.searchParams.get("loja")?.trim() || null;
         const branding = await getBranding();
         const storeName = storeSlug ? await getStoreName(storeSlug) : null;
-        const icon = branding?.pwa_icon_url ?? "/app-icon-512.png";
-        const maskableIcon = branding?.pwa_maskable_icon_url ?? "/app-icon-maskable-512.png";
+        const icon = branding?.pwa_icon_url ?? "/pedium-app-icon-512.png";
+        const maskableIcon = branding?.pwa_maskable_icon_url ?? "/pedium-app-icon-maskable-512.png";
 
         const manifest = {
           name: panel ? "Painel Pedi Um" : storeName ?? "Pedi Um",
