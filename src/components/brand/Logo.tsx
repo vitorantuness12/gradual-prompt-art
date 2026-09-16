@@ -19,8 +19,8 @@ export interface LogoProps {
 export function Logo({ className, withWordmark = true, inverted = false, context = "platform" }: LogoProps) {
   const { theme } = useAppTheme();
   const { data } = useQuery({ queryKey: platformBrandingQueryKey, queryFn: fetchPlatformBranding, staleTime: 5 * 60_000 });
-  const light = context === "merchant" ? data?.merchantLogoLightUrl : data?.salesLogoLightUrl;
-  const dark = context === "merchant" ? data?.merchantLogoDarkUrl : data?.salesLogoDarkUrl;
+  const light = context === "merchant" ? data?.merchantLogoLightUrl : context === "sales" ? data?.salesLogoLightUrl : null;
+  const dark = context === "merchant" ? data?.merchantLogoDarkUrl : context === "sales" ? data?.salesLogoDarkUrl : null;
   const configured = theme === "dark" ? dark ?? light : light ?? dark;
   return (
     <span className={cn("inline-flex items-center", className)}>

@@ -38,7 +38,7 @@ export function PlatformLogoField(props: PlatformLogoFieldProps) {
 
   return (
     <article className="overflow-hidden rounded-lg border border-border bg-card">
-      <div className={cn("flex h-36 items-center justify-center p-6", props.darkPreview ? "bg-foreground" : "bg-background")}>
+      <div className={cn("flex h-36 items-center justify-center bg-background p-6", props.darkPreview && "dark")}>
         <img src={props.value ?? fallbackLogo.url} alt={`Prévia: ${props.title}`} className="max-h-20 max-w-full object-contain" />
       </div>
       <div className="space-y-3 border-t border-border p-4">
