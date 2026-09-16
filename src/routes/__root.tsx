@@ -114,9 +114,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap",
       },
-      { rel: "icon", type: "image/png", href: "/favicon.png" },
+      { rel: "icon", type: "image/png", href: "/pedium-favicon.png" },
       { rel: "manifest", href: "/api/public/manifest" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "apple-touch-icon", href: "/pedium-apple-touch-icon.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -183,12 +183,12 @@ function RuntimeBrandingHead() {
   useEffect(() => {
     if (data?.faviconUrl) {
       document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]').forEach((link) => {
-        link.href = data.faviconUrl ?? "/favicon.png";
+        link.href = data.faviconUrl ?? "/pedium-favicon.png";
       });
     }
     const appleTouchIcon = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');
     if (appleTouchIcon && (data?.pwaIconUrl || data?.faviconUrl)) {
-      appleTouchIcon.href = data.pwaIconUrl ?? data.faviconUrl ?? "/apple-touch-icon.png";
+      appleTouchIcon.href = data.pwaIconUrl ?? data.faviconUrl ?? "/pedium-apple-touch-icon.png";
     }
     if (data?.appCoverUrl) {
       const entries = [

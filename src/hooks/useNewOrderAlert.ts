@@ -64,7 +64,7 @@ function announce(title: string, description: string | undefined, tag: string) {
   ) {
     new Notification(title, {
       body: description ?? "Abra o painel para conferir.",
-      icon: "/app-icon-192.png",
+      icon: "/pedium-app-icon-192.png",
       tag,
     });
   }
