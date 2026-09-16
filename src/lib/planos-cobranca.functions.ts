@@ -174,6 +174,8 @@ export const createPlanInvoice = createServerFn({ method: "POST" })
       .update({ number: planInvoiceNumber(invoice.id, startedAt) })
       .eq("id", invoice.id);
 
+    await supabaseAdmin.from("audit_logs").insert({ store_id: data.storeId, user_id: context.userId, action: "platform.invoice_created", entity: "subscription_invoices", entity_id: invoice.id, metadata: { plan_id: data.planId, amount, period: data.period } });
+
     return { ok: true, message: `Cobrança de ${plan.name} criada.`, invoiceId: invoice.id };
   });
 
@@ -220,6 +222,8 @@ export const payPlanInvoice = createServerFn({ method: "POST" })
         .eq("id", invoice.subscription_id);
     }
 
+    await supabaseAdmin.from("audit_logs").insert({ store_id: invoice.store_id, user_id: context.userId, action: "platform.invoice_paid", entity: "subscription_invoices", entity_id: invoice.id, metadata: { method: data.method ?? "manual", amount: invoice.amount } });
+
     return { ok: true, message: "Pagamento confirmado e plano ativo." };
   });
 
@@ -235,7 +239,7 @@ export const voidPlanInvoice = createServerFn({ method: "POST" })
 
     const { data: invoice } = await supabaseAdmin
       .from("subscription_invoices")
-      .select("id, subscription_id, status")
+      .select("id, store_id, subscription_id, status")
       .eq("id", data.invoiceId)
       .maybeSingle();
     if (!invoice) return { ok: false, message: "Cobrança não encontrada." };
@@ -249,6 +253,7 @@ export const voidPlanInvoice = createServerFn({ method: "POST" })
     if (invoice.subscription_id) {
       await supabaseAdmin.from("store_subscriptions").update({ status: "past_due" }).eq("id", invoice.subscription_id);
     }
+    await supabaseAdmin.from("audit_logs").insert({ store_id: invoice.store_id, user_id: context.userId, action: "platform.invoice_voided", entity: "subscription_invoices", entity_id: invoice.id, metadata: { reason: data.reason ?? null } });
     return { ok: true, message: "Cobrança cancelada e loja marcada em atraso." };
   });
 
@@ -271,7 +276,7 @@ export const refundPlanInvoice = createServerFn({ method: "POST" })
 
     const { data: invoice } = await supabaseAdmin
       .from("subscription_invoices")
-      .select("id, subscription_id, status, amount, refunded_amount")
+      .select("id, store_id, subscription_id, status, amount, refunded_amount")
       .eq("id", data.invoiceId)
       .maybeSingle();
     if (!invoice) return { ok: false, message: "Cobrança não encontrada." };
@@ -305,6 +310,8 @@ export const refundPlanInvoice = createServerFn({ method: "POST" })
         .update({ status: "canceled", canceled_at: new Date().toISOString(), cancel_at_period_end: true })
         .eq("id", invoice.subscription_id);
     }
+
+    await supabaseAdmin.from("audit_logs").insert({ store_id: invoice.store_id, user_id: context.userId, action: "platform.invoice_refunded", entity: "subscription_invoices", entity_id: invoice.id, metadata: { amount: check.amount, full, reason: data.reason ?? null, subscription_canceled: Boolean(full && data.cancelSubscription) } });
 
     return {
       ok: true,

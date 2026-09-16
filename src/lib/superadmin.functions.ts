@@ -447,15 +447,123 @@ export const adminDeleteStore = createServerFn({ method: "POST" })
 
 export const adminListAuditLogs = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ search: z.string().trim().max(100).default(""), page: z.number().int().min(1).max(1000).default(1) }).parse(data))
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context as never);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const pageSize = 50;
+    const from = (data.page - 1) * pageSize;
+    let query = supabaseAdmin
+      .from("audit_logs")
+      .select("id, action, entity, store_id, user_id, created_at, metadata", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(from, from + pageSize - 1);
+    if (data.search) query = query.or(`action.ilike.%${data.search}%,entity.ilike.%${data.search}%`);
+    const { data: rows, count } = await query;
+    return { rows: rows ?? [], total: count ?? 0, page: data.page };
+  });
+
+const contentTable = z.enum(["platform_banners", "platform_faqs", "platform_segments"]);
+
+export const adminListContent = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ table: contentTable }).parse(data))
+  .handler(async ({ data, context }) => {
+    await assertSuperAdmin(context as never);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin.from(data.table).select("*").order("sort_order");
+    if (error) throw new Error("Não foi possível carregar o conteúdo.");
+    return rows as unknown as Record<string, unknown>[];
+  });
+
+export const adminMutateContent = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({
+    table: contentTable,
+    action: z.enum(["create", "toggle", "delete"]),
+    id: z.string().uuid().optional(),
+    isActive: z.boolean().optional(),
+    values: z.record(z.string(), z.string().max(1000)).optional(),
+  }).parse(data))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    await assertSuperAdmin(context as never);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.action === "create") {
+      const { error } = await supabaseAdmin.from(data.table).insert((data.values ?? {}) as never);
+      if (error) throw new Error(error.message);
+    } else if (data.action === "toggle" && data.id && data.isActive !== undefined) {
+      const { error } = await supabaseAdmin.from(data.table).update({ is_active: data.isActive } as never).eq("id", data.id);
+      if (error) throw new Error(error.message);
+    } else if (data.action === "delete" && data.id) {
+      const { error } = await supabaseAdmin.from(data.table).delete().eq("id", data.id);
+      if (error) throw new Error(error.message);
+    } else {
+      throw new Error("Ação de conteúdo inválida.");
+    }
+    await supabaseAdmin.from("audit_logs").insert({
+      user_id: context.userId,
+      action: `platform.content_${data.action}`,
+      entity: data.table,
+      entity_id: data.id ?? null,
+      metadata: data.values ?? { is_active: data.isActive ?? null },
+    });
+    return { ok: true };
+  });
+
+export const adminListSupportTickets = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertSuperAdmin(context as never);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin
-      .from("audit_logs")
-      .select("id, action, entity, store_id, user_id, created_at, metadata")
-      .order("created_at", { ascending: false })
-      .limit(60);
+    const { data, error } = await supabaseAdmin
+      .from("support_tickets")
+      .select("id, subject, status, priority, category, created_at, last_message_at, store_id, store:stores(name)")
+      .order("last_message_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error("Não foi possível carregar os tickets.");
     return data ?? [];
+  });
+
+export const adminUpdateSupportTicket = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid(), status: z.enum(["open", "pending", "resolved", "closed"]) }).parse(data))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    await assertSuperAdmin(context as never);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: ticket, error } = await supabaseAdmin.from("support_tickets").update({ status: data.status }).eq("id", data.id).select("store_id").maybeSingle();
+    if (error) throw new Error("Não foi possível atualizar o ticket.");
+    await supabaseAdmin.from("audit_logs").insert({ store_id: ticket?.store_id ?? null, user_id: context.userId, action: "platform.support_ticket_updated", entity: "support_tickets", entity_id: data.id, metadata: { status: data.status } });
+    return { ok: true };
+  });
+
+export const adminListIncidents = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertSuperAdmin(context as never);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin.from("platform_incidents").select("id, title, description, severity, status, started_at, resolved_at").order("started_at", { ascending: false }).limit(100);
+    if (error) throw new Error("Não foi possível carregar os incidentes.");
+    return data ?? [];
+  });
+
+export const adminSaveIncident = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid().optional(), title: z.string().trim().min(3).max(160).optional(), description: z.string().trim().max(1000).optional(), severity: z.enum(["low", "medium", "high", "critical"]).optional(), resolve: z.boolean().default(false) }).parse(data))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    await assertSuperAdmin(context as never);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.resolve && data.id) {
+      const { error } = await supabaseAdmin.from("platform_incidents").update({ status: "resolved", resolved_at: new Date().toISOString() }).eq("id", data.id);
+      if (error) throw new Error("Não foi possível resolver o incidente.");
+    } else if (data.title && data.severity) {
+      const { data: incident, error } = await supabaseAdmin.from("platform_incidents").insert({ title: data.title, description: data.description ?? null, severity: data.severity }).select("id").maybeSingle();
+      if (error) throw new Error("Não foi possível registrar o incidente.");
+      data.id = incident?.id;
+    } else {
+      throw new Error("Preencha os dados do incidente.");
+    }
+    await supabaseAdmin.from("audit_logs").insert({ user_id: context.userId, action: data.resolve ? "platform.incident_resolved" : "platform.incident_created", entity: "platform_incidents", entity_id: data.id ?? null, metadata: { severity: data.severity ?? null } });
+    return { ok: true };
   });
 
 /** Cadastra uma loja pelo admin da plataforma (slug conferido no banco). */

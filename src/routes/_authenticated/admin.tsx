@@ -63,7 +63,13 @@ import {
   adminCreateStore,
   adminDeleteStore,
   adminEditStore,
+  adminListContent,
+  adminListIncidents,
+  adminListSupportTickets,
   adminListAuditLogs,
+  adminMutateContent,
+  adminSaveIncident,
+  adminUpdateSupportTicket,
   adminUpdateStore,
   endSupportAccess,
   getPlatformOverview,
@@ -1489,21 +1495,18 @@ function ContentList({
   primary: string;
 }) {
   const queryClient = useQueryClient();
+  const listFn = useServerFn(adminListContent);
+  const mutateFn = useServerFn(adminMutateContent);
   const [form, setForm] = useState<Record<string, string>>({});
 
   const { data = [] } = useQuery({
     queryKey: ["content", table],
-    queryFn: async () => {
-      const { data, error } = await supabase.from(table).select("*").order("sort_order");
-      if (error) throw new Error(error.message);
-      return data as Record<string, unknown>[];
-    },
+    queryFn: () => listFn({ data: { table } }),
   });
 
   const create = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from(table).insert(form as never);
-      if (error) throw new Error(error.message);
+      await mutateFn({ data: { table, action: "create", values: form } });
     },
     onSuccess: () => {
       toast.success("Item criado.");
@@ -1515,16 +1518,14 @@ function ContentList({
 
   const toggle = useMutation({
     mutationFn: async (input: { id: string; isActive: boolean }) => {
-      const { error } = await supabase.from(table).update({ is_active: input.isActive }).eq("id", input.id);
-      if (error) throw new Error(error.message);
+      await mutateFn({ data: { table, action: "toggle", id: input.id, isActive: input.isActive } });
     },
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["content", table] }),
   });
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from(table).delete().eq("id", id);
-      if (error) throw new Error(error.message);
+      await mutateFn({ data: { table, action: "delete", id } });
     },
     onSuccess: () => {
       toast.success("Item removido.");
@@ -1585,18 +1586,12 @@ function ContentList({
 function SupportTab() {
   const queryClient = useQueryClient();
   const endFn = useServerFn(endSupportAccess);
+  const listTicketsFn = useServerFn(adminListSupportTickets);
+  const updateTicketFn = useServerFn(adminUpdateSupportTicket);
 
   const tickets = useQuery({
     queryKey: ["support-tickets"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("support_tickets")
-        .select("id, subject, status, priority, category, created_at, store_id")
-        .order("last_message_at", { ascending: false })
-        .limit(50);
-      if (error) throw new Error(error.message);
-      return data ?? [];
-    },
+    queryFn: () => listTicketsFn({}),
   });
 
   const sessions = useQuery({
@@ -1614,8 +1609,7 @@ function SupportTab() {
 
   const updateTicket = useMutation({
     mutationFn: async (input: { id: string; status: "open" | "pending" | "resolved" | "closed" }) => {
-      const { error } = await supabase.from("support_tickets").update({ status: input.status }).eq("id", input.id);
-      if (error) throw new Error(error.message);
+      await updateTicketFn({ data: input });
     },
     onSuccess: () => {
       toast.success("Ticket atualizado.");
@@ -1648,8 +1642,9 @@ function SupportTab() {
                   <div>
                     <p className="font-medium text-foreground">{ticket.subject}</p>
                     <p className="text-xs text-muted-foreground">
-                      {ticket.category} · {ticket.priority} · {formatDate(ticket.created_at)}
+                      {ticket.store?.name ?? "Plataforma"} · {ticket.category} · {ticket.priority} · {formatDate(ticket.created_at)}
                     </p>
+                    {Date.now() - new Date(ticket.created_at).getTime() > 24 * 60 * 60 * 1_000 && ticket.status !== "resolved" && ticket.status !== "closed" ? <Badge variant="destructive" className="mt-2">SLA acima de 24h</Badge> : null}
                   </div>
                   <Select value={ticket.status} onValueChange={(status) => updateTicket.mutate({ id: ticket.id, status: status as typeof ticket.status })}>
                     <SelectTrigger className="h-9 w-36">
@@ -1712,32 +1707,29 @@ function SupportTab() {
 function LogsTab() {
   const queryClient = useQueryClient();
   const logsFn = useServerFn(adminListAuditLogs);
+  const listIncidentsFn = useServerFn(adminListIncidents);
+  const saveIncidentFn = useServerFn(adminSaveIncident);
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [severity, setSeverity] = useState("low");
+  const [logSearch, setLogSearch] = useState("");
+  const [logPage, setLogPage] = useState(1);
 
-  const logs = useQuery({ queryKey: ["admin-logs"], queryFn: () => logsFn({}) });
+  const logs = useQuery({ queryKey: ["admin-logs", logSearch, logPage], queryFn: () => logsFn({ data: { search: logSearch, page: logPage } }) });
 
   const incidents = useQuery({
     queryKey: ["admin-incidents"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("platform_incidents")
-        .select("id, title, severity, status, started_at, resolved_at")
-        .order("started_at", { ascending: false })
-        .limit(30);
-      if (error) throw new Error(error.message);
-      return data ?? [];
-    },
+    queryFn: () => listIncidentsFn({}),
   });
 
   const createIncident = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("platform_incidents").insert({ title, severity });
-      if (error) throw new Error(error.message);
+      await saveIncidentFn({ data: { title, description, severity: severity as "low" | "medium" | "high" | "critical" } });
     },
     onSuccess: () => {
       toast.success("Incidente registrado.");
       setTitle("");
+      setDescription("");
       void queryClient.invalidateQueries({ queryKey: ["admin-incidents"] });
     },
     onError: (error: Error) => toast.error(error.message),
@@ -1745,11 +1737,7 @@ function LogsTab() {
 
   const resolveIncident = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("platform_incidents")
-        .update({ status: "resolved", resolved_at: new Date().toISOString() })
-        .eq("id", id);
-      if (error) throw new Error(error.message);
+      await saveIncidentFn({ data: { id, resolve: true } });
     },
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["admin-incidents"] }),
   });
@@ -1758,11 +1746,14 @@ function LogsTab() {
     <div className="grid gap-4 lg:grid-cols-2">
       <Card className="border-border/70 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-base">Logs recentes</CardTitle>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <CardTitle className="text-base">Auditoria</CardTitle>
+            <Input value={logSearch} onChange={(event) => { setLogSearch(event.target.value); setLogPage(1); }} placeholder="Buscar ação ou entidade" className="w-full sm:w-56" />
+          </div>
         </CardHeader>
         <CardContent>
           <ul className="divide-y divide-border text-sm">
-            {(logs.data ?? []).map((log) => (
+            {(logs.data?.rows ?? []).map((log) => (
               <li key={log.id} className="flex items-center justify-between gap-2 py-2">
                 <span className="text-foreground">{log.action}</span>
                 <span className="text-xs text-muted-foreground">
@@ -1771,6 +1762,13 @@ function LogsTab() {
               </li>
             ))}
           </ul>
+          <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+            <span className="text-xs text-muted-foreground">{logs.data?.total ?? 0} registro(s) · página {logPage}</span>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" disabled={logPage === 1} onClick={() => setLogPage((page) => Math.max(1, page - 1))}>Anterior</Button>
+              <Button size="sm" variant="outline" disabled={(logs.data?.rows.length ?? 0) < 50} onClick={() => setLogPage((page) => page + 1)}>Próxima</Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -1792,6 +1790,12 @@ function LogsTab() {
               onChange={(event) => setTitle(event.target.value)}
               placeholder="Título do incidente"
               required
+            />
+            <Input
+              className="min-w-40 flex-1"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="Descrição e impacto"
             />
             <Select value={severity} onValueChange={setSeverity}>
               <SelectTrigger className="w-32">
@@ -1817,6 +1821,7 @@ function LogsTab() {
                   <p className="text-xs text-muted-foreground">
                     {incident.severity} · {formatDate(incident.started_at)}
                   </p>
+                  {incident.description ? <p className="mt-1 text-xs text-muted-foreground">{incident.description}</p> : null}
                 </div>
                 {incident.status === "open" ? (
                   <Button variant="outline" size="sm" onClick={() => resolveIncident.mutate(incident.id)}>
