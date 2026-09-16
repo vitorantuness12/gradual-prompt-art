@@ -1,4 +1,4 @@
-import { Bell, Download, Share, Smartphone } from "lucide-react";
+import { Bell, Download, Share, Smartphone, Volume2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -6,7 +6,13 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { NEW_ORDER_SOUND_KEY, playNewOrderChime } from "@/hooks/useNewOrderAlert";
+import { Slider } from "@/components/ui/slider";
+import {
+  NEW_ORDER_SOUND_KEY,
+  NEW_ORDER_VOLUME_KEY,
+  playNewOrderChime,
+  refreshNewOrderAlertSound,
+} from "@/hooks/useNewOrderAlert";
 import { fetchPlatformBranding, platformBrandingQueryKey } from "@/lib/platform-branding";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 
@@ -14,19 +20,30 @@ export function InstallPanelCard() {
   const { data: branding } = useQuery({ queryKey: platformBrandingQueryKey, queryFn: fetchPlatformBranding, staleTime: 5 * 60_000 });
   const { canInstall, installed, isIos: iosHint, install: promptInstall } = usePwaInstall();
   const [soundOn, setSoundOn] = useState(true);
+  const [volume, setVolume] = useState(70);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     setSoundOn(window.localStorage.getItem(NEW_ORDER_SOUND_KEY) !== "0");
+    const rawVolume = window.localStorage.getItem(NEW_ORDER_VOLUME_KEY);
+    const storedVolume = rawVolume === null ? Number.NaN : Number(rawVolume);
+    if (Number.isFinite(storedVolume)) setVolume(Math.min(100, Math.max(0, storedVolume)));
   }, []);
 
   function toggleSound(checked: boolean) {
     setSoundOn(checked);
     window.localStorage.setItem(NEW_ORDER_SOUND_KEY, checked ? "1" : "0");
+    refreshNewOrderAlertSound();
     if (checked) {
       void playNewOrderChime();
       void Notification.requestPermission?.();
     }
+  }
+
+  function changeVolume(values: number[]) {
+    const nextVolume = values[0] ?? 70;
+    setVolume(nextVolume);
+    window.localStorage.setItem(NEW_ORDER_VOLUME_KEY, String(nextVolume));
   }
 
   async function install() {
@@ -63,11 +80,31 @@ export function InstallPanelCard() {
             <div>
               <p className="text-sm font-medium">Aviso sonoro de pedido novo</p>
               <p className="text-sm text-muted-foreground">
-                Toca enquanto o painel estiver aberto, inclusive no celular.
+                Repete até o pedido ser aceito ou recusado.
               </p>
             </div>
           </div>
           <Switch checked={soundOn} onCheckedChange={toggleSound} aria-label="Aviso sonoro de pedido novo" />
+        </div>
+
+        <div className="space-y-3 rounded-xl border border-border/70 p-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="flex items-center gap-2 text-sm font-medium">
+              <Volume2 className="size-4 text-primary" aria-hidden="true" />
+              Volume do aviso
+            </p>
+            <span className="text-sm tabular-nums text-muted-foreground">{volume}%</span>
+          </div>
+          <Slider
+            value={[volume]}
+            min={0}
+            max={100}
+            step={5}
+            disabled={!soundOn}
+            onValueChange={changeVolume}
+            onValueCommit={() => void playNewOrderChime()}
+            aria-label="Volume do aviso de pedido novo"
+          />
         </div>
 
         {installed ? (

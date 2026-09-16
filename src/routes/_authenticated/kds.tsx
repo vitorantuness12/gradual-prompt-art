@@ -25,6 +25,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useExclusiveShell, useOnlineStatus, useTicker } from "@/hooks/useExclusiveShell";
 import { setAppTheme, useAppTheme } from "@/hooks/useAppTheme";
 import { useActiveStore } from "@/hooks/useMyStores";
+import { acknowledgeNewOrderAlert } from "@/hooks/useNewOrderAlert";
 import { usePosKdsSettings } from "@/hooks/usePosKdsSettings";
 import { useSession } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
@@ -235,9 +236,12 @@ function KdsScreen() {
       advanceFn({
         data: { orderId: order.id, expectedStatus: order.status, nextStatus: nextKdsStatus(order.status) ?? "completed" },
       }),
-    onSuccess: (result) => {
+    onSuccess: (result, order) => {
       if (!result.ok) toast.error(result.message);
-      else toast.success(result.message);
+      else {
+        if (order.status === "pending") acknowledgeNewOrderAlert(order.id);
+        toast.success(result.message);
+      }
       void refresh();
     },
     onError: (error: Error) => toast.error(error.message),
@@ -263,9 +267,12 @@ function KdsScreen() {
 
   const reject = useMutation({
     mutationFn: (input: { orderId: string; reason: string }) => rejectFn({ data: input }),
-    onSuccess: (result) => {
+    onSuccess: (result, input) => {
       if (!result.ok) toast.error(result.message);
-      else toast.success(result.message);
+      else {
+        acknowledgeNewOrderAlert(input.orderId);
+        toast.success(result.message);
+      }
       void refresh();
     },
   });

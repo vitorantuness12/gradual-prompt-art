@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { acknowledgeNewOrderAlert } from "@/hooks/useNewOrderAlert";
 import { supabase } from "@/integrations/supabase/client";
 import { notifyCustomerOrderStatus } from "@/lib/cliente.functions";
 import { dispatchWhatsappOrderEvent } from "@/lib/whatsapp.functions";
@@ -219,7 +220,11 @@ export function OrderDetailDialog({ order, storeId, couriers, onOpenChange }: Pr
         }
       }
     },
-    onSuccess: async () => {
+    onSuccess: async (_result, patch) => {
+      const nextStatus = typeof patch["status"] === "string" ? patch["status"] : null;
+      if (nextStatus && ["confirmed", "rejected", "cancelled"].includes(nextStatus)) {
+        acknowledgeNewOrderAlert(order?.id);
+      }
       toast.success("Pedido atualizado.");
       await queryClient.invalidateQueries({ queryKey: ["orders", storeId] });
       await queryClient.invalidateQueries({ queryKey: ["order-history", order?.id] });
