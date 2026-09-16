@@ -76,13 +76,13 @@ export function PanelMobileNav({ pathname, items, onSignOut }: PanelMobileNavPro
               Mais
             </Button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="max-h-[82dvh] rounded-t-2xl px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-5">
-            <SheetHeader className="pr-10 text-left">
+          <SheetContent side="bottom" className="flex h-[82dvh] max-h-[82dvh] flex-col overflow-hidden rounded-t-2xl px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-5">
+            <SheetHeader className="shrink-0 pr-10 text-left">
               <SheetTitle>Mais recursos</SheetTitle>
               <SheetDescription>Acesse todas as áreas liberadas para sua loja.</SheetDescription>
             </SheetHeader>
-            <ScrollArea className="mt-4 max-h-[62dvh]">
-              <div className="grid grid-cols-2 gap-2 pb-3">
+            <ScrollArea type="always" className="mt-4 min-h-0 flex-1 pr-3">
+              <div className="grid grid-cols-2 gap-2 pb-6">
                 {secondaryItems.map((item) => {
                   const active = isActive(pathname, item.to);
                   return (
