@@ -1,5 +1,5 @@
 import { MessageCircle, Mail, MapPin, Phone } from "lucide-react";
-import logo from "@/assets/pedium-logo.png.asset.json";
+import { Logo } from "@/components/brand/Logo";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -41,7 +41,7 @@ const Footer = () => {
           {/* Brand */}
           <div className="col-span-2 md:col-span-3 lg:col-span-2">
             <a href="/" aria-label="Página inicial da Pedi Um" className="mb-6 flex items-center">
-              <img src={logo.url} alt="Pedi Um — Tudo em um" loading="lazy" decoding="async" className="h-12 w-auto sm:h-14 md:h-16" />
+              <Logo context="sales" className="[&_img]:h-12 sm:[&_img]:h-14 md:[&_img]:h-16" />
             </a>
             <p className="text-muted-foreground text-sm mb-6 max-w-xs">
               Pedi Um — plataforma própria para lojas, delivery, pedidos, mesas,

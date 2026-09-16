@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 
 import { PlanBillingTab } from "@/components/admin/PlanBillingTab";
+import { PlatformBrandingTab } from "@/components/admin/PlatformBrandingTab";
 import { DemoBadge } from "@/components/brand/DemoBadge";
 import { Logo } from "@/components/brand/Logo";
 import { EvolutionAdminPanel } from "@/components/painel/EvolutionAdminPanel";
@@ -135,6 +136,7 @@ function SuperAdminPage() {
             <TabsTrigger value="billing">Cobrança</TabsTrigger>
 
             <TabsTrigger value="content">Conteúdo</TabsTrigger>
+            <TabsTrigger value="branding">Identidade visual</TabsTrigger>
             <TabsTrigger value="support">Suporte</TabsTrigger>
             <TabsTrigger value="logs">Logs e incidentes</TabsTrigger>
             <TabsTrigger value="integrations">Integrações</TabsTrigger>
@@ -159,6 +161,9 @@ function SuperAdminPage() {
 
           <TabsContent value="content" className="mt-6">
             <ContentTab />
+          </TabsContent>
+          <TabsContent value="branding" className="mt-6">
+            <PlatformBrandingTab />
           </TabsContent>
           <TabsContent value="support" className="mt-6">
             <SupportTab />

@@ -161,7 +161,7 @@ function PainelLayout() {
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
           <Link to="/" aria-label="Página inicial">
-            <Logo withWordmark={false} />
+            <Logo context="merchant" withWordmark={false} />
           </Link>
           <div className="flex min-w-0 flex-1 items-center gap-2">
             {memberships.length > 0 ? (

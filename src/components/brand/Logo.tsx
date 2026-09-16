@@ -1,5 +1,8 @@
 import { cn } from "@/lib/utils";
 import logo from "@/assets/pedium-logo.png.asset.json";
+import { useQuery } from "@tanstack/react-query";
+import { useAppTheme } from "@/hooks/useAppTheme";
+import { fetchPlatformBranding, platformBrandingQueryKey } from "@/lib/platform-branding";
 
 export interface LogoProps {
   className?: string;
@@ -7,21 +10,27 @@ export interface LogoProps {
   withWordmark?: boolean;
   /** Mantido por compatibilidade: a marca já possui contraste próprio. */
   inverted?: boolean;
+  context?: "sales" | "merchant" | "platform";
 }
 
 /**
  * Marca da plataforma Pedi Um.
  */
-export function Logo({ className, withWordmark = true, inverted = false }: LogoProps) {
+export function Logo({ className, withWordmark = true, inverted = false, context = "platform" }: LogoProps) {
+  const { theme } = useAppTheme();
+  const { data } = useQuery({ queryKey: platformBrandingQueryKey, queryFn: fetchPlatformBranding, staleTime: 5 * 60_000 });
+  const light = context === "merchant" ? data?.merchantLogoLightUrl : data?.salesLogoLightUrl;
+  const dark = context === "merchant" ? data?.merchantLogoDarkUrl : data?.salesLogoDarkUrl;
+  const configured = theme === "dark" ? dark ?? light : light ?? dark;
   return (
     <span className={cn("inline-flex items-center", className)}>
       <img
-        src={logo.url}
+        src={configured ?? logo.url}
         alt="Pedi Um — Tudo em um"
         className={cn(
           "w-auto object-contain",
           withWordmark ? "h-9" : "h-8",
-          inverted && "brightness-0 invert",
+          inverted && !configured && "brightness-0 invert",
         )}
         loading="lazy"
         decoding="async"
