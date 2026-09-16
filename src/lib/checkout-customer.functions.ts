@@ -90,7 +90,7 @@ export const requestCheckoutCode = createServerFn({ method: "POST" })
     const { data: profile } = data.channel === "email"
       ? await query.eq("email", identifier).maybeSingle()
       : normalizedPhone.ok
-        ? await query.eq("phone", normalizedPhone.digits).maybeSingle()
+        ? await query.eq("phone", normalizedPhone.national).maybeSingle()
         : { data: null };
 
     const generic = {
@@ -105,13 +105,13 @@ export const requestCheckoutCode = createServerFn({ method: "POST" })
     const stored = await storeVerificationCode(supabaseAdmin, codeIdentifier, code, data.channel);
     if (!stored.ok) return { ok: false, message: stored.message, retryAfterSeconds: stored.retryAfterSeconds };
 
-    if (data.channel === "email") {
+    if (data.channel === "email" && profile.email) {
       await (await import("@/lib/email-templates/send-email")).sendTemplateEmail("verification-code", profile.email, {
         templateData: { code, ttlMinutes: CODE_TTL_MINUTES, storeName: "Pedi Um", customerName: profile.full_name },
       });
     } else {
       const { data: store } = await supabaseAdmin.from("stores").select("id").eq("slug", data.storeSlug).maybeSingle();
-      if (store) {
+      if (store && profile.phone) {
         await (await import("@/lib/whatsapp/send.server")).sendWhatsappMessage(supabaseAdmin, {
           storeId: store.id,
           phone: profile.phone,
@@ -134,9 +134,9 @@ export const confirmCheckoutCode = createServerFn({ method: "POST" })
     const { data: profile } = data.channel === "email"
       ? await query.eq("email", data.identifier.trim().toLowerCase()).maybeSingle()
       : phone.ok
-        ? await query.eq("phone", phone.digits).maybeSingle()
+        ? await query.eq("phone", phone.national).maybeSingle()
         : { data: null };
-    if (!profile) return { ok: false, message: "Código inválido ou expirado.", tokenHash: null };
+    if (!profile?.email) return { ok: false, message: "Código inválido ou expirado.", tokenHash: null };
 
     const { checkVerificationCode } = await import("@/lib/acompanhamento.server");
     const checked = await checkVerificationCode(supabaseAdmin, `checkout-login:${profile.user_id}`, data.code);
