@@ -5,41 +5,80 @@ import { supabase } from "@/integrations/supabase/client";
 
 /** Preferência de som guardada no aparelho do lojista. */
 export const NEW_ORDER_SOUND_KEY = "seupedido:som-pedido-novo";
+export const NEW_ORDER_VOLUME_KEY = "seupedido:volume-pedido-novo";
+
+const DEFAULT_VOLUME = 70;
+const ALERT_INTERVAL_MS = 2_400;
+const activeOrderAlerts = new Set<string>();
+let audioContext: AudioContext | null = null;
+let alertTimer: number | null = null;
+
+function savedVolume(): number {
+  if (typeof window === "undefined") return DEFAULT_VOLUME;
+  const stored = Number(window.localStorage.getItem(NEW_ORDER_VOLUME_KEY));
+  return Number.isFinite(stored) ? Math.min(100, Math.max(0, stored)) : DEFAULT_VOLUME;
+}
+
+function getAudioContext(): AudioContext | null {
+  if (typeof window === "undefined") return null;
+  const AudioCtor =
+    window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioCtor) return null;
+  audioContext ??= new AudioCtor();
+  return audioContext;
+}
+
+async function playAlertPattern(): Promise<void> {
+  const context = getAudioContext();
+  if (!context) return;
+
+  try {
+    if (context.state === "suspended") await context.resume();
+    const volume = savedVolume() / 100;
+    const start = context.currentTime;
+    [784, 988, 1175].forEach((frequency, index) => {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const from = start + index * 0.16;
+      oscillator.type = index === 2 ? "triangle" : "sine";
+      oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(0.0001, from);
+      gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume * 0.24), from + 0.025);
+      gain.gain.exponentialRampToValueAtTime(0.0001, from + 0.14);
+      oscillator.connect(gain).connect(context.destination);
+      oscillator.start(from);
+      oscillator.stop(from + 0.16);
+    });
+  } catch {
+    // Sem áudio disponível: o aviso visual continua funcionando.
+  }
+}
 
 /**
  * Toca um aviso curto usando a própria API de áudio do navegador — assim não
  * dependemos de arquivo de som e o aviso funciona também com o app instalado.
  */
 export async function playNewOrderChime(): Promise<void> {
-  if (typeof window === "undefined") return;
-  const AudioCtor =
-    window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-  if (!AudioCtor) return;
+  await playAlertPattern();
+}
 
-  try {
-    const context = new AudioCtor();
-    // Alguns navegadores só liberam o áudio depois de um toque na tela.
-    if (context.state === "suspended") await context.resume();
+function beginOrderAlert(orderId: string): void {
+  activeOrderAlerts.add(orderId);
+  if (!soundEnabled() || alertTimer !== null) return;
+  void playAlertPattern();
+  alertTimer = window.setInterval(() => void playAlertPattern(), ALERT_INTERVAL_MS);
+}
 
-    const start = context.currentTime;
-    [880, 1180].forEach((frequency, index) => {
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      oscillator.type = "sine";
-      oscillator.frequency.value = frequency;
-      const from = start + index * 0.22;
-      gain.gain.setValueAtTime(0.0001, from);
-      gain.gain.exponentialRampToValueAtTime(0.25, from + 0.03);
-      gain.gain.exponentialRampToValueAtTime(0.0001, from + 0.2);
-      oscillator.connect(gain).connect(context.destination);
-      oscillator.start(from);
-      oscillator.stop(from + 0.22);
-    });
+export function acknowledgeNewOrderAlert(orderId?: string): void {
+  if (orderId) activeOrderAlerts.delete(orderId);
+  else activeOrderAlerts.clear();
+  if (activeOrderAlerts.size > 0 || alertTimer === null) return;
+  window.clearInterval(alertTimer);
+  alertTimer = null;
+}
 
-    window.setTimeout(() => void context.close(), 900);
-  } catch {
-    // Sem áudio disponível: o aviso visual já foi mostrado.
-  }
+export function refreshNewOrderAlertSound(): void {
+  if (!soundEnabled()) acknowledgeNewOrderAlert();
 }
 
 function soundEnabled() {
@@ -53,9 +92,12 @@ interface CommerceAlertCallbacks {
   onNotification?: () => void;
 }
 
-function announce(title: string, description: string | undefined, tag: string) {
+function announce(title: string, description: string | undefined, tag: string, repeat = false) {
   toast.success(title, { description });
-  if (soundEnabled()) void playNewOrderChime();
+  if (soundEnabled()) {
+    if (repeat) beginOrderAlert(tag);
+    else void playNewOrderChime();
+  }
 
   if (
     typeof Notification !== "undefined" &&
@@ -85,6 +127,7 @@ export function useNewOrderAlert(storeId: string | undefined, callbacks: Commerc
         { event: "INSERT", schema: "public", table: "orders", filter: `store_id=eq.${storeId}` },
         (payload) => {
           const order = payload.new as {
+            id?: string;
             code?: string;
             customer_name?: string;
             channel?: string;
@@ -98,10 +141,21 @@ export function useNewOrderAlert(storeId: string | undefined, callbacks: Commerc
           announce(
             order.code ? `${kind} #${order.code}` : kind,
             order.customer_name ? `Cliente: ${order.customer_name}` : undefined,
-            `${isPreorder ? "encomenda" : "pedido"}-${order.code ?? Date.now()}`,
+            order.id ?? `${isPreorder ? "encomenda" : "pedido"}-${order.code ?? Date.now()}`,
+            true,
           );
           callbackRef.current.onOrder?.();
           callbackRef.current.onNotification?.();
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "orders", filter: `store_id=eq.${storeId}` },
+        (payload) => {
+          const order = payload.new as { id?: string; status?: string };
+          if (order.id && ["confirmed", "rejected", "cancelled"].includes(order.status ?? "")) {
+            acknowledgeNewOrderAlert(order.id);
+          }
         },
       )
       .on(
@@ -122,6 +176,7 @@ export function useNewOrderAlert(storeId: string | undefined, callbacks: Commerc
       .subscribe();
 
     return () => {
+      acknowledgeNewOrderAlert();
       void supabase.removeChannel(channel);
     };
   }, [storeId]);
