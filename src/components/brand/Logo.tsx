@@ -10,14 +10,14 @@ export interface LogoProps {
 }
 
 /**
- * Marca da plataforma Pedium.
+ * Marca da plataforma Pedi Um.
  */
 export function Logo({ className, withWordmark = true, inverted = false }: LogoProps) {
   return (
     <span className={cn("inline-flex items-center", className)}>
       <img
         src={logo.url}
-        alt="Pedium — Tudo em um"
+        alt="Pedi Um — Tudo em um"
         className={cn(
           "w-auto object-contain",
           withWordmark ? "h-9" : "h-8",

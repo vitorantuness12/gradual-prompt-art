@@ -40,16 +40,16 @@ const Footer = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 md:gap-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-3 lg:col-span-2">
-            <a href="/" aria-label="Página inicial da Pedium" className="mb-6 flex items-center">
-              <img src={logo.url} alt="Pedium — Tudo em um" loading="lazy" decoding="async" className="h-12 w-auto sm:h-14 md:h-16" />
+            <a href="/" aria-label="Página inicial da Pedi Um" className="mb-6 flex items-center">
+              <img src={logo.url} alt="Pedi Um — Tudo em um" loading="lazy" decoding="async" className="h-12 w-auto sm:h-14 md:h-16" />
             </a>
             <p className="text-muted-foreground text-sm mb-6 max-w-xs">
-              Seu Pedido — plataforma própria para lojas, delivery, pedidos, mesas,
+              Pedi Um — plataforma própria para lojas, delivery, pedidos, mesas,
               PDV, pagamentos, estoque e gestão.
             </p>
             <div className="space-y-3">
               <a
-                href="https://wa.me/5565990000000?text=Quero%20conhecer%20o%20O%20Seu%20Pedido"
+                href="https://wa.me/5565990000000?text=Quero%20conhecer%20o%20Pedi%20Um"
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
