@@ -170,29 +170,6 @@ function SettingsPage() {
         </div>
       ) : null}
 
-      <Card className="border-border/70 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-base">Dados da conta</CardTitle>
-          <CardDescription>E-mail usado no cadastro da Pedi Um.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="max-w-xl space-y-2">
-            <Label htmlFor="email-cadastro">E-mail de cadastro</Label>
-            {sessionLoading ? (
-              <Skeleton className="h-10 w-full" />
-            ) : (
-              <Input
-                id="email-cadastro"
-                type="email"
-                value={user?.email ?? "E-mail não disponível"}
-                readOnly
-                aria-readonly="true"
-              />
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
       <StorePublicSettings store={store} editable={editable} onSaved={refetch} />
       <Card className="border-border/70 shadow-sm">
         <CardHeader>
@@ -202,6 +179,20 @@ function SettingsPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <fieldset disabled={!editable} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email-cadastro">E-mail de cadastro</Label>
+                {sessionLoading ? (
+                  <Skeleton className="h-10 w-full" />
+                ) : (
+                  <Input
+                    id="email-cadastro"
+                    type="email"
+                    value={user?.email ?? "E-mail não disponível"}
+                    readOnly
+                    aria-readonly="true"
+                  />
+                )}
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="loja-nome">Nome</Label>
                 <Input id="loja-nome" name="name" defaultValue={store.name} required />
