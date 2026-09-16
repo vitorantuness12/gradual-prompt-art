@@ -5,24 +5,24 @@ const steps = [
   {
     icon: UserPlus,
     title: "Crie sua conta",
-    description: "Crie sua conta e escolha o segmento do negócio.",
+    description: "Cadastre seu negócio e configure as informações principais.",
   },
   {
     icon: Store,
-    title: "Configure sua loja",
+    title: "Monte sua loja",
     description:
-      "Configure sua loja e cadastre produtos, serviços ou cardápio.",
+      "Adicione sua marca, produtos, preços e formas de venda.",
   },
   {
     icon: Share2,
-    title: "Divulgue",
-    description: "Divulgue sua URL própria, QR Code e WhatsApp.",
+    title: "Divulgue seu link",
+    description: "Compartilhe sua loja pelo Instagram, WhatsApp, QR Code e outros canais.",
   },
   {
     icon: ClipboardList,
-    title: "Receba pedidos",
+    title: "Comece a vender",
     description:
-      "Receba pedidos, pagamentos, agendamentos e acompanhe toda a operação.",
+      "Receba pedidos e acompanhe sua operação pela Pedi Um.",
   },
 ];
 
@@ -65,15 +65,14 @@ const HowItWorks = () => {
           className="text-center mb-10 md:mb-16"
         >
           <span className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
-            Como funciona
+            COMEÇAR É SIMPLES
           </span>
           <h2 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6">
-            Sua operação no ar em{" "}
-            <span className="text-gradient">quatro etapas</span>
+            Da sua conta ao{" "}
+            <span className="text-gradient">primeiro pedido.</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto px-2">
-            Do cadastro ao primeiro pedido, com loja própria, catálogo e
-            acompanhamento em tempo real.
+            Crie sua conta, monte sua loja, divulgue seu link e comece a vender.
           </p>
         </motion.div>
 

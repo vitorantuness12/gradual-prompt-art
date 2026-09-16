@@ -6,23 +6,23 @@ const Footer = () => {
 
   const links = {
     produto: [
-      { label: "Funcionalidades", href: "#funcoes" },
-      { label: "Sua URL própria", href: "#url-propria" },
-      { label: "Preços", href: "#precos" },
-      { label: "Segmentos", href: "#segmentos" },
+      { label: "Recursos", href: "#funcoes" },
+      { label: "Sua loja online", href: "#url-propria" },
+      { label: "Planos", href: "#precos" },
+      { label: "Para quem é", href: "#segmentos" },
       { label: "Integrações", href: "#integracoes" },
     ],
     empresa: [
-      { label: "Criar minha loja", href: "/auth?modo=criar" },
-      { label: "Login", href: "/auth?modo=entrar" },
+      { label: "Criar conta", href: "/auth?modo=criar" },
+      { label: "Entrar", href: "/auth?modo=entrar" },
       { label: "Como funciona", href: "#como-funciona" },
       { label: "Acompanhar pedido", href: "/acompanhar" },
-      { label: "Depoimentos", href: "#depoimentos" },
+      { label: "Pedi Um", href: "#depoimentos" },
     ],
     suporte: [
       { label: "Central de Ajuda", href: "#faq" },
-      { label: "Contato", href: "mailto:contato@oseupedido.com.br" },
-      { label: "FAQ", href: "#faq" },
+      { label: "Falar com a gente", href: "mailto:contato@oseupedido.com.br" },
+      { label: "Perguntas frequentes", href: "#faq" },
       { label: "LGPD", href: "/privacidade" },
     ],
     legal: [
@@ -44,8 +44,8 @@ const Footer = () => {
               <Logo context="sales" className="[&_img]:h-12 sm:[&_img]:h-14 md:[&_img]:h-16" />
             </a>
             <p className="text-muted-foreground text-sm mb-6 max-w-xs">
-              Pedi Um — plataforma própria para lojas, delivery, pedidos, mesas,
-              PDV, pagamentos, estoque e gestão.
+              Pedi Um — loja, pedidos e gestão para negócios que querem vender
+              direto e ter mais controle da própria operação.
             </p>
             <div className="space-y-3">
               <a
@@ -136,7 +136,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="mt-10 md:mt-16 pt-6 md:pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} Pedi Um. Todos os direitos reservados.
+            © {currentYear} Pedi Um. Todos os direitos reservados. Tudo pra vender. Tudo em um.
           </p>
           <div className="flex items-center gap-6">
             <a

@@ -88,7 +88,7 @@ const Integrations = () => {
             transition={{ delay: 0.2 }}
             className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4"
           >
-            Integrações
+            CONECTE SUA OPERAÇÃO
           </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -97,8 +97,8 @@ const Integrations = () => {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6"
           >
-            Conecte com as{" "}
-            <span className="text-gradient">melhores plataformas</span>
+            A Pedi Um não precisa{" "}
+            <span className="text-gradient">trabalhar sozinha.</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -107,8 +107,8 @@ const Integrations = () => {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto px-2"
           >
-            A plataforma é preparada para integrações por APIs oficiais. A
-            disponibilidade depende do provedor e das credenciais do lojista.
+            Integre pagamentos, WhatsApp, mapas, marketplaces e outras ferramentas
+            utilizadas pelo seu negócio.
           </motion.p>
         </motion.div>
 
@@ -156,7 +156,7 @@ const Integrations = () => {
           transition={{ delay: 0.6 }}
           className="text-center text-muted-foreground text-sm mt-8"
         >
-          Também é possível integrar mapas, analytics e sistemas externos via API REST.
+          A disponibilidade de cada integração pode variar conforme o provedor, plano e credenciais utilizadas.
         </motion.p>
       </div>
     </section>

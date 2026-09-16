@@ -15,6 +15,10 @@ interface PricingCard {
   price?: string;
 }
 
+/** Mantém recursos internos disponíveis sem colocá-los no posicionamento público da homepage. */
+const isPrimaryMarketingFeature = (feature: string) =>
+  !/agenda|agendamento|consulta|horário marcado|prestador de serviço/i.test(feature);
+
 /** Usado apenas se ainda não houver planos publicados no painel. */
 const fallbackPlans: PricingCard[] = [
   {
@@ -44,7 +48,7 @@ const fallbackPlans: PricingCard[] = [
       "Gestão de entregadores e rotas",
       "Mesas, comandas e divisão de conta",
       "Catálogo com inteligência artificial",
-      "Agenda com lembretes no WhatsApp",
+      "Clientes e notificações pelo WhatsApp",
     ],
     cta: "Começar teste grátis",
   },
@@ -59,7 +63,7 @@ const fallbackPlans: PricingCard[] = [
       "API REST, webhooks e integrações avançadas",
       "KDS e impressão setorizada",
       "Encomendas com orçamento e produção",
-      "Agenda e lembretes para pedidos programados",
+      "Pedidos programados e notificações",
       "Suporte prioritário",
     ],
     cta: "Falar com um consultor",
@@ -131,7 +135,7 @@ const Pricing = () => {
         name: plan.name,
         description: plan.tagline ?? plan.description ?? "",
         popular: index === highlightedIndex,
-        features: plan.highlights ?? [],
+        features: (plan.highlights ?? []).filter(isPrimaryMarketingFeature),
         cta: Number(plan.price_month) > 0 ? "Começar teste grátis" : "Criar minha loja",
         price: Number(plan.price_month) > 0 ? `${formatCurrency(Number(plan.price_month))}/mês` : "Grátis",
       }))
@@ -173,7 +177,7 @@ const Pricing = () => {
             transition={{ delay: 0.2 }}
             className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4"
           >
-            Planos & Preços
+            PLANOS PEDI UM
           </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -182,8 +186,8 @@ const Pricing = () => {
             transition={{ delay: 0.3 }}
             className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6"
           >
-            Escolha o plano ideal para{" "}
-            <span className="text-gradient">seu negócio</span>
+            Comece do seu jeito.{" "}
+            <span className="text-gradient">Cresça no seu ritmo.</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -192,8 +196,8 @@ const Pricing = () => {
             transition={{ delay: 0.4 }}
             className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto px-2"
           >
-            Planos para pedidos, delivery, PDV, mesas e agendamentos. Os valores e
-            recursos de cada plano são definidos no momento do cadastro.
+            Planos para diferentes momentos da sua operação, do primeiro pedido a
+            negócios com maior volume e equipes.
           </motion.p>
         </motion.div>
 

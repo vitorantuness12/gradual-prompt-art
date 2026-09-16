@@ -11,33 +11,33 @@ import {
 const segments = [
   {
     icon: ChefHat,
-    title: "Restaurantes e delivery",
-    description: "Pedidos para entrega, retirada, mesa e consumo local.",
+    title: "Alimentação",
+    description: "Restaurantes, hamburguerias, pizzarias, cafeterias e padarias.",
   },
   {
     icon: Pizza,
-    title: "Pizzarias e hamburguerias",
-    description: "Combos, adicionais, variações e montagem personalizada.",
+    title: "Varejo",
+    description: "Lojas, mercados, conveniências e diferentes tipos de comércio.",
   },
   {
     icon: ShoppingBasket,
-    title: "Mercados e mercearias",
-    description: "Catálogo amplo, estoque conectado às vendas e entregas.",
+    title: "Beleza e cuidados",
+    description: "Cosméticos, produtos de beleza e negócios especializados.",
   },
   {
     icon: Stethoscope,
-    title: "Farmácias e conveniências",
-    description: "Pedidos rápidos, notificações e entrega por região.",
+    title: "Pet",
+    description: "Pet shops e comércio de produtos para animais.",
   },
   {
     icon: Dog,
-    title: "Pet shops e clínicas veterinárias",
-    description: "Produtos, serviços e agenda de banho, tosa e consultas.",
+    title: "Delivery e retirada",
+    description: "Operações que recebem pedidos e vendem direto aos clientes.",
   },
   {
     icon: CupSoda,
-    title: "Cafeterias e padarias",
-    description: "QR Code nas mesas, comandas e encomendas agendadas.",
+    title: "E muito mais",
+    description: "Se o seu negócio vende produtos, existe espaço para a Pedi Um.",
   },
 ];
 
@@ -103,7 +103,7 @@ const Segments = () => {
             transition={{ delay: 0.2 }}
             className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4"
           >
-            Segmentos
+            FEITA PARA NEGÓCIOS REAIS
           </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -112,8 +112,8 @@ const Segments = () => {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6"
           >
-            Feito para o{" "}
-            <span className="text-gradient">seu tipo de negócio</span>
+            Se você vende, a Pedi Um{" "}
+            <span className="text-gradient">pode trabalhar com você.</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -122,8 +122,7 @@ const Segments = () => {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto px-2"
           >
-            Nossa plataforma se adapta às necessidades específicas de cada
-            segmento, com funcionalidades pensadas para o seu negócio.
+            Uma plataforma flexível para diferentes operações, do balcão ao online.
           </motion.p>
         </motion.div>
 
@@ -175,7 +174,7 @@ const Segments = () => {
           transition={{ delay: 0.6 }}
           className="text-center text-muted-foreground text-sm mt-6"
         >
-          E muito mais! Qualquer negócio que faz entregas pode usar nossa plataforma.
+          Venda produtos, receba pedidos e centralize sua operação na Pedi Um.
         </motion.p>
       </div>
     </section>

@@ -9,14 +9,14 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const links = [
-    { label: "Home", href: "#" },
-    { label: "Sua URL", href: "#url-propria" },
-    { label: "Segmentos", href: "#segmentos" },
+    { label: "Início", href: "#" },
+    { label: "Sua Loja", href: "#url-propria" },
+    { label: "Para quem é", href: "#segmentos" },
     { label: "Como funciona", href: "#como-funciona" },
-    { label: "Funções", href: "#funcoes" },
+    { label: "Recursos", href: "#funcoes" },
     { label: "Integrações", href: "#integracoes" },
-    { label: "Preços", href: "#precos" },
-    { label: "FAQ", href: "#faq" },
+    { label: "Planos", href: "#precos" },
+    { label: "Dúvidas", href: "#faq" },
   ];
 
   return (
@@ -57,7 +57,7 @@ const Navbar = () => {
               </Button>
               <Button variant="default" size="sm" asChild>
                 <a href="/auth?modo=criar">
-                  Criar minha loja
+                  Começar grátis
                 </a>
               </Button>
             </div>
@@ -87,7 +87,7 @@ const Navbar = () => {
                 <div className="flex flex-col gap-2">
                   <Button variant="default" asChild>
                     <a href="/auth?modo=criar" onClick={() => setIsOpen(false)}>
-                      Criar minha loja
+                      Começar grátis
                     </a>
                   </Button>
                   <Button variant="outline" asChild>

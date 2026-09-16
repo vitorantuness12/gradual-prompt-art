@@ -3,26 +3,26 @@ import { Star } from "lucide-react";
 
 const testimonials = [
   {
-    name: "Loja própria",
-    role: "Sua marca em primeiro lugar",
+    name: "Mais que pedidos",
+    role: "Sua operação conectada",
     content:
-      "Uma plataforma criada para negócios que querem vender direto, sem intermediários entre você e o cliente.",
+      "Sua loja, seus pedidos e seu PDV trabalhando como uma única operação.",
     rating: 0,
     avatar: "L",
   },
   {
-    name: "Operação organizada",
-    role: "Pedidos, mesas, PDV e entregas",
+    name: "Mais controle",
+    role: "Dados para decidir",
     content:
-      "Mais controle sobre pedidos, clientes e operação, com tudo acompanhado em um único painel.",
+      "Estoque, clientes e gestão reunidos para você acompanhar o que acontece no negócio.",
     rating: 0,
     avatar: "O",
   },
   {
-    name: "Seus dados",
-    role: "CRM e relatórios",
+    name: "Mais negócio",
+    role: "Venda direta",
     content:
-      "Sua loja, seus clientes, seus dados e sua marca. As informações de vendas ficam com o seu negócio.",
+      "Seu produto, seu cliente e sua venda, sem intermediários entre sua marca e quem compra.",
     rating: 0,
     avatar: "D",
   },
@@ -89,7 +89,7 @@ const Testimonials = () => {
             transition={{ delay: 0.2 }}
             className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4"
           >
-            Nossa proposta
+            PEDI UM
           </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -98,8 +98,8 @@ const Testimonials = () => {
             transition={{ delay: 0.3 }}
             className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6"
           >
-            Feito para quem quer{" "}
-            <span className="text-gradient">vender direto</span>
+            Mais que pedidos.{" "}
+            <span className="text-gradient">Mais controle. Mais negócio.</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -108,8 +108,8 @@ const Testimonials = () => {
             transition={{ delay: 0.4 }}
             className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto px-2"
           >
-            Ainda não exibimos avaliações: os depoimentos aparecerão aqui quando
-            forem enviados por clientes reais.
+            Sua loja, seus pedidos, seu PDV, seu estoque, seus clientes e sua gestão
+            trabalhando como uma única operação.
           </motion.p>
         </motion.div>
 

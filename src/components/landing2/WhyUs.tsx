@@ -6,21 +6,21 @@ import { useRef } from "react";
 const benefits = [
   {
     icon: ShoppingBag,
-    title: "100% da sua marca, 0% de comissão",
+    title: "Sua loja",
     description:
-      "Sua loja com sua identidade, seus clientes e seus dados. Sem comissão sobre os pedidos e sem depender de marketplaces.",
+      "Sua marca e seu catálogo, com venda direta e 0% de comissão sobre os pedidos.",
   },
   {
     icon: Printer,
-    title: "Operação integrada em tempo real",
+    title: "Seus clientes",
     description:
-      "Pedidos organizados automaticamente, estoque conectado às vendas, gestão de entregadores e catálogo fácil de atualizar.",
+      "Construa sua própria base e acompanhe o histórico de quem compra da sua empresa.",
   },
   {
     icon: Users,
-    title: "Mais controle e mais recompra",
+    title: "Seu controle",
     description:
-      "Atendimento online e presencial, relatórios para decidir melhor, fidelização, cashback e URL própria para divulgar sua loja.",
+      "Loja, pedidos, PDV, estoque e gestão trabalhando juntos em um único painel.",
   },
 ];
 
@@ -83,7 +83,7 @@ const WhyUs = () => {
               transition={{ delay: 0.1 }}
               className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4"
             >
-              Por que nos escolher?
+              MENOS FERRAMENTAS. MAIS OPERAÇÃO.
             </motion.span>
             <motion.h2
               initial={{ opacity: 0, y: 30 }}
@@ -92,8 +92,8 @@ const WhyUs = () => {
               transition={{ delay: 0.2, duration: 0.6 }}
               className="font-display text-[1.35rem] leading-tight sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 text-balance"
             >
-              Seu negócio precisa de uma{" "}
-              <span className="text-gradient">plataforma própria</span>
+              Seu negócio não precisa de{" "}
+              <span className="text-gradient">cinco sistemas.</span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -102,8 +102,8 @@ const WhyUs = () => {
               transition={{ delay: 0.3, duration: 0.5 }}
               className="text-muted-foreground text-sm sm:text-base md:text-lg mb-6 md:mb-10 text-balance"
             >
-              Sua loja, seus clientes, seus dados e sua marca. Mais controle sobre
-              pedidos, vendas e operação, em um só painel.
+              Loja, pedidos, PDV, estoque e gestão trabalhando juntos. Quando uma
+              venda acontece, sua operação acompanha.
             </motion.p>
 
             <motion.div

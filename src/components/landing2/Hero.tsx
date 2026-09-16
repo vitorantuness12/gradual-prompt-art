@@ -101,7 +101,7 @@ const Hero = () => {
                 transition={{ duration: 1.5, repeat: Infinity }}
               />
               <span className="text-sm text-muted-foreground">
-                Delivery • Pizzarias • Mercados • Farmácias • Pet shops
+                LOJA • PEDIDOS • PDV • ESTOQUE • GESTÃO
               </span>
             </motion.div>
 
@@ -116,7 +116,7 @@ const Hero = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                Crie sua loja online{" "}
+                Tudo pra vender.{" "}
               </motion.span>
               <motion.span
                 className="text-gradient inline-block"
@@ -124,14 +124,14 @@ const Hero = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
               >
-                própria
+                Tudo em um.
               </motion.span>
               <motion.span
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.6 }}
               >
-                {" "}e venda do seu jeito{" "}
+                {""}
               </motion.span>
               <motion.span
                 className="text-gradient inline-block"
@@ -139,7 +139,7 @@ const Hero = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7, type: "spring", stiffness: 200 }}
               >
-                sem comissão
+                {""}
               </motion.span>
             </motion.h1>
 
@@ -149,9 +149,9 @@ const Hero = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.5 }}
             >
-              Tudo para o seu negócio vender online: loja própria com sua marca,
-              catálogo, estoque, pagamentos, entregas e relatórios. Sem depender
-              de marketplaces e sem pagar comissão por venda.
+              Tenha sua própria loja online, receba pedidos, venda no balcão e
+              controle sua operação em uma única plataforma. Mais autonomia para
+              vender. Mais controle para crescer.
             </motion.p>
 
             {/* Segmentos */}
@@ -200,7 +200,7 @@ const Hero = () => {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
                 <Button variant="hero" size="lg" asChild>
                   <a href="/auth?modo=criar">
-                    Começar grátis
+                    Criar minha loja grátis
                   </a>
                 </Button>
               </motion.div>
@@ -208,7 +208,7 @@ const Hero = () => {
                 <Button variant="heroOutline" size="lg" asChild>
                   <a href="#funcoes">
                     <Smartphone className="w-5 h-5" />
-                    Ver demonstração
+                    Conhecer a Pedi Um
                   </a>
                 </Button>
               </motion.div>
@@ -217,9 +217,9 @@ const Hero = () => {
             {/* Destaques */}
             <div className="grid grid-cols-3 gap-3 sm:gap-6">
               {[
-                { icon: TrendingUp, value: "0%", label: "Comissão sobre vendas" },
-                { icon: Zap, value: "7 dias", label: "De teste grátis" },
-                { icon: Users, value: "100%", label: "Da sua marca" },
+                { icon: TrendingUp, value: "0%", label: "Comissão sobre pedidos" },
+                { icon: Zap, value: "7 dias", label: "Grátis" },
+                { icon: Users, value: "100%", label: "Sua marca em primeiro lugar" },
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
@@ -259,7 +259,7 @@ const Hero = () => {
 
               <motion.img
                 src={welcomeImg}
-                alt="App Pedi Um"
+                alt="Painel da Pedi Um"
                 width={460}
                 height={407}
                 fetchPriority="high"
