@@ -14,3 +14,11 @@
 - [x] Consolidar instalação e remover manifestos antigos
 - [x] Adaptar Pedidos, Financeiro e Clientes para celular
 - [x] Validar fluxos principais em celular e desktop
+
+## Super Admin completo
+- [ ] Reestruturar navegação e visão geral operacional
+- [ ] Centralizar leituras e ações críticas no servidor
+- [ ] Completar gestão de lojas, usuários e assinaturas
+- [ ] Adicionar saúde da plataforma, privacidade e riscos
+- [ ] Aprimorar suporte, incidentes, auditoria e integrações
+- [ ] Validar permissões, celular e fluxos administrativos
