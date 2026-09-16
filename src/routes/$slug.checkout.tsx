@@ -1000,125 +1000,15 @@ function CheckoutPage() {
           </CardContent>
         </Card>
 
-        {/* 3. Dados */}
+        {/* 3. Observações; dados pessoais vêm da conta no fechamento. */}
         <Card className="border-border/70 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-base">3. Seus dados</CardTitle>
-            <CardDescription>Você acessará sua conta ao confirmar o pedido.</CardDescription>
+            <CardTitle className="text-base">3. Detalhes do pedido</CardTitle>
+            <CardDescription>Ao confirmar, você acessará sua conta e escolherá o endereço salvo.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="nome">Nome completo</Label>
-              <Input
-                id="nome"
-                autoComplete="name"
-                value={form.name}
-                onChange={(event) => update("name", event.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="telefone">Telefone (WhatsApp)</Label>
-              <Input
-                id="telefone"
-                inputMode="tel"
-                autoComplete="tel"
-                value={maskPhone(form.phone)}
-                onChange={(event) => update("phone", maskPhone(event.target.value))}
-
-              />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="email">E-mail (opcional)</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                value={form.email}
-                onChange={(event) => update("email", event.target.value)}
-              />
-            </div>
-
             {isDelivery ? (
               <>
-                <div className="space-y-2">
-                  <Label htmlFor="cep">CEP</Label>
-                  <div className="relative">
-                    <Input
-                      id="cep"
-                      inputMode="numeric"
-                      autoComplete="postal-code"
-                      value={form.zip}
-                      onChange={(event) => update("zip", event.target.value)}
-                      placeholder="00000-000"
-                      disabled={isSearchingCep}
-                      className={isSearchingCep ? "pr-10" : undefined}
-                    />
-                    {isSearchingCep ? (
-                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                      </span>
-                    ) : null}
-                  </div>
-                  {cepError ? (
-                    <div className="space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3">
-                      <p className="text-sm text-amber-700 dark:text-amber-400">{cepError}</p>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setCepError(null);
-                          document.getElementById("rua")?.focus();
-                        }}
-                      >
-                        Usar este endereço
-                      </Button>
-                    </div>
-                  ) : null}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="rua">Rua</Label>
-                  <Input
-                    id="rua"
-                    value={form.street}
-                    onChange={(event) => update("street", event.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="numero">Número</Label>
-                  <Input
-                    id="numero"
-                    value={form.number}
-                    onChange={(event) => update("number", event.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="bairro">Bairro</Label>
-                  <Input
-                    id="bairro"
-                    value={form.district}
-                    onChange={(event) => update("district", event.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="complemento">Complemento</Label>
-                  <Input
-                    id="complemento"
-                    value={form.complement}
-                    onChange={(event) => update("complement", event.target.value)}
-                    placeholder="Apto, bloco, sala"
-                  />
-                </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="referencia">Ponto de referência</Label>
-                  <Input
-                    id="referencia"
-                    value={form.reference}
-                    onChange={(event) => update("reference", event.target.value)}
-                    placeholder="Ex.: portão azul, ao lado da praça"
-                  />
-                </div>
-
                 <div className="sm:col-span-2 space-y-2 rounded-xl border border-border/70 bg-muted/40 p-3">
                   {estimating ? (
                     <p className="text-sm text-muted-foreground">Calculando distância e frete…</p>
@@ -1155,7 +1045,7 @@ function CheckoutPage() {
                     </>
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      Informe o CEP ou rua e bairro para calcularmos a distância e o frete.
+                      O frete será confirmado depois que você escolher um endereço salvo.
                     </p>
                   )}
                 </div>

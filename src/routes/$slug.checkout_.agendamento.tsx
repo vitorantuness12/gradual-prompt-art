@@ -400,7 +400,15 @@ function AgendamentoCheckout() {
         </CardContent>
       </Card>
 
-      <CustomerFields value={customer} onChange={setCustomer} notesLabel="Alguma observação para o atendimento?" />
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Observações</CardTitle>
+          <CardDescription>Se necessário, deixe uma informação para o atendimento.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Input value={customer.notes} onChange={(event) => setCustomer((current) => ({ ...current, notes: event.target.value }))} />
+        </CardContent>
+      </Card>
       <PaymentChoice methods={methods} value={payment} onChange={setPayment} />
       <CheckoutCustomerAccess
         open={accessOpen}

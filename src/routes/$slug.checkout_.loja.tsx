@@ -397,8 +397,6 @@ function LojaCheckout() {
         </Card>
       ) : null}
 
-      <CustomerFields value={customer} onChange={setCustomer} />
-
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
