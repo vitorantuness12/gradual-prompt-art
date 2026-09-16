@@ -15,12 +15,29 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { canManage, useActiveStore } from "@/hooks/useMyStores";
+import { useSession } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 import { ROLE_LABEL, formatDateTime } from "@/lib/format";
 import { storePublicUrl } from "@/lib/store-url";
 
 
 export const Route = createFileRoute("/_authenticated/painel/configuracoes")({
+  head: () => ({
+    meta: [
+      { title: "Configurações da loja | Pedi Um" },
+      {
+        name: "description",
+        content: "Gerencie os dados, atendimento e acesso da sua loja na Pedi Um.",
+      },
+      { property: "og:title", content: "Configurações da loja | Pedi Um" },
+      {
+        property: "og:description",
+        content: "Gerencie os dados, atendimento e acesso da sua loja na Pedi Um.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: SettingsPage,
 });
 
@@ -42,6 +59,7 @@ type StoreFlag = "accepts_delivery" | "accepts_pickup" | "accepts_scheduling" | 
 
 function SettingsPage() {
   const { active, refetch } = useActiveStore();
+  const { user, loading: sessionLoading } = useSession();
   const queryClient = useQueryClient();
   const storeId = active?.storeId;
   const editable = canManage(active?.role);
@@ -152,6 +170,29 @@ function SettingsPage() {
           Seu papel atual ({ROLE_LABEL[active.role]}) permite apenas visualizar estas configurações.
         </div>
       ) : null}
+
+      <Card className="border-border/70 shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-base">Sua conta</CardTitle>
+          <CardDescription>E-mail usado no cadastro da Pedi Um.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="max-w-xl space-y-2">
+            <Label htmlFor="email-cadastro">E-mail de cadastro</Label>
+            {sessionLoading ? (
+              <Skeleton className="h-10 w-full" />
+            ) : (
+              <Input
+                id="email-cadastro"
+                type="email"
+                value={user?.email ?? "E-mail não disponível"}
+                readOnly
+                aria-readonly="true"
+              />
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       <StorePublicSettings store={store} editable={editable} onSaved={refetch} />
 
