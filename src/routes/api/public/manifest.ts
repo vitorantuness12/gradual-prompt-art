@@ -29,7 +29,7 @@ export const Route = createFileRoute("/api/public/manifest")({
           lang: "pt-BR",
           dir: "ltr",
           id: panel ? "/painel/" : storeSlug ? `/${storeSlug}/` : "/",
-          start_url: panel ? "/painel/pedidos?origem=app" : storeSlug ? `/${storeSlug}?origem=app` : "/?origem=app",
+          start_url: panel ? "/auth?modo=entrar&perfil=lojista&origem=app&redirect=%2Fpainel%2Fpedidos" : storeSlug ? `/${storeSlug}?origem=app` : "/?origem=app",
           scope: "/",
           display: "standalone",
           orientation: "portrait",
@@ -42,9 +42,9 @@ export const Route = createFileRoute("/api/public/manifest")({
           ],
           shortcuts: panel
             ? [
-                { name: "Pedidos", url: "/painel/pedidos?origem=app" },
-                { name: "Financeiro", url: "/painel/pagamentos?origem=app" },
-                { name: "Clientes", url: "/painel/clientes?origem=app" },
+                { name: "Pedidos", url: "/auth?modo=entrar&perfil=lojista&origem=app&redirect=%2Fpainel%2Fpedidos" },
+                { name: "Financeiro", url: "/auth?modo=entrar&perfil=lojista&origem=app&redirect=%2Fpainel%2Fpagamentos" },
+                { name: "Clientes", url: "/auth?modo=entrar&perfil=lojista&origem=app&redirect=%2Fpainel%2Fclientes" },
               ]
             : storeSlug
               ? [

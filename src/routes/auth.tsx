@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { Logo } from "@/components/brand/Logo";
+import { MerchantPwaLogin } from "@/components/auth/MerchantPwaLogin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +28,7 @@ const searchSchema = z.object({
   perfil: z.enum(["cliente", "motoboy", "lojista"]).optional().catch(undefined),
   modo: z.enum(["entrar", "criar", "recuperar"]).optional().catch(undefined),
   redirect: z.string().optional().catch(undefined),
+  origem: z.enum(["app"]).optional().catch(undefined),
 });
 
 const TITLE = "Entrar ou criar conta — Pedi Um";
@@ -116,6 +118,7 @@ function AuthPage() {
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [checkEmail, setCheckEmail] = useState(false);
+  const [standalone, setStandalone] = useState(false);
 
   // Etapa/perfil derivados da URL, mas com estado otimista: o clique muda a tela
   // imediatamente e a URL é sincronizada em segundo plano (sem travar o render).
@@ -134,6 +137,14 @@ function AuthPage() {
   });
 
   // Se a URL mudar por fora (voltar/avançar do navegador), acompanha.
+  useEffect(() => {
+    const displayMode = window.matchMedia("(display-mode: standalone)");
+    const syncStandalone = () => setStandalone(displayMode.matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true);
+    syncStandalone();
+    displayMode.addEventListener("change", syncStandalone);
+    return () => displayMode.removeEventListener("change", syncStandalone);
+  }, []);
+
   useEffect(() => {
     setStep({ etapa: urlEtapa, perfil: urlPerfil });
   }, [urlEtapa, urlPerfil]);
@@ -161,11 +172,23 @@ function AuthPage() {
     });
   }
 
+  useEffect(() => {
+    if (!standalone || perfil === "lojista") return;
+    go({ etapa: "entrar", perfil: "lojista", modo: "entrar" });
+    // A instalação do painel sempre pertence ao lojista.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [standalone, perfil]);
+
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (!data.session) return;
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
       const kinds = await fetchAccountKinds();
+      if ((search.origem === "app" || standalone) && !kinds.merchant) {
+        await supabase.auth.signOut();
+        toast.error("Este aplicativo é exclusivo para contas de lojista.");
+        return;
+      }
       void navigate({ to: redirectForAccount(kinds, perfil, search.redirect), replace: true });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -174,6 +197,11 @@ function AuthPage() {
   /** Depois de autenticar, decide o destino conforme os perfis da conta. */
   async function routeAfterLogin(chosen: AccountKind | null) {
     const kinds = await fetchAccountKinds();
+    if ((search.origem === "app" || standalone) && !kinds.merchant) {
+      await supabase.auth.signOut();
+      toast.error("Esta conta não possui acesso de lojista.");
+      return;
+    }
     const available = [
       kinds.customer ? "cliente" : null,
       kinds.courier ? "motoboy" : null,
@@ -409,6 +437,31 @@ function AuthPage() {
   }
 
   const kindInfo = ACCOUNT_KINDS.find((item) => item.key === perfil);
+  const merchantApp = (search.origem === "app" || standalone) && etapa === "entrar" && perfil === "lojista";
+
+  if (merchantApp) {
+    return (
+      <MerchantPwaLogin
+        identifier={form.identifier}
+        password={form.password}
+        otpCode={otpCode}
+        loading={loading}
+        recovering={recovering}
+        otpSent={otpSent}
+        showPassword={showPassword}
+        onIdentifierChange={(identifier) => update({ identifier })}
+        onPasswordChange={(password) => update({ password })}
+        onOtpCodeChange={setOtpCode}
+        onTogglePassword={() => setShowPassword((value) => !value)}
+        onLogin={handleLogin}
+        onRecover={handleRecover}
+        onSetRecovering={setRecovering}
+        onSendOtp={() => void handleSendOtp()}
+        onVerifyOtp={() => void handleVerifyOtp()}
+        onCreateAccount={() => go({ etapa: "criar", perfil: "lojista" })}
+      />
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-secondary/40">
