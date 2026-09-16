@@ -1,12 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Sparkles } from "lucide-react";
+import { Activity, Blocks, Building2, CreditCard, FileText, Headphones, LayoutDashboard, MessageCircle, Palette, ReceiptText, ScrollText, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 
 import { PlanBillingTab } from "@/components/admin/PlanBillingTab";
+import { AdminHealthTab } from "@/components/admin/AdminHealthTab";
+import { AdminPrivacyTab } from "@/components/admin/AdminPrivacyTab";
 import { PlatformBrandingTab } from "@/components/admin/PlatformBrandingTab";
 import { DemoBadge } from "@/components/brand/DemoBadge";
 import { Logo } from "@/components/brand/Logo";
@@ -61,7 +63,13 @@ import {
   adminCreateStore,
   adminDeleteStore,
   adminEditStore,
+  adminListContent,
+  adminListIncidents,
+  adminListSupportTickets,
   adminListAuditLogs,
+  adminMutateContent,
+  adminSaveIncident,
+  adminUpdateSupportTicket,
   adminUpdateStore,
   endSupportAccess,
   getPlatformOverview,
@@ -122,30 +130,42 @@ function SuperAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-secondary/30">
-      <header className="border-b border-border/70 bg-card">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
+    <div className="min-h-dvh bg-secondary/30">
+      <header className="sticky top-0 z-40 border-b border-border/70 bg-card/95 pt-[env(safe-area-inset-top)] backdrop-blur">
+        <div className="mx-auto grid max-w-7xl grid-cols-[auto_minmax(0,1fr)] items-center gap-3 px-4 py-3 sm:px-6">
           <Logo />
-          <h1 className="text-base font-semibold text-foreground">Administração da plataforma</h1>
+          <div className="min-w-0 text-right">
+            <h1 className="truncate text-base font-semibold text-foreground">Central da plataforma</h1>
+            <p className="hidden text-xs text-muted-foreground sm:block">Operação, receita, saúde e governança da Pedi Um</p>
+          </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
-        <Tabs defaultValue="overview">
-          <TabsList className="flex w-full flex-wrap justify-start">
-            <TabsTrigger value="overview">Visão geral</TabsTrigger>
-            <TabsTrigger value="stores">Lojas</TabsTrigger>
-            <TabsTrigger value="users">Usuários</TabsTrigger>
-            <TabsTrigger value="plans">Planos</TabsTrigger>
-            <TabsTrigger value="billing">Cobrança</TabsTrigger>
+        <Tabs defaultValue="overview" className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
+          <aside className="min-w-0">
+            <TabsList className="grid h-auto w-full grid-cols-2 gap-1 overflow-visible bg-card p-2 shadow-sm sm:grid-cols-4 lg:sticky lg:top-24 lg:grid-cols-1">
+              <AdminNavLabel label="Operação" />
+              <AdminTab value="overview" icon={LayoutDashboard} label="Visão geral" />
+              <AdminTab value="stores" icon={Building2} label="Lojas" />
+              <AdminTab value="users" icon={Users} label="Usuários" />
+              <AdminTab value="support" icon={Headphones} label="Suporte" />
+              <AdminNavLabel label="Comercial" />
+              <AdminTab value="plans" icon={ReceiptText} label="Planos" />
+              <AdminTab value="billing" icon={CreditCard} label="Cobrança" />
+              <AdminNavLabel label="Plataforma" />
+              <AdminTab value="health" icon={Activity} label="Saúde" />
+              <AdminTab value="integrations" icon={Blocks} label="Integrações" />
+              <AdminTab value="evolution" icon={MessageCircle} label="WhatsApp" />
+              <AdminTab value="content" icon={FileText} label="Conteúdo" />
+              <AdminTab value="branding" icon={Palette} label="Identidade visual" />
+              <AdminNavLabel label="Governança" />
+              <AdminTab value="privacy" icon={ShieldCheck} label="Privacidade" />
+              <AdminTab value="logs" icon={ScrollText} label="Auditoria" />
+            </TabsList>
+          </aside>
 
-            <TabsTrigger value="content">Conteúdo</TabsTrigger>
-            <TabsTrigger value="branding">Identidade visual</TabsTrigger>
-            <TabsTrigger value="support">Suporte</TabsTrigger>
-            <TabsTrigger value="logs">Logs e incidentes</TabsTrigger>
-            <TabsTrigger value="integrations">Integrações</TabsTrigger>
-            <TabsTrigger value="evolution">Evolution API</TabsTrigger>
-          </TabsList>
+          <div className="min-w-0">
 
           <TabsContent value="overview" className="mt-6">
             <OverviewTab />
@@ -162,7 +182,10 @@ function SuperAdminPage() {
           <TabsContent value="billing" className="mt-6">
             <PlanBillingTab />
           </TabsContent>
-
+          <TabsContent value="health" className="mt-6">
+            <AdminSectionHeader title="Saúde da plataforma" description="Acompanhe falhas e conexões dos serviços usados pelas lojas." />
+            <AdminHealthTab />
+          </TabsContent>
           <TabsContent value="content" className="mt-6">
             <ContentTab />
           </TabsContent>
@@ -171,6 +194,9 @@ function SuperAdminPage() {
           </TabsContent>
           <TabsContent value="support" className="mt-6">
             <SupportTab />
+          </TabsContent>
+          <TabsContent value="privacy" className="mt-6">
+            <AdminPrivacyTab />
           </TabsContent>
           <TabsContent value="logs" className="mt-6">
             <LogsTab />
@@ -181,8 +207,31 @@ function SuperAdminPage() {
           <TabsContent value="evolution" className="mt-6">
             <EvolutionAdminPanel />
           </TabsContent>
+          </div>
         </Tabs>
       </main>
+    </div>
+  );
+}
+
+function AdminTab({ value, icon: Icon, label }: { value: string; icon: typeof LayoutDashboard; label: string }) {
+  return (
+    <TabsTrigger value={value} className="min-w-0 justify-start gap-2 px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+      <Icon className="size-4 shrink-0" aria-hidden="true" />
+      <span className="truncate">{label}</span>
+    </TabsTrigger>
+  );
+}
+
+function AdminNavLabel({ label }: { label: string }) {
+  return <p className="col-span-2 hidden px-3 pb-1 pt-3 text-[11px] font-semibold uppercase text-muted-foreground sm:col-span-1 lg:block">{label}</p>;
+}
+
+function AdminSectionHeader({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="mb-5">
+      <h2 className="text-xl font-semibold text-foreground">{title}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">{description}</p>
     </div>
   );
 }
@@ -197,8 +246,9 @@ function OverviewTab() {
 
   return (
     <div className="space-y-6">
+      <AdminSectionHeader title="Visão geral" description="Indicadores comerciais e operacionais atualizados da plataforma." />
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Lojas" value={String(data.stores)} hint={`${data.activeStores} ativas`} />
+        <StatCard label="Lojas" value={String(data.stores)} hint={`${data.activeStores} ativas · ${data.publishedStores} publicadas`} />
         <StatCard label="Usuários" value={String(data.users)} />
         <StatCard label="Pedidos" value={String(data.orders)} hint={`${data.ordersMonth} neste mês`} />
         <StatCard label="Receita das lojas" value={formatCurrency(data.revenue)} hint={`${formatCurrency(data.revenueMonth)} no mês`} />
@@ -206,6 +256,13 @@ function OverviewTab() {
         <StatCard label="Ativação" value={`${data.activationRate}%`} hint="Lojas publicadas" />
         <StatCard label="Churn" value={`${data.churnRate}%`} hint="Assinaturas canceladas/expiradas" />
         <StatCard label="Suporte" value={String(data.openTickets)} hint={`${data.openIncidents} incidentes abertos`} />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <AttentionCard label="Cobranças vencidas" value={data.overdueInvoices} tone="financial" />
+        <AttentionCard label="Solicitações LGPD" value={data.pendingPrivacyRequests} tone="privacy" />
+        <AttentionCard label="Falhas operacionais" value={data.failedPayments + data.fiscalErrors + data.failedWebhooks + data.failedMessages} tone="risk" />
+        <AttentionCard label="Lojas sem assinatura" value={data.storesWithoutSubscription} tone="subscription" />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -238,6 +295,18 @@ function OverviewTab() {
           </CardContent>
         </Card>
       </div>
+    </div>
+  );
+}
+
+function AttentionCard({ label, value, tone }: { label: string; value: number; tone: "financial" | "privacy" | "risk" | "subscription" }) {
+  const icon = tone === "financial" ? CreditCard : tone === "privacy" ? ShieldCheck : tone === "risk" ? Activity : Building2;
+  const Icon = icon;
+  return (
+    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-border bg-card p-4">
+      <Icon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+      <span className="min-w-0 text-sm font-medium text-foreground">{label}</span>
+      <Badge variant={value > 0 ? "destructive" : "secondary"}>{value}</Badge>
     </div>
   );
 }
@@ -1386,7 +1455,6 @@ function ContentTab() {
           { key: "cta_label", label: "Botão" },
           { key: "cta_url", label: "Link" },
         ]}
-        primary="title"
       />
       <ContentList
         table="platform_faqs"
@@ -1396,7 +1464,6 @@ function ContentTab() {
           { key: "answer", label: "Resposta" },
           { key: "category", label: "Categoria" },
         ]}
-        primary="question"
       />
       <ContentList
         table="platform_segments"
@@ -1406,7 +1473,6 @@ function ContentTab() {
           { key: "label", label: "Nome" },
           { key: "description", label: "Descrição" },
         ]}
-        primary="label"
       />
     </div>
   );
@@ -1418,29 +1484,24 @@ function ContentList({
   table,
   title,
   fields,
-  primary,
 }: {
   table: ContentTable;
   title: string;
   fields: { key: string; label: string }[];
-  primary: string;
 }) {
   const queryClient = useQueryClient();
+  const listFn = useServerFn(adminListContent);
+  const mutateFn = useServerFn(adminMutateContent);
   const [form, setForm] = useState<Record<string, string>>({});
 
   const { data = [] } = useQuery({
     queryKey: ["content", table],
-    queryFn: async () => {
-      const { data, error } = await supabase.from(table).select("*").order("sort_order");
-      if (error) throw new Error(error.message);
-      return data as Record<string, unknown>[];
-    },
+    queryFn: () => listFn({ data: { table } }),
   });
 
   const create = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from(table).insert(form as never);
-      if (error) throw new Error(error.message);
+      await mutateFn({ data: { table, action: "create", values: form } });
     },
     onSuccess: () => {
       toast.success("Item criado.");
@@ -1452,16 +1513,14 @@ function ContentList({
 
   const toggle = useMutation({
     mutationFn: async (input: { id: string; isActive: boolean }) => {
-      const { error } = await supabase.from(table).update({ is_active: input.isActive }).eq("id", input.id);
-      if (error) throw new Error(error.message);
+      await mutateFn({ data: { table, action: "toggle", id: input.id, isActive: input.isActive } });
     },
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["content", table] }),
   });
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from(table).delete().eq("id", id);
-      if (error) throw new Error(error.message);
+      await mutateFn({ data: { table, action: "delete", id } });
     },
     onSuccess: () => {
       toast.success("Item removido.");
@@ -1497,15 +1556,15 @@ function ContentList({
 
         <ul className="divide-y divide-border">
           {data.map((item) => (
-            <li key={String(item["id"])} className="flex items-center justify-between gap-2 py-2">
-              <span className="min-w-0 truncate text-foreground">{String(item[primary] ?? "—")}</span>
+            <li key={item.id} className="flex items-center justify-between gap-2 py-2">
+              <span className="min-w-0 truncate text-foreground">{item.label}</span>
               <div className="flex items-center gap-2">
                 <Switch
-                  checked={Boolean(item["is_active"])}
-                  onCheckedChange={(checked) => toggle.mutate({ id: String(item["id"]), isActive: checked })}
+                  checked={item.isActive}
+                  onCheckedChange={(checked) => toggle.mutate({ id: item.id, isActive: checked })}
                   aria-label="Ativo"
                 />
-                <Button variant="ghost" size="sm" onClick={() => remove.mutate(String(item["id"]))}>
+                <Button variant="ghost" size="sm" onClick={() => remove.mutate(item.id)}>
                   Excluir
                 </Button>
               </div>
@@ -1522,18 +1581,12 @@ function ContentList({
 function SupportTab() {
   const queryClient = useQueryClient();
   const endFn = useServerFn(endSupportAccess);
+  const listTicketsFn = useServerFn(adminListSupportTickets);
+  const updateTicketFn = useServerFn(adminUpdateSupportTicket);
 
   const tickets = useQuery({
     queryKey: ["support-tickets"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("support_tickets")
-        .select("id, subject, status, priority, category, created_at, store_id")
-        .order("last_message_at", { ascending: false })
-        .limit(50);
-      if (error) throw new Error(error.message);
-      return data ?? [];
-    },
+    queryFn: () => listTicketsFn({}),
   });
 
   const sessions = useQuery({
@@ -1551,8 +1604,7 @@ function SupportTab() {
 
   const updateTicket = useMutation({
     mutationFn: async (input: { id: string; status: "open" | "pending" | "resolved" | "closed" }) => {
-      const { error } = await supabase.from("support_tickets").update({ status: input.status }).eq("id", input.id);
-      if (error) throw new Error(error.message);
+      await updateTicketFn({ data: input });
     },
     onSuccess: () => {
       toast.success("Ticket atualizado.");
@@ -1585,8 +1637,9 @@ function SupportTab() {
                   <div>
                     <p className="font-medium text-foreground">{ticket.subject}</p>
                     <p className="text-xs text-muted-foreground">
-                      {ticket.category} · {ticket.priority} · {formatDate(ticket.created_at)}
+                      {ticket.store?.name ?? "Plataforma"} · {ticket.category} · {ticket.priority} · {formatDate(ticket.created_at)}
                     </p>
+                    {Date.now() - new Date(ticket.created_at).getTime() > 24 * 60 * 60 * 1_000 && ticket.status !== "resolved" && ticket.status !== "closed" ? <Badge variant="destructive" className="mt-2">SLA acima de 24h</Badge> : null}
                   </div>
                   <Select value={ticket.status} onValueChange={(status) => updateTicket.mutate({ id: ticket.id, status: status as typeof ticket.status })}>
                     <SelectTrigger className="h-9 w-36">
@@ -1649,32 +1702,29 @@ function SupportTab() {
 function LogsTab() {
   const queryClient = useQueryClient();
   const logsFn = useServerFn(adminListAuditLogs);
+  const listIncidentsFn = useServerFn(adminListIncidents);
+  const saveIncidentFn = useServerFn(adminSaveIncident);
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [severity, setSeverity] = useState("low");
+  const [logSearch, setLogSearch] = useState("");
+  const [logPage, setLogPage] = useState(1);
 
-  const logs = useQuery({ queryKey: ["admin-logs"], queryFn: () => logsFn({}) });
+  const logs = useQuery({ queryKey: ["admin-logs", logSearch, logPage], queryFn: () => logsFn({ data: { search: logSearch, page: logPage } }) });
 
   const incidents = useQuery({
     queryKey: ["admin-incidents"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("platform_incidents")
-        .select("id, title, severity, status, started_at, resolved_at")
-        .order("started_at", { ascending: false })
-        .limit(30);
-      if (error) throw new Error(error.message);
-      return data ?? [];
-    },
+    queryFn: () => listIncidentsFn({}),
   });
 
   const createIncident = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("platform_incidents").insert({ title, severity });
-      if (error) throw new Error(error.message);
+      await saveIncidentFn({ data: { title, description, severity: severity as "low" | "medium" | "high" | "critical" } });
     },
     onSuccess: () => {
       toast.success("Incidente registrado.");
       setTitle("");
+      setDescription("");
       void queryClient.invalidateQueries({ queryKey: ["admin-incidents"] });
     },
     onError: (error: Error) => toast.error(error.message),
@@ -1682,11 +1732,7 @@ function LogsTab() {
 
   const resolveIncident = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("platform_incidents")
-        .update({ status: "resolved", resolved_at: new Date().toISOString() })
-        .eq("id", id);
-      if (error) throw new Error(error.message);
+      await saveIncidentFn({ data: { id, resolve: true } });
     },
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["admin-incidents"] }),
   });
@@ -1695,11 +1741,14 @@ function LogsTab() {
     <div className="grid gap-4 lg:grid-cols-2">
       <Card className="border-border/70 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-base">Logs recentes</CardTitle>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <CardTitle className="text-base">Auditoria</CardTitle>
+            <Input value={logSearch} onChange={(event) => { setLogSearch(event.target.value); setLogPage(1); }} placeholder="Buscar ação ou entidade" className="w-full sm:w-56" />
+          </div>
         </CardHeader>
         <CardContent>
           <ul className="divide-y divide-border text-sm">
-            {(logs.data ?? []).map((log) => (
+            {(logs.data?.rows ?? []).map((log) => (
               <li key={log.id} className="flex items-center justify-between gap-2 py-2">
                 <span className="text-foreground">{log.action}</span>
                 <span className="text-xs text-muted-foreground">
@@ -1708,6 +1757,13 @@ function LogsTab() {
               </li>
             ))}
           </ul>
+          <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+            <span className="text-xs text-muted-foreground">{logs.data?.total ?? 0} registro(s) · página {logPage}</span>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" disabled={logPage === 1} onClick={() => setLogPage((page) => Math.max(1, page - 1))}>Anterior</Button>
+              <Button size="sm" variant="outline" disabled={(logs.data?.rows.length ?? 0) < 50} onClick={() => setLogPage((page) => page + 1)}>Próxima</Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -1729,6 +1785,12 @@ function LogsTab() {
               onChange={(event) => setTitle(event.target.value)}
               placeholder="Título do incidente"
               required
+            />
+            <Input
+              className="min-w-40 flex-1"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="Descrição e impacto"
             />
             <Select value={severity} onValueChange={setSeverity}>
               <SelectTrigger className="w-32">
@@ -1754,6 +1816,7 @@ function LogsTab() {
                   <p className="text-xs text-muted-foreground">
                     {incident.severity} · {formatDate(incident.started_at)}
                   </p>
+                  {incident.description ? <p className="mt-1 text-xs text-muted-foreground">{incident.description}</p> : null}
                 </div>
                 {incident.status === "open" ? (
                   <Button variant="outline" size="sm" onClick={() => resolveIncident.mutate(incident.id)}>
