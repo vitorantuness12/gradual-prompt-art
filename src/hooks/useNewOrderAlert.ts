@@ -15,7 +15,9 @@ let alertTimer: number | null = null;
 
 function savedVolume(): number {
   if (typeof window === "undefined") return DEFAULT_VOLUME;
-  const stored = Number(window.localStorage.getItem(NEW_ORDER_VOLUME_KEY));
+  const raw = window.localStorage.getItem(NEW_ORDER_VOLUME_KEY);
+  if (raw === null) return DEFAULT_VOLUME;
+  const stored = Number(raw);
   return Number.isFinite(stored) ? Math.min(100, Math.max(0, stored)) : DEFAULT_VOLUME;
 }
 

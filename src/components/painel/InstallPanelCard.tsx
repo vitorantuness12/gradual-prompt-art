@@ -25,7 +25,8 @@ export function InstallPanelCard() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     setSoundOn(window.localStorage.getItem(NEW_ORDER_SOUND_KEY) !== "0");
-    const storedVolume = Number(window.localStorage.getItem(NEW_ORDER_VOLUME_KEY));
+    const rawVolume = window.localStorage.getItem(NEW_ORDER_VOLUME_KEY);
+    const storedVolume = rawVolume === null ? Number.NaN : Number(rawVolume);
     if (Number.isFinite(storedVolume)) setVolume(Math.min(100, Math.max(0, storedVolume)));
   }, []);
 
