@@ -5441,6 +5441,39 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_branding: {
+        Row: {
+          created_at: string
+          key: string
+          merchant_logo_dark_url: string | null
+          merchant_logo_light_url: string | null
+          sales_logo_dark_url: string | null
+          sales_logo_light_url: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          key?: string
+          merchant_logo_dark_url?: string | null
+          merchant_logo_light_url?: string | null
+          sales_logo_dark_url?: string | null
+          sales_logo_light_url?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          merchant_logo_dark_url?: string | null
+          merchant_logo_light_url?: string | null
+          sales_logo_dark_url?: string | null
+          sales_logo_light_url?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       platform_faqs: {
         Row: {
           answer: string
