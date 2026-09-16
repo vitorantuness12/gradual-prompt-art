@@ -61,7 +61,7 @@ export const Route = createFileRoute("/_authenticated/painel")({
   component: PainelLayout,
   head: () => ({
     // O painel tem manifesto próprio para o app instalado abrir direto nos pedidos.
-    links: [{ rel: "manifest", href: "/manifest-painel.webmanifest" }],
+    links: [{ rel: "manifest", href: "/api/public/manifest?painel=1" }],
   }),
 });
 

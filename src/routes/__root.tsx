@@ -113,7 +113,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap",
       },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
-      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "manifest", href: "/api/public/manifest" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
     ],
   }),
@@ -178,9 +178,13 @@ function RuntimeBrandingHead() {
 
   useEffect(() => {
     if (data?.faviconUrl) {
-      document.querySelectorAll<HTMLLinkElement>('link[rel="icon"], link[rel="apple-touch-icon"]').forEach((link) => {
+      document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]').forEach((link) => {
         link.href = data.faviconUrl ?? "/favicon.png";
       });
+    }
+    const appleTouchIcon = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');
+    if (appleTouchIcon && (data?.pwaIconUrl || data?.faviconUrl)) {
+      appleTouchIcon.href = data.pwaIconUrl ?? data.faviconUrl ?? "/apple-touch-icon.png";
     }
     if (data?.appCoverUrl) {
       const entries = [
@@ -197,7 +201,7 @@ function RuntimeBrandingHead() {
         meta.content = data.appCoverUrl ?? "";
       });
     }
-  }, [data?.appCoverUrl, data?.faviconUrl]);
+  }, [data?.appCoverUrl, data?.faviconUrl, data?.pwaIconUrl]);
 
   return null;
 }

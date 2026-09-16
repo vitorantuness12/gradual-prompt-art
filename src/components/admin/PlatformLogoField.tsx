@@ -14,7 +14,7 @@ interface PlatformLogoFieldProps {
   slot: PlatformLogoSlot;
   value: string | null;
   darkPreview: boolean;
-  previewShape?: "logo" | "square" | "cover";
+  previewShape?: "logo" | "square" | "cover" | "splash";
   fallbackUrl?: string;
   successLabel?: string;
   prepareUpload: Parameters<typeof uploadPlatformLogo>[2];
@@ -49,6 +49,7 @@ export function PlatformLogoField(props: PlatformLogoFieldProps) {
             "max-h-full max-w-full object-contain",
             props.previewShape === "square" && "aspect-square rounded-md",
             props.previewShape === "cover" && "aspect-video w-full rounded-md object-cover",
+            props.previewShape === "splash" && "h-full aspect-[9/16] rounded-md object-cover",
           )}
         />
       </div>

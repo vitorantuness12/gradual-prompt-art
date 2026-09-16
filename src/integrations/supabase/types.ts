@@ -5449,6 +5449,9 @@ export type Database = {
           key: string
           merchant_logo_dark_url: string | null
           merchant_logo_light_url: string | null
+          pwa_icon_url: string | null
+          pwa_maskable_icon_url: string | null
+          pwa_splash_url: string | null
           sales_logo_dark_url: string | null
           sales_logo_light_url: string | null
           updated_at: string
@@ -5461,6 +5464,9 @@ export type Database = {
           key?: string
           merchant_logo_dark_url?: string | null
           merchant_logo_light_url?: string | null
+          pwa_icon_url?: string | null
+          pwa_maskable_icon_url?: string | null
+          pwa_splash_url?: string | null
           sales_logo_dark_url?: string | null
           sales_logo_light_url?: string | null
           updated_at?: string
@@ -5473,6 +5479,9 @@ export type Database = {
           key?: string
           merchant_logo_dark_url?: string | null
           merchant_logo_light_url?: string | null
+          pwa_icon_url?: string | null
+          pwa_maskable_icon_url?: string | null
+          pwa_splash_url?: string | null
           sales_logo_dark_url?: string | null
           sales_logo_light_url?: string | null
           updated_at?: string

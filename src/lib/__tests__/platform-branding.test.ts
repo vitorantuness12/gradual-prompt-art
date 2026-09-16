@@ -9,6 +9,9 @@ const branding: PlatformBranding = {
   merchantLogoDarkUrl: null,
   faviconUrl: "https://assets.test/favicon.webp",
   appCoverUrl: "https://assets.test/capa.webp",
+  pwaIconUrl: "https://assets.test/app.webp",
+  pwaMaskableIconUrl: "https://assets.test/app-maskable.webp",
+  pwaSplashUrl: "https://assets.test/abertura.webp",
   updatedAt: null,
 };
 

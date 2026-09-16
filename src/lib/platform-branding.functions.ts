@@ -10,6 +10,9 @@ const slotSchema = z.enum([
   "merchant_logo_dark_url",
   "favicon_url",
   "app_cover_url",
+  "pwa_icon_url",
+  "pwa_maskable_icon_url",
+  "pwa_splash_url",
 ]);
 
 const urlSchema = z.string().url().max(2200).nullable();
@@ -52,6 +55,9 @@ export const savePlatformBranding = createServerFn({ method: "POST" })
       merchantLogoDarkUrl: urlSchema,
       faviconUrl: urlSchema,
       appCoverUrl: urlSchema,
+      pwaIconUrl: urlSchema,
+      pwaMaskableIconUrl: urlSchema,
+      pwaSplashUrl: urlSchema,
     }).parse(input),
   )
   .handler(async ({ data, context }) => {
@@ -65,6 +71,9 @@ export const savePlatformBranding = createServerFn({ method: "POST" })
       merchant_logo_dark_url: data.merchantLogoDarkUrl,
       favicon_url: data.faviconUrl,
       app_cover_url: data.appCoverUrl,
+      pwa_icon_url: data.pwaIconUrl,
+      pwa_maskable_icon_url: data.pwaMaskableIconUrl,
+      pwa_splash_url: data.pwaSplashUrl,
       updated_by: context.userId,
     });
     if (error) throw new Error("Não foi possível salvar a identidade visual.");
