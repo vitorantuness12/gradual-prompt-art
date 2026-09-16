@@ -178,9 +178,13 @@ function RuntimeBrandingHead() {
 
   useEffect(() => {
     if (data?.faviconUrl) {
-      document.querySelectorAll<HTMLLinkElement>('link[rel="icon"], link[rel="apple-touch-icon"]').forEach((link) => {
+      document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]').forEach((link) => {
         link.href = data.faviconUrl ?? "/favicon.png";
       });
+    }
+    const appleTouchIcon = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');
+    if (appleTouchIcon && (data?.pwaIconUrl || data?.faviconUrl)) {
+      appleTouchIcon.href = data.pwaIconUrl ?? data.faviconUrl ?? "/apple-touch-icon.png";
     }
     if (data?.appCoverUrl) {
       const entries = [
@@ -197,7 +201,7 @@ function RuntimeBrandingHead() {
         meta.content = data.appCoverUrl ?? "";
       });
     }
-  }, [data?.appCoverUrl, data?.faviconUrl]);
+  }, [data?.appCoverUrl, data?.faviconUrl, data?.pwaIconUrl]);
 
   return null;
 }

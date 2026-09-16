@@ -4,6 +4,20 @@ import type { PlatformLogoSlot } from "@/lib/platform-branding";
 
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
 
+async function readImageDimensions(file: File): Promise<{ width: number; height: number }> {
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    return await new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve({ width: image.naturalWidth, height: image.naturalHeight });
+      image.onerror = () => reject(new Error("Não foi possível ler as dimensões da imagem."));
+      image.src = objectUrl;
+    });
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 export async function uploadPlatformLogo(
   file: File,
   slot: PlatformLogoSlot,
@@ -12,11 +26,21 @@ export async function uploadPlatformLogo(
   if (!ALLOWED_TYPES.includes(file.type)) throw new Error("Use uma imagem PNG, JPG, WebP ou SVG.");
   if (file.size > 5 * 1024 * 1024) throw new Error("A imagem deve ter no máximo 5 MB.");
 
+  const { width, height } = await readImageDimensions(file);
+  if ((slot === "pwa_icon_url" || slot === "pwa_maskable_icon_url") && (width !== height || width < 512)) {
+    throw new Error("O ícone do aplicativo deve ser quadrado e ter pelo menos 512 × 512 px.");
+  }
+  if (slot === "pwa_splash_url" && width >= height) {
+    throw new Error("A tela de abertura deve usar uma imagem vertical.");
+  }
+
   const isSvg = file.type === "image/svg+xml";
   const dimensions = slot === "favicon_url" || slot === "pwa_icon_url" || slot === "pwa_maskable_icon_url"
     ? { maxWidth: 512, maxHeight: 512 }
-    : slot === "app_cover_url" || slot === "pwa_splash_url"
+    : slot === "app_cover_url"
       ? { maxWidth: 1920, maxHeight: 1080 }
+      : slot === "pwa_splash_url"
+        ? { maxWidth: 1080, maxHeight: 1920 }
       : { maxWidth: 1600, maxHeight: 800 };
   const body = isSvg ? file : await compressImage(file, { ...dimensions, quality: 0.9 });
   const contentType = (isSvg ? file.type : "image/webp") as "image/png" | "image/jpeg" | "image/webp" | "image/svg+xml";
