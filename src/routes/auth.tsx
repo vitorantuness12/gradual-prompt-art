@@ -146,13 +146,6 @@ function AuthPage() {
   }, []);
 
   useEffect(() => {
-    if (!standalone || perfil === "lojista") return;
-    go({ etapa: "entrar", perfil: "lojista", modo: "entrar" });
-    // A instalação do painel sempre pertence ao lojista.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [standalone, perfil]);
-
-  useEffect(() => {
     setStep({ etapa: urlEtapa, perfil: urlPerfil });
   }, [urlEtapa, urlPerfil]);
 
@@ -178,6 +171,13 @@ function AuthPage() {
       replace: true,
     });
   }
+
+  useEffect(() => {
+    if (!standalone || perfil === "lojista") return;
+    go({ etapa: "entrar", perfil: "lojista", modo: "entrar" });
+    // A instalação do painel sempre pertence ao lojista.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [standalone, perfil]);
 
 
   useEffect(() => {
