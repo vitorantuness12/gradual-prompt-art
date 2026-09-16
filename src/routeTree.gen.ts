@@ -77,6 +77,7 @@ import { Route as AuthenticatedPainelRelatoriosRouteImport } from './routes/_aut
 import { Route as AuthenticatedPainelSalaoRouteImport } from './routes/_authenticated/painel.salao'
 import { Route as AuthenticatedPainelSuporteRouteImport } from './routes/_authenticated/painel.suporte'
 import { Route as AuthenticatedPainelWhatsappRouteImport } from './routes/_authenticated/painel.whatsapp'
+import { Route as ApiPublicManifestRouteImport } from './routes/api/public/manifest'
 import { Route as ApiV1SplatRouteImport } from './routes/api/v1/$'
 import { Route as ApiPublicAgendaLembretesRouteImport } from './routes/api/public/agenda/lembretes'
 import { Route as ApiPublicAssinaturasCobrancasRouteImport } from './routes/api/public/assinaturas/cobrancas'
@@ -469,6 +470,11 @@ const AuthenticatedPainelWhatsappRoute =
     path: '/whatsapp',
     getParentRoute: () => AuthenticatedPainelRoute,
   } as any)
+const ApiPublicManifestRoute = ApiPublicManifestRouteImport.update({
+  id: '/api/public/manifest',
+  path: '/api/public/manifest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV1SplatRoute = ApiV1SplatRouteImport.update({
   id: '/api/v1/$',
   path: '/api/v1/$',
@@ -639,6 +645,7 @@ export interface FileRoutesByFullPath {
   '/painel/salao': typeof AuthenticatedPainelSalaoRoute
   '/painel/suporte': typeof AuthenticatedPainelSuporteRoute
   '/painel/whatsapp': typeof AuthenticatedPainelWhatsappRoute
+  '/api/public/manifest': typeof ApiPublicManifestRoute
   '/api/v1/$': typeof ApiV1SplatRoute
   '/painel/': typeof AuthenticatedPainelIndexRoute
   '/api/public/agenda/lembretes': typeof ApiPublicAgendaLembretesRoute
@@ -725,6 +732,7 @@ export interface FileRoutesByTo {
   '/painel/salao': typeof AuthenticatedPainelSalaoRoute
   '/painel/suporte': typeof AuthenticatedPainelSuporteRoute
   '/painel/whatsapp': typeof AuthenticatedPainelWhatsappRoute
+  '/api/public/manifest': typeof ApiPublicManifestRoute
   '/api/v1/$': typeof ApiV1SplatRoute
   '/painel': typeof AuthenticatedPainelIndexRoute
   '/api/public/agenda/lembretes': typeof ApiPublicAgendaLembretesRoute
@@ -814,6 +822,7 @@ export interface FileRoutesById {
   '/_authenticated/painel/salao': typeof AuthenticatedPainelSalaoRoute
   '/_authenticated/painel/suporte': typeof AuthenticatedPainelSuporteRoute
   '/_authenticated/painel/whatsapp': typeof AuthenticatedPainelWhatsappRoute
+  '/api/public/manifest': typeof ApiPublicManifestRoute
   '/api/v1/$': typeof ApiV1SplatRoute
   '/_authenticated/painel/': typeof AuthenticatedPainelIndexRoute
   '/api/public/agenda/lembretes': typeof ApiPublicAgendaLembretesRoute
@@ -903,6 +912,7 @@ export interface FileRouteTypes {
     | '/painel/salao'
     | '/painel/suporte'
     | '/painel/whatsapp'
+    | '/api/public/manifest'
     | '/api/v1/$'
     | '/painel/'
     | '/api/public/agenda/lembretes'
@@ -989,6 +999,7 @@ export interface FileRouteTypes {
     | '/painel/salao'
     | '/painel/suporte'
     | '/painel/whatsapp'
+    | '/api/public/manifest'
     | '/api/v1/$'
     | '/painel'
     | '/api/public/agenda/lembretes'
@@ -1077,6 +1088,7 @@ export interface FileRouteTypes {
     | '/_authenticated/painel/salao'
     | '/_authenticated/painel/suporte'
     | '/_authenticated/painel/whatsapp'
+    | '/api/public/manifest'
     | '/api/v1/$'
     | '/_authenticated/painel/'
     | '/api/public/agenda/lembretes'
@@ -1123,6 +1135,7 @@ export interface RootRouteChildren {
   SlugIndexRoute: typeof SlugIndexRoute
   SlugCheckoutAgendamentoRoute: typeof SlugCheckoutAgendamentoRoute
   SlugCheckoutLojaRoute: typeof SlugCheckoutLojaRoute
+  ApiPublicManifestRoute: typeof ApiPublicManifestRoute
   ApiV1SplatRoute: typeof ApiV1SplatRoute
   ApiPublicAgendaLembretesRoute: typeof ApiPublicAgendaLembretesRoute
   ApiPublicAssinaturasCobrancasRoute: typeof ApiPublicAssinaturasCobrancasRoute
@@ -1621,6 +1634,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPainelWhatsappRouteImport
       parentRoute: typeof AuthenticatedPainelRoute
     }
+    '/api/public/manifest': {
+      id: '/api/public/manifest'
+      path: '/api/public/manifest'
+      fullPath: '/api/public/manifest'
+      preLoaderRoute: typeof ApiPublicManifestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v1/$': {
       id: '/api/v1/$'
       path: '/api/v1/$'
@@ -1881,6 +1901,7 @@ const rootRouteChildren: RootRouteChildren = {
   SlugIndexRoute: SlugIndexRoute,
   SlugCheckoutAgendamentoRoute: SlugCheckoutAgendamentoRoute,
   SlugCheckoutLojaRoute: SlugCheckoutLojaRoute,
+  ApiPublicManifestRoute: ApiPublicManifestRoute,
   ApiV1SplatRoute: ApiV1SplatRoute,
   ApiPublicAgendaLembretesRoute: ApiPublicAgendaLembretesRoute,
   ApiPublicAssinaturasCobrancasRoute: ApiPublicAssinaturasCobrancasRoute,
