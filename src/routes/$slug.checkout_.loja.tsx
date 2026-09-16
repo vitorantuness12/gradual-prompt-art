@@ -26,6 +26,8 @@ import { normalizePhoneBR } from "@/lib/phone";
 import { parsePaymentMethods } from "@/lib/store-config";
 import { publicStoreQuery } from "@/lib/store-queries";
 import { cn } from "@/lib/utils";
+import { CheckoutCustomerAccess, type CheckoutAddressValue } from "@/components/store/CheckoutCustomerAccess";
+import type { CheckoutCustomerSession } from "@/lib/checkout-customer.functions";
 
 export const Route = createFileRoute("/$slug/checkout_/loja")({
   head: () => ({
@@ -84,6 +86,8 @@ function LojaCheckout() {
   const [shipping, setShipping] = useState<{ fee: number; label: string; message: string; ok: boolean } | null>(null);
   const [quoting, setQuoting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [accessOpen, setAccessOpen] = useState(false);
+  const [authenticatedCustomer, setAuthenticatedCustomer] = useState<CheckoutCustomerSession | null>(null);
 
   const cartLines = cart.items.map((item) => ({
     productId: item.productId,
@@ -156,6 +160,11 @@ function LojaCheckout() {
     }
     if (!payment) {
       toast.error("Escolha a forma de pagamento.");
+      return;
+    }
+
+    if (!authenticatedCustomer) {
+      setAccessOpen(true);
       return;
     }
 
@@ -439,6 +448,20 @@ function LojaCheckout() {
       </Card>
 
       <PaymentChoice methods={methods} value={payment} onChange={setPayment} />
+      <CheckoutCustomerAccess
+        open={accessOpen}
+        storeSlug={slug}
+        needsAddress={fulfillment === "delivery"}
+        initialAddress={{ ...address, reference: "" }}
+        onOpenChange={setAccessOpen}
+        onReady={(account: CheckoutCustomerSession, selected: CheckoutAddressValue | null) => {
+          setAuthenticatedCustomer(account);
+          setCustomer((current) => ({ ...current, name: account.fullName, phone: account.phone, email: account.email }));
+          if (selected) setAddress({ zip: selected.zip, street: selected.street, number: selected.number, district: selected.district, city: selected.city, state: selected.state, complement: selected.complement });
+          setAccessOpen(false);
+          toast.success("Conta confirmada. Toque novamente em concluir pedido.");
+        }}
+      />
     </CheckoutShell>
   );
 }

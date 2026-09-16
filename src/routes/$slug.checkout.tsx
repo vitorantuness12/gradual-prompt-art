@@ -85,6 +85,11 @@ import { computeDynamicEta } from "@/lib/operacao";
 import { getStoreLoad } from "@/lib/operacao.functions";
 import { publicStoreQuery } from "@/lib/store-queries";
 import { CheckoutThemeProvider } from "@/components/store/CheckoutThemeProvider";
+import {
+  CheckoutCustomerAccess,
+  type CheckoutAddressValue,
+} from "@/components/store/CheckoutCustomerAccess";
+import type { CheckoutCustomerSession } from "@/lib/checkout-customer.functions";
 
 export const Route = createFileRoute("/$slug/checkout")({
   head: () => ({
@@ -226,6 +231,8 @@ function CheckoutPage() {
   const [isSearchingCep, setIsSearchingCep] = useState(false);
   const [cepError, setCepError] = useState<string | null>(null);
   const [review, setReview] = useState(false);
+  const [accessOpen, setAccessOpen] = useState(false);
+  const [authenticatedCustomer, setAuthenticatedCustomer] = useState<CheckoutCustomerSession | null>(null);
   const [acceptedOffers, setAcceptedOffers] = useState<string[]>([]);
   const [tracking, setTracking] = useState<Tracking>(EMPTY_TRACKING);
   const [submitting, setSubmitting] = useState(false);
@@ -614,16 +621,8 @@ function CheckoutPage() {
       toast.error(normalizedPhone.message);
       return;
     }
-    if (!consent.acceptedTerms) {
-      toast.error("Aceite os Termos de Uso e a Política de Privacidade para continuar.");
-      return;
-    }
     if (settings.requireEmail && !form.email.trim()) {
       toast.error("Esta loja pede um e-mail válido para o pedido.");
-      return;
-    }
-    if (!settings.allowGuest && !consent.createProfile) {
-      toast.error("Esta loja exige cadastro para finalizar o pedido.");
       return;
     }
 
@@ -647,7 +646,7 @@ function CheckoutPage() {
       toast.error("Escolha a forma de pagamento.");
       return;
     }
-    setReview(true);
+    setAccessOpen(true);
   }
 
   async function submitOrder() {
@@ -660,37 +659,6 @@ function CheckoutPage() {
         setSubmitting(false);
         return;
       }
-
-      // Identificação do cliente: cria/atualiza cadastro por telefone e grava aceites.
-      const identity = await persistIdentity({
-        data: {
-          storeSlug: store.slug,
-          phone: form.phone,
-          name: form.name.trim(),
-          email: form.email.trim() || undefined,
-          fulfillment: String(fulfillment),
-          acceptedTerms: consent.acceptedTerms,
-          marketingOptIn: consent.marketingOptIn,
-          createProfile: consent.createProfile,
-          address: isDelivery
-            ? {
-                street: form.street.trim(),
-                number: form.number.trim(),
-                complement: form.complement.trim(),
-                reference: form.reference.trim(),
-                district: form.district.trim(),
-                zipCode: form.zip.trim(),
-              }
-            : undefined,
-        },
-      });
-      if (!identity.ok) {
-        toast.error(identity.message);
-        setSubmitting(false);
-        return;
-      }
-
-
 
       const scheduledFor =
         timing === "scheduled" && date && time
@@ -840,7 +808,6 @@ function CheckoutPage() {
       couponState.clear();
       setReview(false);
       toast.success(`Pedido ${order.code} enviado para a loja!`);
-      if (identity.created) toast.success(identity.message);
 
       void navigate({ to: "/$slug/acompanhar", params: { slug }, search: { codigo: order.code } });
     } catch (cause) {
@@ -904,30 +871,6 @@ function CheckoutPage() {
             {availability.message} Você pode enviar o pedido como agendado, se a loja aceitar.
           </p>
         ) : null}
-
-        {/* 0. Identificação por telefone */}
-        <PhoneIdentifyCard
-          slug={slug}
-          phone={form.phone}
-          settings={settings}
-          consent={consent}
-          onPhoneChange={(value) => update("phone", value)}
-          onConsentChange={setConsent}
-          onApplyCustomer={({ name, email, address }) => {
-            setForm((current) => ({
-              ...current,
-              name: name ?? current.name,
-              email: email ?? current.email,
-              zip: address?.zipCode ?? current.zip,
-              street: address?.street ?? current.street,
-              number: address?.number ?? current.number,
-              district: address?.district ?? current.district,
-              complement: address?.complement ?? current.complement,
-              reference: address?.reference ?? current.reference,
-            }));
-            toast.success("Dados preenchidos. Confira antes de finalizar.");
-          }}
-        />
 
         {/* 1. Itens */}
 
@@ -1092,7 +1035,7 @@ function CheckoutPage() {
         <Card className="border-border/70 shadow-sm">
           <CardHeader>
             <CardTitle className="text-base">3. Seus dados</CardTitle>
-            <CardDescription>Não é preciso criar conta para pedir.</CardDescription>
+            <CardDescription>Você acessará sua conta ao confirmar o pedido.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
@@ -1656,6 +1599,41 @@ function CheckoutPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <CheckoutCustomerAccess
+        open={accessOpen}
+        storeSlug={slug}
+        needsAddress={isDelivery}
+        initialAddress={{
+          zip: form.zip,
+          street: form.street,
+          number: form.number,
+          complement: form.complement,
+          reference: form.reference,
+          district: form.district,
+          city: "",
+          state: "",
+        }}
+        onOpenChange={setAccessOpen}
+        onReady={(customer: CheckoutCustomerSession, address: CheckoutAddressValue | null) => {
+          setAuthenticatedCustomer(customer);
+          setForm((current) => ({
+            ...current,
+            name: customer.fullName,
+            email: customer.email,
+            phone: customer.phone,
+            ...(address ? {
+              zip: address.zip,
+              street: address.street,
+              number: address.number,
+              complement: address.complement,
+              reference: address.reference,
+              district: address.district,
+            } : {}),
+          }));
+          setAccessOpen(false);
+          setReview(true);
+        }}
+      />
     </CheckoutThemeProvider>
   );
 }

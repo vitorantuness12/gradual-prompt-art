@@ -23,6 +23,8 @@ import { normalizePhoneBR } from "@/lib/phone";
 import { parsePaymentMethods } from "@/lib/store-config";
 import { publicStoreQuery } from "@/lib/store-queries";
 import { cn } from "@/lib/utils";
+import { CheckoutCustomerAccess } from "@/components/store/CheckoutCustomerAccess";
+import type { CheckoutCustomerSession } from "@/lib/checkout-customer.functions";
 
 export const Route = createFileRoute("/$slug/checkout_/agendamento")({
   head: () => ({
@@ -68,6 +70,8 @@ function AgendamentoCheckout() {
   const [customer, setCustomer] = useState<CustomerFormValue>(emptyCustomer);
   const [payment, setPayment] = useState("");
   const [saving, setSaving] = useState(false);
+  const [accessOpen, setAccessOpen] = useState(false);
+  const [authenticatedCustomer, setAuthenticatedCustomer] = useState<CheckoutCustomerSession | null>(null);
 
   const service = useMemo(
     () => options.data?.services.find((item) => item.id === serviceId) ?? null,
@@ -118,6 +122,10 @@ function AgendamentoCheckout() {
     }
     if (!payment) {
       toast.error("Escolha a forma de pagamento.");
+      return;
+    }
+    if (!authenticatedCustomer) {
+      setAccessOpen(true);
       return;
     }
 
@@ -403,6 +411,19 @@ function AgendamentoCheckout() {
 
       <CustomerFields value={customer} onChange={setCustomer} notesLabel="Alguma observação para o atendimento?" />
       <PaymentChoice methods={methods} value={payment} onChange={setPayment} />
+      <CheckoutCustomerAccess
+        open={accessOpen}
+        storeSlug={slug}
+        needsAddress={false}
+        initialAddress={{ zip: "", street: "", number: "", complement: "", reference: "", district: "", city: "", state: "" }}
+        onOpenChange={setAccessOpen}
+        onReady={(account) => {
+          setAuthenticatedCustomer(account);
+          setCustomer((current) => ({ ...current, name: account.fullName, phone: account.phone, email: account.email }));
+          setAccessOpen(false);
+          toast.success("Conta confirmada. Toque novamente em confirmar agendamento.");
+        }}
+      />
     </CheckoutShell>
   );
 }
