@@ -181,9 +181,14 @@ function AuthPage() {
 
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (!data.session) return;
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
       const kinds = await fetchAccountKinds();
+      if ((search.origem === "app" || standalone) && !kinds.merchant) {
+        await supabase.auth.signOut();
+        toast.error("Este aplicativo é exclusivo para contas de lojista.");
+        return;
+      }
       void navigate({ to: redirectForAccount(kinds, perfil, search.redirect), replace: true });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -192,6 +197,11 @@ function AuthPage() {
   /** Depois de autenticar, decide o destino conforme os perfis da conta. */
   async function routeAfterLogin(chosen: AccountKind | null) {
     const kinds = await fetchAccountKinds();
+    if ((search.origem === "app" || standalone) && !kinds.merchant) {
+      await supabase.auth.signOut();
+      toast.error("Esta conta não possui acesso de lojista.");
+      return;
+    }
     const available = [
       kinds.customer ? "cliente" : null,
       kinds.courier ? "motoboy" : null,

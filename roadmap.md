@@ -27,4 +27,4 @@
 - [x] Abrir o aplicativo instalado no login exclusivo do lojista
 - [x] Criar login móvel com aparência nativa e áreas seguras
 - [x] Direcionar sessões ativas e atalhos para o painel correto
-- [ ] Validar abertura, login e telas móveis
+- [x] Validar abertura, login e telas móveis
