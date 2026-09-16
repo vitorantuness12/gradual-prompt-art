@@ -15,6 +15,10 @@ interface PricingCard {
   price?: string;
 }
 
+/** Mantém recursos internos disponíveis sem colocá-los no posicionamento público da homepage. */
+const isPrimaryMarketingFeature = (feature: string) =>
+  !/agenda|agendamento|consulta|horário marcado|prestador de serviço/i.test(feature);
+
 /** Usado apenas se ainda não houver planos publicados no painel. */
 const fallbackPlans: PricingCard[] = [
   {
@@ -131,7 +135,7 @@ const Pricing = () => {
         name: plan.name,
         description: plan.tagline ?? plan.description ?? "",
         popular: index === highlightedIndex,
-        features: plan.highlights ?? [],
+        features: (plan.highlights ?? []).filter(isPrimaryMarketingFeature),
         cta: Number(plan.price_month) > 0 ? "Começar teste grátis" : "Criar minha loja",
         price: Number(plan.price_month) > 0 ? `${formatCurrency(Number(plan.price_month))}/mês` : "Grátis",
       }))

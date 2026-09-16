@@ -4,4 +4,4 @@
 - [x] Remover referências públicas de agendamento da homepage
 - [x] Atualizar SEO, metadados globais e descrição do PWA
 - [x] Auditar marca antiga sem alterar identificadores técnicos
-- [ ] Validar desktop, tablet, mobile, links e overflow
+- [x] Validar desktop, tablet, mobile, links e overflow
