@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/pedium-logo.png.asset.json";
 import { ThemeToggle } from "@/components/painel/ThemeToggle";
 
 const Navbar = () => {
@@ -30,8 +30,8 @@ const Navbar = () => {
         <nav className="container bg-glass rounded-2xl px-4 py-3 sm:px-6 sm:py-4 max-h-[85svh] overflow-y-auto">
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 lg:flex lg:justify-between">
             {/* Logo */}
-            <a href="/" aria-label="Página inicial do O Seu Pedido" className="flex min-w-0 shrink-0 items-center">
-              <img src={logo} alt="O Seu Pedido" className="h-10 sm:h-12 lg:h-14 w-auto" />
+            <a href="/" aria-label="Página inicial da Pedium" className="flex min-w-0 shrink-0 items-center">
+              <img src={logo.url} alt="Pedium — Tudo em um" className="h-10 w-auto sm:h-12 lg:h-14" />
             </a>
 
             {/* Desktop Navigation */}
