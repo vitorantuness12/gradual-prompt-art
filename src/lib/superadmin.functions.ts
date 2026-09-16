@@ -32,6 +32,16 @@ export interface PlatformOverview {
   churnRate: number;
   openTickets: number;
   openIncidents: number;
+  pendingPrivacyRequests: number;
+  overdueInvoices: number;
+  failedPayments: number;
+  fiscalErrors: number;
+  failedWebhooks: number;
+  failedMessages: number;
+  connectedWhatsapp: number;
+  configuredIntegrations: number;
+  storesWithoutSubscription: number;
+  publishedStores: number;
 }
 
 export const getPlatformOverview = createServerFn({ method: "POST" })
@@ -45,7 +55,8 @@ export const getPlatformOverview = createServerFn({ method: "POST" })
     monthStart.setHours(0, 0, 0, 0);
     const iso = monthStart.toISOString();
 
-    const [stores, profiles, orders, ordersMonth, subs, tickets, incidents, paidOrders] = await Promise.all([
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1_000).toISOString();
+    const [stores, profiles, orders, ordersMonth, subs, tickets, incidents, paidOrders, privacy, overdueInvoices, failedPayments, fiscalErrors, failedWebhooks, failedMessages, whatsapp, integrations] = await Promise.all([
       supabaseAdmin.from("stores").select("id, is_active, is_published, created_at"),
       supabaseAdmin.from("profiles").select("id", { count: "exact", head: true }),
       supabaseAdmin.from("orders").select("id", { count: "exact", head: true }),
@@ -54,6 +65,14 @@ export const getPlatformOverview = createServerFn({ method: "POST" })
       supabaseAdmin.from("support_tickets").select("id", { count: "exact", head: true }).in("status", ["open", "pending"]),
       supabaseAdmin.from("platform_incidents").select("id", { count: "exact", head: true }).eq("status", "open"),
       supabaseAdmin.from("orders").select("total, created_at").eq("payment_status", "paid"),
+      supabaseAdmin.from("data_requests").select("id", { count: "exact", head: true }).in("status", ["pending", "in_progress", "processing"]),
+      supabaseAdmin.from("subscription_invoices").select("id", { count: "exact", head: true }).eq("status", "open").lt("due_at", new Date().toISOString()),
+      supabaseAdmin.from("payments").select("id", { count: "exact", head: true }).eq("status", "failed").gte("created_at", thirtyDaysAgo),
+      supabaseAdmin.from("fiscal_invoices").select("id", { count: "exact", head: true }).eq("status", "error").gte("created_at", thirtyDaysAgo),
+      supabaseAdmin.from("webhook_deliveries").select("id", { count: "exact", head: true }).eq("status", "failed").gte("created_at", thirtyDaysAgo),
+      supabaseAdmin.from("whatsapp_delivery_attempts").select("id", { count: "exact", head: true }).eq("status", "failed").gte("created_at", thirtyDaysAgo),
+      supabaseAdmin.from("whatsapp_instances").select("id", { count: "exact", head: true }).eq("status", "open"),
+      supabaseAdmin.from("platform_integrations").select("id", { count: "exact", head: true }).eq("is_enabled", true),
     ]);
 
     const storeRows = stores.data ?? [];
@@ -97,6 +116,132 @@ export const getPlatformOverview = createServerFn({ method: "POST" })
       churnRate: subRows.length ? Math.round((canceled / subRows.length) * 100) : 0,
       openTickets: tickets.count ?? 0,
       openIncidents: incidents.count ?? 0,
+      pendingPrivacyRequests: privacy.count ?? 0,
+      overdueInvoices: overdueInvoices.count ?? 0,
+      failedPayments: failedPayments.count ?? 0,
+      fiscalErrors: fiscalErrors.count ?? 0,
+      failedWebhooks: failedWebhooks.count ?? 0,
+      failedMessages: failedMessages.count ?? 0,
+      connectedWhatsapp: whatsapp.count ?? 0,
+      configuredIntegrations: integrations.count ?? 0,
+      storesWithoutSubscription: Math.max(0, storeRows.length - subRows.length),
+      publishedStores: activated,
+    };
+  });
+
+export interface AdminPrivacyRequest {
+  id: string;
+  kind: string;
+  status: string;
+  contact: string | null;
+  note: string | null;
+  storeId: string | null;
+  storeName: string | null;
+  createdAt: string;
+  handledAt: string | null;
+}
+
+export const listAdminPrivacyRequests = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ status: z.string().max(30).default("all"), page: z.number().int().min(1).max(1000).default(1) }).parse(data))
+  .handler(async ({ data, context }): Promise<{ rows: AdminPrivacyRequest[]; total: number; page: number }> => {
+    await assertSuperAdmin(context as never);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const pageSize = 30;
+    const from = (data.page - 1) * pageSize;
+    let query = supabaseAdmin
+      .from("data_requests")
+      .select("id, kind, status, contact, note, store_id, created_at, handled_at", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(from, from + pageSize - 1);
+    if (data.status !== "all") query = query.eq("status", data.status);
+    const { data: rows, count, error } = await query;
+    if (error) throw new Error("Não foi possível carregar as solicitações de privacidade.");
+    const storeIds = [...new Set((rows ?? []).map((row) => row.store_id).filter((id): id is string => Boolean(id)))];
+    const { data: stores } = storeIds.length
+      ? await supabaseAdmin.from("stores").select("id, name").in("id", storeIds)
+      : { data: [] as { id: string; name: string }[] };
+    const names = new Map((stores ?? []).map((store) => [store.id, store.name]));
+    return {
+      rows: (rows ?? []).map((row) => ({
+        id: row.id,
+        kind: row.kind,
+        status: row.status,
+        contact: row.contact,
+        note: row.note,
+        storeId: row.store_id,
+        storeName: row.store_id ? names.get(row.store_id) ?? null : null,
+        createdAt: row.created_at,
+        handledAt: row.handled_at,
+      })),
+      total: count ?? 0,
+      page: data.page,
+    };
+  });
+
+export const updateAdminPrivacyRequest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({
+    requestId: z.string().uuid(),
+    status: z.enum(["pending", "in_progress", "done", "rejected"]),
+    note: z.string().trim().max(600).optional(),
+  }).parse(data))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    await assertSuperAdmin(context as never);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const finished = data.status === "done" || data.status === "rejected";
+    const { data: request, error } = await supabaseAdmin
+      .from("data_requests")
+      .update({ status: data.status, note: data.note, handled_by: context.userId, handled_at: finished ? new Date().toISOString() : null })
+      .eq("id", data.requestId)
+      .select("store_id")
+      .maybeSingle();
+    if (error) throw new Error("Não foi possível atualizar a solicitação.");
+    await supabaseAdmin.from("audit_logs").insert({
+      store_id: request?.store_id ?? null,
+      user_id: context.userId,
+      action: "platform.privacy_request_updated",
+      entity: "data_requests",
+      entity_id: data.requestId,
+      metadata: { status: data.status },
+    });
+    return { ok: true };
+  });
+
+export interface AdminHealthSnapshot {
+  fiscal: { errors: number; pending: number };
+  payments: { failed: number; pending: number };
+  webhooks: { failed: number; retrying: number };
+  whatsapp: { connected: number; total: number; failedMessages: number };
+  integrations: { connected: number; errors: number; total: number };
+}
+
+export const getAdminHealthSnapshot = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<AdminHealthSnapshot> => {
+    await assertSuperAdmin(context as never);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1_000).toISOString();
+    const [fiscalErrors, fiscalPending, paymentFailed, paymentPending, webhookFailed, webhookRetrying, whatsappConnected, whatsappTotal, messageFailed, integrationConnected, integrationErrors, integrationTotal] = await Promise.all([
+      supabaseAdmin.from("fiscal_invoices").select("id", { count: "exact", head: true }).eq("status", "error").gte("created_at", since),
+      supabaseAdmin.from("fiscal_invoices").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      supabaseAdmin.from("payments").select("id", { count: "exact", head: true }).eq("status", "failed").gte("created_at", since),
+      supabaseAdmin.from("payments").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      supabaseAdmin.from("webhook_deliveries").select("id", { count: "exact", head: true }).eq("status", "failed").gte("created_at", since),
+      supabaseAdmin.from("webhook_deliveries").select("id", { count: "exact", head: true }).eq("status", "retrying"),
+      supabaseAdmin.from("whatsapp_instances").select("id", { count: "exact", head: true }).eq("status", "open"),
+      supabaseAdmin.from("whatsapp_instances").select("id", { count: "exact", head: true }),
+      supabaseAdmin.from("whatsapp_delivery_attempts").select("id", { count: "exact", head: true }).eq("status", "failed").gte("created_at", since),
+      supabaseAdmin.from("platform_integrations").select("id", { count: "exact", head: true }).eq("status", "connected"),
+      supabaseAdmin.from("platform_integrations").select("id", { count: "exact", head: true }).eq("status", "error"),
+      supabaseAdmin.from("platform_integrations").select("id", { count: "exact", head: true }),
+    ]);
+    return {
+      fiscal: { errors: fiscalErrors.count ?? 0, pending: fiscalPending.count ?? 0 },
+      payments: { failed: paymentFailed.count ?? 0, pending: paymentPending.count ?? 0 },
+      webhooks: { failed: webhookFailed.count ?? 0, retrying: webhookRetrying.count ?? 0 },
+      whatsapp: { connected: whatsappConnected.count ?? 0, total: whatsappTotal.count ?? 0, failedMessages: messageFailed.count ?? 0 },
+      integrations: { connected: integrationConnected.count ?? 0, errors: integrationErrors.count ?? 0, total: integrationTotal.count ?? 0 },
     };
   });
 
@@ -224,10 +369,20 @@ export const endSupportAccess = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: boolean }> => {
     await assertSuperAdmin(context as never);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin
+    const { data: session } = await supabaseAdmin
       .from("impersonation_sessions")
       .update({ ended_at: new Date().toISOString() })
-      .eq("id", data.id);
+      .eq("id", data.id)
+      .select("store_id")
+      .maybeSingle();
+    await supabaseAdmin.from("audit_logs").insert({
+      store_id: session?.store_id ?? null,
+      user_id: context.userId,
+      action: "support.impersonation_ended",
+      entity: "impersonation_sessions",
+      entity_id: data.id,
+      metadata: {},
+    });
     return { ok: true };
   });
 
