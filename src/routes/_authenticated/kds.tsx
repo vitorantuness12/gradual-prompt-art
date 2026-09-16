@@ -196,12 +196,9 @@ function KdsScreen() {
   const availabilityFn = useServerFn(setProductAvailability);
   const pauseProduct = useMutation({
     mutationFn: (input: { productId: string; available: boolean }) => availabilityFn({ data: input }),
-    onSuccess: (result, order) => {
+    onSuccess: (result) => {
       if (!result.ok) toast.error(result.message);
-      else {
-        if (order.status === "pending") acknowledgeNewOrderAlert(order.id);
-        toast.success(result.message);
-      }
+      else toast.success(result.message);
       void refresh();
     },
     onError: (error: Error) => toast.error(error.message),
@@ -239,10 +236,10 @@ function KdsScreen() {
       advanceFn({
         data: { orderId: order.id, expectedStatus: order.status, nextStatus: nextKdsStatus(order.status) ?? "completed" },
       }),
-    onSuccess: (result, input) => {
+    onSuccess: (result, order) => {
       if (!result.ok) toast.error(result.message);
       else {
-        acknowledgeNewOrderAlert(input.orderId);
+        if (order.status === "pending") acknowledgeNewOrderAlert(order.id);
         toast.success(result.message);
       }
       void refresh();
@@ -270,9 +267,12 @@ function KdsScreen() {
 
   const reject = useMutation({
     mutationFn: (input: { orderId: string; reason: string }) => rejectFn({ data: input }),
-    onSuccess: (result) => {
+    onSuccess: (result, input) => {
       if (!result.ok) toast.error(result.message);
-      else toast.success(result.message);
+      else {
+        acknowledgeNewOrderAlert(input.orderId);
+        toast.success(result.message);
+      }
       void refresh();
     },
   });
