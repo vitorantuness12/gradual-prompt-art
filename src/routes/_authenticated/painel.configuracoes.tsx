@@ -4,7 +4,6 @@ import { type FormEvent } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { CheckoutModelCard } from "@/components/painel/CheckoutModelCard";
 import { EmptyState, PageHeader } from "@/components/painel/PageHeader";
 import { StorePublicSettings } from "@/components/painel/StorePublicSettings";
 import { Button } from "@/components/ui/button";
@@ -173,7 +172,7 @@ function SettingsPage() {
 
       <Card className="border-border/70 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-base">Sua conta</CardTitle>
+          <CardTitle className="text-base">Dados da conta</CardTitle>
           <CardDescription>E-mail usado no cadastro da Pedi Um.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -195,12 +194,6 @@ function SettingsPage() {
       </Card>
 
       <StorePublicSettings store={store} editable={editable} onSaved={refetch} />
-
-      <CheckoutModelCard store={store} storeId={store.id} editable={editable} onSaved={refetch} />
-
-
-
-
       <Card className="border-border/70 shadow-sm">
         <CardHeader>
           <CardTitle className="text-base">Dados da loja</CardTitle>
