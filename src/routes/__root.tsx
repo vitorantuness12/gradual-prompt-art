@@ -83,20 +83,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "Pedi Um — plataforma de pedidos e agendamentos" },
+      { title: "Pedi Um | Loja, Pedidos e Gestão" },
       {
         name: "description",
         content:
-          "Crie a loja online do seu negócio, receba pedidos e agendamentos e gerencie tudo em um painel só.",
+          "Loja online, pedidos, PDV, estoque, clientes e gestão em um só lugar. Tudo pra vender. Tudo em um.",
       },
-      { property: "og:title", content: "Pedi Um" },
+      { property: "og:title", content: "Pedi Um — Tudo pra vender. Tudo em um." },
       {
         property: "og:description",
-        content: "Loja própria, pedidos, agendamentos, entregas e relatórios para pequenos e médios negócios.",
+        content: "Loja online, pedidos, PDV, estoque e gestão em uma única plataforma para o seu negócio.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@oseupedido" },
+      { property: "og:site_name", content: "Pedi Um" },
+      { name: "twitter:title", content: "Pedi Um — Tudo pra vender. Tudo em um." },
+      { name: "twitter:description", content: "Loja online, pedidos, PDV, estoque e gestão em uma única plataforma para o seu negócio." },
+      { name: "application-name", content: "Pedi Um" },
       { name: "theme-color", content: "#f97316" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },

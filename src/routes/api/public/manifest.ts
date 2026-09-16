@@ -24,7 +24,7 @@ export const Route = createFileRoute("/api/public/manifest")({
           name: panel ? "Painel Pedi Um" : storeName ?? "Pedi Um",
           short_name: panel ? "Meu Painel" : storeName ?? "Pedi Um",
           description: panel
-            ? "Gerencie pedidos, catálogo e vendas da sua loja."
+            ? "Tudo pra vender. Tudo em um."
             : "Peça na sua loja favorita, acompanhe o pedido em tempo real e repita compras anteriores.",
           lang: "pt-BR",
           dir: "ltr",

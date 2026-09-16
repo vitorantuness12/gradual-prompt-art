@@ -4,7 +4,7 @@ import { Link2, QrCode, Instagram, MessageCircle } from "lucide-react";
 /** Exemplos de endereços exibidos apenas como ilustração do formato da URL. */
 const EXAMPLES = [
   "pedium.com.br/pizzariabella",
-  "pedium.com.br/barbearia-central",
+  "pedium.com.br/mercado-central",
   "pedium.com.br/pet-amigo",
 ];
 
@@ -36,17 +36,16 @@ const StoreUrl = () => {
           className="text-center mb-10 md:mb-14"
         >
           <span className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
-            Sua URL própria
+            SUA LOJA. SUA MARCA.
           </span>
           <h2 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6">
-            Cada negócio recebe sua própria{" "}
-            <span className="text-gradient">loja online</span>
+            Uma loja online que{" "}
+            <span className="text-gradient">realmente é sua.</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto px-2">
-            Cada negócio recebe sua própria loja online no endereço
-            pedium.com.br/nomedaloja. O “nomedaloja” é um endereço exclusivo e
-            personalizável, sem exposição de IDs internos, ideal para divulgar no
-            Instagram, WhatsApp, Google, cartão de visita e QR Code.
+            Crie sua loja com sua identidade, seus produtos e uma URL exclusiva
+            para divulgar no Instagram, WhatsApp, Google, QR Code ou onde seus
+            clientes estiverem.
           </p>
         </motion.div>
 
@@ -58,7 +57,7 @@ const StoreUrl = () => {
           className="max-w-3xl mx-auto bg-gradient-card border border-border rounded-2xl md:rounded-3xl p-6 md:p-10"
         >
           <p className="text-sm text-muted-foreground mb-3 text-center">
-            Cada negócio recebe sua própria loja online no endereço:
+            Seu endereço exclusivo para vender direto:
           </p>
           <p className="font-display text-lg sm:text-2xl md:text-3xl font-bold text-center text-gradient break-all mb-8">
             pedium.com.br/nomedaloja

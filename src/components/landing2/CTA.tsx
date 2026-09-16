@@ -120,7 +120,7 @@ const CTA = () => {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-foreground mb-4 md:mb-6"
           >
-            Crie sua loja própria e comece a vender
+            Seu próximo pedido pode começar aqui.
           </motion.h2>
 
           <motion.p
@@ -130,8 +130,8 @@ const CTA = () => {
             transition={{ delay: 0.4, duration: 0.5 }}
             className="text-primary-foreground/80 text-base md:text-lg mb-8 md:mb-10 max-w-xl mx-auto px-2"
           >
-            Uma plataforma criada para negócios que querem vender direto, com sua
-            própria loja em pedium.com.br/nomedaloja.
+            Crie sua loja, organize sua operação e comece a vender diretamente para
+            seus clientes.
           </motion.p>
 
           <motion.div
@@ -151,7 +151,7 @@ const CTA = () => {
                 asChild
               >
                 <a href="/auth?modo=criar">
-                  Comece seu teste grátis
+                  Começar grátis
                   <motion.div
                     animate={{ x: [0, 5, 0] }}
                     transition={{ duration: 1, repeat: Infinity }}
@@ -171,7 +171,7 @@ const CTA = () => {
                 className="border-white/30 text-primary-foreground hover:bg-white/10"
                 asChild
               >
-                <a href="#funcoes">Ver como funciona</a>
+                <a href="https://wa.me/5565990000000?text=Quero%20conhecer%20a%20Pedi%20Um" target="_blank" rel="noreferrer">Falar com a Pedi Um</a>
               </Button>
             </motion.div>
           </motion.div>
@@ -183,9 +183,9 @@ const CTA = () => {
             transition={{ delay: 0.7 }}
             className="text-primary-foreground/60 text-xs md:text-sm mt-6 md:mt-8 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4"
           >
-            <span>✓ Loja própria com sua marca</span>
-            <span>✓ Sem comissão sobre pedidos</span>
-            <span>✓ Cancele quando quiser</span>
+            <span>✓ Sua própria loja</span>
+            <span>✓ 0% de comissão sobre pedidos</span>
+            <span>✓ PDV e gestão integrados</span>
           </motion.p>
         </motion.div>
       </motion.div>

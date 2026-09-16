@@ -15,9 +15,9 @@ import StoreUrl from "@/components/landing2/StoreUrl";
 import Testimonials from "@/components/landing2/Testimonials";
 import WhyUs from "@/components/landing2/WhyUs";
 
-const TITLE = "Pedi Um — sua loja própria com pedidos, PDV e delivery";
+const TITLE = "Pedi Um | Loja Online, Pedidos, PDV e Gestão";
 const DESCRIPTION =
-  "Loja própria em pedium.com.br/nomedaloja: pedidos, delivery, PDV, mesas, agenda, encomendas, estoque com lotes, pagamentos, entregadores, catálogo com IA e relatórios.";
+  "Tenha sua própria loja online, receba pedidos, venda pelo PDV e controle estoque, clientes, pagamentos e operação em um só lugar. Tudo pra vender. Tudo em um.";
 
 
 export const Route = createFileRoute("/")({
@@ -25,11 +25,13 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: TITLE },
       { name: "description", content: DESCRIPTION },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESCRIPTION },
+      { property: "og:title", content: "Pedi Um — Tudo pra vender. Tudo em um." },
+      { property: "og:description", content: "Loja online, pedidos, PDV, estoque e gestão em uma única plataforma para o seu negócio." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://oseupedido.com.br/" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Pedi Um — Tudo pra vender. Tudo em um." },
+      { name: "twitter:description", content: "Loja online, pedidos, PDV, estoque e gestão em uma única plataforma para o seu negócio." },
     ],
     links: [{ rel: "canonical", href: "https://oseupedido.com.br/" }],
   }),

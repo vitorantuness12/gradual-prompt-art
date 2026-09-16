@@ -49,7 +49,7 @@ const features = [
     icon: ShoppingCart,
     title: "Pedidos online",
     description:
-      "Receba pedidos para delivery, retirada, consumo local, mesa ou agendamento, com acompanhamento de status em tempo real.",
+      "Centralize pedidos para delivery, retirada, consumo local e mesa, com acompanhamento de status em tempo real.",
   },
   {
     icon: Smartphone,
@@ -107,9 +107,9 @@ const features = [
   },
   {
     icon: CalendarClock,
-    title: "Agenda e encomendas",
+    title: "Encomendas e pedidos programados",
     description:
-      "Gerencie serviços, reservas, horários, profissionais, pedidos futuros, encomendas, sinais e personalizações.",
+      "Organize pedidos futuros, encomendas, sinais, personalizações e etapas de produção.",
   },
   {
     icon: MessageSquare,
@@ -157,7 +157,7 @@ const features = [
     icon: Code,
     title: "API REST",
     description:
-      "Integre o Seu Pedido a outros sistemas usando API REST documentada, autenticação segura, webhooks e permissões por escopo.",
+      "Integre a Pedi Um a outros sistemas usando API REST documentada, autenticação segura, webhooks e permissões por escopo.",
   },
   {
     icon: PrinterCheck,
@@ -272,7 +272,7 @@ const Features = () => {
             transition={{ delay: 0.2 }}
             className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4"
           >
-            Funcionalidades
+            RECURSOS
           </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -281,8 +281,8 @@ const Features = () => {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6"
           >
-            Tudo que você precisa em{" "}
-            <span className="text-gradient">um só lugar</span>
+            Tudo pra vender.{" "}
+            <span className="text-gradient">Tudo em um.</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -291,8 +291,8 @@ const Features = () => {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto px-2"
           >
-            Loja própria, pedidos, PDV, mesas, entregas, estoque, pagamentos e gestão
-            em uma plataforma única para o seu negócio.
+            Loja online, pedidos, PDV, estoque, pagamentos, entregas, clientes e
+            gestão em uma única plataforma.
           </motion.p>
         </motion.div>
 

@@ -13,9 +13,9 @@ const faqs = [
       "Sua loja terá uma URL própria no formato pedium.com.br/nomedaloja. O nome da loja será exclusivo e poderá ser divulgado por link ou QR Code.",
   },
   {
-    question: "O sistema cobra comissão por pedido?",
+    question: "A Pedi Um cobra comissão por pedido?",
     answer:
-      "O modelo do Seu Pedido é configurável por plano. Quando o plano contratado não possui comissão, o lojista paga apenas a mensalidade correspondente.",
+      "Não. A Pedi Um não cobra comissão sobre os pedidos feitos pela sua loja. As condições de cada plano são apresentadas no cadastro.",
   },
   {
     question: "Posso vender pelo WhatsApp?",
@@ -23,12 +23,12 @@ const faqs = [
       "Sim. O sistema pode ser preparado para notificações, atendimento e automações com a API oficial do WhatsApp Business, conforme a configuração da conta do lojista.",
   },
   {
-    question: "Posso usar para delivery, retirada e mesas?",
+    question: "Posso usar para delivery e retirada?",
     answer:
-      "Sim. A loja pode habilitar delivery, retirada, consumo local, mesas, comandas, QR Code e pedidos agendados.",
+      "Sim. A loja pode habilitar delivery, retirada, consumo local, mesas, comandas e pedidos por QR Code.",
   },
   {
-    question: "Existe PDV?",
+    question: "A Pedi Um possui PDV?",
     answer:
       "Sim. O sistema possui estrutura para vendas no balcão, controle de caixa, sangrias, operadores e pagamento dividido.",
   },
@@ -58,14 +58,9 @@ const faqs = [
       "Sim. Você pode enviar uma foto do cardápio ou colar uma lista em texto e a inteligência artificial sugere nomes, descrições, categorias e preços para você revisar antes de publicar.",
   },
   {
-    question: "Trabalho com encomendas. O sistema atende?",
+    question: "Consigo organizar encomendas e pedidos futuros?",
     answer:
       "Sim. Você envia um orçamento com link de aprovação para o cliente, define sinal de 50% com saldo na entrega, campos obrigatórios de personalização, checklist de produção, data de corte e limite de encomendas por dia.",
-  },
-  {
-    question: "Atendo com hora marcada. Como funciona a agenda?",
-    answer:
-      "A agenda controla profissionais, bloqueios, encaixes e lista de espera, envia lembretes automáticos por WhatsApp 24h e 2h antes, permite o cliente remarcar pelo link e calcula comissões e repasses.",
   },
   {
     question: "Meus dados ficam protegidos?",
@@ -111,7 +106,7 @@ const FAQ = () => {
             transition={{ delay: 0.2 }}
             className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4"
           >
-            Dúvidas Frequentes
+            DÚVIDAS
           </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -120,8 +115,8 @@ const FAQ = () => {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6"
           >
-            Perguntas{" "}
-            <span className="text-gradient">Frequentes</span>
+            Ficou alguma{" "}
+            <span className="text-gradient">dúvida?</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -130,7 +125,7 @@ const FAQ = () => {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto px-2"
           >
-            Tire suas dúvidas sobre a loja própria, funcionalidades, planos e integrações.
+            Veja as respostas para as perguntas mais comuns sobre a Pedi Um.
           </motion.p>
         </motion.div>
 
