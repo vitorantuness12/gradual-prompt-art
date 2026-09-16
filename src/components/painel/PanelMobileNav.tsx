@@ -15,6 +15,7 @@ interface NavigationItem {
 interface PanelMobileNavProps {
   pathname: string;
   items: NavigationItem[];
+  onSignOut: () => void;
 }
 
 const PRIMARY_ITEMS: NavigationItem[] = [
@@ -28,7 +29,7 @@ function isActive(pathname: string, to: string): boolean {
   return to === "/painel" ? pathname === to : pathname.startsWith(to);
 }
 
-export function PanelMobileNav({ pathname, items }: PanelMobileNavProps) {
+export function PanelMobileNav({ pathname, items, onSignOut }: PanelMobileNavProps) {
   const primaryPaths = new Set(PRIMARY_ITEMS.map((item) => item.to));
   const secondaryItems = items.filter((item) => !primaryPaths.has(item.to));
   const moreActive = secondaryItems.some((item) => isActive(pathname, item.to));
@@ -97,6 +98,9 @@ export function PanelMobileNav({ pathname, items }: PanelMobileNavProps) {
                     </SheetClose>
                   );
                 })}
+                <Button type="button" variant="outline" className="col-span-2 mt-2" onClick={onSignOut}>
+                  Sair da conta
+                </Button>
               </div>
             </ScrollArea>
           </SheetContent>

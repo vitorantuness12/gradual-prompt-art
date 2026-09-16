@@ -208,8 +208,8 @@ function PaymentsPage() {
                 const remaining = Number(payment.amount) - Number(payment.refunded_amount ?? 0);
                 return (
                   <Card key={payment.id} className="border-border/70">
-                    <CardContent className="flex flex-wrap items-center justify-between gap-3 pt-6">
-                      <div className="min-w-[220px]">
+                    <CardContent className="grid gap-4 pt-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:pt-6">
+                      <div className="min-w-0">
                         <p className="font-medium text-foreground">
                           {order ? `#${order.code} · ${order.customer_name}` : "Transação avulsa"}
                         </p>
@@ -226,14 +226,15 @@ function PaymentsPage() {
                           <p className="text-xs text-destructive">{payment.last_error}</p>
                         ) : null}
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="grid grid-cols-[auto_1fr] items-center gap-3 sm:flex">
                         <Badge variant={payment.status === "paid" ? "default" : "secondary"}>
                           {PAYMENT_STATUS_LABEL[payment.status] ?? payment.status}
                         </Badge>
                         <span className="font-semibold text-foreground">{formatCurrency(Number(payment.amount))}</span>
                         {payment.status === "paid" && remaining > 0 ? (
                           <Button
-                            size="sm"
+                            size="default"
+                            className="col-span-2 w-full sm:w-auto"
                             variant="outline"
                             disabled={doRefund.isPending}
                             onClick={() => doRefund.mutate({ paymentId: payment.id, amount: remaining })}

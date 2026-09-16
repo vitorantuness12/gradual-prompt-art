@@ -246,7 +246,7 @@ function PainelLayout() {
           )}
         </main>
       </div>
-      <PanelMobileNav pathname={pathname} items={groups.flatMap((group) => group.items)} />
+      <PanelMobileNav pathname={pathname} items={groups.flatMap((group) => group.items)} onSignOut={() => void handleSignOut()} />
     </div>
   );
 }
