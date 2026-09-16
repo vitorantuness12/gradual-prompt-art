@@ -29,7 +29,9 @@ export const Route = createFileRoute("/api/public/manifest")({
           lang: "pt-BR",
           dir: "ltr",
           id: panel ? "/painel/" : storeSlug ? `/${storeSlug}/` : "/",
-          start_url: panel ? "/auth?modo=entrar&perfil=lojista&origem=app&redirect=%2Fpainel%2Fpedidos" : storeSlug ? `/${storeSlug}?origem=app` : "/?origem=app",
+          start_url: panel || !storeSlug
+            ? "/auth?modo=entrar&perfil=lojista&origem=app&redirect=%2Fpainel%2Fpedidos"
+            : `/${storeSlug}?origem=app`,
           scope: "/",
           display: "standalone",
           orientation: "portrait",

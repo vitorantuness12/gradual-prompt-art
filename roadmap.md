@@ -5,3 +5,4 @@
 - [x] Atualizar SEO, metadados globais e descrição do PWA
 - [x] Auditar marca antiga sem alterar identificadores técnicos
 - [x] Validar desktop, tablet, mobile, links e overflow
+- [x] Abrir o PWA da plataforma diretamente no login exclusivo do lojista

@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 import { CookieBanner } from "@/components/landing/CookieBanner";
 import CTA from "@/components/landing2/CTA";
@@ -21,6 +22,20 @@ const DESCRIPTION =
 
 
 export const Route = createFileRoute("/")({
+  beforeLoad: ({ location }) => {
+    if (new URLSearchParams(location.searchStr).get("origem") === "app") {
+      throw redirect({
+        to: "/auth",
+        search: {
+          modo: "entrar",
+          perfil: "lojista",
+          origem: "app",
+          redirect: "/painel/pedidos",
+        },
+        replace: true,
+      });
+    }
+  },
   head: () => ({
     meta: [
       { title: TITLE },
@@ -41,6 +56,25 @@ export const Route = createFileRoute("/")({
 
 /** Landing page pública da plataforma. */
 function LandingPage() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const standalone = window.matchMedia("(display-mode: standalone)").matches
+      || (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    if (!standalone) return;
+
+    void navigate({
+      to: "/auth",
+      search: {
+        modo: "entrar",
+        perfil: "lojista",
+        origem: "app",
+        redirect: "/painel/pedidos",
+      },
+      replace: true,
+    });
+  }, [navigate]);
+
   return (
     <main className="min-h-screen bg-background">
       <Navbar />
