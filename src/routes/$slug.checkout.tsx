@@ -63,12 +63,7 @@ import {
   validateCoupon,
   type CustomerAccount,
 } from "@/lib/orders.functions";
-import {
-  DEFAULT_CHECKOUT_SETTINGS,
-  getCheckoutSettings,
-  saveCheckoutIdentity,
-} from "@/lib/identificacao.functions";
-import { PhoneIdentifyCard, type IdentityConsent } from "@/components/store/PhoneIdentifyCard";
+import { DEFAULT_CHECKOUT_SETTINGS, getCheckoutSettings } from "@/lib/identificacao.functions";
 import { normalizePhoneBR } from "@/lib/phone";
 import { maskPhone } from "@/lib/masks";
 
@@ -85,6 +80,11 @@ import { computeDynamicEta } from "@/lib/operacao";
 import { getStoreLoad } from "@/lib/operacao.functions";
 import { publicStoreQuery } from "@/lib/store-queries";
 import { CheckoutThemeProvider } from "@/components/store/CheckoutThemeProvider";
+import {
+  CheckoutCustomerAccess,
+  type CheckoutAddressValue,
+} from "@/components/store/CheckoutCustomerAccess";
+import type { CheckoutCustomerSession } from "@/lib/checkout-customer.functions";
 
 export const Route = createFileRoute("/$slug/checkout")({
   head: () => ({
@@ -226,14 +226,10 @@ function CheckoutPage() {
   const [isSearchingCep, setIsSearchingCep] = useState(false);
   const [cepError, setCepError] = useState<string | null>(null);
   const [review, setReview] = useState(false);
+  const [accessOpen, setAccessOpen] = useState(false);
   const [acceptedOffers, setAcceptedOffers] = useState<string[]>([]);
   const [tracking, setTracking] = useState<Tracking>(EMPTY_TRACKING);
   const [submitting, setSubmitting] = useState(false);
-  const [consent, setConsent] = useState<IdentityConsent>({
-    acceptedTerms: false,
-    marketingOptIn: false,
-    createProfile: true,
-  });
 
   // Preferências de checkout definidas pelo lojista (visitante, verificação, etc.).
   const checkoutSettingsQuery = useQuery({
@@ -246,7 +242,6 @@ function CheckoutPage() {
     enabled: settings.upsellEnabled,
     max: settings.upsellMaxItems,
   });
-  const persistIdentity = useServerFn(saveCheckoutIdentity);
   const sendOrder = useServerFn(enviarPedidoLoja);
 
 
@@ -604,33 +599,6 @@ function CheckoutPage() {
       toast.error("Escolha a forma de atendimento.");
       return;
     }
-    const parsed = checkoutSchema.safeParse(form);
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Verifique os dados informados.");
-      return;
-    }
-    const normalizedPhone = normalizePhoneBR(form.phone);
-    if (!normalizedPhone.ok) {
-      toast.error(normalizedPhone.message);
-      return;
-    }
-    if (!consent.acceptedTerms) {
-      toast.error("Aceite os Termos de Uso e a Política de Privacidade para continuar.");
-      return;
-    }
-    if (settings.requireEmail && !form.email.trim()) {
-      toast.error("Esta loja pede um e-mail válido para o pedido.");
-      return;
-    }
-    if (!settings.allowGuest && !consent.createProfile) {
-      toast.error("Esta loja exige cadastro para finalizar o pedido.");
-      return;
-    }
-
-    if (isDelivery && (!form.street.trim() || !form.number.trim())) {
-      toast.error("Informe rua e número para a entrega.");
-      return;
-    }
     if (isDelivery && estimate?.blockedReason) {
       toast.error(estimate.blockedReason);
       return;
@@ -647,7 +615,7 @@ function CheckoutPage() {
       toast.error("Escolha a forma de pagamento.");
       return;
     }
-    setReview(true);
+    setAccessOpen(true);
   }
 
   async function submitOrder() {
@@ -660,37 +628,6 @@ function CheckoutPage() {
         setSubmitting(false);
         return;
       }
-
-      // Identificação do cliente: cria/atualiza cadastro por telefone e grava aceites.
-      const identity = await persistIdentity({
-        data: {
-          storeSlug: store.slug,
-          phone: form.phone,
-          name: form.name.trim(),
-          email: form.email.trim() || undefined,
-          fulfillment: String(fulfillment),
-          acceptedTerms: consent.acceptedTerms,
-          marketingOptIn: consent.marketingOptIn,
-          createProfile: consent.createProfile,
-          address: isDelivery
-            ? {
-                street: form.street.trim(),
-                number: form.number.trim(),
-                complement: form.complement.trim(),
-                reference: form.reference.trim(),
-                district: form.district.trim(),
-                zipCode: form.zip.trim(),
-              }
-            : undefined,
-        },
-      });
-      if (!identity.ok) {
-        toast.error(identity.message);
-        setSubmitting(false);
-        return;
-      }
-
-
 
       const scheduledFor =
         timing === "scheduled" && date && time
@@ -840,7 +777,6 @@ function CheckoutPage() {
       couponState.clear();
       setReview(false);
       toast.success(`Pedido ${order.code} enviado para a loja!`);
-      if (identity.created) toast.success(identity.message);
 
       void navigate({ to: "/$slug/acompanhar", params: { slug }, search: { codigo: order.code } });
     } catch (cause) {
@@ -904,30 +840,6 @@ function CheckoutPage() {
             {availability.message} Você pode enviar o pedido como agendado, se a loja aceitar.
           </p>
         ) : null}
-
-        {/* 0. Identificação por telefone */}
-        <PhoneIdentifyCard
-          slug={slug}
-          phone={form.phone}
-          settings={settings}
-          consent={consent}
-          onPhoneChange={(value) => update("phone", value)}
-          onConsentChange={setConsent}
-          onApplyCustomer={({ name, email, address }) => {
-            setForm((current) => ({
-              ...current,
-              name: name ?? current.name,
-              email: email ?? current.email,
-              zip: address?.zipCode ?? current.zip,
-              street: address?.street ?? current.street,
-              number: address?.number ?? current.number,
-              district: address?.district ?? current.district,
-              complement: address?.complement ?? current.complement,
-              reference: address?.reference ?? current.reference,
-            }));
-            toast.success("Dados preenchidos. Confira antes de finalizar.");
-          }}
-        />
 
         {/* 1. Itens */}
 
@@ -1088,125 +1000,15 @@ function CheckoutPage() {
           </CardContent>
         </Card>
 
-        {/* 3. Dados */}
+        {/* 3. Observações; dados pessoais vêm da conta no fechamento. */}
         <Card className="border-border/70 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-base">3. Seus dados</CardTitle>
-            <CardDescription>Não é preciso criar conta para pedir.</CardDescription>
+            <CardTitle className="text-base">3. Detalhes do pedido</CardTitle>
+            <CardDescription>Ao confirmar, você acessará sua conta e escolherá o endereço salvo.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="nome">Nome completo</Label>
-              <Input
-                id="nome"
-                autoComplete="name"
-                value={form.name}
-                onChange={(event) => update("name", event.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="telefone">Telefone (WhatsApp)</Label>
-              <Input
-                id="telefone"
-                inputMode="tel"
-                autoComplete="tel"
-                value={maskPhone(form.phone)}
-                onChange={(event) => update("phone", maskPhone(event.target.value))}
-
-              />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="email">E-mail (opcional)</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                value={form.email}
-                onChange={(event) => update("email", event.target.value)}
-              />
-            </div>
-
             {isDelivery ? (
               <>
-                <div className="space-y-2">
-                  <Label htmlFor="cep">CEP</Label>
-                  <div className="relative">
-                    <Input
-                      id="cep"
-                      inputMode="numeric"
-                      autoComplete="postal-code"
-                      value={form.zip}
-                      onChange={(event) => update("zip", event.target.value)}
-                      placeholder="00000-000"
-                      disabled={isSearchingCep}
-                      className={isSearchingCep ? "pr-10" : undefined}
-                    />
-                    {isSearchingCep ? (
-                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                      </span>
-                    ) : null}
-                  </div>
-                  {cepError ? (
-                    <div className="space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3">
-                      <p className="text-sm text-amber-700 dark:text-amber-400">{cepError}</p>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setCepError(null);
-                          document.getElementById("rua")?.focus();
-                        }}
-                      >
-                        Usar este endereço
-                      </Button>
-                    </div>
-                  ) : null}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="rua">Rua</Label>
-                  <Input
-                    id="rua"
-                    value={form.street}
-                    onChange={(event) => update("street", event.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="numero">Número</Label>
-                  <Input
-                    id="numero"
-                    value={form.number}
-                    onChange={(event) => update("number", event.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="bairro">Bairro</Label>
-                  <Input
-                    id="bairro"
-                    value={form.district}
-                    onChange={(event) => update("district", event.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="complemento">Complemento</Label>
-                  <Input
-                    id="complemento"
-                    value={form.complement}
-                    onChange={(event) => update("complement", event.target.value)}
-                    placeholder="Apto, bloco, sala"
-                  />
-                </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="referencia">Ponto de referência</Label>
-                  <Input
-                    id="referencia"
-                    value={form.reference}
-                    onChange={(event) => update("reference", event.target.value)}
-                    placeholder="Ex.: portão azul, ao lado da praça"
-                  />
-                </div>
-
                 <div className="sm:col-span-2 space-y-2 rounded-xl border border-border/70 bg-muted/40 p-3">
                   {estimating ? (
                     <p className="text-sm text-muted-foreground">Calculando distância e frete…</p>
@@ -1243,7 +1045,7 @@ function CheckoutPage() {
                     </>
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      Informe o CEP ou rua e bairro para calcularmos a distância e o frete.
+                      O frete será confirmado depois que você escolher um endereço salvo.
                     </p>
                   )}
                 </div>
@@ -1656,6 +1458,40 @@ function CheckoutPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <CheckoutCustomerAccess
+        open={accessOpen}
+        storeSlug={slug}
+        needsAddress={isDelivery}
+        initialAddress={{
+          zip: form.zip,
+          street: form.street,
+          number: form.number,
+          complement: form.complement,
+          reference: form.reference,
+          district: form.district,
+          city: "",
+          state: "",
+        }}
+        onOpenChange={setAccessOpen}
+        onReady={(customer: CheckoutCustomerSession, address: CheckoutAddressValue | null) => {
+          setForm((current) => ({
+            ...current,
+            name: customer.fullName,
+            email: customer.email,
+            phone: customer.phone,
+            ...(address ? {
+              zip: address.zip,
+              street: address.street,
+              number: address.number,
+              complement: address.complement,
+              reference: address.reference,
+              district: address.district,
+            } : {}),
+          }));
+          setAccessOpen(false);
+          setReview(true);
+        }}
+      />
     </CheckoutThemeProvider>
   );
 }

@@ -12,6 +12,7 @@ type Admin = Awaited<typeof import("@/integrations/supabase/client.server")>["su
 export async function gravarPedidoLoja(
   admin: Admin,
   input: PedidoLojaInput,
+  userId: string,
 ): Promise<PedidoLojaResult> {
   if (input.items.length === 0) {
     return { ok: false, message: "Seu carrinho está vazio." };
@@ -25,14 +26,21 @@ export async function gravarPedidoLoja(
     return { ok: false, message: pricing.message };
   }
   const store = { id: pricing.storeId };
+  const { resolveAuthenticatedCheckoutCustomer } = await import("@/lib/checkout-customer.server");
+  const customer = await resolveAuthenticatedCheckoutCustomer(admin, userId, store.id);
+  if (!customer) {
+    return { ok: false, message: "Complete seu cadastro de cliente para finalizar o pedido." };
+  }
 
   const { data: order, error } = await admin
     .from("orders")
     .insert({
       store_id: store.id,
-      customer_name: input.customerName,
-      customer_phone: input.customerPhone,
-      customer_email: input.customerEmail ?? null,
+      user_id: customer.userId,
+      customer_id: customer.customerId,
+      customer_name: customer.name,
+      customer_phone: customer.phone,
+      customer_email: customer.email,
       type: input.type,
       table_number: input.tableNumber ?? null,
       distance_km: pricing.distanceKm ?? input.distanceKm ?? null,

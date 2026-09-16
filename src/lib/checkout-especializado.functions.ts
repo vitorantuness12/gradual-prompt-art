@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import type { CartLineInput } from "@/lib/checkout-especializado";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 /**
  * Pontes RPC dos checkouts especializados. Cada função é uma casca fina: toda
@@ -38,6 +39,7 @@ export const getAgendaSlots = createServerFn({ method: "GET" })
 
 /** Fecha o agendamento reconferindo a disponibilidade real do horário. */
 export const submitAgendamento = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator(
     (
       input: CustomerFields & {
@@ -50,14 +52,14 @@ export const submitAgendamento = createServerFn({ method: "POST" })
       },
     ) => input,
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { consumeRateLimit, rateLimitMessage } = await import("@/lib/security.server");
     const limit = await consumeRateLimit("checkout", data.phone);
     if (!limit.allowed) return { ok: false, message: rateLimitMessage(limit) };
 
     const { createAgendamento } = await import("@/lib/checkout-especializado.server");
-    return createAgendamento(supabaseAdmin, data);
+    return createAgendamento(supabaseAdmin, data, context.userId);
   });
 
 /** Compra de produto digital: registra o pedido sem liberar o acesso. */
@@ -102,6 +104,7 @@ export const getShippingQuote = createServerFn({ method: "POST" })
 
 /** Pedido de produto físico: revalida preço, estoque e frete antes de gravar. */
 export const submitStoreCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator(
     (
       input: CustomerFields & {
@@ -123,14 +126,14 @@ export const submitStoreCheckout = createServerFn({ method: "POST" })
       },
     ) => input,
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { consumeRateLimit, rateLimitMessage } = await import("@/lib/security.server");
     const limit = await consumeRateLimit("checkout", data.phone);
     if (!limit.allowed) return { ok: false, message: rateLimitMessage(limit) };
 
     const { createStoreOrder } = await import("@/lib/checkout-especializado.server");
-    return createStoreOrder(supabaseAdmin, data);
+    return createStoreOrder(supabaseAdmin, data, context.userId);
   });
 
 /** Assinatura recorrente: revalida preço, promoção e frete antes de gravar. */

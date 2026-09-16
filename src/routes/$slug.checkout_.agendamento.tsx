@@ -23,6 +23,8 @@ import { normalizePhoneBR } from "@/lib/phone";
 import { parsePaymentMethods } from "@/lib/store-config";
 import { publicStoreQuery } from "@/lib/store-queries";
 import { cn } from "@/lib/utils";
+import { CheckoutCustomerAccess } from "@/components/store/CheckoutCustomerAccess";
+import type { CheckoutCustomerSession } from "@/lib/checkout-customer.functions";
 
 export const Route = createFileRoute("/$slug/checkout_/agendamento")({
   head: () => ({
@@ -68,6 +70,8 @@ function AgendamentoCheckout() {
   const [customer, setCustomer] = useState<CustomerFormValue>(emptyCustomer);
   const [payment, setPayment] = useState("");
   const [saving, setSaving] = useState(false);
+  const [accessOpen, setAccessOpen] = useState(false);
+  const [authenticatedCustomer, setAuthenticatedCustomer] = useState<CheckoutCustomerSession | null>(null);
 
   const service = useMemo(
     () => options.data?.services.find((item) => item.id === serviceId) ?? null,
@@ -107,17 +111,12 @@ function AgendamentoCheckout() {
       toast.error("Escolha um horário disponível.");
       return;
     }
-    if (customer.name.trim().length < 3) {
-      toast.error("Informe seu nome completo.");
-      return;
-    }
-    const phone = normalizePhoneBR(customer.phone);
-    if (!phone.ok) {
-      toast.error(phone.message);
-      return;
-    }
     if (!payment) {
       toast.error("Escolha a forma de pagamento.");
+      return;
+    }
+    if (!authenticatedCustomer) {
+      setAccessOpen(true);
       return;
     }
 
@@ -132,7 +131,7 @@ function AgendamentoCheckout() {
           startsAt,
           paymentMethod: payment,
           name: customer.name.trim(),
-          phone: phone.e164,
+           phone: normalizePhoneBR(customer.phone).e164,
           email: customer.email.trim() || null,
           notes: customer.notes.trim() || null,
         },
@@ -401,8 +400,29 @@ function AgendamentoCheckout() {
         </CardContent>
       </Card>
 
-      <CustomerFields value={customer} onChange={setCustomer} notesLabel="Alguma observação para o atendimento?" />
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Observações</CardTitle>
+          <CardDescription>Se necessário, deixe uma informação para o atendimento.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Input value={customer.notes} onChange={(event) => setCustomer((current) => ({ ...current, notes: event.target.value }))} />
+        </CardContent>
+      </Card>
       <PaymentChoice methods={methods} value={payment} onChange={setPayment} />
+      <CheckoutCustomerAccess
+        open={accessOpen}
+        storeSlug={slug}
+        needsAddress={false}
+        initialAddress={{ zip: "", street: "", number: "", complement: "", reference: "", district: "", city: "", state: "" }}
+        onOpenChange={setAccessOpen}
+        onReady={(account) => {
+          setAuthenticatedCustomer(account);
+          setCustomer((current) => ({ ...current, name: account.fullName, phone: account.phone, email: account.email }));
+          setAccessOpen(false);
+          toast.success("Conta confirmada. Toque novamente em confirmar agendamento.");
+        }}
+      />
     </CheckoutShell>
   );
 }
