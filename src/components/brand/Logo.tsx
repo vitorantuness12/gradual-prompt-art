@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import logo from "@/assets/pedium-logo.png.asset.json";
 import { useQuery } from "@tanstack/react-query";
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { fetchPlatformBranding, platformBrandingQueryKey } from "@/lib/platform-branding";
+import { fetchPlatformBranding, platformBrandingQueryKey, resolvePlatformLogo } from "@/lib/platform-branding";
 
 export interface LogoProps {
   className?: string;
@@ -19,9 +19,7 @@ export interface LogoProps {
 export function Logo({ className, withWordmark = true, inverted = false, context = "platform" }: LogoProps) {
   const { theme } = useAppTheme();
   const { data } = useQuery({ queryKey: platformBrandingQueryKey, queryFn: fetchPlatformBranding, staleTime: 5 * 60_000 });
-  const light = context === "merchant" ? data?.merchantLogoLightUrl : data?.salesLogoLightUrl;
-  const dark = context === "merchant" ? data?.merchantLogoDarkUrl : data?.salesLogoDarkUrl;
-  const configured = theme === "dark" ? dark ?? light : light ?? dark;
+  const configured = resolvePlatformLogo(data, context, theme);
   return (
     <span className={cn("inline-flex items-center", className)}>
       <img

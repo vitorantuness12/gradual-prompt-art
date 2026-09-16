@@ -16,9 +16,9 @@ export async function uploadPlatformLogo(
   const body = isSvg ? file : await compressImage(file, { maxWidth: 1600, maxHeight: 800, quality: 0.9 });
   const contentType = (isSvg ? file.type : "image/webp") as "image/png" | "image/jpeg" | "image/webp" | "image/svg+xml";
   const signed = await prepare({ data: { slot, contentType } });
-  const { error } = await supabase.storage.from("store-images").uploadToSignedUrl(signed.path, signed.token, body, { contentType });
+  const { error } = await supabase.storage.from("platform-assets").uploadToSignedUrl(signed.path, signed.token, body, { contentType });
   if (error) throw new Error("Não foi possível enviar a logo. Tente novamente.");
-  const { data, error: urlError } = await supabase.storage.from("store-images").createSignedUrl(signed.path, 60 * 60 * 24 * 365 * 5);
+  const { data, error: urlError } = await supabase.storage.from("platform-assets").createSignedUrl(signed.path, 60 * 60 * 24 * 365 * 5);
   if (urlError || !data.signedUrl) throw new Error("A logo foi enviada, mas não foi possível abrir sua prévia.");
   return data.signedUrl;
 }
