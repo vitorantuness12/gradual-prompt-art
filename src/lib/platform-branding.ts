@@ -4,13 +4,17 @@ export type PlatformLogoSlot =
   | "sales_logo_light_url"
   | "sales_logo_dark_url"
   | "merchant_logo_light_url"
-  | "merchant_logo_dark_url";
+  | "merchant_logo_dark_url"
+  | "favicon_url"
+  | "app_cover_url";
 
 export interface PlatformBranding {
   salesLogoLightUrl: string | null;
   salesLogoDarkUrl: string | null;
   merchantLogoLightUrl: string | null;
   merchantLogoDarkUrl: string | null;
+  faviconUrl: string | null;
+  appCoverUrl: string | null;
   updatedAt: string | null;
 }
 
@@ -19,6 +23,8 @@ export const EMPTY_PLATFORM_BRANDING: PlatformBranding = {
   salesLogoDarkUrl: null,
   merchantLogoLightUrl: null,
   merchantLogoDarkUrl: null,
+  faviconUrl: null,
+  appCoverUrl: null,
   updatedAt: null,
 };
 
@@ -38,7 +44,7 @@ export function resolvePlatformLogo(
 export async function fetchPlatformBranding(): Promise<PlatformBranding> {
   const { data, error } = await supabase
     .from("platform_branding")
-    .select("sales_logo_light_url, sales_logo_dark_url, merchant_logo_light_url, merchant_logo_dark_url, updated_at")
+    .select("sales_logo_light_url, sales_logo_dark_url, merchant_logo_light_url, merchant_logo_dark_url, favicon_url, app_cover_url, updated_at")
     .eq("key", "default")
     .maybeSingle();
 
@@ -49,6 +55,8 @@ export async function fetchPlatformBranding(): Promise<PlatformBranding> {
     salesLogoDarkUrl: data.sales_logo_dark_url,
     merchantLogoLightUrl: data.merchant_logo_light_url,
     merchantLogoDarkUrl: data.merchant_logo_dark_url,
+    faviconUrl: data.favicon_url,
+    appCoverUrl: data.app_cover_url,
     updatedAt: data.updated_at,
   };
 }

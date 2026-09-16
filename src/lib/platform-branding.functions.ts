@@ -8,6 +8,8 @@ const slotSchema = z.enum([
   "sales_logo_dark_url",
   "merchant_logo_light_url",
   "merchant_logo_dark_url",
+  "favicon_url",
+  "app_cover_url",
 ]);
 
 const urlSchema = z.string().url().max(2200).nullable();
@@ -48,6 +50,8 @@ export const savePlatformBranding = createServerFn({ method: "POST" })
       salesLogoDarkUrl: urlSchema,
       merchantLogoLightUrl: urlSchema,
       merchantLogoDarkUrl: urlSchema,
+      faviconUrl: urlSchema,
+      appCoverUrl: urlSchema,
     }).parse(input),
   )
   .handler(async ({ data, context }) => {
@@ -59,6 +63,8 @@ export const savePlatformBranding = createServerFn({ method: "POST" })
       sales_logo_dark_url: data.salesLogoDarkUrl,
       merchant_logo_light_url: data.merchantLogoLightUrl,
       merchant_logo_dark_url: data.merchantLogoDarkUrl,
+      favicon_url: data.faviconUrl,
+      app_cover_url: data.appCoverUrl,
       updated_by: context.userId,
     });
     if (error) throw new Error("Não foi possível salvar a identidade visual.");

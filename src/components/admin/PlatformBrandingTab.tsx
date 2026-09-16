@@ -24,7 +24,7 @@ export function PlatformBrandingTab() {
 
   const dirty = useMemo(() => {
     if (!query.data) return false;
-    return ["salesLogoLightUrl", "salesLogoDarkUrl", "merchantLogoLightUrl", "merchantLogoDarkUrl"].some(
+    return ["salesLogoLightUrl", "salesLogoDarkUrl", "merchantLogoLightUrl", "merchantLogoDarkUrl", "faviconUrl", "appCoverUrl"].some(
       (key) => draft[key as keyof PlatformBranding] !== query.data[key as keyof PlatformBranding],
     );
   }, [draft, query.data]);
@@ -35,6 +35,8 @@ export function PlatformBrandingTab() {
       salesLogoDarkUrl: draft.salesLogoDarkUrl,
       merchantLogoLightUrl: draft.merchantLogoLightUrl,
       merchantLogoDarkUrl: draft.merchantLogoDarkUrl,
+      faviconUrl: draft.faviconUrl,
+      appCoverUrl: draft.appCoverUrl,
     } }),
     onSuccess: () => {
       toast.success("Identidade visual atualizada.");
@@ -64,6 +66,13 @@ export function PlatformBrandingTab() {
           <div className="grid gap-4 md:grid-cols-2">
             <PlatformLogoField title="Logo para modo claro" description="Cabeçalho e rodapé sobre fundos claros." slot="sales_logo_light_url" value={draft.salesLogoLightUrl} darkPreview={false} prepareUpload={prepareUpload} onChange={(value) => set("salesLogoLightUrl", value)} />
             <PlatformLogoField title="Logo para modo escuro" description="Cabeçalho e rodapé sobre fundos escuros." slot="sales_logo_dark_url" value={draft.salesLogoDarkUrl} darkPreview prepareUpload={prepareUpload} onChange={(value) => set("salesLogoDarkUrl", value)} />
+          </div>
+        </section>
+        <section>
+          <h2 className="mb-3 text-sm font-semibold text-foreground">Aplicativo e navegador</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            <PlatformLogoField title="Favicon" description="Ícone quadrado exibido na aba do navegador e nos favoritos. Recomendado: 512 × 512 px." slot="favicon_url" value={draft.faviconUrl} darkPreview={false} previewShape="square" successLabel="Favicon" prepareUpload={prepareUpload} onChange={(value) => set("faviconUrl", value)} />
+            <PlatformLogoField title="Capa do aplicativo" description="Imagem horizontal usada na abertura e no compartilhamento do aplicativo. Recomendado: 1200 × 630 px." slot="app_cover_url" value={draft.appCoverUrl} darkPreview={false} previewShape="cover" successLabel="Capa" prepareUpload={prepareUpload} onChange={(value) => set("appCoverUrl", value)} />
           </div>
         </section>
         <section>

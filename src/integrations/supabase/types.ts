@@ -5443,7 +5443,9 @@ export type Database = {
       }
       platform_branding: {
         Row: {
+          app_cover_url: string | null
           created_at: string
+          favicon_url: string | null
           key: string
           merchant_logo_dark_url: string | null
           merchant_logo_light_url: string | null
@@ -5453,7 +5455,9 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          app_cover_url?: string | null
           created_at?: string
+          favicon_url?: string | null
           key?: string
           merchant_logo_dark_url?: string | null
           merchant_logo_light_url?: string | null
@@ -5463,7 +5467,9 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          app_cover_url?: string | null
           created_at?: string
+          favicon_url?: string | null
           key?: string
           merchant_logo_dark_url?: string | null
           merchant_logo_light_url?: string | null
