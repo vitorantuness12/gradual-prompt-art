@@ -46,7 +46,7 @@ export const OrderStatusEmail = ({
   storeName = 'a loja',
   orderCode = '000000',
   statusSentence = 'teve uma atualização',
-  trackingUrl = 'https://oseupedido.com.br/acompanhar',
+  trackingUrl = 'https://pedium.com.br/acompanhar',
   total,
 }: OrderStatusEmailProps) => (
   <Html lang="pt-BR" dir="ltr">
@@ -70,7 +70,7 @@ export const OrderStatusEmail = ({
         <Text style={footer}>
           Você recebe este aviso porque confirmou seu telefone nesta loja. Para
           parar de receber, acesse a área do cliente em
-          oseupedido.com.br/meus-pedidos.
+          pedium.com.br/meus-pedidos.
         </Text>
       </Container>
     </Body>
@@ -89,7 +89,7 @@ export const template = {
     storeName: 'Lanches do Antunes',
     orderCode: 'A1B2C3',
     statusSentence: 'saiu para entrega',
-    trackingUrl: 'https://oseupedido.com.br/acompanhar',
+    trackingUrl: 'https://pedium.com.br/acompanhar',
     total: 78.9,
   },
 }

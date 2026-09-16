@@ -47,7 +47,7 @@ export const SubscriptionUpdateEmail = ({
   headline = 'Sua assinatura foi atualizada',
   sentence = 'Houve uma atualização na sua assinatura.',
   detail = null,
-  actionUrl = 'https://oseupedido.com.br/meus-pedidos',
+  actionUrl = 'https://pedium.com.br/meus-pedidos',
   actionLabel = 'Ver minha assinatura',
 }: SubscriptionEmailProps) => (
   <Html lang="pt-BR" dir="ltr">
@@ -92,7 +92,7 @@ export const template = {
     headline: 'Assinatura criada',
     sentence: 'sua assinatura foi criada e o próximo pedido é gerado automaticamente.',
     detail: 'Próximo pedido: 05/09/2026 · Todo mês · R$ 89,90',
-    actionUrl: 'https://oseupedido.com.br/meus-pedidos',
+    actionUrl: 'https://pedium.com.br/meus-pedidos',
     actionLabel: 'Ver minha assinatura',
   },
 }
