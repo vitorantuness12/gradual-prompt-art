@@ -16,8 +16,8 @@ self.addEventListener("push", (event) => {
   const title = payload.title || "Pedi Um";
   const options = {
     body: payload.body || "",
-    icon: payload.icon || "/app-icon-192.png",
-    badge: "/app-icon-192.png",
+    icon: payload.icon || "/pedium-app-icon-192.png",
+    badge: "/pedium-app-icon-192.png",
     tag: payload.tag || undefined,
     renotify: Boolean(payload.tag),
     requireInteraction: payload.urgent === true,
