@@ -302,8 +302,38 @@ function OrdersPage() {
 
           <TabsContent value="tabela">
             <Card className="border-border/70 shadow-sm">
-              <CardContent className="overflow-x-auto pt-6">
-                <Table>
+              <CardContent className="pt-4 sm:pt-6">
+                <div className="space-y-3 md:hidden">
+                  {orders.map((order) => (
+                    <button
+                      key={order.id}
+                      type="button"
+                      onClick={() => setSelected(order)}
+                      className="grid min-h-24 w-full grid-cols-[minmax(0,1fr)_auto] items-start gap-3 rounded-xl border border-border bg-background p-4 text-left transition-colors active:bg-secondary"
+                    >
+                      <span className="min-w-0">
+                        <span className="flex min-w-0 items-center gap-2">
+                          <strong className="shrink-0 text-sm text-foreground">#{order.code}</strong>
+                          <span className="truncate text-sm font-medium text-foreground">{order.customer_name}</span>
+                        </span>
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                          {ORDER_TYPE_LABEL[order.type]} · {formatDateTime(order.created_at)}
+                        </span>
+                        <span className={`mt-2 inline-flex rounded-full border px-2 py-0.5 text-xs ${statusClass(order.status)}`}>
+                          {statusLabel(order.status)}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-right">
+                        <strong className="block text-sm text-foreground">{formatCurrency(Number(order.total))}</strong>
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                          {PAYMENT_STATUS_LABEL[order.payment_status] ?? order.payment_status}
+                        </span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <div className="hidden overflow-x-auto md:block">
+                  <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Pedido</TableHead>
@@ -344,7 +374,8 @@ function OrdersPage() {
                       </TableRow>
                     ))}
                   </TableBody>
-                </Table>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

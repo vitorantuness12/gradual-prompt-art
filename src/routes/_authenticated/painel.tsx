@@ -38,6 +38,7 @@ import {
 
 import { DemoBadge } from "@/components/brand/DemoBadge";
 import { NotificationCenter } from "@/components/painel/NotificationCenter";
+import { PanelMobileNav } from "@/components/painel/PanelMobileNav";
 import { ThemeToggle } from "@/components/painel/ThemeToggle";
 import { StorePauseButton } from "@/components/painel/StorePauseButton";
 import { Logo } from "@/components/brand/Logo";
@@ -157,16 +158,16 @@ function PainelLayout() {
 
 
   return (
-    <div className="min-h-screen bg-secondary/30">
-      <header className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
+    <div className="min-h-dvh bg-secondary/30 pb-20 lg:pb-0">
+      <header className="sticky top-0 z-40 border-b border-border/70 bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur">
+        <div className="mx-auto grid max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-3 py-2 sm:px-6 sm:py-3">
           <Link to="/" aria-label="Página inicial">
             <Logo context="merchant" withWordmark={false} />
           </Link>
           <div className="flex min-w-0 flex-1 items-center gap-2">
             {memberships.length > 0 ? (
               <Select value={active?.storeId ?? ""} onValueChange={selectStore}>
-                <SelectTrigger className="w-full max-w-64" aria-label="Selecionar loja">
+                <SelectTrigger className="h-11 w-full max-w-64" aria-label="Selecionar loja">
                   <SelectValue placeholder="Selecione a loja" />
                 </SelectTrigger>
                 <SelectContent>
@@ -178,7 +179,7 @@ function PainelLayout() {
                 </SelectContent>
               </Select>
             ) : null}
-            {active?.store.is_demo ? <DemoBadge /> : null}
+            <span className="hidden sm:inline">{active?.store.is_demo ? <DemoBadge /> : null}</span>
           </div>
           <div className="flex items-center gap-2">
             {active ? (
@@ -186,11 +187,11 @@ function PainelLayout() {
                 {ROLE_LABEL[active.role]}
               </span>
             ) : null}
-            <StorePauseButton storeId={active?.storeId} />
+            <span className="hidden sm:inline-flex"><StorePauseButton storeId={active?.storeId} /></span>
             <NotificationCenter storeId={active?.storeId} />
-            <ThemeToggle />
+            <span className="hidden sm:inline-flex"><ThemeToggle /></span>
 
-            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+            <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={handleSignOut}>
               <LogOut className="mr-2 size-4" aria-hidden="true" />
               Sair
             </Button>
@@ -198,9 +199,9 @@ function PainelLayout() {
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row">
-        <nav aria-label="Menu do painel" className="lg:w-56 lg:shrink-0">
-          <div className="flex gap-4 overflow-x-auto pb-2 lg:flex-col lg:gap-5 lg:overflow-visible lg:pb-0">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-4 sm:px-6 sm:py-6 lg:flex-row">
+        <nav aria-label="Menu do painel" className="hidden lg:block lg:w-56 lg:shrink-0">
+          <div className="flex flex-col gap-5">
             {groups.map((group) => (
               <div key={group.title} className="shrink-0">
                 <p className="hidden px-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground lg:block">
@@ -215,7 +216,7 @@ function PainelLayout() {
                         activeProps={{
                           className: "bg-primary text-primary-foreground hover:bg-primary/90",
                         }}
-                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                         className="flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                       >
                         <item.icon className="size-4" aria-hidden="true" />
                         {item.label}
@@ -245,6 +246,7 @@ function PainelLayout() {
           )}
         </main>
       </div>
+      <PanelMobileNav pathname={pathname} items={groups.flatMap((group) => group.items)} onSignOut={() => void handleSignOut()} />
     </div>
   );
 }

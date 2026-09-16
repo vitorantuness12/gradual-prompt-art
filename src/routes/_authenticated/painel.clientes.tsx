@@ -95,8 +95,8 @@ function CustomersPage() {
             const blocked = blockedPhones.has((customer.phone ?? "").replace(/\D/g, ""));
             return (
               <Card key={customer.id} className="border-border/70 shadow-sm">
-                <CardContent className="flex flex-wrap items-center justify-between gap-3 pt-6">
-                  <div>
+                <CardContent className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 pt-4 sm:pt-6">
+                  <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="font-medium text-foreground">{customer.name}</h2>
                       {customer.is_demo ? <DemoBadge /> : null}
@@ -109,7 +109,7 @@ function CustomersPage() {
                       ) : null}
                       {blocked ? <Badge variant="destructive">Bloqueado</Badge> : null}
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="break-words text-sm text-muted-foreground">
                       {customer.phone ?? "sem telefone"} · {customer.email ?? "sem e-mail"}
                       {customer.district ? ` · ${customer.district}` : ""}
                     </p>
@@ -120,7 +120,7 @@ function CustomersPage() {
                       </p>
                     ) : null}
                   </div>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="shrink-0 text-right text-xs text-muted-foreground sm:text-sm">
                     Desde {formatDate(customer.created_at)}
                   </span>
                 </CardContent>

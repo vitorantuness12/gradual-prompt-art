@@ -14,20 +14,22 @@ export const Route = createFileRoute("/api/public/manifest")({
       GET: async ({ request }) => {
         const url = new URL(request.url);
         const panel = url.searchParams.get("painel") === "1";
+        const storeSlug = url.searchParams.get("loja")?.trim() || null;
         const branding = await getBranding();
+        const storeName = storeSlug ? await getStoreName(storeSlug) : null;
         const icon = branding?.pwa_icon_url ?? "/app-icon-512.png";
         const maskableIcon = branding?.pwa_maskable_icon_url ?? "/app-icon-maskable-512.png";
 
         const manifest = {
-          name: panel ? "Painel Pedi Um" : "Pedi Um",
-          short_name: panel ? "Meu Painel" : "Pedi Um",
+          name: panel ? "Painel Pedi Um" : storeName ?? "Pedi Um",
+          short_name: panel ? "Meu Painel" : storeName ?? "Pedi Um",
           description: panel
             ? "Gerencie pedidos, catálogo e vendas da sua loja."
             : "Peça na sua loja favorita, acompanhe o pedido em tempo real e repita compras anteriores.",
           lang: "pt-BR",
           dir: "ltr",
-          id: panel ? "/painel/" : "/",
-          start_url: panel ? "/painel/pedidos?origem=app" : "/?origem=app",
+          id: panel ? "/painel/" : storeSlug ? `/${storeSlug}/` : "/",
+          start_url: panel ? "/painel/pedidos?origem=app" : storeSlug ? `/${storeSlug}?origem=app` : "/?origem=app",
           scope: "/",
           display: "standalone",
           orientation: "portrait",
@@ -41,13 +43,19 @@ export const Route = createFileRoute("/api/public/manifest")({
           shortcuts: panel
             ? [
                 { name: "Pedidos", url: "/painel/pedidos?origem=app" },
-                { name: "PDV / Caixa", url: "/pdv?origem=app" },
-                { name: "Metas do dia", url: "/painel/metas?origem=app" },
+                { name: "Financeiro", url: "/painel/pagamentos?origem=app" },
+                { name: "Clientes", url: "/painel/clientes?origem=app" },
               ]
-            : [
-                { name: "Acompanhar pedido", short_name: "Acompanhar", url: "/acompanhar?origem=app" },
-                { name: "Meus pedidos recentes", short_name: "Pedidos", url: "/acompanhar?origem=app&aba=recentes" },
-              ],
+            : storeSlug
+              ? [
+                  { name: "Abrir loja", short_name: "Loja", url: `/${storeSlug}?origem=app` },
+                  { name: "Acompanhar pedido", short_name: "Pedidos", url: `/${storeSlug}/acompanhar?origem=app` },
+                  { name: "Ver carrinho", short_name: "Carrinho", url: `/${storeSlug}/carrinho?origem=app` },
+                ]
+              : [
+                  { name: "Acompanhar pedido", short_name: "Acompanhar", url: "/acompanhar?origem=app" },
+                  { name: "Meus pedidos recentes", short_name: "Pedidos", url: "/acompanhar?origem=app&aba=recentes" },
+                ],
         };
 
         return Response.json(manifest, {
@@ -75,4 +83,22 @@ async function getBranding(): Promise<ManifestBranding | null> {
     .eq("key", "default")
     .maybeSingle();
   return data;
+}
+
+async function getStoreName(slug: string): Promise<string | null> {
+  const supabaseUrl = process.env["SUPABASE_URL"];
+  const publishableKey = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  if (!supabaseUrl || !publishableKey) return null;
+
+  const client = createClient<Database>(supabaseUrl, publishableKey, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
+  const { data } = await client
+    .from("stores")
+    .select("name")
+    .eq("slug", slug)
+    .eq("is_active", true)
+    .eq("is_published", true)
+    .maybeSingle();
+  return data?.name ?? null;
 }
