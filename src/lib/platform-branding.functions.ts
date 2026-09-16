@@ -32,9 +32,9 @@ export const createPlatformLogoUpload = createServerFn({ method: "POST" })
     await requireSuperAdmin(context as never);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const extension = data.contentType === "image/svg+xml" ? "svg" : data.contentType.split("/")[1];
-    const path = `platform-branding/${data.slot}-${crypto.randomUUID()}.${extension}`;
+    const path = `${data.slot}-${crypto.randomUUID()}.${extension}`;
     const { data: signed, error } = await supabaseAdmin.storage
-      .from("store-images")
+      .from("platform-assets")
       .createSignedUploadUrl(path, { upsert: false });
     if (error || !signed) throw new Error("Não foi possível preparar o envio da logo.");
     return { path, token: signed.token };
