@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/$slug/checkout_/agendamento")({
   head: () => ({
     meta: [
-      { title: "Agendar atendimento — O Seu Pedido" },
+      { title: "Agendar atendimento — Pedi Um" },
       {
         name: "description",
         content: "Escolha o serviço, o profissional, a data e o horário disponível e confirme seu agendamento.",

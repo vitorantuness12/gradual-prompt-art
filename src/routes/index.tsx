@@ -15,7 +15,7 @@ import StoreUrl from "@/components/landing2/StoreUrl";
 import Testimonials from "@/components/landing2/Testimonials";
 import WhyUs from "@/components/landing2/WhyUs";
 
-const TITLE = "O Seu Pedido — sua loja própria com pedidos, PDV e delivery";
+const TITLE = "Pedi Um — sua loja própria com pedidos, PDV e delivery";
 const DESCRIPTION =
   "Loja própria em oseupedido.com.br/nomedaloja: pedidos, delivery, PDV, mesas, agenda, encomendas, estoque com lotes, pagamentos, entregadores, catálogo com IA e relatórios.";
 

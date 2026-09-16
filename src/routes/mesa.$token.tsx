@@ -18,7 +18,7 @@ export const Route = createFileRoute("/mesa/$token")({
   component: TablePage,
   head: () => ({
     meta: [
-      { title: "Peça da sua mesa | O Seu Pedido" },
+      { title: "Peça da sua mesa | Pedi Um" },
       {
         name: "description",
         content: "Escaneou o QR Code da mesa? Veja o cardápio, faça seu pedido, chame o garçom e peça a conta sem instalar nada.",

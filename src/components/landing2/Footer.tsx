@@ -136,14 +136,14 @@ const Footer = () => {
         {/* Bottom */}
         <div className="mt-10 md:mt-16 pt-6 md:pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} O Seu Pedido. Todos os direitos reservados.
+            © {currentYear} Pedi Um. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-6">
             <a
               href="https://www.facebook.com/oseupedido"
               target="_blank"
               rel="noreferrer"
-              aria-label="Facebook do O Seu Pedido"
+              aria-label="Facebook do Pedi Um"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -154,7 +154,7 @@ const Footer = () => {
               href="https://www.pinterest.com/oseupedido"
               target="_blank"
               rel="noreferrer"
-              aria-label="Pinterest do O Seu Pedido"
+              aria-label="Pinterest do Pedi Um"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -165,7 +165,7 @@ const Footer = () => {
               href="https://www.instagram.com/oseupedido"
               target="_blank"
               rel="noreferrer"
-              aria-label="Instagram do O Seu Pedido"
+              aria-label="Instagram do Pedi Um"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

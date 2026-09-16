@@ -320,7 +320,7 @@ export function resolvedFooterConfig(
     name: footer.name?.trim() || store.name || null,
     phone: formatFooterPhone(footer.phone?.trim() || store.phone || null),
     address: footer.address?.trim() || fullAddress || null,
-    // A assinatura "Feito com O Seu Pedido" é fixa em todas as lojas.
+    // A assinatura "Feito com Pedi Um" é fixa em todas as lojas.
     note: null,
     background: footer.background ?? null,
     text: footer.text ?? null,

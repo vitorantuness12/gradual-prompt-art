@@ -58,7 +58,7 @@ export const Route = createFileRoute("/_authenticated/painel/fidelidade")({
   component: LoyaltyPage,
   head: () => ({
     meta: [
-      { title: "Fidelidade e CRM | O Seu Pedido" },
+      { title: "Fidelidade e CRM | Pedi Um" },
       {
         name: "description",
         content:

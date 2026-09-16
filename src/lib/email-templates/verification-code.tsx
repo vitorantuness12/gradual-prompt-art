@@ -52,7 +52,7 @@ export const VerificationCodeEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Section style={brandBar} />
-        <Text style={brandName}>O Seu Pedido</Text>
+        <Text style={brandName}>Pedi Um</Text>
         <Heading style={h1}>Confirme que é você</Heading>
         <Text style={text}>
           {customerName}, use o código abaixo para confirmar seu telefone no

@@ -80,13 +80,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "O Seu Pedido — plataforma de pedidos e agendamentos" },
+      { title: "Pedi Um — plataforma de pedidos e agendamentos" },
       {
         name: "description",
         content:
           "Crie a loja online do seu negócio, receba pedidos e agendamentos e gerencie tudo em um painel só.",
       },
-      { property: "og:title", content: "O Seu Pedido" },
+      { property: "og:title", content: "Pedi Um" },
       {
         property: "og:description",
         content: "Loja própria, pedidos, agendamentos, entregas e relatórios para pequenos e médios negócios.",
@@ -97,7 +97,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "theme-color", content: "#f97316" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-title", content: "Seu Pedido" },
+      { name: "apple-mobile-web-app-title", content: "Pedi Um" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
     ],
     links: [

@@ -217,7 +217,7 @@ export function StorePreview({ config, sections, device, storeName, storeSlug, p
             </div>
 
             <footer className="border-t border-border bg-card p-4 text-[11px] text-muted-foreground">
-              {storeName} · feito com O Seu Pedido
+              {storeName} · feito com Pedi Um
             </footer>
           </div>
         </StoreThemeProvider>

@@ -16,13 +16,13 @@ export const Route = createFileRoute("/_authenticated/painel/marketing")({
   component: MarketingPage,
   head: () => ({
     meta: [
-      { title: "Marketing automático | O Seu Pedido" },
+      { title: "Marketing automático | Pedi Um" },
       {
         name: "description",
         content:
           "Ative mensagens automáticas de aniversário, retorno de clientes e pedido de avaliação pelo WhatsApp da sua loja.",
       },
-      { property: "og:title", content: "Marketing automático | O Seu Pedido" },
+      { property: "og:title", content: "Marketing automático | Pedi Um" },
       {
         property: "og:description",
         content: "Cupom de aniversário, reativação de clientes e pedido de avaliação no automático.",

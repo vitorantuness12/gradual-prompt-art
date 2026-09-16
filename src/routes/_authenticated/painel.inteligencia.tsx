@@ -14,13 +14,13 @@ export const Route = createFileRoute("/_authenticated/painel/inteligencia")({
   component: InteligenciaPage,
   head: () => ({
     meta: [
-      { title: "Catálogo inteligente | O Seu Pedido" },
+      { title: "Catálogo inteligente | Pedi Um" },
       {
         name: "description",
         content:
           "Sugestões de itens combinados feitas por inteligência artificial e vitrine ordenada pelos produtos que mais vendem.",
       },
-      { property: "og:title", content: "Catálogo inteligente | O Seu Pedido" },
+      { property: "og:title", content: "Catálogo inteligente | Pedi Um" },
       {
         property: "og:description",
         content: "Aumente o valor do pedido com combinações sugeridas e vitrine organizada pelas vendas.",

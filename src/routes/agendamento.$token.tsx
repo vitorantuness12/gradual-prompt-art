@@ -19,7 +19,7 @@ export const Route = createFileRoute("/agendamento/$token")({
   component: ConfirmAppointmentPage,
   head: () => ({
     meta: [
-      { title: "Confirmar horário | O Seu Pedido" },
+      { title: "Confirmar horário | Pedi Um" },
       { name: "description", content: "Confirme, remarque ou cancele o seu horário em um clique, sem instalar nada." },
       { property: "og:title", content: "Confirmar horário" },
       { property: "og:description", content: "Confirme, remarque ou cancele o seu horário em um clique." },

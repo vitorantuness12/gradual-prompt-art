@@ -259,7 +259,7 @@ const Hero = () => {
 
               <motion.img
                 src={welcomeImg}
-                alt="App O Seu Pedido"
+                alt="App Pedi Um"
                 width={460}
                 height={407}
                 fetchPriority="high"

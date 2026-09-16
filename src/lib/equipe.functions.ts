@@ -36,7 +36,7 @@ async function sendInviteEmail(to: string, storeName: string, link: string): Pro
         from,
         to,
         subject: `Convite para a equipe de ${storeName}`,
-        html: `<p>Você foi convidado para a equipe de <strong>${storeName}</strong> no O Seu Pedido.</p><p><a href="${link}">Aceitar convite</a></p>`,
+        html: `<p>Você foi convidado para a equipe de <strong>${storeName}</strong> no Pedi Um.</p><p><a href="${link}">Aceitar convite</a></p>`,
       }),
     });
     return response.ok;

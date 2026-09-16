@@ -26,7 +26,7 @@ export const Route = createFileRoute("/$slug/acompanhar")({
   }),
   head: ({ params }) => ({
     meta: [
-      { title: `Acompanhar pedido — ${params.slug} | O Seu Pedido` },
+      { title: `Acompanhar pedido — ${params.slug} | Pedi Um` },
       {
         name: "description",
         content: "Consulte a situação do seu pedido nesta loja informando o código e o telefone da compra.",

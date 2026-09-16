@@ -47,7 +47,7 @@ export const Route = createFileRoute("/_authenticated/painel/equipe")({
   component: TeamPage,
   head: () => ({
     meta: [
-      { title: "Equipe da loja | O Seu Pedido" },
+      { title: "Equipe da loja | Pedi Um" },
       {
         name: "description",
         content: "Convide pessoas, defina papéis e permissões por área do painel.",

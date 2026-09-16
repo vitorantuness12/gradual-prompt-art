@@ -89,7 +89,7 @@ import { CheckoutThemeProvider } from "@/components/store/CheckoutThemeProvider"
 export const Route = createFileRoute("/$slug/checkout")({
   head: () => ({
     meta: [
-      { title: "Finalizar pedido — O Seu Pedido" },
+      { title: "Finalizar pedido — Pedi Um" },
       {
         name: "description",
         content:

@@ -18,7 +18,7 @@ export const Route = createFileRoute("/orcamento/$token")({
   component: QuotePage,
   head: () => ({
     meta: [
-      { title: "Sua proposta de encomenda | O Seu Pedido" },
+      { title: "Sua proposta de encomenda | Pedi Um" },
       {
         name: "description",
         content: "Veja os itens, o valor, o sinal e aprove a proposta da sua encomenda em poucos toques.",

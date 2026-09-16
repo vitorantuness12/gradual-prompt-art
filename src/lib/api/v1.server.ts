@@ -449,7 +449,7 @@ export async function handleApiV1(request: Request, splat: string): Promise<Resp
   if (!resource) {
     return withCors(
       apiJson({
-        name: "API O Seu Pedido",
+        name: "API Pedi Um",
         version: "v1",
         documentation: `${url.origin}/api/public/v1/openapi.json`,
         resources: [...new Set(ROUTES.map((route) => route.resource))],

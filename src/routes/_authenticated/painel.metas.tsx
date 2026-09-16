@@ -17,13 +17,13 @@ export const Route = createFileRoute("/_authenticated/painel/metas")({
   component: MetasPage,
   head: () => ({
     meta: [
-      { title: "Metas e resumo do dia | O Seu Pedido" },
+      { title: "Metas e resumo do dia | Pedi Um" },
       {
         name: "description",
         content:
           "Acompanhe quanto sua loja já vendeu hoje e no mês, defina metas e receba o resumo diário no WhatsApp.",
       },
-      { property: "og:title", content: "Metas e resumo do dia | O Seu Pedido" },
+      { property: "og:title", content: "Metas e resumo do dia | Pedi Um" },
       {
         property: "og:description",
         content: "Metas de vendas, ticket médio e resumo diário no WhatsApp do lojista.",

@@ -9,7 +9,7 @@ import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 // Configuration
-const SITE_NAME = "O Seu Pedido"
+const SITE_NAME = "Pedi Um"
 const SENDER_DOMAIN = "notify.oseupedido.com.br"
 const ROOT_DOMAIN = "oseupedido.com.br"
 const FROM_DOMAIN = "notify.oseupedido.com.br"

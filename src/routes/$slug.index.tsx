@@ -52,7 +52,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/$slug/")({
   head: ({ params }) => ({
     meta: [
-      { title: `Cardápio e pedidos — ${params.slug} | O Seu Pedido` },
+      { title: `Cardápio e pedidos — ${params.slug} | Pedi Um` },
       {
         name: "description",
         content: "Veja o catálogo completo, monte seu pedido e escolha entre entrega ou retirada nesta loja.",
@@ -824,7 +824,7 @@ function StoreFooter({
             rel="noreferrer"
             className="font-semibold underline underline-offset-2 hover:opacity-100"
           >
-            O Seu Pedido
+            Pedi Um
           </a>
         </p>
 

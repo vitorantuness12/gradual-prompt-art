@@ -12,9 +12,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/redefinir-senha")({
   head: () => ({
     meta: [
-      { title: "Redefinir senha — O Seu Pedido" },
-      { name: "description", content: "Defina uma nova senha para acessar o painel da sua loja no O Seu Pedido." },
-      { property: "og:title", content: "Redefinir senha — O Seu Pedido" },
+      { title: "Redefinir senha — Pedi Um" },
+      { name: "description", content: "Defina uma nova senha para acessar o painel da sua loja no Pedi Um." },
+      { property: "og:title", content: "Redefinir senha — Pedi Um" },
       { property: "og:description", content: "Crie uma nova senha de acesso à sua conta." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

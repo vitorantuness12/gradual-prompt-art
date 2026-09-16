@@ -22,13 +22,13 @@ import { maskPhone, maskZip, onlyDigits } from "@/lib/masks";
 export const Route = createFileRoute("/_authenticated/minha-conta")({
   head: () => ({
     meta: [
-      { title: "Minha conta — O Seu Pedido" },
+      { title: "Minha conta — Pedi Um" },
       {
         name: "description",
         content:
-          "Gerencie seus dados, endereços, pedidos anteriores, consentimentos e privacidade na sua conta O Seu Pedido.",
+          "Gerencie seus dados, endereços, pedidos anteriores, consentimentos e privacidade na sua conta Pedi Um.",
       },
-      { property: "og:title", content: "Minha conta — O Seu Pedido" },
+      { property: "og:title", content: "Minha conta — Pedi Um" },
       { property: "og:description", content: "Seus pedidos, endereços e preferências em um só lugar." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

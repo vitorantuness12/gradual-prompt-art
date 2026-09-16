@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/$slug/checkout_/loja")({
   head: () => ({
     meta: [
-      { title: "Finalizar compra — O Seu Pedido" },
+      { title: "Finalizar compra — Pedi Um" },
       {
         name: "description",
         content:

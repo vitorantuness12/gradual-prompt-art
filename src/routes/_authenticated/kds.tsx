@@ -62,7 +62,7 @@ export const Route = createFileRoute("/_authenticated/kds")({
   component: KdsScreen,
   head: () => ({
     meta: [
-      { title: "Monitor de preparo (KDS) | O Seu Pedido" },
+      { title: "Monitor de preparo (KDS) | Pedi Um" },
       {
         name: "description",
         content: "Monitor de preparo em tela exclusiva com filas por setor, temporizador, prioridade e impressão setorizada.",

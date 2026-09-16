@@ -37,9 +37,9 @@ import {
 export const Route = createFileRoute("/_authenticated/painel/whatsapp")({
   head: () => ({
     meta: [
-      { title: "WhatsApp da loja | O Seu Pedido" },
+      { title: "WhatsApp da loja | Pedi Um" },
       { name: "description", content: "Conecte o WhatsApp da sua loja por QR Code e configure automações de pedidos." },
-      { property: "og:title", content: "WhatsApp da loja | O Seu Pedido" },
+      { property: "og:title", content: "WhatsApp da loja | Pedi Um" },
       { property: "og:description", content: "Conecte o WhatsApp da sua loja por QR Code e configure automações." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -76,7 +76,7 @@ export const Route = createFileRoute("/_authenticated/painel/estoque")({
   component: StockPage,
   head: () => ({
     meta: [
-      { title: "Estoque | O Seu Pedido" },
+      { title: "Estoque | Pedi Um" },
       { name: "description", content: "Controle de estoque, ajustes, ingredientes e histórico de movimentações da sua loja." },
     ],
   }),

@@ -73,7 +73,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: SuperAdminPage,
   head: () => ({
     meta: [
-      { title: "Administração da plataforma | O Seu Pedido" },
+      { title: "Administração da plataforma | Pedi Um" },
       { name: "description", content: "Painel superadministrativo: lojas, usuários, planos, conteúdo, logs e suporte." },
     ],
   }),
