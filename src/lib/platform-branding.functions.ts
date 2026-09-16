@@ -64,7 +64,7 @@ export const createPlatformLogoUpload = async ({ data }: { data: z.infer<typeof 
   const { slot, contentType } = logoUploadSchema.parse(data);
   const ext = contentType.split("/")[1].replace("svg+xml", "svg");
   const path = `${slot}-${Date.now()}.${ext}`;
-  
+
   const { data: signed, error } = await supabase.storage
     .from("platform-assets")
     .createSignedUploadUrl(path);
