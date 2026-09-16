@@ -12,7 +12,6 @@ const slotSchema = z.enum([
   "app_cover_url",
   "pwa_icon_url",
   "pwa_maskable_icon_url",
-  "pwa_splash_url",
 ]);
 
 const urlSchema = z.string().url().max(2200).nullable();
@@ -57,7 +56,6 @@ export const savePlatformBranding = createServerFn({ method: "POST" })
       appCoverUrl: urlSchema,
       pwaIconUrl: urlSchema,
       pwaMaskableIconUrl: urlSchema,
-      pwaSplashUrl: urlSchema,
     }).parse(input),
   )
   .handler(async ({ data, context }) => {
@@ -73,7 +71,6 @@ export const savePlatformBranding = createServerFn({ method: "POST" })
       app_cover_url: data.appCoverUrl,
       pwa_icon_url: data.pwaIconUrl,
       pwa_maskable_icon_url: data.pwaMaskableIconUrl,
-      pwa_splash_url: data.pwaSplashUrl,
       updated_by: context.userId,
     });
     if (error) throw new Error("Não foi possível salvar a identidade visual.");

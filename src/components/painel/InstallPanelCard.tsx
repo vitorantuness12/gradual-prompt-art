@@ -14,10 +14,6 @@ interface InstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-/**
- * Convida o lojista a instalar o painel no celular e liga o aviso sonoro de
- * pedido novo. O som fica guardado como preferência do aparelho.
- */
 export function InstallPanelCard() {
   const { data: branding } = useQuery({ queryKey: platformBrandingQueryKey, queryFn: fetchPlatformBranding, staleTime: 5 * 60_000 });
   const [promptEvent, setPromptEvent] = useState<InstallPromptEvent | null>(null);
@@ -70,10 +66,10 @@ export function InstallPanelCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {branding?.pwaSplashUrl || branding?.appCoverUrl ? (
+        {branding?.appCoverUrl ? (
           <img
-            src={branding.pwaSplashUrl ?? branding.appCoverUrl ?? undefined}
-            alt="Tela de abertura do aplicativo Pedi Um"
+            src={branding.appCoverUrl}
+            alt="Capa do aplicativo Pedi Um"
             className="aspect-video w-full rounded-md border border-border object-cover"
             loading="lazy"
           />

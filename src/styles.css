@@ -122,6 +122,8 @@
   --shadow-glow-sm: 0 0 30px -8px hsl(0 84% 50% / 0.4);
   --shadow-card: 0 25px 50px -12px hsl(220 25% 12% / 0.12);
   --shadow-elevated: 0 20px 40px -15px hsl(220 25% 12% / 0.18);
+  --app-splash-background: hsl(0 0% 1%);
+  --app-splash-glow: hsl(0 100% 48%);
 }
 
 /* Tema escuro: aplicado quando a classe .dark está no <html>. */
@@ -299,6 +301,62 @@
   }
 }
 
+/* Abertura leve do aplicativo instalado: usa o ícone PWA já configurado. */
+.app-launch-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--app-splash-background);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 280ms ease;
+}
+
+.app-launch-splash[data-visible="true"] {
+  opacity: 1;
+}
+
+.app-launch-splash__glow {
+  position: absolute;
+  width: min(120vw, 48rem);
+  aspect-ratio: 1;
+  background: radial-gradient(circle, color-mix(in srgb, var(--app-splash-glow) 42%, transparent) 0%, transparent 68%);
+  filter: blur(1.5rem);
+  animation: app-splash-breathe 1.15s ease-in-out both;
+}
+
+.app-launch-splash__icon {
+  position: relative;
+  width: clamp(7.5rem, 34vw, 12rem);
+  aspect-ratio: 1;
+  object-fit: contain;
+  filter: drop-shadow(0 0 1.75rem color-mix(in srgb, var(--app-splash-glow) 65%, transparent));
+  animation: app-splash-icon 1.15s ease-out both;
+}
+
+@media (display-mode: standalone) {
+  .app-launch-splash {
+    display: flex;
+  }
+}
+
+@keyframes app-splash-icon {
+  0% { opacity: 0; transform: scale(0.92); }
+  35% { opacity: 1; transform: scale(1); }
+  75% { opacity: 1; transform: scale(1.015); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes app-splash-breathe {
+  0% { opacity: 0; transform: scale(0.75); }
+  45% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.72; transform: scale(1.08); }
+}
+
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -335,3 +393,4 @@
     scroll-behavior: auto !important;
   }
 }
+

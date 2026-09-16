@@ -6,7 +6,6 @@ import type { Database } from "@/integrations/supabase/types";
 interface ManifestBranding {
   pwa_icon_url: string | null;
   pwa_maskable_icon_url: string | null;
-  pwa_splash_url: string | null;
 }
 
 export const Route = createFileRoute("/api/public/manifest")({
@@ -18,7 +17,6 @@ export const Route = createFileRoute("/api/public/manifest")({
         const branding = await getBranding();
         const icon = branding?.pwa_icon_url ?? "/app-icon-512.png";
         const maskableIcon = branding?.pwa_maskable_icon_url ?? "/app-icon-maskable-512.png";
-        const splash = branding?.pwa_splash_url;
 
         const manifest = {
           name: panel ? "Painel Pedi Um" : "Pedi Um",
@@ -33,16 +31,13 @@ export const Route = createFileRoute("/api/public/manifest")({
           scope: "/",
           display: "standalone",
           orientation: "portrait",
-          background_color: "#ffffff",
-          theme_color: panel ? "#dc2626" : "#f97316",
+          background_color: "#030303",
+          theme_color: "#dc2626",
           categories: ["food", "shopping", "business"],
           icons: [
             { src: icon, sizes: "512x512", purpose: "any" },
             { src: maskableIcon, sizes: "512x512", purpose: "maskable" },
           ],
-          screenshots: splash
-            ? [{ src: splash, sizes: "1080x1920", form_factor: "narrow", label: "Tela de abertura do Pedi Um" }]
-            : undefined,
           shortcuts: panel
             ? [
                 { name: "Pedidos", url: "/painel/pedidos?origem=app" },
@@ -76,7 +71,7 @@ async function getBranding(): Promise<ManifestBranding | null> {
   });
   const { data } = await client
     .from("platform_branding")
-    .select("pwa_icon_url, pwa_maskable_icon_url, pwa_splash_url")
+    .select("pwa_icon_url, pwa_maskable_icon_url")
     .eq("key", "default")
     .maybeSingle();
   return data;

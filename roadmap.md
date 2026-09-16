@@ -4,4 +4,5 @@
 - [x] Aplicar as logos nas áreas correspondentes
 - [x] Validar permissões, upload e visualização
 - [x] Adicionar favicon e capa do aplicativo
-- [x] Adicionar ícone, ícone adaptável e tela de abertura do PWA
+- [x] Adicionar ícone e ícone adaptável do PWA
+- [x] Criar tela de abertura automática e leve com o ícone configurado

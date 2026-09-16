@@ -8,8 +8,7 @@ export type PlatformLogoSlot =
   | "favicon_url"
   | "app_cover_url"
   | "pwa_icon_url"
-  | "pwa_maskable_icon_url"
-  | "pwa_splash_url";
+  | "pwa_maskable_icon_url";
 
 export interface PlatformBranding {
   salesLogoLightUrl: string | null;
@@ -20,7 +19,6 @@ export interface PlatformBranding {
   appCoverUrl: string | null;
   pwaIconUrl: string | null;
   pwaMaskableIconUrl: string | null;
-  pwaSplashUrl: string | null;
   updatedAt: string | null;
 }
 
@@ -33,7 +31,6 @@ export const EMPTY_PLATFORM_BRANDING: PlatformBranding = {
   appCoverUrl: null,
   pwaIconUrl: null,
   pwaMaskableIconUrl: null,
-  pwaSplashUrl: null,
   updatedAt: null,
 };
 
@@ -53,7 +50,7 @@ export function resolvePlatformLogo(
 export async function fetchPlatformBranding(): Promise<PlatformBranding> {
   const { data, error } = await supabase
     .from("platform_branding")
-    .select("sales_logo_light_url, sales_logo_dark_url, merchant_logo_light_url, merchant_logo_dark_url, favicon_url, app_cover_url, pwa_icon_url, pwa_maskable_icon_url, pwa_splash_url, updated_at")
+    .select("sales_logo_light_url, sales_logo_dark_url, merchant_logo_light_url, merchant_logo_dark_url, favicon_url, app_cover_url, pwa_icon_url, pwa_maskable_icon_url, updated_at")
     .eq("key", "default")
     .maybeSingle();
 
@@ -68,7 +65,6 @@ export async function fetchPlatformBranding(): Promise<PlatformBranding> {
     appCoverUrl: data.app_cover_url,
     pwaIconUrl: data.pwa_icon_url,
     pwaMaskableIconUrl: data.pwa_maskable_icon_url,
-    pwaSplashUrl: data.pwa_splash_url,
     updatedAt: data.updated_at,
   };
 }
