@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { z } from "zod";
 
@@ -13,6 +13,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckoutThemeProvider } from "@/components/store/CheckoutThemeProvider";
+import {
+  CheckoutCustomerAccess,
+  type CheckoutAddressValue,
+} from "@/components/store/CheckoutCustomerAccess";
 import { UpsellSuggestions } from "@/components/store/UpsellSuggestions";
 import { buildLineId, seedCart, useCart, type CartItem } from "@/hooks/useCart";
 import { useCartCoupon } from "@/hooks/useCartCoupon";
@@ -52,6 +56,7 @@ export const Route = createFileRoute("/$slug/carrinho")({
 /** Página de conferência do carrinho, entre o catálogo e o checkout. */
 function StoreCartPage() {
   const { slug } = Route.useParams();
+  const navigate = useNavigate();
   const { retomar, cupom } = Route.useSearch();
   const { data, isLoading } = useQuery(publicStoreQuery(slug));
   const store = data?.store ?? null;
@@ -60,6 +65,7 @@ function StoreCartPage() {
   const cart = useCart(slug, store?.id ?? null);
 
   const [couponCode, setCouponCode] = useState("");
+  const [accessOpen, setAccessOpen] = useState(false);
   const couponState = useCartCoupon(slug, store?.id ?? null, cart.subtotal, cart.hydrated);
   const total = Math.max(0, cart.subtotal - couponState.discount);
   const availability = store ? storeAvailability(store) : null;
@@ -377,10 +383,8 @@ function StoreCartPage() {
               <p className="font-semibold text-foreground">{formatCurrency(total)}</p>
             </div>
             {canCheckout ? (
-              <Button asChild size="lg">
-                <Link to={checkoutPathFor(slug, data?.store ?? null)}>
-                  Ir para o pagamento
-                </Link>
+              <Button type="button" size="lg" onClick={() => setAccessOpen(true)}>
+                Finalizar pedido
               </Button>
             ) : (
               <Button size="lg" disabled>
@@ -390,6 +394,30 @@ function StoreCartPage() {
           </div>
         </div>
       ) : null}
+      <CheckoutCustomerAccess
+        open={accessOpen}
+        storeSlug={slug}
+        needsAddress={false}
+        initialAddress={emptyCheckoutAddress()}
+        onOpenChange={setAccessOpen}
+        onReady={() => {
+          setAccessOpen(false);
+          void navigate({ href: checkoutPathFor(slug, data?.store ?? null) });
+        }}
+      />
     </CheckoutThemeProvider>
   );
+}
+
+function emptyCheckoutAddress(): CheckoutAddressValue {
+  return {
+    zip: "",
+    street: "",
+    number: "",
+    complement: "",
+    reference: "",
+    district: "",
+    city: "",
+    state: "",
+  };
 }

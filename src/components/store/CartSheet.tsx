@@ -1,8 +1,12 @@
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { CouponFeedbackMessage } from "@/components/catalogo/CouponFeedbackMessage";
+import {
+  CheckoutCustomerAccess,
+  type CheckoutAddressValue,
+} from "@/components/store/CheckoutCustomerAccess";
 import { UpsellSuggestions } from "@/components/store/UpsellSuggestions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,10 +79,13 @@ export function CartSheet({
   onAddSuggestion,
   coupon,
 }: CartSheetProps) {
+  const navigate = useNavigate();
   const [couponInput, setCouponInput] = useState("");
+  const [accessOpen, setAccessOpen] = useState(false);
   const discount = coupon ? Math.min(coupon.discount, subtotal) : 0;
   const total = Math.max(0, subtotal - discount);
   return (
+    <>
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
         <SheetHeader className="border-b border-border p-4 text-left">
@@ -217,17 +224,14 @@ export function CartSheet({
               <span className="text-base font-semibold text-foreground">{formatCurrency(total)}</span>
             </div>
             <Button
-              asChild={accepting && items.length > 0}
               disabled={!accepting || items.length === 0}
               className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
+              onClick={() => {
+                onOpenChange(false);
+                setAccessOpen(true);
+              }}
             >
-              {accepting && items.length > 0 ? (
-                <Link to={checkoutPathFor(slug, store ?? null)} onClick={() => onOpenChange(false)}>
-                  Finalizar pedido
-                </Link>
-              ) : (
-                <span>{accepting ? "Sacola vazia" : "Loja indisponível"}</span>
-              )}
+              {accepting && items.length > 0 ? "Finalizar pedido" : accepting ? "Sacola vazia" : "Loja indisponível"}
             </Button>
             <Button type="button" variant="outline" className="w-full" onClick={() => onOpenChange(false)}>
               Continuar comprando
@@ -236,5 +240,30 @@ export function CartSheet({
         </SheetFooter>
       </SheetContent>
     </Sheet>
+    <CheckoutCustomerAccess
+      open={accessOpen}
+      storeSlug={slug}
+      needsAddress={false}
+      initialAddress={emptyCheckoutAddress()}
+      onOpenChange={setAccessOpen}
+      onReady={() => {
+        setAccessOpen(false);
+        void navigate({ href: checkoutPathFor(slug, store ?? null) });
+      }}
+    />
+    </>
   );
+}
+
+function emptyCheckoutAddress(): CheckoutAddressValue {
+  return {
+    zip: "",
+    street: "",
+    number: "",
+    complement: "",
+    reference: "",
+    district: "",
+    city: "",
+    state: "",
+  };
 }
