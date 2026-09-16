@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/pedium-logo.png.asset.json";
 
 export interface LogoProps {
   className?: string;
@@ -10,14 +10,14 @@ export interface LogoProps {
 }
 
 /**
- * Marca da plataforma "O Seu Pedido".
+ * Marca da plataforma Pedium.
  */
 export function Logo({ className, withWordmark = true, inverted = false }: LogoProps) {
   return (
     <span className={cn("inline-flex items-center", className)}>
       <img
-        src={logo}
-        alt="O Seu Pedido"
+        src={logo.url}
+        alt="Pedium — Tudo em um"
         className={cn(
           "w-auto object-contain",
           withWordmark ? "h-9" : "h-8",

@@ -1,5 +1,5 @@
 import { MessageCircle, Mail, MapPin, Phone } from "lucide-react";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/pedium-logo.png.asset.json";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -40,8 +40,8 @@ const Footer = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 md:gap-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-3 lg:col-span-2">
-            <a href="/" aria-label="Página inicial do O Seu Pedido" className="flex items-center mb-6">
-              <img src={logo} alt="O Seu Pedido" loading="lazy" decoding="async" className="h-12 sm:h-14 md:h-16 w-auto" />
+            <a href="/" aria-label="Página inicial da Pedium" className="mb-6 flex items-center">
+              <img src={logo.url} alt="Pedium — Tudo em um" loading="lazy" decoding="async" className="h-12 w-auto sm:h-14 md:h-16" />
             </a>
             <p className="text-muted-foreground text-sm mb-6 max-w-xs">
               Seu Pedido — plataforma própria para lojas, delivery, pedidos, mesas,
