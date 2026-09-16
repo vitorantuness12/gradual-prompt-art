@@ -13,9 +13,9 @@ export async function uploadPlatformLogo(
   if (file.size > 5 * 1024 * 1024) throw new Error("A imagem deve ter no máximo 5 MB.");
 
   const isSvg = file.type === "image/svg+xml";
-  const dimensions = slot === "favicon_url"
+  const dimensions = slot === "favicon_url" || slot === "pwa_icon_url" || slot === "pwa_maskable_icon_url"
     ? { maxWidth: 512, maxHeight: 512 }
-    : slot === "app_cover_url"
+    : slot === "app_cover_url" || slot === "pwa_splash_url"
       ? { maxWidth: 1920, maxHeight: 1080 }
       : { maxWidth: 1600, maxHeight: 800 };
   const body = isSvg ? file : await compressImage(file, { ...dimensions, quality: 0.9 });
