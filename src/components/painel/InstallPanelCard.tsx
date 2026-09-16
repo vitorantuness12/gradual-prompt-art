@@ -1,4 +1,5 @@
 import { Bell, Download, Share, Smartphone } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { NEW_ORDER_SOUND_KEY, playNewOrderChime } from "@/hooks/useNewOrderAlert";
+import { fetchPlatformBranding, platformBrandingQueryKey } from "@/lib/platform-branding";
 
 interface InstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -17,6 +19,7 @@ interface InstallPromptEvent extends Event {
  * pedido novo. O som fica guardado como preferência do aparelho.
  */
 export function InstallPanelCard() {
+  const { data: branding } = useQuery({ queryKey: platformBrandingQueryKey, queryFn: fetchPlatformBranding, staleTime: 5 * 60_000 });
   const [promptEvent, setPromptEvent] = useState<InstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
   const [iosHint, setIosHint] = useState(false);
@@ -67,6 +70,14 @@ export function InstallPanelCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {branding?.appCoverUrl ? (
+          <img
+            src={branding.appCoverUrl}
+            alt="Capa do aplicativo Pedi Um"
+            className="aspect-video w-full rounded-md border border-border object-cover"
+            loading="lazy"
+          />
+        ) : null}
         <div className="flex items-center justify-between gap-4 rounded-xl border border-border/70 p-3">
           <div className="flex items-start gap-3">
             <Bell className="mt-0.5 size-4 text-primary" aria-hidden="true" />
