@@ -1,28 +1,5 @@
-# Roteiro — novos módulos
-
-Ordem combinada com o usuário: um bloco por vez.
-
-1. [x] Central de marketing automática — cupom de aniversário, "sentimos sua falta" em 30 dias, pós-compra pedindo avaliação (WhatsApp já ligado)
-2. [x] Upsell inteligente por IA no catálogo + reordenação automática pelos itens que mais vendem
-3. [x] App do lojista (PWA) instalável com alerta sonoro de pedido novo
-4. [x] Painel de metas e comparativo por período + resumo diário no WhatsApp do dono
-5. [ ] Cobrança recorrente da plataforma com bloqueio automático por inadimplência e teste grátis
-6. [ ] Gestão de múltiplas unidades (marca com várias lojas, estoque e relatório consolidado)
-
-## Já pronto (base)
-- Motor de automações (`src/lib/automacoes.server.ts`) e cron `/api/public/crm/automacoes`
-- Cobrança de planos manual no admin (`src/lib/planos-cobranca.functions.ts`)
-- Notas fiscais, estornos, LGPD, afiliados
-
-## Foco nos segmentos principais
-- [x] Manter apenas os seis segmentos de alimentação, conveniência e pet shop na apresentação
-- [x] Remover a configuração manual de funções do painel
-- [x] Remover o checkout digital e seus pontos de entrada, com fallback seguro para lojas antigas
-- [x] Manter Agenda disponível para delivery
-- [x] Validar roteamento, menu público e Agenda por testes automatizados; painel autenticado depende de sessão externa
-
-## Agendamentos e encomendas por ramo
-- [x] Reformular Agenda para reservas, serviços pet e retirada/entrega programada
-- [x] Reformular Encomendas para entradas pela loja e pelo painel
-- [x] Adicionar avisos em tempo real e notificações para ambos os fluxos
-- [x] Validar as duas páginas e seus fluxos principais
+## Identidade visual global
+- [ ] Mapear admin, persistência e todos os usos da marca
+- [ ] Criar configuração de logos por contexto e tema
+- [ ] Aplicar as logos nas áreas correspondentes
+- [ ] Validar permissões, upload e visualização
