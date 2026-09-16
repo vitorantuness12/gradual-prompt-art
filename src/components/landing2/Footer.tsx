@@ -62,7 +62,7 @@ const Footer = () => {
                 className="flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Mail className="w-4 h-4 text-primary" />
-                contato@oseupedido.com.br
+                Fale com a equipe por e-mail
               </a>
             </div>
           </div>
