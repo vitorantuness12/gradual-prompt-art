@@ -8,6 +8,7 @@ import { useStoreDocumentTitle } from "@/hooks/useStoreDocumentTitle";
 import { HighlightsPopup, HighlightsSection } from "@/components/store/HighlightsPopup";
 import { RepeatOrderModal } from "@/components/store/RepeatOrderModal";
 import { InstallAppBanner } from "@/components/store/InstallAppBanner";
+import { StoreMobileNav } from "@/components/store/StoreMobileNav";
 import { StoreThemeProvider } from "@/components/store/StoreThemeProvider";
 import { ProductDetailDialog } from "@/components/store/ProductDetailDialog";
 import { CartSheet, quickCartEnabled } from "@/components/store/CartSheet";
@@ -137,6 +138,11 @@ function PublicStorePage() {
   const [filter, setFilter] = useState<Filter>("all");
   const [detail, setDetail] = useState<ProductRow | null>(null);
 
+  function focusSearch() {
+    document.getElementById("store-catalog-search")?.focus({ preventScroll: false });
+    document.getElementById("store-catalog-search")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
   // Endereço antigo continua funcionando: levamos o visitante ao endereço atual.
   useEffect(() => {
     if (isLoading || data) return;
@@ -251,7 +257,7 @@ function PublicStorePage() {
 
 
   return (
-    <StoreThemeProvider config={theme} paintDocument className="flex min-h-screen flex-col bg-muted/30 text-foreground">
+    <StoreThemeProvider config={theme} paintDocument className="flex min-h-dvh flex-col bg-muted/30 pb-20 text-foreground sm:pb-0">
       <header>
         {coverUrl ? (
           <div className="relative h-36 w-full overflow-hidden sm:h-56 lg:h-64">
@@ -394,6 +400,7 @@ function PublicStorePage() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <Input
+              id="store-catalog-search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder={layout === "schedule" ? "Buscar serviço" : "Buscar no catálogo"}
@@ -696,7 +703,7 @@ function PublicStorePage() {
       />
 
       {cart.hydrated && cart.count > 0 ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur">
+        <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-border bg-card/95 backdrop-blur sm:bottom-0 sm:z-40">
           <div className="mx-auto flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6" style={{ maxWidth: "var(--store-max-width)" }}>
             <div className="text-sm">
               <p className="font-medium text-foreground">
@@ -729,6 +736,16 @@ function PublicStorePage() {
           </div>
         </div>
       ) : null}
+
+      <StoreMobileNav
+        slug={slug}
+        cartCount={cart.hydrated ? cart.count : 0}
+        onSearch={focusSearch}
+        onCart={() => {
+          if (quickCart) setCartSheetOpen(true);
+          else void navigate({ to: "/$slug/carrinho", params: { slug } });
+        }}
+      />
 
       {quickCart ? (
         <CartSheet

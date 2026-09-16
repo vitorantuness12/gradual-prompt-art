@@ -41,8 +41,8 @@ export const Route = createFileRoute("/api/public/manifest")({
           shortcuts: panel
             ? [
                 { name: "Pedidos", url: "/painel/pedidos?origem=app" },
-                { name: "PDV / Caixa", url: "/pdv?origem=app" },
-                { name: "Metas do dia", url: "/painel/metas?origem=app" },
+                { name: "Financeiro", url: "/painel/pagamentos?origem=app" },
+                { name: "Clientes", url: "/painel/clientes?origem=app" },
               ]
             : [
                 { name: "Acompanhar pedido", short_name: "Acompanhar", url: "/acompanhar?origem=app" },

@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
 import { AppLaunchSplash } from "@/components/brand/AppLaunchSplash";
+import { ConnectionBanner } from "@/components/app/ConnectionBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchPlatformBranding, platformBrandingQueryKey } from "@/lib/platform-branding";
 
@@ -81,7 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "Pedi Um — plataforma de pedidos e agendamentos" },
       {
         name: "description",
@@ -166,6 +167,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <RuntimeBrandingHead />
       <AppLaunchSplash />
+      <ConnectionBanner />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <div id="conteudo-principal">
         <Outlet />

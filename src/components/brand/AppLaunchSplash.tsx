@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 
 import { fetchPlatformBranding, platformBrandingQueryKey } from "@/lib/platform-branding";
 
-const SPLASH_DURATION_MS = 1_150;
-const SPLASH_EXIT_MS = 280;
+const SPLASH_DURATION_MS = 700;
+const SPLASH_EXIT_MS = 180;
 
 export function AppLaunchSplash() {
   const { data: branding } = useQuery({

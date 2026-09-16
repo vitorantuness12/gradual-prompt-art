@@ -8,31 +8,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { NEW_ORDER_SOUND_KEY, playNewOrderChime } from "@/hooks/useNewOrderAlert";
 import { fetchPlatformBranding, platformBrandingQueryKey } from "@/lib/platform-branding";
-
-interface InstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
+import { usePwaInstall } from "@/hooks/usePwaInstall";
 
 export function InstallPanelCard() {
   const { data: branding } = useQuery({ queryKey: platformBrandingQueryKey, queryFn: fetchPlatformBranding, staleTime: 5 * 60_000 });
-  const [promptEvent, setPromptEvent] = useState<InstallPromptEvent | null>(null);
-  const [installed, setInstalled] = useState(false);
-  const [iosHint, setIosHint] = useState(false);
+  const { canInstall, installed, isIos: iosHint, install: promptInstall } = usePwaInstall();
   const [soundOn, setSoundOn] = useState(true);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     setSoundOn(window.localStorage.getItem(NEW_ORDER_SOUND_KEY) !== "0");
-    setInstalled(window.matchMedia("(display-mode: standalone)").matches);
-    setIosHint(/iphone|ipad|ipod/i.test(window.navigator.userAgent));
-
-    const handler = (event: Event) => {
-      event.preventDefault();
-      setPromptEvent(event as InstallPromptEvent);
-    };
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
   function toggleSound(checked: boolean) {
@@ -45,13 +30,11 @@ export function InstallPanelCard() {
   }
 
   async function install() {
-    if (!promptEvent) {
+    if (!canInstall) {
       toast.info("Use o menu do navegador e escolha “Instalar aplicativo”.");
       return;
     }
-    await promptEvent.prompt();
-    const choice = await promptEvent.userChoice;
-    if (choice.outcome === "accepted") setInstalled(true);
+    await promptInstall();
   }
 
   return (

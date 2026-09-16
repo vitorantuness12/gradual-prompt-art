@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { CreditCard, LayoutDashboard, Menu, ShoppingBag, Users } from "lucide-react";
-import type { ComponentType } from "react";
+import { CreditCard, LayoutDashboard, Menu, ShoppingBag, Users, type LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -10,7 +9,7 @@ import { cn } from "@/lib/utils";
 interface NavigationItem {
   to: string;
   label: string;
-  icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  icon: LucideIcon;
 }
 
 interface PanelMobileNavProps {
