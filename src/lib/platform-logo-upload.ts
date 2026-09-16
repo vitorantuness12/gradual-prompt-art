@@ -13,7 +13,12 @@ export async function uploadPlatformLogo(
   if (file.size > 5 * 1024 * 1024) throw new Error("A imagem deve ter no máximo 5 MB.");
 
   const isSvg = file.type === "image/svg+xml";
-  const body = isSvg ? file : await compressImage(file, { maxWidth: 1600, maxHeight: 800, quality: 0.9 });
+  const dimensions = slot === "favicon_url"
+    ? { maxWidth: 512, maxHeight: 512 }
+    : slot === "app_cover_url"
+      ? { maxWidth: 1920, maxHeight: 1080 }
+      : { maxWidth: 1600, maxHeight: 800 };
+  const body = isSvg ? file : await compressImage(file, { ...dimensions, quality: 0.9 });
   const contentType = (isSvg ? file.type : "image/webp") as "image/png" | "image/jpeg" | "image/webp" | "image/svg+xml";
   const signed = await prepare({ data: { slot, contentType } });
   const { error } = await supabase.storage.from("platform-assets").uploadToSignedUrl(signed.path, signed.token, body, { contentType });

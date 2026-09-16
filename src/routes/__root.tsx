@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchPlatformBranding, platformBrandingQueryKey } from "@/lib/platform-branding";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -162,6 +163,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <RuntimeBrandingHead />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <div id="conteudo-principal">
         <Outlet />
@@ -169,4 +171,33 @@ function RootComponent() {
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );
+}
+
+function RuntimeBrandingHead() {
+  const { data } = useQuery({ queryKey: platformBrandingQueryKey, queryFn: fetchPlatformBranding, staleTime: 5 * 60_000 });
+
+  useEffect(() => {
+    if (data?.faviconUrl) {
+      document.querySelectorAll<HTMLLinkElement>('link[rel="icon"], link[rel="apple-touch-icon"]').forEach((link) => {
+        link.href = data.faviconUrl ?? "/favicon.png";
+      });
+    }
+    if (data?.appCoverUrl) {
+      const entries = [
+        { selector: 'meta[property="og:image"]', attribute: "property", key: "og:image" },
+        { selector: 'meta[name="twitter:image"]', attribute: "name", key: "twitter:image" },
+      ];
+      entries.forEach(({ selector, attribute, key }) => {
+        let meta = document.head.querySelector<HTMLMetaElement>(selector);
+        if (!meta) {
+          meta = document.createElement("meta");
+          meta.setAttribute(attribute, key);
+          document.head.appendChild(meta);
+        }
+        meta.content = data.appCoverUrl ?? "";
+      });
+    }
+  }, [data?.appCoverUrl, data?.faviconUrl]);
+
+  return null;
 }

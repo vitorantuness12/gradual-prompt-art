@@ -3,3 +3,4 @@
 - [x] Criar configuração de logos por contexto e tema
 - [x] Aplicar as logos nas áreas correspondentes
 - [x] Validar permissões, upload e visualização
+- [x] Adicionar favicon e capa do aplicativo

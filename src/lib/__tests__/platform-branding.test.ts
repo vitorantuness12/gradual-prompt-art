@@ -7,6 +7,8 @@ const branding: PlatformBranding = {
   salesLogoDarkUrl: "https://assets.test/vendas-escuro.webp",
   merchantLogoLightUrl: "https://assets.test/lojista-claro.webp",
   merchantLogoDarkUrl: null,
+  faviconUrl: "https://assets.test/favicon.webp",
+  appCoverUrl: "https://assets.test/capa.webp",
   updatedAt: null,
 };
 

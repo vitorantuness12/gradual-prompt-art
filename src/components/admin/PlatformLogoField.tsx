@@ -14,6 +14,9 @@ interface PlatformLogoFieldProps {
   slot: PlatformLogoSlot;
   value: string | null;
   darkPreview: boolean;
+  previewShape?: "logo" | "square" | "cover";
+  fallbackUrl?: string;
+  successLabel?: string;
   prepareUpload: Parameters<typeof uploadPlatformLogo>[2];
   onChange: (value: string | null) => void;
 }
@@ -27,9 +30,9 @@ export function PlatformLogoField(props: PlatformLogoFieldProps) {
     setUploading(true);
     try {
       props.onChange(await uploadPlatformLogo(file, props.slot, props.prepareUpload));
-      toast.success("Logo enviada. Salve para aplicar a alteração.");
+      toast.success(`${props.successLabel ?? "Imagem"} enviada. Salve para aplicar a alteração.`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Falha ao enviar a logo.");
+      toast.error(error instanceof Error ? error.message : "Falha ao enviar a imagem.");
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -38,8 +41,16 @@ export function PlatformLogoField(props: PlatformLogoFieldProps) {
 
   return (
     <article className="overflow-hidden rounded-lg border border-border bg-card">
-      <div className={cn("flex h-36 items-center justify-center bg-background p-6", props.darkPreview && "dark")}>
-        <img src={props.value ?? fallbackLogo.url} alt={`Prévia: ${props.title}`} className="max-h-20 max-w-full object-contain" />
+      <div className={cn("flex h-36 items-center justify-center bg-background p-4", props.darkPreview && "dark")}>
+        <img
+          src={props.value ?? props.fallbackUrl ?? fallbackLogo.url}
+          alt={`Prévia: ${props.title}`}
+          className={cn(
+            "max-h-full max-w-full object-contain",
+            props.previewShape === "square" && "aspect-square rounded-md",
+            props.previewShape === "cover" && "aspect-video w-full rounded-md object-cover",
+          )}
+        />
       </div>
       <div className="space-y-3 border-t border-border p-4">
         <div>
