@@ -22,3 +22,9 @@
 - [x] Adicionar saúde da plataforma, privacidade e riscos
 - [x] Aprimorar suporte, incidentes, auditoria e integrações
 - [x] Validar permissões, celular e fluxos administrativos
+
+## Entrada PWA do lojista
+- [ ] Abrir o aplicativo instalado no login exclusivo do lojista
+- [ ] Criar login móvel com aparência nativa e áreas seguras
+- [ ] Direcionar sessões ativas e atalhos para o painel correto
+- [ ] Validar abertura, login e telas móveis
