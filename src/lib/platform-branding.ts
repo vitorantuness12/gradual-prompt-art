@@ -24,6 +24,17 @@ export const EMPTY_PLATFORM_BRANDING: PlatformBranding = {
 
 export const platformBrandingQueryKey = ["platform-branding"] as const;
 
+export function resolvePlatformLogo(
+  branding: PlatformBranding | undefined,
+  context: "sales" | "merchant" | "platform",
+  theme: "light" | "dark",
+): string | null {
+  if (!branding || context === "platform") return null;
+  const light = context === "merchant" ? branding.merchantLogoLightUrl : branding.salesLogoLightUrl;
+  const dark = context === "merchant" ? branding.merchantLogoDarkUrl : branding.salesLogoDarkUrl;
+  return theme === "dark" ? dark ?? light : light ?? dark;
+}
+
 export async function fetchPlatformBranding(): Promise<PlatformBranding> {
   const { data, error } = await supabase
     .from("platform_branding")

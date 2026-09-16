@@ -76,6 +76,10 @@ export const Route = createFileRoute("/_authenticated/admin")({
     meta: [
       { title: "Administração da plataforma | Pedi Um" },
       { name: "description", content: "Painel superadministrativo: lojas, usuários, planos, conteúdo, logs e suporte." },
+      { property: "og:title", content: "Administração da plataforma | Pedi Um" },
+      { property: "og:description", content: "Gestão administrativa da plataforma Pedi Um." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });

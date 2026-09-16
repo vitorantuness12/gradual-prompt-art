@@ -25,7 +25,7 @@ async function requireSuperAdmin(context: {
 
 export const createPlatformLogoUpload = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z.object({ slot: slotSchema, contentType: z.enum(["image/png", "image/jpeg", "image/webp", "image/svg+xml"]) }).parse(input),
   )
   .handler(async ({ data, context }) => {
@@ -42,7 +42,7 @@ export const createPlatformLogoUpload = createServerFn({ method: "POST" })
 
 export const savePlatformBranding = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z.object({
       salesLogoLightUrl: urlSchema,
       salesLogoDarkUrl: urlSchema,
