@@ -43,15 +43,27 @@ class AudioContextMock {
 
 describe("alerta sonoro de pedido", () => {
   beforeEach(() => {
-    localStorage.clear();
+    const values = new Map<string, string>();
+    const localStorageMock = {
+      clear: () => values.clear(),
+      getItem: (key: string) => values.get(key) ?? null,
+      removeItem: (key: string) => values.delete(key),
+      setItem: (key: string, value: string) => values.set(key, value),
+    };
     AudioContextMock.instances = [];
-    Object.defineProperty(window, "AudioContext", { configurable: true, value: AudioContextMock });
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: { AudioContext: AudioContextMock, clearInterval, localStorage: localStorageMock, setInterval },
+    });
   });
 
-  afterEach(() => acknowledgeNewOrderAlert());
+  afterEach(() => {
+    acknowledgeNewOrderAlert();
+    Reflect.deleteProperty(globalThis, "window");
+  });
 
   it("aplica o volume salvo ao aviso", async () => {
-    localStorage.setItem(NEW_ORDER_VOLUME_KEY, "50");
+    window.localStorage.setItem(NEW_ORDER_VOLUME_KEY, "50");
     await playNewOrderChime();
 
     const context = AudioContextMock.instances[0];
@@ -59,7 +71,7 @@ describe("alerta sonoro de pedido", () => {
   });
 
   it("desliga qualquer repetição quando o som é desativado", () => {
-    localStorage.setItem(NEW_ORDER_SOUND_KEY, "0");
+    window.localStorage.setItem(NEW_ORDER_SOUND_KEY, "0");
     expect(() => refreshNewOrderAlertSound()).not.toThrow();
   });
 });
