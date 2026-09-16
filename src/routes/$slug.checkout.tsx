@@ -63,12 +63,7 @@ import {
   validateCoupon,
   type CustomerAccount,
 } from "@/lib/orders.functions";
-import {
-  DEFAULT_CHECKOUT_SETTINGS,
-  getCheckoutSettings,
-  saveCheckoutIdentity,
-} from "@/lib/identificacao.functions";
-import { PhoneIdentifyCard, type IdentityConsent } from "@/components/store/PhoneIdentifyCard";
+import { DEFAULT_CHECKOUT_SETTINGS, getCheckoutSettings } from "@/lib/identificacao.functions";
 import { normalizePhoneBR } from "@/lib/phone";
 import { maskPhone } from "@/lib/masks";
 
@@ -232,15 +227,9 @@ function CheckoutPage() {
   const [cepError, setCepError] = useState<string | null>(null);
   const [review, setReview] = useState(false);
   const [accessOpen, setAccessOpen] = useState(false);
-  const [authenticatedCustomer, setAuthenticatedCustomer] = useState<CheckoutCustomerSession | null>(null);
   const [acceptedOffers, setAcceptedOffers] = useState<string[]>([]);
   const [tracking, setTracking] = useState<Tracking>(EMPTY_TRACKING);
   const [submitting, setSubmitting] = useState(false);
-  const [consent, setConsent] = useState<IdentityConsent>({
-    acceptedTerms: false,
-    marketingOptIn: false,
-    createProfile: true,
-  });
 
   // Preferências de checkout definidas pelo lojista (visitante, verificação, etc.).
   const checkoutSettingsQuery = useQuery({
@@ -253,7 +242,6 @@ function CheckoutPage() {
     enabled: settings.upsellEnabled,
     max: settings.upsellMaxItems,
   });
-  const persistIdentity = useServerFn(saveCheckoutIdentity);
   const sendOrder = useServerFn(enviarPedidoLoja);
 
 
@@ -609,25 +597,6 @@ function CheckoutPage() {
     }
     if (!selected) {
       toast.error("Escolha a forma de atendimento.");
-      return;
-    }
-    const parsed = checkoutSchema.safeParse(form);
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Verifique os dados informados.");
-      return;
-    }
-    const normalizedPhone = normalizePhoneBR(form.phone);
-    if (!normalizedPhone.ok) {
-      toast.error(normalizedPhone.message);
-      return;
-    }
-    if (settings.requireEmail && !form.email.trim()) {
-      toast.error("Esta loja pede um e-mail válido para o pedido.");
-      return;
-    }
-
-    if (isDelivery && (!form.street.trim() || !form.number.trim())) {
-      toast.error("Informe rua e número para a entrega.");
       return;
     }
     if (isDelivery && estimate?.blockedReason) {
@@ -1615,7 +1584,6 @@ function CheckoutPage() {
         }}
         onOpenChange={setAccessOpen}
         onReady={(customer: CheckoutCustomerSession, address: CheckoutAddressValue | null) => {
-          setAuthenticatedCustomer(customer);
           setForm((current) => ({
             ...current,
             name: customer.fullName,

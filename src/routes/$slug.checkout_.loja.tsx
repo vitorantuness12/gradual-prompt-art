@@ -145,19 +145,6 @@ function LojaCheckout() {
       toast.error("Seu carrinho está vazio.");
       return;
     }
-    if (customer.name.trim().length < 3) {
-      toast.error("Informe seu nome completo.");
-      return;
-    }
-    const phone = normalizePhoneBR(customer.phone);
-    if (!phone.ok) {
-      toast.error(phone.message);
-      return;
-    }
-    if (fulfillment === "delivery" && (!address.zip || !address.street || !address.number)) {
-      toast.error("Complete o endereço de entrega.");
-      return;
-    }
     if (!payment) {
       toast.error("Escolha a forma de pagamento.");
       return;
@@ -179,7 +166,7 @@ function LojaCheckout() {
           fulfillment,
           address: fulfillment === "delivery" ? address : null,
           name: customer.name.trim(),
-          phone: phone.e164,
+           phone: normalizePhoneBR(customer.phone).e164,
           email: customer.email.trim() || null,
           notes: customer.notes.trim() || null,
         },

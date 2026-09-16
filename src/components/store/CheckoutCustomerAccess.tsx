@@ -78,6 +78,8 @@ export function CheckoutCustomerAccess(props: CheckoutCustomerAccessProps) {
     void supabase.auth.getUser().then(({ data }) => {
       if (data.user) void refreshCustomer();
     });
+    // A abertura do modal é o único gatilho; refreshCustomer usa as props atuais.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.open]);
 
   async function passwordLogin(): Promise<void> {

@@ -111,15 +111,6 @@ function AgendamentoCheckout() {
       toast.error("Escolha um horário disponível.");
       return;
     }
-    if (customer.name.trim().length < 3) {
-      toast.error("Informe seu nome completo.");
-      return;
-    }
-    const phone = normalizePhoneBR(customer.phone);
-    if (!phone.ok) {
-      toast.error(phone.message);
-      return;
-    }
     if (!payment) {
       toast.error("Escolha a forma de pagamento.");
       return;
@@ -140,7 +131,7 @@ function AgendamentoCheckout() {
           startsAt,
           paymentMethod: payment,
           name: customer.name.trim(),
-          phone: phone.e164,
+           phone: normalizePhoneBR(customer.phone).e164,
           email: customer.email.trim() || null,
           notes: customer.notes.trim() || null,
         },
