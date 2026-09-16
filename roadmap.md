@@ -16,9 +16,9 @@
 - [x] Validar fluxos principais em celular e desktop
 
 ## Super Admin completo
-- [ ] Reestruturar navegação e visão geral operacional
-- [ ] Centralizar leituras e ações críticas no servidor
+- [x] Reestruturar navegação e visão geral operacional
+- [x] Centralizar leituras e ações críticas no servidor
 - [ ] Completar gestão de lojas, usuários e assinaturas
-- [ ] Adicionar saúde da plataforma, privacidade e riscos
+- [x] Adicionar saúde da plataforma, privacidade e riscos
 - [ ] Aprimorar suporte, incidentes, auditoria e integrações
 - [ ] Validar permissões, celular e fluxos administrativos

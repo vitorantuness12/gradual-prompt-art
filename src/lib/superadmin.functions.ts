@@ -192,7 +192,7 @@ export const updateAdminPrivacyRequest = createServerFn({ method: "POST" })
     const finished = data.status === "done" || data.status === "rejected";
     const { data: request, error } = await supabaseAdmin
       .from("data_requests")
-      .update({ status: data.status, note: data.note, handled_by: context.userId, handled_at: finished ? new Date().toISOString() : null })
+      .update({ status: data.status, ...(data.note !== undefined ? { note: data.note } : {}), handled_by: context.userId, handled_at: finished ? new Date().toISOString() : null })
       .eq("id", data.requestId)
       .select("store_id")
       .maybeSingle();

@@ -1,12 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Sparkles } from "lucide-react";
+import { Activity, Blocks, Building2, CreditCard, FileText, Headphones, LayoutDashboard, MessageCircle, Palette, ReceiptText, ScrollText, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 
 import { PlanBillingTab } from "@/components/admin/PlanBillingTab";
+import { AdminHealthTab } from "@/components/admin/AdminHealthTab";
+import { AdminPrivacyTab } from "@/components/admin/AdminPrivacyTab";
 import { PlatformBrandingTab } from "@/components/admin/PlatformBrandingTab";
 import { DemoBadge } from "@/components/brand/DemoBadge";
 import { Logo } from "@/components/brand/Logo";
@@ -122,30 +124,42 @@ function SuperAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-secondary/30">
-      <header className="border-b border-border/70 bg-card">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
+    <div className="min-h-dvh bg-secondary/30">
+      <header className="sticky top-0 z-40 border-b border-border/70 bg-card/95 pt-[env(safe-area-inset-top)] backdrop-blur">
+        <div className="mx-auto grid max-w-7xl grid-cols-[auto_minmax(0,1fr)] items-center gap-3 px-4 py-3 sm:px-6">
           <Logo />
-          <h1 className="text-base font-semibold text-foreground">Administração da plataforma</h1>
+          <div className="min-w-0 text-right">
+            <h1 className="truncate text-base font-semibold text-foreground">Central da plataforma</h1>
+            <p className="hidden text-xs text-muted-foreground sm:block">Operação, receita, saúde e governança da Pedi Um</p>
+          </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
-        <Tabs defaultValue="overview">
-          <TabsList className="flex w-full flex-wrap justify-start">
-            <TabsTrigger value="overview">Visão geral</TabsTrigger>
-            <TabsTrigger value="stores">Lojas</TabsTrigger>
-            <TabsTrigger value="users">Usuários</TabsTrigger>
-            <TabsTrigger value="plans">Planos</TabsTrigger>
-            <TabsTrigger value="billing">Cobrança</TabsTrigger>
+        <Tabs defaultValue="overview" className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
+          <aside className="min-w-0">
+            <TabsList className="grid h-auto w-full grid-cols-2 gap-1 overflow-visible bg-card p-2 shadow-sm sm:grid-cols-4 lg:sticky lg:top-24 lg:grid-cols-1">
+              <AdminNavLabel label="Operação" />
+              <AdminTab value="overview" icon={LayoutDashboard} label="Visão geral" />
+              <AdminTab value="stores" icon={Building2} label="Lojas" />
+              <AdminTab value="users" icon={Users} label="Usuários" />
+              <AdminTab value="support" icon={Headphones} label="Suporte" />
+              <AdminNavLabel label="Comercial" />
+              <AdminTab value="plans" icon={ReceiptText} label="Planos" />
+              <AdminTab value="billing" icon={CreditCard} label="Cobrança" />
+              <AdminNavLabel label="Plataforma" />
+              <AdminTab value="health" icon={Activity} label="Saúde" />
+              <AdminTab value="integrations" icon={Blocks} label="Integrações" />
+              <AdminTab value="evolution" icon={MessageCircle} label="WhatsApp" />
+              <AdminTab value="content" icon={FileText} label="Conteúdo" />
+              <AdminTab value="branding" icon={Palette} label="Identidade visual" />
+              <AdminNavLabel label="Governança" />
+              <AdminTab value="privacy" icon={ShieldCheck} label="Privacidade" />
+              <AdminTab value="logs" icon={ScrollText} label="Auditoria" />
+            </TabsList>
+          </aside>
 
-            <TabsTrigger value="content">Conteúdo</TabsTrigger>
-            <TabsTrigger value="branding">Identidade visual</TabsTrigger>
-            <TabsTrigger value="support">Suporte</TabsTrigger>
-            <TabsTrigger value="logs">Logs e incidentes</TabsTrigger>
-            <TabsTrigger value="integrations">Integrações</TabsTrigger>
-            <TabsTrigger value="evolution">Evolution API</TabsTrigger>
-          </TabsList>
+          <div className="min-w-0">
 
           <TabsContent value="overview" className="mt-6">
             <OverviewTab />
@@ -162,7 +176,10 @@ function SuperAdminPage() {
           <TabsContent value="billing" className="mt-6">
             <PlanBillingTab />
           </TabsContent>
-
+          <TabsContent value="health" className="mt-6">
+            <AdminSectionHeader title="Saúde da plataforma" description="Acompanhe falhas e conexões dos serviços usados pelas lojas." />
+            <AdminHealthTab />
+          </TabsContent>
           <TabsContent value="content" className="mt-6">
             <ContentTab />
           </TabsContent>
@@ -171,6 +188,9 @@ function SuperAdminPage() {
           </TabsContent>
           <TabsContent value="support" className="mt-6">
             <SupportTab />
+          </TabsContent>
+          <TabsContent value="privacy" className="mt-6">
+            <AdminPrivacyTab />
           </TabsContent>
           <TabsContent value="logs" className="mt-6">
             <LogsTab />
@@ -181,8 +201,31 @@ function SuperAdminPage() {
           <TabsContent value="evolution" className="mt-6">
             <EvolutionAdminPanel />
           </TabsContent>
+          </div>
         </Tabs>
       </main>
+    </div>
+  );
+}
+
+function AdminTab({ value, icon: Icon, label }: { value: string; icon: typeof LayoutDashboard; label: string }) {
+  return (
+    <TabsTrigger value={value} className="min-w-0 justify-start gap-2 px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+      <Icon className="size-4 shrink-0" aria-hidden="true" />
+      <span className="truncate">{label}</span>
+    </TabsTrigger>
+  );
+}
+
+function AdminNavLabel({ label }: { label: string }) {
+  return <p className="col-span-2 hidden px-3 pb-1 pt-3 text-[11px] font-semibold uppercase text-muted-foreground sm:col-span-1 lg:block">{label}</p>;
+}
+
+function AdminSectionHeader({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="mb-5">
+      <h2 className="text-xl font-semibold text-foreground">{title}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">{description}</p>
     </div>
   );
 }
@@ -197,8 +240,9 @@ function OverviewTab() {
 
   return (
     <div className="space-y-6">
+      <AdminSectionHeader title="Visão geral" description="Indicadores comerciais e operacionais atualizados da plataforma." />
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Lojas" value={String(data.stores)} hint={`${data.activeStores} ativas`} />
+        <StatCard label="Lojas" value={String(data.stores)} hint={`${data.activeStores} ativas · ${data.publishedStores} publicadas`} />
         <StatCard label="Usuários" value={String(data.users)} />
         <StatCard label="Pedidos" value={String(data.orders)} hint={`${data.ordersMonth} neste mês`} />
         <StatCard label="Receita das lojas" value={formatCurrency(data.revenue)} hint={`${formatCurrency(data.revenueMonth)} no mês`} />
@@ -206,6 +250,13 @@ function OverviewTab() {
         <StatCard label="Ativação" value={`${data.activationRate}%`} hint="Lojas publicadas" />
         <StatCard label="Churn" value={`${data.churnRate}%`} hint="Assinaturas canceladas/expiradas" />
         <StatCard label="Suporte" value={String(data.openTickets)} hint={`${data.openIncidents} incidentes abertos`} />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <AttentionCard label="Cobranças vencidas" value={data.overdueInvoices} tone="financial" />
+        <AttentionCard label="Solicitações LGPD" value={data.pendingPrivacyRequests} tone="privacy" />
+        <AttentionCard label="Falhas operacionais" value={data.failedPayments + data.fiscalErrors + data.failedWebhooks + data.failedMessages} tone="risk" />
+        <AttentionCard label="Lojas sem assinatura" value={data.storesWithoutSubscription} tone="subscription" />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -238,6 +289,18 @@ function OverviewTab() {
           </CardContent>
         </Card>
       </div>
+    </div>
+  );
+}
+
+function AttentionCard({ label, value, tone }: { label: string; value: number; tone: "financial" | "privacy" | "risk" | "subscription" }) {
+  const icon = tone === "financial" ? CreditCard : tone === "privacy" ? ShieldCheck : tone === "risk" ? Activity : Building2;
+  const Icon = icon;
+  return (
+    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-border bg-card p-4">
+      <Icon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+      <span className="min-w-0 text-sm font-medium text-foreground">{label}</span>
+      <Badge variant={value > 0 ? "destructive" : "secondary"}>{value}</Badge>
     </div>
   );
 }
