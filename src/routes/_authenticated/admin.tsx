@@ -1455,7 +1455,6 @@ function ContentTab() {
           { key: "cta_label", label: "Botão" },
           { key: "cta_url", label: "Link" },
         ]}
-        primary="title"
       />
       <ContentList
         table="platform_faqs"
@@ -1465,7 +1464,6 @@ function ContentTab() {
           { key: "answer", label: "Resposta" },
           { key: "category", label: "Categoria" },
         ]}
-        primary="question"
       />
       <ContentList
         table="platform_segments"
@@ -1475,7 +1473,6 @@ function ContentTab() {
           { key: "label", label: "Nome" },
           { key: "description", label: "Descrição" },
         ]}
-        primary="label"
       />
     </div>
   );
@@ -1487,12 +1484,10 @@ function ContentList({
   table,
   title,
   fields,
-  primary,
 }: {
   table: ContentTable;
   title: string;
   fields: { key: string; label: string }[];
-  primary: string;
 }) {
   const queryClient = useQueryClient();
   const listFn = useServerFn(adminListContent);

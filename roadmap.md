@@ -18,7 +18,7 @@
 ## Super Admin completo
 - [x] Reestruturar navegação e visão geral operacional
 - [x] Centralizar leituras e ações críticas no servidor
-- [ ] Completar gestão de lojas, usuários e assinaturas
+- [x] Completar gestão de lojas, usuários e assinaturas
 - [x] Adicionar saúde da plataforma, privacidade e riscos
-- [ ] Aprimorar suporte, incidentes, auditoria e integrações
-- [ ] Validar permissões, celular e fluxos administrativos
+- [x] Aprimorar suporte, incidentes, auditoria e integrações
+- [x] Validar permissões, celular e fluxos administrativos
