@@ -30,17 +30,11 @@ export async function uploadPlatformLogo(
   if ((slot === "pwa_icon_url" || slot === "pwa_maskable_icon_url") && (width !== height || width < 512)) {
     throw new Error("O ícone do aplicativo deve ser quadrado e ter pelo menos 512 × 512 px.");
   }
-  if (slot === "pwa_splash_url" && width >= height) {
-    throw new Error("A tela de abertura deve usar uma imagem vertical.");
-  }
-
   const isSvg = file.type === "image/svg+xml";
   const dimensions = slot === "favicon_url" || slot === "pwa_icon_url" || slot === "pwa_maskable_icon_url"
     ? { maxWidth: 512, maxHeight: 512 }
     : slot === "app_cover_url"
       ? { maxWidth: 1920, maxHeight: 1080 }
-      : slot === "pwa_splash_url"
-        ? { maxWidth: 1080, maxHeight: 1920 }
       : { maxWidth: 1600, maxHeight: 800 };
   const body = isSvg ? file : await compressImage(file, { ...dimensions, quality: 0.9 });
   const contentType = (isSvg ? file.type : "image/webp") as "image/png" | "image/jpeg" | "image/webp" | "image/svg+xml";

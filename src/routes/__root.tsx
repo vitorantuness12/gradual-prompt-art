@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
+import { AppLaunchSplash } from "@/components/brand/AppLaunchSplash";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchPlatformBranding, platformBrandingQueryKey } from "@/lib/platform-branding";
 
@@ -164,6 +165,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <RuntimeBrandingHead />
+      <AppLaunchSplash />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <div id="conteudo-principal">
         <Outlet />

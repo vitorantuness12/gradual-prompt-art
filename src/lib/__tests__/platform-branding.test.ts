@@ -11,7 +11,6 @@ const branding: PlatformBranding = {
   appCoverUrl: "https://assets.test/capa.webp",
   pwaIconUrl: "https://assets.test/app.webp",
   pwaMaskableIconUrl: "https://assets.test/app-maskable.webp",
-  pwaSplashUrl: "https://assets.test/abertura.webp",
   updatedAt: null,
 };
 

@@ -24,7 +24,7 @@ export function PlatformBrandingTab() {
 
   const dirty = useMemo(() => {
     if (!query.data) return false;
-    return ["salesLogoLightUrl", "salesLogoDarkUrl", "merchantLogoLightUrl", "merchantLogoDarkUrl", "faviconUrl", "appCoverUrl", "pwaIconUrl", "pwaMaskableIconUrl", "pwaSplashUrl"].some(
+    return ["salesLogoLightUrl", "salesLogoDarkUrl", "merchantLogoLightUrl", "merchantLogoDarkUrl", "faviconUrl", "appCoverUrl", "pwaIconUrl", "pwaMaskableIconUrl"].some(
       (key) => draft[key as keyof PlatformBranding] !== query.data[key as keyof PlatformBranding],
     );
   }, [draft, query.data]);
@@ -39,7 +39,6 @@ export function PlatformBrandingTab() {
       appCoverUrl: draft.appCoverUrl,
       pwaIconUrl: draft.pwaIconUrl,
       pwaMaskableIconUrl: draft.pwaMaskableIconUrl,
-      pwaSplashUrl: draft.pwaSplashUrl,
     } }),
     onSuccess: () => {
       toast.success("Identidade visual atualizada.");
@@ -80,10 +79,9 @@ export function PlatformBrandingTab() {
         </section>
         <section>
           <h2 className="mb-3 text-sm font-semibold text-foreground">Aplicativo PWA</h2>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <PlatformLogoField title="Ícone do aplicativo" description="Ícone quadrado exibido ao instalar o aplicativo. Recomendado: 512 × 512 px." slot="pwa_icon_url" value={draft.pwaIconUrl} darkPreview={false} previewShape="square" successLabel="Ícone" prepareUpload={prepareUpload} onChange={(value) => set("pwaIconUrl", value)} />
             <PlatformLogoField title="Ícone adaptável" description="Mantenha a marca no centro, com espaço livre nas bordas para o recorte do celular." slot="pwa_maskable_icon_url" value={draft.pwaMaskableIconUrl} darkPreview={false} previewShape="square" successLabel="Ícone adaptável" prepareUpload={prepareUpload} onChange={(value) => set("pwaMaskableIconUrl", value)} />
-            <PlatformLogoField title="Tela de abertura" description="Imagem de apresentação do aplicativo. Recomendado: formato vertical, até 1920 px." slot="pwa_splash_url" value={draft.pwaSplashUrl} darkPreview={false} previewShape="splash" successLabel="Tela de abertura" prepareUpload={prepareUpload} onChange={(value) => set("pwaSplashUrl", value)} />
           </div>
         </section>
         <section>

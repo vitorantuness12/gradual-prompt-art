@@ -70,10 +70,10 @@ export function InstallPanelCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {branding?.pwaSplashUrl || branding?.appCoverUrl ? (
+        {branding?.appCoverUrl ? (
           <img
-            src={branding.pwaSplashUrl ?? branding.appCoverUrl ?? undefined}
-            alt="Tela de abertura do aplicativo Pedi Um"
+            src={branding.appCoverUrl}
+            alt="Capa do aplicativo Pedi Um"
             className="aspect-video w-full rounded-md border border-border object-cover"
             loading="lazy"
           />
