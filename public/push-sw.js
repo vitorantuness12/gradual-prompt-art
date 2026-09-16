@@ -1,4 +1,4 @@
-/* Service worker de mensagens (Web Push) do O Seu Pedido.
+/* Service worker de mensagens (Web Push) do Pedi Um.
    Não faz cache de páginas nem de assets: existe apenas para receber
    notificações em segundo plano, com o app fechado. */
 
@@ -10,10 +10,10 @@ self.addEventListener("push", (event) => {
   try {
     payload = event.data ? event.data.json() : {};
   } catch {
-    payload = { title: "O Seu Pedido", body: event.data ? event.data.text() : "" };
+    payload = { title: "Pedi Um", body: event.data ? event.data.text() : "" };
   }
 
-  const title = payload.title || "O Seu Pedido";
+  const title = payload.title || "Pedi Um";
   const options = {
     body: payload.body || "",
     icon: payload.icon || "/app-icon-192.png",

@@ -29,7 +29,7 @@ const searchSchema = z.object({
   redirect: z.string().optional().catch(undefined),
 });
 
-const TITLE = "Entrar ou criar conta — O Seu Pedido";
+const TITLE = "Entrar ou criar conta — Pedi Um";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
@@ -39,9 +39,9 @@ export const Route = createFileRoute("/auth")({
       {
         name: "description",
         content:
-          "Entre ou crie sua conta no O Seu Pedido como cliente, motoboy ou lojista e acesse o painel certo para você.",
+          "Entre ou crie sua conta no Pedi Um como cliente, motoboy ou lojista e acesse o painel certo para você.",
       },
-      { property: "og:title", content: "Acesso à plataforma O Seu Pedido" },
+      { property: "og:title", content: "Acesso à plataforma Pedi Um" },
       {
         property: "og:description",
         content: "Escolha seu perfil — cliente, motoboy ou lojista — e acesse a plataforma.",

@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/painel/suporte")({
   component: SupportPage,
   head: () => ({
     meta: [
-      { title: "Suporte da loja | O Seu Pedido" },
+      { title: "Suporte da loja | Pedi Um" },
       {
         name: "description",
         content:

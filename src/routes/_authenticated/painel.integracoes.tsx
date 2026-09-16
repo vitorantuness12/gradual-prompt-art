@@ -59,7 +59,7 @@ export const Route = createFileRoute("/_authenticated/painel/integracoes")({
   component: IntegrationsPage,
   head: () => ({
     meta: [
-      { title: "Central de integrações e API | O Seu Pedido" },
+      { title: "Central de integrações e API | Pedi Um" },
       {
         name: "description",
         content:

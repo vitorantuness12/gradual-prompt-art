@@ -20,7 +20,7 @@ export const Route = createFileRoute("/$slug/membros")({
   component: MembrosPage,
   head: () => ({
     meta: [
-      { title: "Área de membros | O Seu Pedido" },
+      { title: "Área de membros | Pedi Um" },
       {
         name: "description",
         content: "Entre com seu e-mail para baixar os materiais dos produtos digitais que você comprou.",

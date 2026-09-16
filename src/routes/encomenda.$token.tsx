@@ -18,7 +18,7 @@ export const Route = createFileRoute("/encomenda/$token")({
   component: OrderTrackPage,
   head: () => ({
     meta: [
-      { title: "Acompanhe sua encomenda | O Seu Pedido" },
+      { title: "Acompanhe sua encomenda | Pedi Um" },
       {
         name: "description",
         content: "Veja o andamento da produção, aprove a prova e confirme o pagamento do saldo da sua encomenda.",

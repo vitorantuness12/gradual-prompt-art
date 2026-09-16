@@ -1,5 +1,5 @@
 {
-  "name": "Painel O Seu Pedido",
+  "name": "Painel Pedi Um",
   "short_name": "Meu Painel",
   "description": "Gerencie pedidos, catálogo e vendas da sua loja.",
   "start_url": "/painel/pedidos?origem=app",

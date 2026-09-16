@@ -24,7 +24,7 @@ import { formatCurrency, formatDateTime } from "@/lib/format";
 export const Route = createFileRoute("/_authenticated/entregador_/status")({
   head: () => ({
     meta: [
-      { title: "Status do cadastro de entregador — O Seu Pedido" },
+      { title: "Status do cadastro de entregador — Pedi Um" },
       {
         name: "description",
         content:

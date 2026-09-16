@@ -18,7 +18,7 @@ import { isValidDocument, isValidPhone, maskDocument, maskPhone, onlyDigits } fr
 export const Route = createFileRoute("/_authenticated/completar-cadastro")({
   head: () => ({
     meta: [
-      { title: "Completar cadastro — O Seu Pedido" },
+      { title: "Completar cadastro — Pedi Um" },
       {
         name: "description",
         content: "Finalize seu cadastro escolhendo o perfil de cliente, motoboy ou lojista.",

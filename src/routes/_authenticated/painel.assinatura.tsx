@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/painel/assinatura")({
   component: SubscriptionPage,
   head: () => ({
     meta: [
-      { title: "Assinatura da loja | O Seu Pedido" },
+      { title: "Assinatura da loja | Pedi Um" },
       { name: "description", content: "Acompanhe o plano, os limites de uso, as faturas e faça upgrade quando precisar." },
     ],
   }),

@@ -56,13 +56,13 @@ export const Route = createFileRoute("/_authenticated/painel/produtos")({
   component: CatalogPage,
   head: () => ({
     meta: [
-      { title: "Catálogo da loja | O Seu Pedido" },
+      { title: "Catálogo da loja | Pedi Um" },
       {
         name: "description",
         content:
           "Cadastre produtos, grade de variações com SKU, coleções e categorias da sua loja em um só lugar.",
       },
-      { property: "og:title", content: "Catálogo da loja | O Seu Pedido" },
+      { property: "og:title", content: "Catálogo da loja | Pedi Um" },
       {
         property: "og:description",
         content: "Produtos, grade de SKUs, etiquetas e coleções da sua loja.",

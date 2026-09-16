@@ -13,8 +13,8 @@ export const Route = createFileRoute("/_authenticated/convite/$token")({
   component: InvitePage,
   head: () => ({
     meta: [
-      { title: "Convite para equipe | O Seu Pedido" },
-      { name: "description", content: "Aceite o convite para participar da equipe de uma loja no O Seu Pedido." },
+      { title: "Convite para equipe | Pedi Um" },
+      { name: "description", content: "Aceite o convite para participar da equipe de uma loja no Pedi Um." },
     ],
   }),
 });

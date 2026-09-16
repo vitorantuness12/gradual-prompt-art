@@ -37,9 +37,9 @@ import {
 export const Route = createFileRoute("/_authenticated/painel/whatsapp")({
   head: () => ({
     meta: [
-      { title: "WhatsApp da loja | O Seu Pedido" },
+      { title: "WhatsApp da loja | Pedi Um" },
       { name: "description", content: "Conecte o WhatsApp da sua loja por QR Code e configure automações de pedidos." },
-      { property: "og:title", content: "WhatsApp da loja | O Seu Pedido" },
+      { property: "og:title", content: "WhatsApp da loja | Pedi Um" },
       { property: "og:description", content: "Conecte o WhatsApp da sua loja por QR Code e configure automações." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -56,7 +56,7 @@ function WhatsappPage() {
     <div className="space-y-6">
       <PageHeader
         title="WhatsApp da loja"
-        description="Conecte o WhatsApp da sua loja lendo o QR Code com o celular. Depois de conectado, o Seu Pedido envia atualizações de pedidos e executa as automações que você escolher."
+        description="Conecte o WhatsApp da sua loja lendo o QR Code com o celular. Depois de conectado, o Pedi Um envia atualizações de pedidos e executa as automações que você escolher."
       />
       {!storeId ? (
         <p className="text-sm text-muted-foreground">Selecione uma loja para continuar.</p>
@@ -149,7 +149,7 @@ function ConnectionTab({ storeId }: { storeId: string }) {
 
   const testMutation = useMutation({
     mutationFn: () =>
-      sendTest({ data: { storeId, phone: testPhone, body: "Teste de conexão do WhatsApp pelo Seu Pedido." } }),
+      sendTest({ data: { storeId, phone: testPhone, body: "Teste de conexão do WhatsApp pelo Pedi Um." } }),
     onSuccess: (result) => toast[result.ok ? "success" : "error"](result.message),
     onError: () => toast.error("Falha ao enviar a mensagem de teste."),
   });

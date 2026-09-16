@@ -35,7 +35,7 @@ export const Route = createFileRoute("/$slug/carrinho")({
   validateSearch: searchSchema,
   head: ({ params }) => ({
     meta: [
-      { title: `Carrinho — ${params.slug} | O Seu Pedido` },
+      { title: `Carrinho — ${params.slug} | Pedi Um` },
       {
         name: "description",
         content: "Confira os itens do seu carrinho, ajuste quantidades e siga para finalizar o pedido.",

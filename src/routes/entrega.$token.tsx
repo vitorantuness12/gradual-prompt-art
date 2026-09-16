@@ -16,9 +16,9 @@ export const Route = createFileRoute("/entrega/$token")({
   component: DeliveryPage,
   head: () => ({
     meta: [
-      { title: "Sua entrega digital | O Seu Pedido" },
+      { title: "Sua entrega digital | Pedi Um" },
       { name: "description", content: "Acesse o arquivo do produto digital que você comprou, com link protegido e validade." },
-      { property: "og:title", content: "Sua entrega digital | O Seu Pedido" },
+      { property: "og:title", content: "Sua entrega digital | Pedi Um" },
       { property: "og:description", content: "Link protegido para baixar o produto digital comprado." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

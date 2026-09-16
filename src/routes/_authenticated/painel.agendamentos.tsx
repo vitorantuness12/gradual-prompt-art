@@ -40,9 +40,9 @@ export const Route = createFileRoute("/_authenticated/painel/agendamentos")({
   component: AppointmentsPage,
   head: () => ({
     meta: [
-      { title: "Agendamentos | O Seu Pedido" },
+      { title: "Agendamentos | Pedi Um" },
       { name: "description", content: "Gerencie reservas, serviços e horários programados da sua loja." },
-      { property: "og:title", content: "Agendamentos | O Seu Pedido" },
+      { property: "og:title", content: "Agendamentos | Pedi Um" },
       { property: "og:description", content: "Reservas, serviços e retiradas programadas em uma agenda organizada." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

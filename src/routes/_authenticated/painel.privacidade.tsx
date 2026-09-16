@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/painel/privacidade")({
   component: PrivacyPage,
   head: () => ({
     meta: [
-      { title: "Privacidade e dados | O Seu Pedido" },
+      { title: "Privacidade e dados | Pedi Um" },
       { name: "description", content: "Exporte ou exclua os seus dados pessoais e conheça a política de retenção." },
     ],
   }),

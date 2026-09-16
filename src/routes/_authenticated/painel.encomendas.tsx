@@ -44,13 +44,13 @@ export const Route = createFileRoute("/_authenticated/painel/encomendas")({
   component: EncomendasPage,
   head: () => ({
     meta: [
-      { title: "Encomendas | O Seu Pedido" },
+      { title: "Encomendas | Pedi Um" },
       {
         name: "description",
         content:
           "Gerencie pedidos antecipados, itens sob encomenda, kits e grandes pedidos.",
       },
-      { property: "og:title", content: "Encomendas | O Seu Pedido" },
+      { property: "og:title", content: "Encomendas | Pedi Um" },
       {
         property: "og:description",
         content: "Pedidos antecipados, aprovação, sinal e produção em um só lugar.",

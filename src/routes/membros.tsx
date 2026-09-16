@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const TITLE = "Acessar curso ou produto digital - O Seu Pedido";
+const TITLE = "Acessar curso ou produto digital - Pedi Um";
 
 export const Route = createFileRoute("/membros")({
   head: () => ({

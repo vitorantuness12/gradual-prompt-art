@@ -76,10 +76,10 @@ export function openApiDocument(origin: string): JsonObject {
   return {
     openapi: "3.1.0",
     info: {
-      title: "API O Seu Pedido",
+      title: "API Pedi Um",
       version: "1.0.0",
       description:
-        "API REST da plataforma O Seu Pedido. Autenticação por chave rotacionável com escopos, limite por minuto, paginação e filtros. Todos os dados são restritos à loja dona da chave.",
+        "API REST da plataforma Pedi Um. Autenticação por chave rotacionável com escopos, limite por minuto, paginação e filtros. Todos os dados são restritos à loja dona da chave.",
     },
     servers: [{ url: `${origin}/api/public/v1` }, { url: `${origin}/api/v1` }],
     security: [{ apiKey: [] }],

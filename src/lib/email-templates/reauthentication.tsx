@@ -31,7 +31,7 @@ interface ReauthenticationEmailProps {
 
 export const ReauthenticationEmail = ({
   token,
-  siteName = 'O Seu Pedido',
+  siteName = 'Pedi Um',
 }: ReauthenticationEmailProps) => (
   <Html lang="pt-BR" dir="ltr">
     <Head />

@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_authenticated/painel/cobrancas")({
   component: CobrancasPage,
   head: () => ({
     meta: [
-      { title: "Cobranças | O Seu Pedido" },
+      { title: "Cobranças | Pedi Um" },
       {
         name: "description",
         content: "Acompanhe as transações dos pedidos digitais, confirme pagamentos e libere o acesso do cliente.",

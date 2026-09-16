@@ -34,13 +34,13 @@ export const Route = createFileRoute("/acompanhar")({
   }),
   head: () => ({
     meta: [
-      { title: "Acompanhar pedido — O Seu Pedido" },
+      { title: "Acompanhar pedido — Pedi Um" },
       {
         name: "description",
         content:
           "Consulte seu pedido pelo número e telefone da compra, pelo telefone com código de verificação ou pelo código público do link.",
       },
-      { property: "og:title", content: "Acompanhar pedido — O Seu Pedido" },
+      { property: "og:title", content: "Acompanhar pedido — Pedi Um" },
       { property: "og:description", content: "Veja em que etapa está o seu pedido em tempo real." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://oseupedido.com.br/acompanhar" },

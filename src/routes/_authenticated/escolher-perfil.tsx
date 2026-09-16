@@ -10,7 +10,7 @@ import { ACCOUNT_KINDS, courierCanWork, type AccountKind } from "@/lib/contas";
 export const Route = createFileRoute("/_authenticated/escolher-perfil")({
   head: () => ({
     meta: [
-      { title: "Escolher ambiente de acesso — O Seu Pedido" },
+      { title: "Escolher ambiente de acesso — Pedi Um" },
       {
         name: "description",
         content: "Escolha entre acessar como cliente, motoboy ou lojista usando a mesma conta.",

@@ -47,7 +47,7 @@ export const Route = createFileRoute("/_authenticated/painel/salao")({
   component: SalaoPage,
   head: () => ({
     meta: [
-      { title: "Salão e mesas | O Seu Pedido" },
+      { title: "Salão e mesas | Pedi Um" },
       {
         name: "description",
         content: "Mapa visual de mesas e balcões, comandas por mesa, chamados de garçom e fila de impressão por setor.",

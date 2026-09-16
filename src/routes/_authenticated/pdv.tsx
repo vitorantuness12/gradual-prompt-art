@@ -80,7 +80,7 @@ export const Route = createFileRoute("/_authenticated/pdv")({
   component: PosScreen,
   head: () => ({
     meta: [
-      { title: "PDV em tela exclusiva | O Seu Pedido" },
+      { title: "PDV em tela exclusiva | Pedi Um" },
       {
         name: "description",
         content:

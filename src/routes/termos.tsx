@@ -5,13 +5,13 @@ import { LegalPage } from "@/components/landing/LegalPage";
 export const Route = createFileRoute("/termos")({
   head: () => ({
     meta: [
-      { title: "Termos de uso — O Seu Pedido" },
+      { title: "Termos de uso — Pedi Um" },
       {
         name: "description",
-        content: "Condições de uso da plataforma O Seu Pedido para lojistas e clientes finais.",
+        content: "Condições de uso da plataforma Pedi Um para lojistas e clientes finais.",
       },
-      { property: "og:title", content: "Termos de uso — O Seu Pedido" },
-      { property: "og:description", content: "Condições de uso da plataforma O Seu Pedido." },
+      { property: "og:title", content: "Termos de uso — Pedi Um" },
+      { property: "og:description", content: "Condições de uso da plataforma Pedi Um." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://oseupedido.com.br/termos" },
     ],
@@ -30,7 +30,7 @@ function TermsPage() {
         {
           heading: "1. Sobre a plataforma",
           paragraphs: [
-            "O Seu Pedido é um serviço que permite a negócios criarem uma loja própria para receber pedidos e agendamentos. A plataforma disponibiliza as ferramentas; a operação comercial é de responsabilidade de cada loja.",
+            "Pedi Um é um serviço que permite a negócios criarem uma loja própria para receber pedidos e agendamentos. A plataforma disponibiliza as ferramentas; a operação comercial é de responsabilidade de cada loja.",
           ],
         },
         {

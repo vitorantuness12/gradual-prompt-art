@@ -22,13 +22,13 @@ export const Route = createFileRoute("/planos")({
   component: PublicPlansPage,
   head: () => ({
     meta: [
-      { title: "Planos e preços | O Seu Pedido" },
+      { title: "Planos e preços | Pedi Um" },
       {
         name: "description",
         content:
-          "Compare os planos Free, Start, Pro e Premium do O Seu Pedido: usuários, produtos, pedidos, automações, KDS e domínio próprio.",
+          "Compare os planos Free, Start, Pro e Premium do Pedi Um: usuários, produtos, pedidos, automações, KDS e domínio próprio.",
       },
-      { property: "og:title", content: "Planos e preços | O Seu Pedido" },
+      { property: "og:title", content: "Planos e preços | Pedi Um" },
       {
         property: "og:description",
         content: "Escolha o plano ideal para a sua loja: sem comissão por pedido e com teste grátis nos planos pagos.",

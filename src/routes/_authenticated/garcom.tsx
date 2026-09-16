@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_authenticated/garcom")({
   component: WaiterPage,
   head: () => ({
     meta: [
-      { title: "Área do garçom | O Seu Pedido" },
+      { title: "Área do garçom | Pedi Um" },
       { name: "description", content: "Mesas, lançamento de itens, acompanhamento de preparo e chamados na palma da mão." },
     ],
   }),

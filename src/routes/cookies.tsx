@@ -5,12 +5,12 @@ import { LegalPage } from "@/components/landing/LegalPage";
 export const Route = createFileRoute("/cookies")({
   head: () => ({
     meta: [
-      { title: "Cookies e LGPD — O Seu Pedido" },
+      { title: "Cookies e LGPD — Pedi Um" },
       {
         name: "description",
-        content: "Quais cookies o O Seu Pedido utiliza, para que servem e como gerenciar o seu consentimento.",
+        content: "Quais cookies o Pedi Um utiliza, para que servem e como gerenciar o seu consentimento.",
       },
-      { property: "og:title", content: "Cookies e LGPD — O Seu Pedido" },
+      { property: "og:title", content: "Cookies e LGPD — Pedi Um" },
       { property: "og:description", content: "Uso de cookies e gestão de consentimento na plataforma." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://oseupedido.com.br/cookies" },

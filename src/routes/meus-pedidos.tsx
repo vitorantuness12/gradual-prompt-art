@@ -35,7 +35,7 @@ const SESSION_KEY = "seu-pedido:cliente-sessao";
 export const Route = createFileRoute("/meus-pedidos")({
   head: () => ({
     meta: [
-      { title: "Meus pedidos — área do cliente | O Seu Pedido" },
+      { title: "Meus pedidos — área do cliente | Pedi Um" },
       {
         name: "description",
         content:
@@ -148,7 +148,7 @@ function CustomerAreaPage() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-4">
-          <Link to="/" aria-label="Página inicial do O Seu Pedido">
+          <Link to="/" aria-label="Página inicial do Pedi Um">
             <Logo className="h-8 w-auto" />
           </Link>
           {session ? (

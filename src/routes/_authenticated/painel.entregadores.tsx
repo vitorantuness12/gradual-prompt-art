@@ -21,7 +21,7 @@ import { maskPhone, onlyDigits } from "@/lib/masks";
 export const Route = createFileRoute("/_authenticated/painel/entregadores")({
   head: () => ({
     meta: [
-      { title: "Entregadores da loja — O Seu Pedido" },
+      { title: "Entregadores da loja — Pedi Um" },
       {
         name: "description",
         content: "Convide motoboys, aprove vínculos, defina comissão por entrega e acompanhe a equipe de entrega.",
