@@ -231,7 +231,7 @@ const WhyUs = () => {
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
                     <span className="text-foreground font-semibold">Sua loja</span>{" "}
-                    em oseupedido.com.br/nomedaloja
+                    em pedium.com.br/nomedaloja
                   </p>
                 </div>
               </motion.div>

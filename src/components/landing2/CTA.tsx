@@ -131,7 +131,7 @@ const CTA = () => {
             className="text-primary-foreground/80 text-base md:text-lg mb-8 md:mb-10 max-w-xl mx-auto px-2"
           >
             Uma plataforma criada para negócios que querem vender direto, com sua
-            própria loja em oseupedido.com.br/nomedaloja.
+            própria loja em pedium.com.br/nomedaloja.
           </motion.p>
 
           <motion.div

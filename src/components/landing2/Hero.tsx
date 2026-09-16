@@ -187,7 +187,7 @@ const Hero = () => {
                 Sua loja online em
               </span>
               <span className="text-xs sm:text-sm font-semibold text-primary break-all">
-                oseupedido.com.br/nomedaloja
+                pedium.com.br/nomedaloja
               </span>
             </motion.div>
 

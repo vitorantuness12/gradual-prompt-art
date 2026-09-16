@@ -17,7 +17,7 @@ import WhyUs from "@/components/landing2/WhyUs";
 
 const TITLE = "Pedi Um — sua loja própria com pedidos, PDV e delivery";
 const DESCRIPTION =
-  "Loja própria em oseupedido.com.br/nomedaloja: pedidos, delivery, PDV, mesas, agenda, encomendas, estoque com lotes, pagamentos, entregadores, catálogo com IA e relatórios.";
+  "Loja própria em pedium.com.br/nomedaloja: pedidos, delivery, PDV, mesas, agenda, encomendas, estoque com lotes, pagamentos, entregadores, catálogo com IA e relatórios.";
 
 
 export const Route = createFileRoute("/")({
