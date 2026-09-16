@@ -42,10 +42,14 @@ export const Route = createFileRoute("/$slug/carrinho")({
       { title: `Carrinho — ${params.slug} | Pedi Um` },
       {
         name: "description",
-        content: "Confira os itens do seu carrinho, ajuste quantidades e siga para finalizar o pedido.",
+        content:
+          "Confira os itens do seu carrinho, ajuste quantidades e siga para finalizar o pedido.",
       },
       { property: "og:title", content: "Carrinho de compras" },
-      { property: "og:description", content: "Revise tudo o que você adicionou antes de finalizar o pedido." },
+      {
+        property: "og:description",
+        content: "Revise tudo o que você adicionou antes de finalizar o pedido.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -111,7 +115,6 @@ function StoreCartPage() {
     recover.mutate(retomar);
   }, [retomar, store, cart.hydrated, recover]);
 
-
   if (isLoading) {
     return (
       <CheckoutThemeProvider className="min-h-screen bg-background text-foreground">
@@ -140,7 +143,9 @@ function StoreCartPage() {
     <CheckoutThemeProvider className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border/70 bg-card">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-5 sm:px-6">
-          <span className="text-base font-semibold tracking-tight text-foreground">{store.name}</span>
+          <span className="text-base font-semibold tracking-tight text-foreground">
+            {store.name}
+          </span>
           <Link
             to="/$slug"
             params={{ slug }}
@@ -169,7 +174,9 @@ function StoreCartPage() {
               </span>
               <div>
                 <p className="text-base font-medium text-foreground">Seu carrinho está vazio</p>
-                <p className="text-sm text-muted-foreground">Escolha os produtos no catálogo para começar.</p>
+                <p className="text-sm text-muted-foreground">
+                  Escolha os produtos no catálogo para começar.
+                </p>
               </div>
               <Button asChild>
                 <Link to="/$slug" params={{ slug }}>
@@ -185,7 +192,9 @@ function StoreCartPage() {
                 <CardTitle className="text-lg">
                   {cart.count} {cart.count === 1 ? "item" : "itens"}
                 </CardTitle>
-                <CardDescription>Você pode alterar quantidades ou remover itens aqui.</CardDescription>
+                <CardDescription>
+                  Você pode alterar quantidades ou remover itens aqui.
+                </CardDescription>
               </CardHeader>
               <CardContent className="divide-y divide-border/70 p-0">
                 {cart.items.map((item) => {
@@ -203,7 +212,9 @@ function StoreCartPage() {
                             {item.options.map((option, index) => (
                               <li key={`${option.groupName}-${option.optionName}-${index}`}>
                                 {option.groupName}: {option.optionName}
-                                {option.priceDelta ? ` (+${formatCurrency(option.priceDelta)})` : ""}
+                                {option.priceDelta
+                                  ? ` (+${formatCurrency(option.priceDelta)})`
+                                  : ""}
                               </li>
                             ))}
                           </ul>
@@ -290,12 +301,13 @@ function StoreCartPage() {
               }}
             />
 
-
-
             <Card className="border-border/70 shadow-sm">
               <CardContent className="space-y-3 py-6">
                 <div className="space-y-3 rounded-xl border border-border/70 bg-muted/40 p-3">
-                  <Label htmlFor="cupom-carrinho" className="text-xs font-bold uppercase tracking-wide">
+                  <Label
+                    htmlFor="cupom-carrinho"
+                    className="text-xs font-bold uppercase tracking-wide"
+                  >
                     Cupom de desconto
                   </Label>
                   <div className="flex flex-wrap items-center gap-2">
@@ -334,16 +346,19 @@ function StoreCartPage() {
                   </div>
                   {couponState.coupon ? (
                     <p className="text-sm font-medium text-success">
-                      Cupom {couponState.coupon.code} aplicado: −{formatCurrency(couponState.discount)}
+                      Cupom {couponState.coupon.code} aplicado: −
+                      {formatCurrency(couponState.discount)}
                     </p>
-                   ) : couponState.feedback?.kind === "error" ? (
-                     <CouponFeedbackMessage feedback={couponState.feedback} />
-                   ) : null}
+                  ) : couponState.feedback?.kind === "error" ? (
+                    <CouponFeedbackMessage feedback={couponState.feedback} />
+                  ) : null}
                 </div>
 
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>Subtotal</span>
-                  <span className="font-medium text-foreground">{formatCurrency(cart.subtotal)}</span>
+                  <span className="font-medium text-foreground">
+                    {formatCurrency(cart.subtotal)}
+                  </span>
                 </div>
                 {couponState.discount > 0 ? (
                   <div className="flex items-center justify-between text-sm text-success">
@@ -378,7 +393,9 @@ function StoreCartPage() {
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
             <div className="text-sm">
               <p className="text-muted-foreground">
-                {couponState.discount > 0 ? `Subtotal ${formatCurrency(cart.subtotal)} · cupom −${formatCurrency(couponState.discount)}` : "Subtotal"}
+                {couponState.discount > 0
+                  ? `Subtotal ${formatCurrency(cart.subtotal)} · cupom −${formatCurrency(couponState.discount)}`
+                  : "Subtotal"}
               </p>
               <p className="font-semibold text-foreground">{formatCurrency(total)}</p>
             </div>
