@@ -284,9 +284,12 @@ export interface AgendamentoInput extends CheckoutCustomer {
  * Cria o agendamento após reconferir a disponibilidade real do horário.
  * Também gera o pedido correspondente, para o financeiro da loja continuar único.
  */
-export async function createAgendamento(admin: Admin, input: AgendamentoInput): Promise<CheckoutOutcome> {
+export async function createAgendamento(admin: Admin, input: AgendamentoInput, userId: string): Promise<CheckoutOutcome> {
   const store = await loadStore(admin, input.slug);
   if (!store) return { ok: false, message: "Loja não encontrada." };
+  const { resolveAuthenticatedCheckoutCustomer } = await import("@/lib/checkout-customer.server");
+  const customer = await resolveAuthenticatedCheckoutCustomer(admin, userId, store.id);
+  if (!customer) return { ok: false, message: "Complete seu cadastro de cliente para continuar." };
   if (!paymentAllowed(store, input.paymentMethod)) {
     return { ok: false, message: "Forma de pagamento indisponível nesta loja." };
   }
@@ -325,13 +328,15 @@ export async function createAgendamento(admin: Admin, input: AgendamentoInput): 
     .from("orders")
     .insert({
       store_id: store.id,
+      user_id: customer.userId,
+      customer_id: customer.customerId,
       code,
       type: "scheduled",
       status: "pending",
       channel: "checkout_agendamento",
-      customer_name: input.name,
-      customer_phone: input.phone,
-      customer_email: input.email || null,
+      customer_name: customer.name,
+      customer_phone: customer.phone,
+      customer_email: customer.email,
       subtotal: totals.subtotal,
       total: totals.total,
       delivery_fee: 0,
@@ -755,9 +760,12 @@ export interface StoreCheckoutInput extends CheckoutCustomer {
  * Pedido de produto físico: revalida preço e estoque, recalcula o frete pelas
  * regras da loja e só então grava o pedido, baixando o estoque das variações.
  */
-export async function createStoreOrder(admin: Admin, input: StoreCheckoutInput): Promise<CheckoutOutcome> {
+export async function createStoreOrder(admin: Admin, input: StoreCheckoutInput, userId: string): Promise<CheckoutOutcome> {
   const store = await loadStore(admin, input.slug);
   if (!store) return { ok: false, message: "Loja não encontrada." };
+  const { resolveAuthenticatedCheckoutCustomer } = await import("@/lib/checkout-customer.server");
+  const customer = await resolveAuthenticatedCheckoutCustomer(admin, userId, store.id);
+  if (!customer) return { ok: false, message: "Complete seu cadastro de cliente para continuar." };
   if (!paymentAllowed(store, input.paymentMethod)) {
     return { ok: false, message: "Forma de pagamento indisponível nesta loja." };
   }
@@ -794,13 +802,15 @@ export async function createStoreOrder(admin: Admin, input: StoreCheckoutInput):
     .from("orders")
     .insert({
       store_id: store.id,
+      user_id: customer.userId,
+      customer_id: customer.customerId,
       code,
       type: input.fulfillment === "delivery" ? "delivery" : "pickup",
       status: "pending",
       channel: "checkout_loja",
-      customer_name: input.name,
-      customer_phone: input.phone,
-      customer_email: input.email || null,
+      customer_name: customer.name,
+      customer_phone: customer.phone,
+      customer_email: customer.email,
       subtotal: totals.subtotal,
       delivery_fee: totals.shipping,
       discount: totals.discount,
