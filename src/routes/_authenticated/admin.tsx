@@ -1561,15 +1561,15 @@ function ContentList({
 
         <ul className="divide-y divide-border">
           {data.map((item) => (
-            <li key={String(item["id"])} className="flex items-center justify-between gap-2 py-2">
-              <span className="min-w-0 truncate text-foreground">{String(item[primary] ?? "—")}</span>
+            <li key={item.id} className="flex items-center justify-between gap-2 py-2">
+              <span className="min-w-0 truncate text-foreground">{item.label}</span>
               <div className="flex items-center gap-2">
                 <Switch
-                  checked={Boolean(item["is_active"])}
-                  onCheckedChange={(checked) => toggle.mutate({ id: String(item["id"]), isActive: checked })}
+                  checked={item.isActive}
+                  onCheckedChange={(checked) => toggle.mutate({ id: item.id, isActive: checked })}
                   aria-label="Ativo"
                 />
-                <Button variant="ghost" size="sm" onClick={() => remove.mutate(String(item["id"]))}>
+                <Button variant="ghost" size="sm" onClick={() => remove.mutate(item.id)}>
                   Excluir
                 </Button>
               </div>

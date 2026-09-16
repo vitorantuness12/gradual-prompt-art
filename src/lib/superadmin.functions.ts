@@ -465,15 +465,28 @@ export const adminListAuditLogs = createServerFn({ method: "POST" })
 
 const contentTable = z.enum(["platform_banners", "platform_faqs", "platform_segments"]);
 
+interface AdminContentItem {
+  id: string;
+  isActive: boolean;
+  label: string;
+}
+
 export const adminListContent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ table: contentTable }).parse(data))
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<AdminContentItem[]> => {
     await assertSuperAdmin(context as never);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin.from(data.table).select("*").order("sort_order");
     if (error) throw new Error("Não foi possível carregar o conteúdo.");
-    return rows as unknown as Record<string, unknown>[];
+    return (rows ?? []).map((row) => {
+      const item = row as unknown as { id: string; is_active: boolean; title?: string; question?: string; name?: string; label?: string };
+      return {
+        id: item.id,
+        isActive: item.is_active,
+        label: item.title ?? item.question ?? item.name ?? item.label ?? "Item sem título",
+      };
+    });
   });
 
 export const adminMutateContent = createServerFn({ method: "POST" })
