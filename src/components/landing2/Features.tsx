@@ -37,7 +37,7 @@ const features = [
     icon: Palette,
     title: "Loja própria personalizada",
     description:
-      "Crie sua loja online com logo, cores, banner, catálogo, domínio e URL exclusiva no formato oseupedido.com.br/nomedaloja.",
+      "Crie sua loja online com logo, cores, banner, catálogo, domínio e URL exclusiva no formato pedium.com.br/nomedaloja.",
   },
   {
     icon: Layers,

@@ -10,7 +10,7 @@ const faqs = [
   {
     question: "Qual será o endereço da minha loja?",
     answer:
-      "Sua loja terá uma URL própria no formato oseupedido.com.br/nomedaloja. O nome da loja será exclusivo e poderá ser divulgado por link ou QR Code.",
+      "Sua loja terá uma URL própria no formato pedium.com.br/nomedaloja. O nome da loja será exclusivo e poderá ser divulgado por link ou QR Code.",
   },
   {
     question: "O sistema cobra comissão por pedido?",

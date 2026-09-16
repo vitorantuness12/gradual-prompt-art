@@ -3,9 +3,9 @@ import { Link2, QrCode, Instagram, MessageCircle } from "lucide-react";
 
 /** Exemplos de endereços exibidos apenas como ilustração do formato da URL. */
 const EXAMPLES = [
-  "oseupedido.com.br/pizzariabella",
-  "oseupedido.com.br/barbearia-central",
-  "oseupedido.com.br/pet-amigo",
+  "pedium.com.br/pizzariabella",
+  "pedium.com.br/barbearia-central",
+  "pedium.com.br/pet-amigo",
 ];
 
 const CHANNELS = [
@@ -44,7 +44,7 @@ const StoreUrl = () => {
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto px-2">
             Cada negócio recebe sua própria loja online no endereço
-            oseupedido.com.br/nomedaloja. O “nomedaloja” é um endereço exclusivo e
+            pedium.com.br/nomedaloja. O “nomedaloja” é um endereço exclusivo e
             personalizável, sem exposição de IDs internos, ideal para divulgar no
             Instagram, WhatsApp, Google, cartão de visita e QR Code.
           </p>
@@ -61,7 +61,7 @@ const StoreUrl = () => {
             Cada negócio recebe sua própria loja online no endereço:
           </p>
           <p className="font-display text-lg sm:text-2xl md:text-3xl font-bold text-center text-gradient break-all mb-8">
-            oseupedido.com.br/nomedaloja
+            pedium.com.br/nomedaloja
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-8">
