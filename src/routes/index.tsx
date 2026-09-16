@@ -22,11 +22,8 @@ const DESCRIPTION =
 
 
 export const Route = createFileRoute("/")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    origem: search.origem === "app" ? "app" as const : undefined,
-  }),
-  beforeLoad: ({ search }) => {
-    if (search.origem === "app") {
+  beforeLoad: ({ location }) => {
+    if (new URLSearchParams(location.searchStr).get("origem") === "app") {
       throw redirect({
         to: "/auth",
         search: {
