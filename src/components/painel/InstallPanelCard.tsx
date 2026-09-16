@@ -74,10 +74,7 @@ export function InstallPanelCard() {
           <img
             src={branding.appCoverUrl}
             alt="Capa do aplicativo Pedi Um"
-            className="aspect-video w-full rounded-md border border-border object-cover"
-            loading="lazy"
           />
-        ) : null}
         <div className="flex items-center justify-between gap-4 rounded-xl border border-border/70 p-3">
           <div className="flex items-start gap-3">
             <Bell className="mt-0.5 size-4 text-primary" aria-hidden="true" />
