@@ -31,8 +31,8 @@ export const Route = createFileRoute("/api/public/manifest")({
           scope: "/",
           display: "standalone",
           orientation: "portrait",
-          background_color: "#ffffff",
-          theme_color: panel ? "#dc2626" : "#f97316",
+          background_color: "#030303",
+          theme_color: "#dc2626",
           categories: ["food", "shopping", "business"],
           icons: [
             { src: icon, sizes: "512x512", purpose: "any" },
