@@ -13,4 +13,4 @@
 - [x] Aplicar áreas seguras, viewport móvel e aviso de conexão
 - [x] Consolidar instalação e remover manifestos antigos
 - [x] Adaptar Pedidos, Financeiro e Clientes para celular
-- [ ] Validar fluxos principais em celular e desktop
+- [x] Validar fluxos principais em celular e desktop

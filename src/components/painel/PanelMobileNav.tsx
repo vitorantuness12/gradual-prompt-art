@@ -1,10 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { CreditCard, LayoutDashboard, Menu, ShoppingBag, Users, type LucideIcon } from "lucide-react";
+import { CreditCard, Download, LayoutDashboard, Menu, ShoppingBag, Users, type LucideIcon } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { usePwaInstall } from "@/hooks/usePwaInstall";
 
 interface NavigationItem {
   to: string;
@@ -30,6 +32,7 @@ function isActive(pathname: string, to: string): boolean {
 }
 
 export function PanelMobileNav({ pathname, items, onSignOut }: PanelMobileNavProps) {
+  const installState = usePwaInstall();
   const primaryPaths = new Set(PRIMARY_ITEMS.map((item) => item.to));
   const secondaryItems = items.filter((item) => !primaryPaths.has(item.to));
   const moreActive = secondaryItems.some((item) => isActive(pathname, item.to));
@@ -98,7 +101,28 @@ export function PanelMobileNav({ pathname, items, onSignOut }: PanelMobileNavPro
                     </SheetClose>
                   );
                 })}
-                <Button type="button" variant="outline" className="col-span-2 mt-2" onClick={onSignOut}>
+                {!installState.installed ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="col-span-2 mt-2 justify-start"
+                    onClick={() => {
+                      if (installState.isIos) {
+                        toast.info("No iPhone, toque em Compartilhar e depois em Adicionar à Tela de Início.");
+                        return;
+                      }
+                      if (!installState.canInstall) {
+                        toast.info("Abra o menu do navegador e escolha Instalar aplicativo.");
+                        return;
+                      }
+                      void installState.install();
+                    }}
+                  >
+                    <Download className="size-4" aria-hidden="true" />
+                    Instalar aplicativo
+                  </Button>
+                ) : null}
+                <Button type="button" variant="ghost" className="col-span-2" onClick={onSignOut}>
                   Sair da conta
                 </Button>
               </div>

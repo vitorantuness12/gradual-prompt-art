@@ -64,7 +64,10 @@ export const Route = createFileRoute("/$slug/")({
       { property: "og:url", content: `https://oseupedido.com.br/${params.slug}` },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: `https://oseupedido.com.br/${params.slug}` }],
+    links: [
+      { rel: "canonical", href: `https://oseupedido.com.br/${params.slug}` },
+      { rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` },
+    ],
 
   }),
   component: PublicStorePage,
