@@ -10,7 +10,6 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
-import { AppLaunchSplash } from "@/components/brand/AppLaunchSplash";
 import { ConnectionBanner } from "@/components/app/ConnectionBanner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -166,7 +165,6 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppLaunchSplash />
       <ConnectionBanner />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <div id="conteudo-principal">
