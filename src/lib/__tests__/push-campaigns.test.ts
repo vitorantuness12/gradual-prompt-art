@@ -13,6 +13,9 @@ const baseCampaign = {
   recurrence: {},
   frequency_cap_hours: 24,
   next_run_at: null,
+  sent_count: 0,
+  failed_count: 0,
+  removed_count: 0,
 };
 
 const customer = {
