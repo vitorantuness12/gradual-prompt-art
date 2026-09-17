@@ -224,7 +224,9 @@ function CustomerDashboardPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() =>
-                        void navigate({ search: loja ? { aba: "pedidos", loja } : { aba: "pedidos" } })
+                        void navigate({
+                          search: loja ? { aba: "pedidos", loja } : { aba: "pedidos" },
+                        })
                       }
                     >
                       Ver todos

@@ -1,6 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Clock, Heart, History, Image as ImageIcon, MapPin, MessageCircle, Phone, Search, ShoppingBag, Sparkles, Star, UserRound } from "lucide-react";
+import {
+  Clock,
+  Heart,
+  History,
+  Image as ImageIcon,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Search,
+  ShoppingBag,
+  Sparkles,
+  Star,
+  UserRound,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { DemoBadge } from "@/components/brand/DemoBadge";
@@ -22,7 +35,13 @@ import { buildLineId, useCart, type CartOption } from "@/hooks/useCart";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useCartCoupon } from "@/hooks/useCartCoupon";
 import { useUpsellSuggestions } from "@/hooks/useUpsellSuggestions";
-import { currentPrice, hasPromo, layoutForStore, productAvailability, PRODUCT_KIND_LABEL } from "@/lib/catalog";
+import {
+  currentPrice,
+  hasPromo,
+  layoutForStore,
+  productAvailability,
+  PRODUCT_KIND_LABEL,
+} from "@/lib/catalog";
 import { fetchRatingSummary } from "@/lib/avaliacoes";
 import { formatCurrency } from "@/lib/format";
 import { storeAvailability } from "@/lib/store-config";
@@ -56,10 +75,14 @@ export const Route = createFileRoute("/$slug/")({
       { title: `Cardápio e pedidos — ${params.slug} | Pedi Um` },
       {
         name: "description",
-        content: "Veja o catálogo completo, monte seu pedido e escolha entre entrega ou retirada nesta loja.",
+        content:
+          "Veja o catálogo completo, monte seu pedido e escolha entre entrega ou retirada nesta loja.",
       },
       { property: "og:title", content: "Faça seu pedido online" },
-      { property: "og:description", content: "Catálogo, entrega e retirada direto com a loja, sem marketplace." },
+      {
+        property: "og:description",
+        content: "Catálogo, entrega e retirada direto com a loja, sem marketplace.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:url", content: `https://oseupedido.com.br/${params.slug}` },
       { name: "twitter:card", content: "summary_large_image" },
@@ -68,7 +91,6 @@ export const Route = createFileRoute("/$slug/")({
       { rel: "canonical", href: `https://oseupedido.com.br/${params.slug}` },
       { rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` },
     ],
-
   }),
   component: PublicStorePage,
 });
@@ -101,8 +123,6 @@ function PublicStorePage() {
     queryFn: () => fetchRatingSummary(data!.store.id),
   });
 
-
-
   // Janelas de entrada publicadas pelo lojista (podem não existir).
   const entry = useQuery(publicEntryPopupsQuery(data?.store.id ?? null));
   const campaigns = entry.data?.campaigns ?? [];
@@ -111,7 +131,11 @@ function PublicStorePage() {
     if (!campaign) return [];
     const manualItems = (entry.data?.items ?? [])
       .filter((item) => item.campaign_id === campaign.id)
-      .map((item) => ({ product_id: item.product_id, badge: item.badge, sort_order: item.sort_order }));
+      .map((item) => ({
+        product_id: item.product_id,
+        badge: item.badge,
+        sort_order: item.sort_order,
+      }));
     return selectCampaignProducts(campaign, data?.products ?? [], {
       manualItems,
       cartProductIds: cart.items.map((item) => item.productId),
@@ -143,7 +167,9 @@ function PublicStorePage() {
 
   function focusSearch() {
     document.getElementById("store-catalog-search")?.focus({ preventScroll: false });
-    document.getElementById("store-catalog-search")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    document
+      .getElementById("store-catalog-search")
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   // Endereço antigo continua funcionando: levamos o visitante ao endereço atual.
@@ -151,7 +177,8 @@ function PublicStorePage() {
     if (isLoading || data) return;
     let active = true;
     void resolveSlugRedirect(slug).then((current) => {
-      if (active && current) void navigate({ to: "/$slug", params: { slug: current }, replace: true });
+      if (active && current)
+        void navigate({ to: "/$slug", params: { slug: current }, replace: true });
     });
     return () => {
       active = false;
@@ -163,7 +190,8 @@ function PublicStorePage() {
   const visible = useMemo(() => {
     const term = search.trim().toLowerCase();
     return products.filter((product) => {
-      if (activeCategory !== "all" && (product.category_id ?? "none") !== activeCategory) return false;
+      if (activeCategory !== "all" && (product.category_id ?? "none") !== activeCategory)
+        return false;
       if (filter === "featured" && !product.is_featured) return false;
       if (filter === "promo" && !hasPromo(product)) return false;
       if (filter === "favorites" && !favorites.has(product.id)) return false;
@@ -219,7 +247,9 @@ function PublicStorePage() {
   /** Delivery, restaurantes, saúde e conveniência conferem a sacola sem sair do catálogo. */
   const quickCart = quickCartEnabled(store.segment);
   const promos = products.filter((product) => hasPromo(product)).slice(0, 6);
-  const recommended = products.filter((product) => product.is_featured && !hasPromo(product)).slice(0, 6);
+  const recommended = products
+    .filter((product) => product.is_featured && !hasPromo(product))
+    .slice(0, 6);
   const contactNumber = (store.whatsapp || store.phone || "").replace(/\D/g, "");
   const coverUrl = theme.branding?.coverUrl ?? store.cover_url ?? null;
   const logoUrl = theme.branding?.logoUrl ?? store.logo_url ?? null;
@@ -254,13 +284,21 @@ function PublicStorePage() {
       options,
       notes,
       maxQuantity: product.max_quantity_per_order,
-      lineId: buildLineId({ productId: product.id, variantId: variant?.id ?? null, options, notes }),
+      lineId: buildLineId({
+        productId: product.id,
+        variantId: variant?.id ?? null,
+        options,
+        notes,
+      }),
     });
   }
 
-
   return (
-    <StoreThemeProvider config={theme} paintDocument className="flex min-h-dvh flex-col bg-muted/30 pb-20 text-foreground sm:pb-0">
+    <StoreThemeProvider
+      config={theme}
+      paintDocument
+      className="flex min-h-dvh flex-col bg-muted/30 pb-20 text-foreground sm:pb-0"
+    >
       <header>
         {coverUrl ? (
           <div className="relative h-36 w-full overflow-hidden sm:h-56 lg:h-64">
@@ -276,7 +314,12 @@ function PublicStorePage() {
         )}
 
         <div className="mx-auto w-full px-3 sm:px-6" style={shellStyle}>
-          <div className={cn("relative rounded-2xl bg-card p-4 shadow-sm sm:p-6", coverUrl && "-mt-10 sm:-mt-10")}>
+          <div
+            className={cn(
+              "relative rounded-2xl bg-card p-4 shadow-sm sm:p-6",
+              coverUrl && "-mt-10 sm:-mt-10",
+            )}
+          >
             {logoUrl ? (
               <img
                 src={logoUrl}
@@ -287,17 +330,27 @@ function PublicStorePage() {
             <div className={cn(logoUrl ? "pt-10 sm:pt-14" : undefined)}>
               <span
                 className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide sm:text-xs"
-                style={{ color: availability.accepting ? theme.colors.statusOpen : theme.colors.statusClosed }}
+                style={{
+                  color: availability.accepting
+                    ? theme.colors.statusOpen
+                    : theme.colors.statusClosed,
+                }}
               >
                 <span
                   className="size-2 rounded-full"
-                  style={{ background: availability.accepting ? theme.colors.statusOpen : theme.colors.statusClosed }}
+                  style={{
+                    background: availability.accepting
+                      ? theme.colors.statusOpen
+                      : theme.colors.statusClosed,
+                  }}
                 />
                 {availability.message}
               </span>
 
               <div className="mt-1 flex flex-wrap items-center gap-2 sm:gap-3">
-                <h1 className="text-xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl">{store.name}</h1>
+                <h1 className="text-xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl">
+                  {store.name}
+                </h1>
                 {store.is_demo ? <DemoBadge /> : null}
               </div>
 
@@ -325,12 +378,17 @@ function PublicStorePage() {
                 <span>Entrega {formatCurrency(Number(store.delivery_fee))}</span>
                 <span aria-hidden="true">•</span>
                 <span>
-                  Pedido mín. <strong className="font-semibold text-foreground">{formatCurrency(Number(store.min_order_value))}</strong>
+                  Pedido mín.{" "}
+                  <strong className="font-semibold text-foreground">
+                    {formatCurrency(Number(store.min_order_value))}
+                  </strong>
                 </span>
               </div>
 
               {store.description ? (
-                <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-muted-foreground sm:text-sm">{store.description}</p>
+                <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-muted-foreground sm:text-sm">
+                  {store.description}
+                </p>
               ) : null}
 
               <ul className="mt-3 flex flex-col gap-2 text-[13px] text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-6 sm:text-sm">
@@ -338,8 +396,8 @@ function PublicStorePage() {
                   <li className="flex min-w-0 items-start gap-1.5">
                     <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                     <span className="min-w-0 break-words">
-                      {store.address_street}, {store.address_number} — {store.address_district}, {store.address_city}/
-                      {store.address_state}
+                      {store.address_street}, {store.address_number} — {store.address_district},{" "}
+                      {store.address_city}/{store.address_state}
                     </span>
                   </li>
                 ) : null}
@@ -377,15 +435,32 @@ function PublicStorePage() {
                     </a>
                   </Button>
                 ) : null}
-                {display.showRepeatOrder && repeatConfig && manualAccessEnabled(repeatConfig) && !popups.isHidden("repeat") ? (
-                  <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => popups.openManually("repeat")}>
+                {display.showRepeatOrder &&
+                repeatConfig &&
+                manualAccessEnabled(repeatConfig) &&
+                !popups.isHidden("repeat") ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 sm:flex-none"
+                    onClick={() => popups.openManually("repeat")}
+                  >
                     <History className="mr-2 size-4" aria-hidden="true" /> Repetir pedido
                   </Button>
                 ) : null}
 
-                {highlightsConfig && manualAccessEnabled(highlightsConfig) && campaign && campaignItems.length > 0 ? (
-                  <Button variant="outline" size="sm" className="max-w-full flex-1 truncate sm:flex-none" onClick={() => popups.openManually("highlights")}>
-                    <Sparkles className="mr-2 size-4 shrink-0" aria-hidden="true" /> <span className="truncate">{campaign.title}</span>
+                {highlightsConfig &&
+                manualAccessEnabled(highlightsConfig) &&
+                campaign &&
+                campaignItems.length > 0 ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="max-w-full flex-1 truncate sm:flex-none"
+                    onClick={() => popups.openManually("highlights")}
+                  >
+                    <Sparkles className="mr-2 size-4 shrink-0" aria-hidden="true" />{" "}
+                    <span className="truncate">{campaign.title}</span>
                   </Button>
                 ) : null}
                 <Link
@@ -402,10 +477,14 @@ function PublicStorePage() {
         </div>
       </header>
 
-
       <main
         className="mx-auto w-full px-4 py-8 sm:px-6"
-        style={{ ...shellStyle, display: "flex", flexDirection: "column", gap: "var(--store-section-gap)" }}
+        style={{
+          ...shellStyle,
+          display: "flex",
+          flexDirection: "column",
+          gap: "var(--store-section-gap)",
+        }}
       >
         <InstallAppBanner storeName={store.name} />
 
@@ -413,7 +492,10 @@ function PublicStorePage() {
 
         <div className="space-y-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <Search
+              className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
             <Input
               id="store-catalog-search"
               value={search}
@@ -466,7 +548,10 @@ function PublicStorePage() {
         {/* Promoções */}
         {promos.length > 0 && filter === "all" && activeCategory === "all" && !search ? (
           <section aria-labelledby="promocoes">
-            <h2 id="promocoes" className="flex items-center gap-2 text-lg font-semibold text-foreground">
+            <h2
+              id="promocoes"
+              className="flex items-center gap-2 text-lg font-semibold text-foreground"
+            >
               <Sparkles className="size-4 text-accent" aria-hidden="true" /> Promoções
             </h2>
             <div className={cn("mt-3", gridClass)}>
@@ -519,8 +604,8 @@ function PublicStorePage() {
                         key={`${collection.id}-${product.id}`}
                         product={product}
                         cardStyle={cardStyle}
-                      imagePosition={imagePosition}
-                      showPromoPrices={display.showPromoPrices}
+                        imagePosition={imagePosition}
+                        showPromoPrices={display.showPromoPrices}
                         isFavorite={favorites.has(product.id)}
                         onToggleFavorite={() => favorites.toggle(product.id)}
                         onOpen={() => setDetail(product)}
@@ -531,8 +616,6 @@ function PublicStorePage() {
               );
             })
           : null}
-
-
 
         {/* Catálogo por categoria */}
         {categories
@@ -568,7 +651,8 @@ function PublicStorePage() {
 
         {(() => {
           const uncategorized = visible.filter((product) => !product.category_id);
-          if (uncategorized.length === 0 || (activeCategory !== "all" && activeCategory !== "none")) return null;
+          if (uncategorized.length === 0 || (activeCategory !== "all" && activeCategory !== "none"))
+            return null;
           return (
             <section aria-labelledby="cat-outros">
               <h2 id="cat-outros" className="text-lg font-semibold text-foreground">
@@ -580,8 +664,8 @@ function PublicStorePage() {
                     key={product.id}
                     product={product}
                     cardStyle={cardStyle}
-                  imagePosition={imagePosition}
-                  showPromoPrices={display.showPromoPrices}
+                    imagePosition={imagePosition}
+                    showPromoPrices={display.showPromoPrices}
                     isFavorite={favorites.has(product.id)}
                     onToggleFavorite={() => favorites.toggle(product.id)}
                     onOpen={() => setDetail(product)}
@@ -600,16 +684,17 @@ function PublicStorePage() {
           </p>
         ) : null}
 
-        {highlightsConfig && sectionEnabled(highlightsConfig) && campaign && campaignItems.length > 0
-          ? (
-            <HighlightsSection
-              campaign={campaign}
-              items={campaignItems}
-              onAdd={(product) => addToCart(product, currentPrice(product), [], null)}
-              onOpenDetail={(product) => setDetail(product)}
-            />
-          )
-          : null}
+        {highlightsConfig &&
+        sectionEnabled(highlightsConfig) &&
+        campaign &&
+        campaignItems.length > 0 ? (
+          <HighlightsSection
+            campaign={campaign}
+            items={campaignItems}
+            onAdd={(product) => addToCart(product, currentPrice(product), [], null)}
+            onOpenDetail={(product) => setDetail(product)}
+          />
+        ) : null}
 
         {/* Recomendados */}
         {recommended.length > 0 ? (
@@ -681,7 +766,9 @@ function PublicStorePage() {
           items={campaignItems}
           theme={theme}
           open={popups.current === "highlights"}
-          onOpenChange={(open) => (open ? popups.openManually("highlights") : popups.close("highlights"))}
+          onOpenChange={(open) =>
+            open ? popups.openManually("highlights") : popups.close("highlights")
+          }
           onAdd={(product) => addToCart(product, currentPrice(product), [], null)}
           onOpenDetail={(product) => {
             popups.close("highlights");
@@ -719,7 +806,10 @@ function PublicStorePage() {
 
       {cart.hydrated && cart.count > 0 ? (
         <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-border bg-card/95 backdrop-blur sm:bottom-0 sm:z-40">
-          <div className="mx-auto flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6" style={{ maxWidth: "var(--store-max-width)" }}>
+          <div
+            className="mx-auto flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6"
+            style={{ maxWidth: "var(--store-max-width)" }}
+          >
             <div className="text-sm">
               <p className="font-medium text-foreground">
                 {cart.count} {cart.count === 1 ? "item" : "itens"}
@@ -842,9 +932,7 @@ function StoreFooter({
         {footer.name ? (
           <p className="text-base font-bold leading-tight sm:text-lg">{footer.name}</p>
         ) : null}
-        {footer.phone ? (
-          <p className="mt-1.5 text-sm opacity-90">{footer.phone}</p>
-        ) : null}
+        {footer.phone ? <p className="mt-1.5 text-sm opacity-90">{footer.phone}</p> : null}
         {footer.address ? (
           <p className="mt-1.5 text-sm leading-snug opacity-90">{footer.address}</p>
         ) : null}
@@ -859,7 +947,6 @@ function StoreFooter({
             Pedi Um
           </a>
         </p>
-
       </div>
     </footer>
   );
@@ -909,7 +996,11 @@ function ProductCard({
             loading="lazy"
             className={cn(
               "shrink-0 rounded-[var(--radius)] object-cover",
-              compact ? "size-14 sm:size-16" : stacked ? "h-32 w-full sm:h-40" : "size-20 sm:size-24",
+              compact
+                ? "size-14 sm:size-16"
+                : stacked
+                  ? "h-32 w-full sm:h-40"
+                  : "size-20 sm:size-24",
             )}
           />
         ) : !compact ? (
@@ -946,7 +1037,9 @@ function ProductCard({
             </p>
           ) : null}
           {(product.tags ?? []).length > 0 && !compact ? (
-            <p className="mt-1 truncate text-[11px] text-muted-foreground sm:text-xs">{(product.tags ?? []).join(" · ")}</p>
+            <p className="mt-1 truncate text-[11px] text-muted-foreground sm:text-xs">
+              {(product.tags ?? []).join(" · ")}
+            </p>
           ) : null}
           <p className="mt-2 flex flex-wrap items-baseline gap-x-2 text-[13px] sm:text-sm">
             <span className="font-semibold" style={{ color: "var(--accent)" }}>
@@ -954,13 +1047,17 @@ function ProductCard({
             </span>
 
             {showPromoPrices && hasPromo(product) ? (
-              <span className="text-muted-foreground line-through">{formatCurrency(Number(product.price))}</span>
+              <span className="text-muted-foreground line-through">
+                {formatCurrency(Number(product.price))}
+              </span>
             ) : null}
             {product.kind === "service" && product.duration_minutes ? (
               <span className="text-muted-foreground">· {product.duration_minutes} min</span>
             ) : null}
           </p>
-          {!availability.available ? <p className="mt-1 text-xs text-destructive">{availability.reason}</p> : null}
+          {!availability.available ? (
+            <p className="mt-1 text-xs text-destructive">{availability.reason}</p>
+          ) : null}
         </div>
 
         <div
@@ -973,11 +1070,18 @@ function ProductCard({
             size="icon"
             variant="ghost"
             className="size-8 shrink-0 sm:size-9"
-            aria-label={isFavorite ? `Remover ${product.name} dos favoritos` : `Salvar ${product.name} nos favoritos`}
+            aria-label={
+              isFavorite
+                ? `Remover ${product.name} dos favoritos`
+                : `Salvar ${product.name} nos favoritos`
+            }
             aria-pressed={isFavorite}
             onClick={onToggleFavorite}
           >
-            <Heart className={cn("size-4", isFavorite && "fill-accent text-accent")} aria-hidden="true" />
+            <Heart
+              className={cn("size-4", isFavorite && "fill-accent text-accent")}
+              aria-hidden="true"
+            />
           </Button>
           <Button
             size="sm"
@@ -994,7 +1098,6 @@ function ProductCard({
           </Button>
         </div>
       </CardContent>
-
     </Card>
   );
 }
