@@ -259,7 +259,7 @@ export const saveMyAddress = createServerFn({ method: "POST" })
       city: data.city,
       state: data.state || null,
       zip_code: data.zipCode?.replace(/\D/g, "") || null,
-      is_default: data.makeDefault ? false : undefined,
+      ...(data.makeDefault ? {} : { is_default: false }),
     };
 
     const query = data.id
