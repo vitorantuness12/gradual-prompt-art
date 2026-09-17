@@ -21,6 +21,7 @@ import {
   sairMembro,
   trocarSenhaMembro,
 } from "@/lib/membros.functions";
+import { storePwaLinks, storePwaMeta } from "@/lib/store-pwa-head";
 
 export const Route = createFileRoute("/$slug/membros")({
   component: MembrosPage,
@@ -39,10 +40,9 @@ export const Route = createFileRoute("/$slug/membros")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      ...storePwaMeta(params.slug),
     ],
-    links: [
-      { rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` },
-    ],
+    links: storePwaLinks(params.slug),
   }),
 });
 

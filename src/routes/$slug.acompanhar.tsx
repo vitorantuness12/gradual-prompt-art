@@ -19,6 +19,7 @@ import { publicStoreQuery } from "@/lib/store-queries";
 import { CheckoutThemeProvider } from "@/components/store/CheckoutThemeProvider";
 import { checkoutStatusClass } from "@/lib/checkout-theme";
 import { trackOrder, type TrackedOrder } from "@/lib/tracking.functions";
+import { storePwaLinks, storePwaMeta } from "@/lib/store-pwa-head";
 
 export const Route = createFileRoute("/$slug/acompanhar")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -39,10 +40,9 @@ export const Route = createFileRoute("/$slug/acompanhar")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      ...storePwaMeta(params.slug),
     ],
-    links: [
-      { rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` },
-    ],
+    links: storePwaLinks(params.slug),
   }),
   component: StoreTrackPage,
 });

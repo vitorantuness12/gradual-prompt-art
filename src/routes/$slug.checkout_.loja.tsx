@@ -31,6 +31,7 @@ import {
   type CheckoutAddressValue,
 } from "@/components/store/CheckoutCustomerAccess";
 import type { CheckoutCustomerSession } from "@/lib/checkout-customer.functions";
+import { storePwaLinks, storePwaMeta } from "@/lib/store-pwa-head";
 
 export const Route = createFileRoute("/$slug/checkout_/loja")({
   head: ({ params }) => ({
@@ -48,10 +49,9 @@ export const Route = createFileRoute("/$slug/checkout_/loja")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      ...storePwaMeta(params.slug),
     ],
-    links: [
-      { rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` },
-    ],
+    links: storePwaLinks(params.slug),
   }),
   component: LojaCheckout,
 });

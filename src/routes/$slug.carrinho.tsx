@@ -52,10 +52,9 @@ export const Route = createFileRoute("/$slug/carrinho")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      ...storePwaMeta(params.slug),
     ],
-    links: [
-      { rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` },
-    ],
+    links: storePwaLinks(params.slug),
   }),
   component: StoreCartPage,
 });
