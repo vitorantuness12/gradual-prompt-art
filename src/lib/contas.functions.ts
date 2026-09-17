@@ -197,7 +197,7 @@ export const getCustomerDashboard = createServerFn({ method: "GET" })
       profile: profile
         ? {
             fullName: profile.full_name,
-            email: profile.email ?? "",
+            email: profile.email ?? String(context.claims.email ?? ""),
             phone: profile.phone ?? "",
             birthDate: profile.birth_date,
             marketingOptIn: profile.marketing_opt_in,
@@ -259,16 +259,8 @@ export const saveMyAddress = createServerFn({ method: "POST" })
       city: data.city,
       state: data.state || null,
       zip_code: data.zipCode?.replace(/\D/g, "") || null,
-      is_default: data.makeDefault,
+      is_default: data.makeDefault ? false : undefined,
     };
-
-    if (data.makeDefault) {
-      const { error } = await context.supabase
-        .from("saved_addresses")
-        .update({ is_default: false })
-        .eq("user_id", context.userId);
-      if (error) throw new Error("Não foi possível atualizar o endereço principal.");
-    }
 
     const query = data.id
       ? context.supabase
@@ -276,9 +268,18 @@ export const saveMyAddress = createServerFn({ method: "POST" })
           .update(values)
           .eq("id", data.id)
           .eq("user_id", context.userId)
-      : context.supabase.from("saved_addresses").insert(values);
-    const { error } = await query;
+          .select("id")
+          .single()
+      : context.supabase.from("saved_addresses").insert(values).select("id").single();
+    const { data: savedAddress, error } = await query;
     if (error) throw new Error("Não foi possível salvar o endereço.");
+
+    if (data.makeDefault) {
+      const { error: defaultError } = await context.supabase.rpc("set_my_default_address", {
+        _address_id: savedAddress.id,
+      });
+      if (defaultError) throw new Error("O endereço foi salvo, mas não pôde ser definido como principal.");
+    }
     return { ok: true };
   });
 

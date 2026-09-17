@@ -42,7 +42,7 @@ export function StoreMobileNav({ slug, cartCount, onSearch, onCart }: StoreMobil
           <UtensilsCrossed className="size-5" aria-hidden="true" />
           Pedidos
         </Link>
-        <Link to="/meus-pedidos" className={itemClass}>
+        <Link to="/minha-conta" search={{ aba: undefined }} className={itemClass}>
           <UserRound className="size-5" aria-hidden="true" />
           Conta
         </Link>
