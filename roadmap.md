@@ -18,3 +18,11 @@
 - [x] Exigir conta de cliente no fechamento do checkout e reutilizar endereços salvos
 - [x] Criar painel do cliente logado com pedidos, histórico e endereços salvos
 - [x] Adicionar acesso à conta do cliente no catálogo, com retorno à loja após o login
+
+# Notificações push para clientes
+
+- [x] Criar campanhas, entregas e consentimento isolados por loja
+- [ ] Criar página do lojista para mensagens, públicos e horários
+- [ ] Ativar notificações no app da loja após login e em Meus dados
+- [ ] Processar campanhas com segmentação, recorrência e deduplicação
+- [ ] Validar segurança, tipos, testes e experiência móvel
