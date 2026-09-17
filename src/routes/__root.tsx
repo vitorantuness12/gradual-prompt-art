@@ -123,7 +123,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap",
       },
       { rel: "icon", type: "image/png", href: "/pedium-favicon.png" },
-      { rel: "manifest", href: "/api/public/manifest" },
       { rel: "apple-touch-icon", href: "/pedium-apple-touch-icon.png" },
     ],
   }),

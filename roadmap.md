@@ -4,6 +4,7 @@
 - [x] Permitir nome, ícone e ícone adaptável próprios na identidade visual da loja.
 - [x] Manter o manifesto da loja em catálogo, carrinho, checkout, acompanhamento e área de membros.
 - [x] Restringir os arquivos de cada loja aos seus próprios gestores.
+- [x] Impedir que o manifesto global do lojista substitua o manifesto individual da loja.
 
 # Roadmap
 

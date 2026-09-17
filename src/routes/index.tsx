@@ -48,7 +48,10 @@ export const Route = createFileRoute("/")({
       { name: "twitter:title", content: "Pedi Um — Tudo pra vender. Tudo em um." },
       { name: "twitter:description", content: "Loja online, pedidos, PDV, estoque e gestão em uma única plataforma para o seu negócio." },
     ],
-    links: [{ rel: "canonical", href: "https://oseupedido.com.br/" }],
+    links: [
+      { rel: "canonical", href: "https://oseupedido.com.br/" },
+      { rel: "manifest", href: "/api/public/manifest" },
+    ],
   }),
 
   component: LandingPage,
