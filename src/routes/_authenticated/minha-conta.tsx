@@ -28,7 +28,7 @@ const TABS: CustomerTab[] = ["inicio", "pedidos", "enderecos", "dados"];
 
 export const Route = createFileRoute("/_authenticated/minha-conta")({
   validateSearch: (search: Record<string, unknown>) => ({
-    aba: TABS.includes(search.aba as CustomerTab) ? (search.aba as CustomerTab) : "inicio",
+    aba: TABS.includes(search["aba"] as CustomerTab) ? (search["aba"] as CustomerTab) : undefined,
   }),
   head: () => ({
     meta: [
@@ -50,7 +50,8 @@ export const Route = createFileRoute("/_authenticated/minha-conta")({
 });
 
 function CustomerDashboardPage() {
-  const { aba } = Route.useSearch();
+  const { aba: searchTab } = Route.useSearch();
+  const aba = searchTab ?? "inicio";
   const navigate = useNavigate({ from: Route.fullPath });
   const queryClient = useQueryClient();
   const loadDashboard = useServerFn(getCustomerDashboard);
