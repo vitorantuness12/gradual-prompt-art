@@ -54,8 +54,9 @@ export function PushCampaignEditor({ busy, onSave, onTest }: PushCampaignEditorP
   const [audienceType, setAudienceType] = useState<PushAudienceType>("all");
   const [scheduleType, setScheduleType] = useState<PushScheduleType>("now");
   const [days, setDays] = useState<number[]>([]);
+  const [requestedAction, setRequestedAction] = useState<PushCampaignDraft["action"]>("schedule");
 
-  function readForm(event: FormEvent<HTMLFormElement>, action: PushCampaignDraft["action"]) {
+  function readForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     onSave({
@@ -71,7 +72,7 @@ export function PushCampaignEditor({ busy, onSave, onTest }: PushCampaignEditorP
       recurrenceDays: days,
       recurrenceTime: String(form.get("recurrence_time") ?? "10:00"),
       frequencyCapHours: Number(form.get("frequency_cap") ?? 24),
-      action,
+      action: requestedAction,
     });
   }
 
@@ -86,7 +87,7 @@ export function PushCampaignEditor({ busy, onSave, onTest }: PushCampaignEditorP
       <CardContent>
         <form
           className="grid gap-5"
-          onSubmit={(event) => readForm(event, scheduleType === "now" ? "send_now" : "schedule")}
+        onSubmit={readForm}
         >
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
@@ -258,21 +259,19 @@ export function PushCampaignEditor({ busy, onSave, onTest }: PushCampaignEditorP
               type="button"
               variant="secondary"
               disabled={busy}
-              onClick={(event) =>
-                readForm(
-                  {
-                    ...event,
-                    preventDefault: () => undefined,
-                    currentTarget: event.currentTarget.closest("form") as HTMLFormElement,
-                  } as unknown as FormEvent<HTMLFormElement>,
-                  "draft",
-                )
-              }
+              onClick={(event) => {
+                setRequestedAction("draft");
+                event.currentTarget.form?.requestSubmit();
+              }}
             >
               <Clock3 className="mr-2 size-4" />
               Salvar rascunho
             </Button>
-            <Button type="submit" disabled={busy}>
+            <Button
+              type="submit"
+              disabled={busy}
+              onClick={() => setRequestedAction(scheduleType === "now" ? "send_now" : "schedule")}
+            >
               <Send className="mr-2 size-4" />
               {scheduleType === "now" ? (
                 "Enviar agora"

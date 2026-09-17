@@ -81,7 +81,10 @@ interface CustomerSubscriptionLink {
   subscription: StoredSubscription | null;
 }
 
-function nextRecurringRun(recurrence: CampaignRow["recurrence"], from = new Date()): string | null {
+export function nextRecurringRun(
+  recurrence: CampaignRow["recurrence"],
+  from = new Date(),
+): string | null {
   const days = recurrence?.days ?? [];
   const match = /^(\d{2}):(\d{2})$/.exec(recurrence?.time ?? "");
   if (!days.length || !match) return null;
@@ -98,7 +101,7 @@ function nextRecurringRun(recurrence: CampaignRow["recurrence"], from = new Date
   return null;
 }
 
-function matchesCampaignAudience(
+export function matchesCampaignAudience(
   campaign: CampaignRow,
   customer: NonNullable<CustomerSubscriptionLink["customer"]>,
   orders: { customer_id: string | null; created_at: string }[],
@@ -152,6 +155,9 @@ export async function dispatchPushCampaigns(client: SupabaseClient, limit = 20) 
   let removed = 0;
   for (const rawCampaign of data ?? []) {
     const campaign = rawCampaign as CampaignRow;
+    const campaignStartedSent = sent;
+    const campaignStartedFailed = failed;
+    const campaignStartedRemoved = removed;
     const { data: claimed } = await client
       .from("push_campaigns")
       .update({ status: "sending", last_run_at: now.toISOString() })
@@ -258,9 +264,9 @@ export async function dispatchPushCampaigns(client: SupabaseClient, limit = 20) 
       .update({
         status: nextRun ? "scheduled" : "sent",
         next_run_at: nextRun,
-        sent_count: sent,
-        failed_count: failed,
-        removed_count: removed,
+        sent_count: sent - campaignStartedSent,
+        failed_count: failed - campaignStartedFailed,
+        removed_count: removed - campaignStartedRemoved,
       })
       .eq("id", campaign.id);
   }

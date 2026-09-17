@@ -145,6 +145,10 @@ export const savePushCampaign = createServerFn({ method: "POST" })
         entity_id: row.id,
         metadata: { status: values.status, schedule_type: data.scheduleType },
       });
+    if (data.action === "send_now") {
+      const { dispatchPushCampaigns } = await import("@/lib/push.server");
+      await dispatchPushCampaigns(supabaseAdmin, 20);
+    }
     return { id: row.id, status: values.status };
   });
 
