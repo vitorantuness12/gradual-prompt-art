@@ -26,12 +26,12 @@ export const Route = createFileRoute("/api/public/manifest")({
         const branding = await getBranding();
         const store = storeSlug ? await getStoreBranding(storeSlug) : null;
         const storeName = store?.name ?? null;
-        const icon = store?.icon ?? branding?.pwa_icon_url ?? "/pedium-app-icon-512.png";
-        const maskableIcon =
-          store?.maskableIcon ??
-          store?.icon ??
-          branding?.pwa_maskable_icon_url ??
-          "/pedium-app-icon-maskable-512.png";
+        const icon = store
+          ? (store.icon ?? "/store-app-fallback.png")
+          : (branding?.pwa_icon_url ?? "/pedium-app-icon-512.png");
+        const maskableIcon = store
+          ? (store.maskableIcon ?? store.icon ?? "/store-app-fallback.png")
+          : (branding?.pwa_maskable_icon_url ?? "/pedium-app-icon-maskable-512.png");
 
         const manifest = {
           name: panel ? "Painel Pedi Um" : (storeName ?? "Pedi Um"),
@@ -166,11 +166,12 @@ async function getStoreBranding(slug: string): Promise<StoreManifestBranding | n
     name: pwaName || data.name,
     primary: typeof themeColors["primary"] === "string" ? themeColors["primary"] : null,
     icon:
-      typeof themeBranding["pwaIconUrl"] === "string"
-        ? themeBranding["pwaIconUrl"]
-        : typeof themeBranding["logoUrl"] === "string"
-          ? themeBranding["logoUrl"]
-          : data.logo_url,
+      typeof themeBranding["logoUrl"] === "string"
+        ? themeBranding["logoUrl"]
+        : data.logo_url ??
+          (typeof themeBranding["pwaIconUrl"] === "string"
+            ? themeBranding["pwaIconUrl"]
+            : null),
     maskableIcon:
       typeof themeBranding["pwaMaskableIconUrl"] === "string"
         ? themeBranding["pwaMaskableIconUrl"]
