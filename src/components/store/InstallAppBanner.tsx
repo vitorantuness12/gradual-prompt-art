@@ -1,5 +1,5 @@
 import { Download, Share, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
@@ -19,11 +19,27 @@ export function InstallAppBanner({
   storeSlug?: string;
 }) {
   const { canInstall, installed, isIos, install } = usePwaInstall();
+  const [storeManifestReady, setStoreManifestReady] = useState(false);
   const dismissKey = `pedium:instalar-loja:${storeSlug ?? "geral"}`;
   const [dismissed, setDismissed] = useState(
     () => typeof window !== "undefined" && window.localStorage.getItem(dismissKey) === "1",
   );
-  const visible = !installed && !dismissed && (canInstall || isIos);
+  useEffect(() => {
+    if (!storeSlug) {
+      setStoreManifestReady(false);
+      return;
+    }
+    const controller = new AbortController();
+    void fetch(`/api/public/manifest?loja=${encodeURIComponent(storeSlug)}`, {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then((response) => setStoreManifestReady(response.ok))
+      .catch(() => setStoreManifestReady(false));
+    return () => controller.abort();
+  }, [storeSlug]);
+
+  const visible = storeManifestReady && !installed && !dismissed && (canInstall || isIos);
 
   if (!visible) return null;
 

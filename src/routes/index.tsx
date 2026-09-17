@@ -58,6 +58,8 @@ export const Route = createFileRoute("/")({
     links: [
       { rel: "canonical", href: "https://oseupedido.com.br/" },
       { rel: "manifest", href: "/api/public/manifest" },
+      { rel: "icon", type: "image/png", href: "/pedium-favicon.png" },
+      { rel: "apple-touch-icon", href: "/pedium-apple-touch-icon.png" },
     ],
   }),
 

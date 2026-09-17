@@ -122,8 +122,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap",
       },
-      { rel: "icon", type: "image/png", href: "/pedium-favicon.png" },
-      { rel: "apple-touch-icon", href: "/pedium-apple-touch-icon.png" },
     ],
   }),
   shellComponent: RootShell,

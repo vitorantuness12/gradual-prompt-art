@@ -62,7 +62,11 @@ export const Route = createFileRoute("/_authenticated/painel")({
   component: PainelLayout,
   head: () => ({
     // O painel tem manifesto próprio para o app instalado abrir direto nos pedidos.
-    links: [{ rel: "manifest", href: "/api/public/manifest?painel=1" }],
+    links: [
+      { rel: "manifest", href: "/api/public/manifest?painel=1" },
+      { rel: "icon", type: "image/png", href: "/pedium-favicon.png" },
+      { rel: "apple-touch-icon", href: "/pedium-apple-touch-icon.png" },
+    ],
   }),
 });
 

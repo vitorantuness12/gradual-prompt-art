@@ -57,7 +57,11 @@ export const Route = createFileRoute("/auth")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "manifest", href: "/api/public/manifest" }],
+    links: [
+      { rel: "manifest", href: "/api/public/manifest" },
+      { rel: "icon", type: "image/png", href: "/pedium-favicon.png" },
+      { rel: "apple-touch-icon", href: "/pedium-apple-touch-icon.png" },
+    ],
   }),
   component: AuthPage,
 });
