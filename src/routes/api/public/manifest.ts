@@ -16,6 +16,10 @@ interface StoreManifestBranding {
   maskableIcon: string | null;
 }
 
+function nonEmptyString(value: unknown): string | null {
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
+}
+
 export const Route = createFileRoute("/api/public/manifest")({
   server: {
     handlers: {
@@ -159,21 +163,14 @@ async function getStoreBranding(slug: string): Promise<StoreManifestBranding | n
     colorsValue && typeof colorsValue === "object" && !Array.isArray(colorsValue)
       ? (colorsValue as Record<string, unknown>)
       : {};
-  const pwaName =
-    typeof themeBranding["pwaName"] === "string" ? themeBranding["pwaName"].trim() : "";
+  const pwaName = nonEmptyString(themeBranding["pwaName"]);
+  const pwaIcon = nonEmptyString(themeBranding["pwaIconUrl"]);
+  const storeLogo = nonEmptyString(themeBranding["logoUrl"]) ?? nonEmptyString(data.logo_url);
   return {
     id: data.id,
     name: pwaName || data.name,
-    primary: typeof themeColors["primary"] === "string" ? themeColors["primary"] : null,
-    icon:
-      typeof themeBranding["pwaIconUrl"] === "string"
-        ? themeBranding["pwaIconUrl"]
-        : typeof themeBranding["logoUrl"] === "string"
-          ? themeBranding["logoUrl"]
-          : data.logo_url,
-    maskableIcon:
-      typeof themeBranding["pwaMaskableIconUrl"] === "string"
-        ? themeBranding["pwaMaskableIconUrl"]
-        : null,
+    primary: nonEmptyString(themeColors["primary"]),
+    icon: pwaIcon ?? storeLogo,
+    maskableIcon: nonEmptyString(themeBranding["pwaMaskableIconUrl"]),
   };
 }
