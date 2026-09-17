@@ -18,7 +18,8 @@ export const PUSH_SCHEDULES = [
 
 export type PushAudienceType = (typeof PUSH_AUDIENCES)[number]["value"];
 export type PushScheduleType = (typeof PUSH_SCHEDULES)[number]["value"];
-export type PushCampaignStatus = "draft" | "scheduled" | "sending" | "sent" | "paused" | "cancelled";
+export type PushCampaignStatus =
+  "draft" | "scheduled" | "sending" | "sent" | "paused" | "cancelled";
 
 export interface PushCampaignSummary {
   id: string;

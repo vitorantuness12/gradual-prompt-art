@@ -64,7 +64,7 @@ export function PushNotificationsCard({ storeId, audience = "lojista", compact }
         },
       });
       toast.success("Notificações ativadas neste aparelho.");
-       void queryClient.invalidateQueries({ queryKey: ["push-status", audience, storeId] });
+      void queryClient.invalidateQueries({ queryKey: ["push-status", audience, storeId] });
     } catch (error) {
       toast.error((error as Error).message);
     } finally {
@@ -78,7 +78,7 @@ export function PushNotificationsCard({ storeId, audience = "lojista", compact }
       const endpoint = await disablePush();
       if (endpoint) await remove({ data: { endpoint } });
       toast.success("Notificações desativadas neste aparelho.");
-       void queryClient.invalidateQueries({ queryKey: ["push-status", audience, storeId] });
+      void queryClient.invalidateQueries({ queryKey: ["push-status", audience, storeId] });
     } catch (error) {
       toast.error((error as Error).message);
     } finally {

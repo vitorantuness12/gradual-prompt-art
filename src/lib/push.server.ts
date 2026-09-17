@@ -138,7 +138,9 @@ export async function dispatchPushCampaigns(client: SupabaseClient, limit = 20) 
   const now = new Date();
   const { data, error } = await client
     .from("push_campaigns")
-    .select("id, store_id, title, body, audience_type, audience_config, schedule_type, recurrence, frequency_cap_hours, next_run_at")
+    .select(
+      "id, store_id, title, body, audience_type, audience_config, schedule_type, recurrence, frequency_cap_hours, next_run_at",
+    )
     .eq("status", "scheduled")
     .lte("next_run_at", now.toISOString())
     .order("next_run_at", { ascending: true })
@@ -159,39 +161,46 @@ export async function dispatchPushCampaigns(client: SupabaseClient, limit = 20) 
       .maybeSingle();
     if (!claimed) continue;
 
-    const [{ data: rawLinks }, { data: orders }, { data: carts }, { data: store }] = await Promise.all([
-      client
-        .from("push_subscription_stores")
-        .select("customer_id, subscription_id, customer:customers(id, birth_date, created_at, marketing_opt_in), subscription:push_subscriptions(id, endpoint, p256dh, auth)")
-        .eq("store_id", campaign.store_id)
-        .eq("is_active", true)
-        .not("consented_at", "is", null)
-        .limit(1000),
-      client
-        .from("orders")
-        .select("customer_id, created_at")
-        .eq("store_id", campaign.store_id)
-        .not("customer_id", "is", null)
-        .order("created_at", { ascending: false })
-        .limit(5000),
-      client
-        .from("abandoned_carts")
-        .select("customer_id")
-        .eq("store_id", campaign.store_id)
-        .not("customer_id", "is", null)
-        .gte("updated_at", new Date(now.getTime() - 7 * 86_400_000).toISOString())
-        .limit(2000),
-      client.from("stores").select("slug").eq("id", campaign.store_id).maybeSingle(),
-    ]);
+    const [{ data: rawLinks }, { data: orders }, { data: carts }, { data: store }] =
+      await Promise.all([
+        client
+          .from("push_subscription_stores")
+          .select(
+            "customer_id, subscription_id, customer:customers(id, birth_date, created_at, marketing_opt_in), subscription:push_subscriptions(id, endpoint, p256dh, auth)",
+          )
+          .eq("store_id", campaign.store_id)
+          .eq("is_active", true)
+          .not("consented_at", "is", null)
+          .limit(1000),
+        client
+          .from("orders")
+          .select("customer_id, created_at")
+          .eq("store_id", campaign.store_id)
+          .not("customer_id", "is", null)
+          .order("created_at", { ascending: false })
+          .limit(5000),
+        client
+          .from("abandoned_carts")
+          .select("customer_id")
+          .eq("store_id", campaign.store_id)
+          .not("customer_id", "is", null)
+          .gte("updated_at", new Date(now.getTime() - 7 * 86_400_000).toISOString())
+          .limit(2000),
+        client.from("stores").select("slug").eq("id", campaign.store_id).maybeSingle(),
+      ]);
     const links = (rawLinks ?? []) as unknown as CustomerSubscriptionLink[];
     const orderRows = (orders ?? []) as { customer_id: string | null; created_at: string }[];
-    const abandoned = new Set((carts ?? []).map((cart) => cart.customer_id).filter((id): id is string => Boolean(id)));
+    const abandoned = new Set(
+      (carts ?? []).map((cart) => cart.customer_id).filter((id): id is string => Boolean(id)),
+    );
     const runKey = campaign.next_run_at ?? now.toISOString();
 
     for (const link of links) {
       if (!link.customer?.marketing_opt_in || !link.subscription) continue;
       if (!matchesCampaignAudience(campaign, link.customer, orderRows, abandoned, now)) continue;
-      const cutoff = new Date(now.getTime() - campaign.frequency_cap_hours * 3_600_000).toISOString();
+      const cutoff = new Date(
+        now.getTime() - campaign.frequency_cap_hours * 3_600_000,
+      ).toISOString();
       const { count: recent } = await client
         .from("push_campaign_deliveries")
         .select("id", { count: "exact", head: true })
@@ -202,13 +211,35 @@ export async function dispatchPushCampaigns(client: SupabaseClient, limit = 20) 
       if ((recent ?? 0) > 0) continue;
       const { data: deliveryRow } = await client
         .from("push_campaign_deliveries")
-        .upsert({ campaign_id: campaign.id, store_id: campaign.store_id, subscription_id: link.subscription_id, customer_id: link.customer.id, run_key: runKey, status: "pending" }, { onConflict: "campaign_id,subscription_id,run_key", ignoreDuplicates: true })
+        .upsert(
+          {
+            campaign_id: campaign.id,
+            store_id: campaign.store_id,
+            subscription_id: link.subscription_id,
+            customer_id: link.customer.id,
+            run_key: runKey,
+            status: "pending",
+          },
+          { onConflict: "campaign_id,subscription_id,run_key", ignoreDuplicates: true },
+        )
         .select("id")
         .maybeSingle();
       if (!deliveryRow) continue;
-      const result = await deliver(link.subscription, { title: campaign.title, body: campaign.body, url: store?.slug ? `/${store.slug}` : "/", tag: `campaign-${campaign.id}` });
+      const result = await deliver(link.subscription, {
+        title: campaign.title,
+        body: campaign.body,
+        url: store?.slug ? `/${store.slug}` : "/",
+        tag: `campaign-${campaign.id}`,
+      });
       const status = result.ok ? "sent" : result.gone ? "expired" : "failed";
-      await client.from("push_campaign_deliveries").update({ status, error: result.ok ? null : result.reason, sent_at: result.ok ? new Date().toISOString() : null }).eq("id", deliveryRow.id);
+      await client
+        .from("push_campaign_deliveries")
+        .update({
+          status,
+          error: result.ok ? null : result.reason,
+          sent_at: result.ok ? new Date().toISOString() : null,
+        })
+        .eq("id", deliveryRow.id);
       if (result.ok) sent += 1;
       else if (result.gone) {
         removed += 1;
@@ -216,18 +247,22 @@ export async function dispatchPushCampaigns(client: SupabaseClient, limit = 20) 
       } else failed += 1;
     }
 
-    const nextRun = campaign.schedule_type === "recurring" || campaign.schedule_type === "automatic"
-      ? campaign.schedule_type === "automatic"
-        ? new Date(now.getTime() + 86_400_000).toISOString()
-        : nextRecurringRun(campaign.recurrence, now)
-      : null;
-    await client.from("push_campaigns").update({
-      status: nextRun ? "scheduled" : "sent",
-      next_run_at: nextRun,
-      sent_count: sent,
-      failed_count: failed,
-      removed_count: removed,
-    }).eq("id", campaign.id);
+    const nextRun =
+      campaign.schedule_type === "recurring" || campaign.schedule_type === "automatic"
+        ? campaign.schedule_type === "automatic"
+          ? new Date(now.getTime() + 86_400_000).toISOString()
+          : nextRecurringRun(campaign.recurrence, now)
+        : null;
+    await client
+      .from("push_campaigns")
+      .update({
+        status: nextRun ? "scheduled" : "sent",
+        next_run_at: nextRun,
+        sent_count: sent,
+        failed_count: failed,
+        removed_count: removed,
+      })
+      .eq("id", campaign.id);
   }
   return { processed: data?.length ?? 0, sent, failed, removed };
 }

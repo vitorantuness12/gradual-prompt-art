@@ -108,16 +108,26 @@ function OverviewPage() {
     { label: "Faturamento hoje", value: formatCurrency(revenue) },
   ];
   if (kind === "alimentacao") {
-    cards.push({ label: "Em preparo", value: String(inKitchen) }, { label: "Saiu para entrega", value: String(onRoute) });
+    cards.push(
+      { label: "Em preparo", value: String(inKitchen) },
+      { label: "Saiu para entrega", value: String(onRoute) },
+    );
   } else if (kind === "varejo") {
-    cards.push({ label: "Ticket médio", value: formatCurrency(average) }, { label: "Aguardando confirmação", value: String(pending) });
+    cards.push(
+      { label: "Ticket médio", value: formatCurrency(average) },
+      { label: "Aguardando confirmação", value: String(pending) },
+    );
   } else {
-    cards.push({ label: "Ticket médio", value: formatCurrency(average) }, { label: "Vendas concluídas", value: String(valid.length) });
+    cards.push(
+      { label: "Ticket médio", value: formatCurrency(average) },
+      { label: "Vendas concluídas", value: String(valid.length) },
+    );
   }
 
-  const shortcuts: FeatureKey[] = segment === "alimentacao"
-    ? ["pedidos", "pdv", "kds", "agendamentos"]
-    : ["produtos", "estoque", "pedidos", "agendamentos"];
+  const shortcuts: FeatureKey[] =
+    segment === "alimentacao"
+      ? ["pedidos", "pdv", "kds", "agendamentos"]
+      : ["produtos", "estoque", "pedidos", "agendamentos"];
 
   return (
     <div>
@@ -166,11 +176,17 @@ function OverviewPage() {
           </CardHeader>
           <CardContent>
             {(appointments ?? []).length === 0 ? (
-              <EmptyState title="Sem agendamentos hoje" description="Os horários marcados aparecem aqui." />
+              <EmptyState
+                title="Sem agendamentos hoje"
+                description="Os horários marcados aparecem aqui."
+              />
             ) : (
               <ul className="divide-y divide-border">
                 {(appointments ?? []).slice(0, 6).map((item) => (
-                  <li key={item.id} className="flex items-center justify-between gap-2 py-3 text-sm">
+                  <li
+                    key={item.id}
+                    className="flex items-center justify-between gap-2 py-3 text-sm"
+                  >
                     <span className="font-medium text-foreground">{item.customer_name}</span>
                     <span className="text-muted-foreground">{formatDateTime(item.starts_at)}</span>
                   </li>
@@ -187,11 +203,17 @@ function OverviewPage() {
         </CardHeader>
         <CardContent>
           {orders.length === 0 ? (
-            <EmptyState title="Nenhum pedido ainda" description="Os pedidos recebidos aparecem aqui." />
+            <EmptyState
+              title="Nenhum pedido ainda"
+              description="Os pedidos recebidos aparecem aqui."
+            />
           ) : (
             <ul className="divide-y divide-border">
               {orders.slice(0, 8).map((order) => (
-                <li key={order.id} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
+                <li
+                  key={order.id}
+                  className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"
+                >
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-foreground">#{order.code}</span>
                     {order.is_demo ? <DemoBadge /> : null}
@@ -200,7 +222,9 @@ function OverviewPage() {
                   <div className="flex items-center gap-4 text-muted-foreground">
                     <span>{ORDER_STATUS_LABEL[order.status]}</span>
                     <span>{formatDateTime(order.created_at)}</span>
-                    <span className="font-medium text-foreground">{formatCurrency(Number(order.total))}</span>
+                    <span className="font-medium text-foreground">
+                      {formatCurrency(Number(order.total))}
+                    </span>
                   </div>
                 </li>
               ))}

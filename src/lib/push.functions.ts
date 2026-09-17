@@ -91,17 +91,17 @@ export const savePushSubscription = createServerFn({ method: "POST" })
     const { data: subscription, error } = await context.supabase
       .from("push_subscriptions")
       .upsert(
-      {
-        user_id: context.userId,
-        store_id: data.storeId ?? null,
-        audience: data.audience,
-        endpoint: data.endpoint,
-        p256dh: data.p256dh,
-        auth: data.auth,
-        user_agent: data.userAgent ?? null,
-        last_used_at: new Date().toISOString(),
-      },
-      { onConflict: "endpoint" },
+        {
+          user_id: context.userId,
+          store_id: data.storeId ?? null,
+          audience: data.audience,
+          endpoint: data.endpoint,
+          p256dh: data.p256dh,
+          auth: data.auth,
+          user_agent: data.userAgent ?? null,
+          last_used_at: new Date().toISOString(),
+        },
+        { onConflict: "endpoint" },
       )
       .select("id")
       .single();
@@ -114,20 +114,18 @@ export const savePushSubscription = createServerFn({ method: "POST" })
         .eq("store_id", data.storeId)
         .eq("user_id", context.userId)
         .maybeSingle();
-      const { error: linkError } = await context.supabase
-        .from("push_subscription_stores")
-        .upsert(
-          {
-            subscription_id: subscription.id,
-            store_id: data.storeId,
-            customer_id: customer?.id ?? null,
-            user_id: context.userId,
-            consented_at: new Date().toISOString(),
-            revoked_at: null,
-            is_active: true,
-          },
-          { onConflict: "subscription_id,store_id" },
-        );
+      const { error: linkError } = await context.supabase.from("push_subscription_stores").upsert(
+        {
+          subscription_id: subscription.id,
+          store_id: data.storeId,
+          customer_id: customer?.id ?? null,
+          user_id: context.userId,
+          consented_at: new Date().toISOString(),
+          revoked_at: null,
+          is_active: true,
+        },
+        { onConflict: "subscription_id,store_id" },
+      );
       if (linkError) throw new Error(linkError.message);
     }
     return { ok: true };

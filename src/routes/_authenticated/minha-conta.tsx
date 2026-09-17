@@ -260,70 +260,72 @@ function CustomerDashboardPage() {
 
             <TabsContent value="dados" className="mt-6">
               <div className="max-w-2xl space-y-4">
-              <Card className="rounded-lg shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-lg">Meus dados</CardTitle>
-                  <CardDescription>Atualize seus dados de contato e preferências.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form
-                    key={data?.profile?.fullName}
-                    onSubmit={submitProfile}
-                    className="grid gap-4 sm:grid-cols-2"
-                  >
-                    <div className="space-y-2 sm:col-span-2">
-                      <Label htmlFor="customer-name">Nome completo</Label>
-                      <Input
-                        id="customer-name"
-                        name="full_name"
-                        defaultValue={data?.profile?.fullName ?? ""}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="customer-email">E-mail</Label>
-                      <Input id="customer-email" value={data?.profile?.email ?? ""} disabled />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="customer-phone">WhatsApp</Label>
-                      <Input
-                        id="customer-phone"
-                        name="phone"
-                        defaultValue={data?.profile?.phone ? maskPhone(data.profile.phone) : ""}
-                        onChange={(event) => {
-                          event.target.value = maskPhone(event.target.value);
-                        }}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="customer-birth">Data de nascimento</Label>
-                      <Input
-                        id="customer-birth"
-                        name="birth_date"
-                        type="date"
-                        defaultValue={data?.profile?.birthDate ?? ""}
-                      />
-                    </div>
-                    <label className="flex items-center gap-2 text-sm text-muted-foreground sm:col-span-2">
-                      <Checkbox
-                        name="marketing"
-                        defaultChecked={data?.profile?.marketingOptIn ?? false}
-                      />
-                      Quero receber novidades e promoções
-                    </label>
-                    <div className="flex flex-wrap gap-2 sm:col-span-2">
-                      <Button type="submit" disabled={profileMutation.isPending}>
-                        {profileMutation.isPending ? "Salvando..." : "Salvar alterações"}
-                      </Button>
-                      <Button asChild type="button" variant="outline">
-                        <Link to="/privacidade">Privacidade dos meus dados</Link>
-                      </Button>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
-              {loja ? <CustomerPushCard storeSlug={loja} /> : null}
+                <Card className="rounded-lg shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Meus dados</CardTitle>
+                    <CardDescription>
+                      Atualize seus dados de contato e preferências.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form
+                      key={data?.profile?.fullName}
+                      onSubmit={submitProfile}
+                      className="grid gap-4 sm:grid-cols-2"
+                    >
+                      <div className="space-y-2 sm:col-span-2">
+                        <Label htmlFor="customer-name">Nome completo</Label>
+                        <Input
+                          id="customer-name"
+                          name="full_name"
+                          defaultValue={data?.profile?.fullName ?? ""}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="customer-email">E-mail</Label>
+                        <Input id="customer-email" value={data?.profile?.email ?? ""} disabled />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="customer-phone">WhatsApp</Label>
+                        <Input
+                          id="customer-phone"
+                          name="phone"
+                          defaultValue={data?.profile?.phone ? maskPhone(data.profile.phone) : ""}
+                          onChange={(event) => {
+                            event.target.value = maskPhone(event.target.value);
+                          }}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="customer-birth">Data de nascimento</Label>
+                        <Input
+                          id="customer-birth"
+                          name="birth_date"
+                          type="date"
+                          defaultValue={data?.profile?.birthDate ?? ""}
+                        />
+                      </div>
+                      <label className="flex items-center gap-2 text-sm text-muted-foreground sm:col-span-2">
+                        <Checkbox
+                          name="marketing"
+                          defaultChecked={data?.profile?.marketingOptIn ?? false}
+                        />
+                        Quero receber novidades e promoções
+                      </label>
+                      <div className="flex flex-wrap gap-2 sm:col-span-2">
+                        <Button type="submit" disabled={profileMutation.isPending}>
+                          {profileMutation.isPending ? "Salvando..." : "Salvar alterações"}
+                        </Button>
+                        <Button asChild type="button" variant="outline">
+                          <Link to="/privacidade">Privacidade dos meus dados</Link>
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+                {loja ? <CustomerPushCard storeSlug={loja} /> : null}
               </div>
             </TabsContent>
           </Tabs>
