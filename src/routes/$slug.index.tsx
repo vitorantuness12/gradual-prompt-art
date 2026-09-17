@@ -14,7 +14,7 @@ import {
   Star,
   UserRound,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { DemoBadge } from "@/components/brand/DemoBadge";
 import { useStoreDocumentTitle } from "@/hooks/useStoreDocumentTitle";
@@ -70,6 +70,8 @@ import { logPopupEvent, savePopupPreference } from "@/lib/popups.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/$slug/")({
+  validateSearch: (search: Record<string, unknown>): { repetir?: boolean } =>
+    search["repetir"] === "1" || search["repetir"] === true ? { repetir: true } : {},
   head: ({ params }) => ({
     meta: [
       { title: `Cardápio e pedidos — ${params.slug} | Pedi Um` },
@@ -99,6 +101,7 @@ type Filter = "all" | "featured" | "promo" | "favorites";
 
 function PublicStorePage() {
   const { slug } = Route.useParams();
+  const { repetir } = Route.useSearch();
   const navigate = useNavigate();
   const { data, isLoading, isError } = useQuery(publicStoreQuery(slug));
   const cart = useCart(slug, data?.store.id ?? null);
@@ -152,6 +155,13 @@ function PublicStorePage() {
 
   const repeatConfig = popups.configFor("repeat");
   const highlightsConfig = popups.configFor("highlights");
+  const repeatRequested = useRef(false);
+
+  useEffect(() => {
+    if (!repetir || !repeatConfig || repeatRequested.current) return;
+    repeatRequested.current = true;
+    popups.openManually("repeat");
+  }, [repetir, repeatConfig, popups]);
 
   /** Registra o evento sem travar a experiência se falhar. */
   function trackPopup(kind: "repeat" | "highlights", event: string) {
