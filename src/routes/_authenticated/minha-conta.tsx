@@ -192,6 +192,7 @@ function CustomerDashboardPage() {
             </TabsList>
 
             <TabsContent value="inicio" className="mt-6 space-y-6">
+              {loja ? <CustomerPushCard storeSlug={loja} compact /> : null}
               <section aria-label="Resumo da conta" className="grid gap-3 sm:grid-cols-3">
                 <SummaryCard
                   icon={Clock3}
