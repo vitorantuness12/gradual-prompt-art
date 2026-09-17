@@ -6915,6 +6915,221 @@ export type Database = {
           },
         ]
       }
+      push_campaign_deliveries: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          customer_id: string | null
+          error: string | null
+          id: string
+          run_key: string
+          sent_at: string | null
+          status: string
+          store_id: string
+          subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          customer_id?: string | null
+          error?: string | null
+          id?: string
+          run_key: string
+          sent_at?: string | null
+          status?: string
+          store_id: string
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          customer_id?: string | null
+          error?: string | null
+          id?: string
+          run_key?: string
+          sent_at?: string | null
+          status?: string
+          store_id?: string
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_campaign_deliveries_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "push_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "push_campaign_deliveries_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "push_campaign_deliveries_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "push_campaign_deliveries_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "push_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_campaigns: {
+        Row: {
+          audience_config: Json
+          audience_type: string
+          automatic_event: string | null
+          body: string
+          created_at: string
+          created_by: string
+          failed_count: number
+          frequency_cap_hours: number
+          id: string
+          last_run_at: string | null
+          name: string
+          next_run_at: string | null
+          quiet_hours: Json
+          recurrence: Json
+          removed_count: number
+          schedule_type: string
+          scheduled_at: string | null
+          sent_count: number
+          status: string
+          store_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audience_config?: Json
+          audience_type?: string
+          automatic_event?: string | null
+          body: string
+          created_at?: string
+          created_by: string
+          failed_count?: number
+          frequency_cap_hours?: number
+          id?: string
+          last_run_at?: string | null
+          name: string
+          next_run_at?: string | null
+          quiet_hours?: Json
+          recurrence?: Json
+          removed_count?: number
+          schedule_type?: string
+          scheduled_at?: string | null
+          sent_count?: number
+          status?: string
+          store_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audience_config?: Json
+          audience_type?: string
+          automatic_event?: string | null
+          body?: string
+          created_at?: string
+          created_by?: string
+          failed_count?: number
+          frequency_cap_hours?: number
+          id?: string
+          last_run_at?: string | null
+          name?: string
+          next_run_at?: string | null
+          quiet_hours?: Json
+          recurrence?: Json
+          removed_count?: number
+          schedule_type?: string
+          scheduled_at?: string | null
+          sent_count?: number
+          status?: string
+          store_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_campaigns_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_subscription_stores: {
+        Row: {
+          consented_at: string | null
+          created_at: string
+          customer_id: string | null
+          id: string
+          is_active: boolean
+          revoked_at: string | null
+          store_id: string
+          subscription_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          consented_at?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          is_active?: boolean
+          revoked_at?: string | null
+          store_id: string
+          subscription_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          consented_at?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          is_active?: boolean
+          revoked_at?: string | null
+          store_id?: string
+          subscription_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscription_stores_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "push_subscription_stores_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "push_subscription_stores_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "push_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_subscriptions: {
         Row: {
           audience: string
