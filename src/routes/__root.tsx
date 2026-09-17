@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -13,7 +13,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { AppLaunchSplash } from "@/components/brand/AppLaunchSplash";
 import { ConnectionBanner } from "@/components/app/ConnectionBanner";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchPlatformBranding, platformBrandingQueryKey } from "@/lib/platform-branding";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -170,7 +169,6 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RuntimeBrandingHead />
       <AppLaunchSplash />
       <ConnectionBanner />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
@@ -182,91 +180,3 @@ function RootComponent() {
   );
 }
 
-function RuntimeBrandingHead() {
-  const { data } = useQuery({
-    queryKey: platformBrandingQueryKey,
-    queryFn: fetchPlatformBranding,
-    staleTime: 5 * 60_000,
-  });
-
-  useEffect(() => {
-    const firstPathSegment = window.location.pathname.split("/").filter(Boolean)[0];
-    const isStoreRoute = Boolean(
-      firstPathSegment &&
-      !["auth", "painel", "admin", "acompanhar", "minha-conta"].includes(firstPathSegment),
-    );
-    if (isStoreRoute && firstPathSegment) {
-      const controller = new AbortController();
-      void fetch(`/api/public/manifest?loja=${encodeURIComponent(firstPathSegment)}`, {
-        cache: "no-store",
-        signal: controller.signal,
-      })
-        .then(async (response) => {
-          if (!response.ok) return null;
-          return response.json() as Promise<{
-            name?: unknown;
-            theme_color?: unknown;
-            icons?: Array<{ src?: unknown; purpose?: unknown }>;
-          }>;
-        })
-        .then((manifest) => {
-          if (!manifest) return;
-          const iconValue = manifest.icons?.find(
-            (icon) => icon.purpose === "any" && typeof icon.src === "string" && icon.src.length > 0,
-          )?.src;
-          const appIcon = typeof iconValue === "string" ? iconValue : null;
-          if (appIcon) {
-            document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]').forEach((link) => {
-              link.href = appIcon;
-            });
-            const appleTouchIcon = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');
-            if (appleTouchIcon) appleTouchIcon.href = appIcon;
-          }
-          if (typeof manifest.name === "string" && manifest.name.trim()) {
-            document.querySelectorAll<HTMLMetaElement>(
-              'meta[name="application-name"], meta[name="apple-mobile-web-app-title"]',
-            ).forEach((meta) => {
-              meta.content = manifest.name as string;
-            });
-          }
-          if (typeof manifest.theme_color === "string" && manifest.theme_color) {
-            const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-            if (themeColor) themeColor.content = manifest.theme_color;
-          }
-        })
-        .catch((error: unknown) => {
-          if (!(error instanceof DOMException && error.name === "AbortError")) {
-            console.error("Não foi possível carregar a identidade do aplicativo da loja.", error);
-          }
-        });
-      return () => controller.abort();
-    }
-    if (data?.faviconUrl) {
-      document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]').forEach((link) => {
-        link.href = data.faviconUrl ?? "/pedium-favicon.png";
-      });
-    }
-    const appleTouchIcon = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');
-    if (appleTouchIcon && (data?.pwaIconUrl || data?.faviconUrl)) {
-      appleTouchIcon.href = data.pwaIconUrl ?? data.faviconUrl ?? "/pedium-apple-touch-icon.png";
-    }
-    if (data?.appCoverUrl) {
-      const entries = [
-        { selector: 'meta[property="og:image"]', attribute: "property", key: "og:image" },
-        { selector: 'meta[name="twitter:image"]', attribute: "name", key: "twitter:image" },
-      ];
-      entries.forEach(({ selector, attribute, key }) => {
-        let meta = document.head.querySelector<HTMLMetaElement>(selector);
-        if (!meta) {
-          meta = document.createElement("meta");
-          meta.setAttribute(attribute, key);
-          document.head.appendChild(meta);
-        }
-        meta.content = data.appCoverUrl ?? "";
-      });
-    }
-    return undefined;
-  }, [data?.appCoverUrl, data?.faviconUrl, data?.pwaIconUrl]);
-
-  return null;
-}
