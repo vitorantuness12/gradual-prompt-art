@@ -213,9 +213,10 @@ function RuntimeBrandingHead() {
         })
         .then((manifest) => {
           if (!manifest) return;
-          const appIcon = manifest.icons?.find(
+          const iconValue = manifest.icons?.find(
             (icon) => icon.purpose === "any" && typeof icon.src === "string" && icon.src.length > 0,
           )?.src;
+          const appIcon = typeof iconValue === "string" ? iconValue : null;
           if (appIcon) {
             document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]').forEach((link) => {
               link.href = appIcon;
