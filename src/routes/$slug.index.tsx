@@ -496,7 +496,7 @@ function PublicStorePage() {
           gap: "var(--store-section-gap)",
         }}
       >
-        <InstallAppBanner storeName={store.name} />
+        <InstallAppBanner storeName={store.name} storeSlug={slug} />
 
         {/* Busca e filtros */}
 

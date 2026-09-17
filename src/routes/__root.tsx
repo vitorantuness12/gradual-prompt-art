@@ -92,13 +92,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Pedi Um — Tudo pra vender. Tudo em um." },
       {
         property: "og:description",
-        content: "Loja online, pedidos, PDV, estoque e gestão em uma única plataforma para o seu negócio.",
+        content:
+          "Loja online, pedidos, PDV, estoque e gestão em uma única plataforma para o seu negócio.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:site_name", content: "Pedi Um" },
       { name: "twitter:title", content: "Pedi Um — Tudo pra vender. Tudo em um." },
-      { name: "twitter:description", content: "Loja online, pedidos, PDV, estoque e gestão em uma única plataforma para o seu negócio." },
+      {
+        name: "twitter:description",
+        content:
+          "Loja online, pedidos, PDV, estoque e gestão em uma única plataforma para o seu negócio.",
+      },
       { name: "application-name", content: "Pedi Um" },
       { name: "theme-color", content: "#f97316" },
       { name: "mobile-web-app-capable", content: "yes" },
@@ -181,9 +186,19 @@ function RootComponent() {
 }
 
 function RuntimeBrandingHead() {
-  const { data } = useQuery({ queryKey: platformBrandingQueryKey, queryFn: fetchPlatformBranding, staleTime: 5 * 60_000 });
+  const { data } = useQuery({
+    queryKey: platformBrandingQueryKey,
+    queryFn: fetchPlatformBranding,
+    staleTime: 5 * 60_000,
+  });
 
   useEffect(() => {
+    const firstPathSegment = window.location.pathname.split("/").filter(Boolean)[0];
+    const isStoreRoute = Boolean(
+      firstPathSegment &&
+      !["auth", "painel", "admin", "acompanhar", "minha-conta"].includes(firstPathSegment),
+    );
+    if (isStoreRoute) return;
     if (data?.faviconUrl) {
       document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]').forEach((link) => {
         link.href = data.faviconUrl ?? "/pedium-favicon.png";

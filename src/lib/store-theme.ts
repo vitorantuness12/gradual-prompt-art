@@ -39,6 +39,9 @@ export interface StoreThemeConfig {
     logoMobileUrl: string | null;
     faviconUrl: string | null;
     coverUrl: string | null;
+    pwaName: string | null;
+    pwaIconUrl: string | null;
+    pwaMaskableIconUrl: string | null;
     promoImages: string[];
   };
   typography: {
@@ -120,7 +123,13 @@ export function fontStack(key: FontKey): string {
 /** Converte "#rrggbb" (ou "#rgb") em canais 0-255. Retorna null se inválido. */
 export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const value = hex.trim().replace("#", "");
-  const full = value.length === 3 ? value.split("").map((c) => c + c).join("") : value;
+  const full =
+    value.length === 3
+      ? value
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : value;
   if (!/^[0-9a-fA-F]{6}$/.test(full)) return null;
   return {
     r: parseInt(full.slice(0, 2), 16),
@@ -170,7 +179,9 @@ export function contrastLevel(foreground: string, background: string): ContrastL
 
 /** Escolhe texto claro ou escuro conforme a cor de fundo. */
 export function readableTextOn(background: string): string {
-  return contrastRatio("#ffffff", background) >= contrastRatio("#111111", background) ? "#ffffff" : "#111111";
+  return contrastRatio("#ffffff", background) >= contrastRatio("#111111", background)
+    ? "#ffffff"
+    : "#111111";
 }
 
 /** Clareia (amount > 0) ou escurece (amount < 0) uma cor. amount em -1..1. */
@@ -220,7 +231,8 @@ export function resolvedFooterColors(
   primary: string,
 ): { background: string; text: string } {
   const derived = footerColorsFromPrimary(primary);
-  const background = footer.background && isValidHex(footer.background) ? footer.background : derived.background;
+  const background =
+    footer.background && isValidHex(footer.background) ? footer.background : derived.background;
   const text = footer.text && isValidHex(footer.text) ? footer.text : readableTextOn(background);
   return { background, text };
 }
@@ -230,7 +242,16 @@ export function resolvedFooterColors(
 export function defaultThemeConfig(): StoreThemeConfig {
   return {
     colors: paletteFromPrimary("#e2452b"),
-    branding: { logoUrl: null, logoMobileUrl: null, faviconUrl: null, coverUrl: null, promoImages: [] },
+    branding: {
+      logoUrl: null,
+      logoMobileUrl: null,
+      faviconUrl: null,
+      coverUrl: null,
+      pwaName: null,
+      pwaIconUrl: null,
+      pwaMaskableIconUrl: null,
+      promoImages: [],
+    },
     typography: { font: "sora", titleSize: 1, titleWeight: 600 },
     layout: {
       radius: 16,
@@ -310,7 +331,10 @@ export function resolvedFooterConfig(
   const zip = formatFooterZip(store.address_zip ?? null);
 
   const street = [store.address_street, store.address_number].filter(Boolean).join(", ");
-  const districtCity = [store.address_district, [store.address_city, store.address_state].filter(Boolean).join("/")]
+  const districtCity = [
+    store.address_district,
+    [store.address_city, store.address_state].filter(Boolean).join("/"),
+  ]
     .filter(Boolean)
     .join(", ");
   const baseAddress = [street, districtCity].filter(Boolean).join(" — ");
@@ -369,10 +393,22 @@ function preset(
 
 /** Dez pontos de partida — o lojista pode alterar tudo depois. */
 export const THEME_PRESETS: ThemePreset[] = [
-  preset("delivery-moderno", "Delivery moderno", "Cores quentes e cards em lista, ideal para entrega rápida.", "#e2452b"),
-  preset("pizzaria", "Pizzaria e hamburgueria", "Fundo escuro e destaque forte para preços.", "#d92d20", {
-    layout: { ...defaultThemeConfig().layout, radius: 20, shadow: "medium" },
-  }, { background: "#141416", card: "#1e1e22", text: "#f5f5f7", mutedText: "#a7a7b3" }),
+  preset(
+    "delivery-moderno",
+    "Delivery moderno",
+    "Cores quentes e cards em lista, ideal para entrega rápida.",
+    "#e2452b",
+  ),
+  preset(
+    "pizzaria",
+    "Pizzaria e hamburgueria",
+    "Fundo escuro e destaque forte para preços.",
+    "#d92d20",
+    {
+      layout: { ...defaultThemeConfig().layout, radius: 20, shadow: "medium" },
+    },
+    { background: "#141416", card: "#1e1e22", text: "#f5f5f7", mutedText: "#a7a7b3" },
+  ),
   preset("mercado", "Mercado e conveniência", "Grade compacta para muitos itens.", "#1f7a3f", {
     layout: { ...defaultThemeConfig().layout, cardStyle: "grid", imagePosition: "top", radius: 12 },
   }),
@@ -381,11 +417,21 @@ export const THEME_PRESETS: ThemePreset[] = [
     typography: { font: "nunito", titleSize: 1.05, titleWeight: 700 },
   }),
   preset("farmacia", "Farmácia", "Visual limpo, azul de confiança e leitura fácil.", "#1867c0", {
-    layout: { ...defaultThemeConfig().layout, cardStyle: "grid", imagePosition: "top", shadow: "none" },
+    layout: {
+      ...defaultThemeConfig().layout,
+      cardStyle: "grid",
+      imagePosition: "top",
+      shadow: "none",
+    },
     typography: { font: "inter", titleSize: 1, titleWeight: 600 },
   }),
   preset("loja-produtos", "Loja de produtos", "Vitrine em grade com imagens grandes.", "#3f3fd1", {
-    layout: { ...defaultThemeConfig().layout, cardStyle: "grid", imagePosition: "top", maxWidth: 1200 },
+    layout: {
+      ...defaultThemeConfig().layout,
+      cardStyle: "grid",
+      imagePosition: "top",
+      maxWidth: 1200,
+    },
   }),
   preset("salao", "Salão e barbearia", "Elegante, com títulos maiores.", "#8a4bd3", {
     typography: { font: "playfair", titleSize: 1.2, titleWeight: 700 },
@@ -395,14 +441,34 @@ export const THEME_PRESETS: ThemePreset[] = [
     layout: { ...defaultThemeConfig().layout, cardStyle: "compact", sectionSpacing: 40 },
     display: { ...defaultThemeConfig().display, showHours: true, showRatings: true },
   }),
-  preset("artesanal", "Artesanal e confeitaria", "Tons suaves e acolhedores.", "#c2557a", {
-    typography: { font: "dm-sans", titleSize: 1.1, titleWeight: 600 },
-    layout: { ...defaultThemeConfig().layout, radius: 22, shadow: "soft" },
-  }, { background: "#fdf7f4", card: "#ffffff" }),
-  preset("minimalista", "Minimalista", "Preto e branco, sem sombras, muito espaço.", "#111827", {
-    layout: { ...defaultThemeConfig().layout, shadow: "none", radius: 8, buttonShape: "square", sectionSpacing: 48 },
-    typography: { font: "inter", titleSize: 1, titleWeight: 500 },
-  }, { background: "#ffffff", card: "#ffffff", secondary: "#ffffff" }),
+  preset(
+    "artesanal",
+    "Artesanal e confeitaria",
+    "Tons suaves e acolhedores.",
+    "#c2557a",
+    {
+      typography: { font: "dm-sans", titleSize: 1.1, titleWeight: 600 },
+      layout: { ...defaultThemeConfig().layout, radius: 22, shadow: "soft" },
+    },
+    { background: "#fdf7f4", card: "#ffffff" },
+  ),
+  preset(
+    "minimalista",
+    "Minimalista",
+    "Preto e branco, sem sombras, muito espaço.",
+    "#111827",
+    {
+      layout: {
+        ...defaultThemeConfig().layout,
+        shadow: "none",
+        radius: 8,
+        buttonShape: "square",
+        sectionSpacing: 48,
+      },
+      typography: { font: "inter", titleSize: 1, titleWeight: 500 },
+    },
+    { background: "#ffffff", card: "#ffffff", secondary: "#ffffff" },
+  ),
 ];
 
 export function presetByKey(key: string): ThemePreset {
@@ -421,7 +487,9 @@ export function parseThemeConfig(value: unknown): StoreThemeConfig {
     branding: {
       ...base.branding,
       ...(raw.branding ?? {}),
-      promoImages: Array.isArray(raw.branding?.promoImages) ? raw.branding.promoImages.filter((i) => typeof i === "string") : [],
+      promoImages: Array.isArray(raw.branding?.promoImages)
+        ? raw.branding.promoImages.filter((i) => typeof i === "string")
+        : [],
     },
     typography: { ...base.typography, ...(raw.typography ?? {}) },
     layout: { ...base.layout, ...(raw.layout ?? {}) },
@@ -497,7 +565,10 @@ export function contrastWarnings(colors: StoreThemeColors): string[] {
   ];
   return checks
     .filter((check) => contrastLevel(check.fg, check.bg) === "ruim")
-    .map((check) => `${check.label}: contraste ${contrastRatio(check.fg, check.bg)}:1 (mínimo recomendado 4.5:1).`);
+    .map(
+      (check) =>
+        `${check.label}: contraste ${contrastRatio(check.fg, check.bg)}:1 (mínimo recomendado 4.5:1).`,
+    );
 }
 
 /** ---------- Catálogo de blocos ---------- */
@@ -512,29 +583,146 @@ export interface BlockDefinition {
 }
 
 export const BLOCK_CATALOG: BlockDefinition[] = [
-  { key: "header", label: "Cabeçalho da loja", description: "Barra superior com nome, busca e carrinho.", defaultTitle: null, required: true },
-  { key: "identity", label: "Logo e identidade", description: "Logo, nome e descrição curta.", defaultTitle: null },
-  { key: "banner", label: "Banner principal", description: "Imagem de capa com chamada.", defaultTitle: null },
-  { key: "store_info", label: "Informações da loja", description: "Resumo do que a loja oferece.", defaultTitle: "Sobre a loja" },
-  { key: "status", label: "Status da loja", description: "Aberto, fechado ou aberto para agendamentos.", defaultTitle: null },
-  { key: "min_order", label: "Pedido mínimo", description: "Valor mínimo para fechar o pedido.", defaultTitle: null },
-  { key: "hours", label: "Horário de funcionamento", description: "Tabela de horários por dia.", defaultTitle: "Horários" },
-  { key: "address", label: "Endereço e áreas atendidas", description: "Endereço da loja e regiões de entrega.", defaultTitle: "Onde entregamos" },
-  { key: "track_order", label: "Botão de acompanhar pedido", description: "Atalho para o acompanhamento.", defaultTitle: "Acompanhar pedido" },
-  { key: "repeat_order", label: "Botão de repetir pedido", description: "Atalho para pedidos anteriores.", defaultTitle: "Peça novamente" },
-  { key: "highlights", label: "Destaques para você", description: "Seleção especial de itens.", defaultTitle: "Destaques para você" },
-  { key: "promotions", label: "Promoções", description: "Itens com preço promocional.", defaultTitle: "Promoções" },
-  { key: "categories", label: "Categorias", description: "Navegação por categorias.", defaultTitle: "Categorias" },
-  { key: "best_sellers", label: "Produtos mais vendidos", description: "Itens com maior número de pedidos.", defaultTitle: "Mais pedidos" },
-  { key: "new_items", label: "Novidades", description: "Itens adicionados recentemente.", defaultTitle: "Novidades" },
-  { key: "combos", label: "Combos e kits", description: "Kits montados pela loja.", defaultTitle: "Combos e kits" },
-  { key: "offers", label: "Produtos em oferta", description: "Ofertas por tempo limitado.", defaultTitle: "Ofertas do dia" },
-  { key: "recommended", label: "Produtos recomendados", description: "Sugestões complementares.", defaultTitle: "Você também pode gostar" },
-  { key: "loyalty", label: "Programa de fidelidade", description: "Pontos, níveis e recompensas.", defaultTitle: "Programa de fidelidade" },
-  { key: "delivery_info", label: "Entrega e retirada", description: "Como o cliente recebe o pedido.", defaultTitle: "Entrega e retirada" },
-  { key: "reviews", label: "Avaliações", description: "Somente avaliações reais registradas.", defaultTitle: "Avaliações" },
-  { key: "contact", label: "WhatsApp ou contato", description: "Canal direto com a loja.", defaultTitle: "Fale com a gente" },
-  { key: "footer", label: "Rodapé", description: "Informações legais e links.", defaultTitle: null, required: true },
+  {
+    key: "header",
+    label: "Cabeçalho da loja",
+    description: "Barra superior com nome, busca e carrinho.",
+    defaultTitle: null,
+    required: true,
+  },
+  {
+    key: "identity",
+    label: "Logo e identidade",
+    description: "Logo, nome e descrição curta.",
+    defaultTitle: null,
+  },
+  {
+    key: "banner",
+    label: "Banner principal",
+    description: "Imagem de capa com chamada.",
+    defaultTitle: null,
+  },
+  {
+    key: "store_info",
+    label: "Informações da loja",
+    description: "Resumo do que a loja oferece.",
+    defaultTitle: "Sobre a loja",
+  },
+  {
+    key: "status",
+    label: "Status da loja",
+    description: "Aberto, fechado ou aberto para agendamentos.",
+    defaultTitle: null,
+  },
+  {
+    key: "min_order",
+    label: "Pedido mínimo",
+    description: "Valor mínimo para fechar o pedido.",
+    defaultTitle: null,
+  },
+  {
+    key: "hours",
+    label: "Horário de funcionamento",
+    description: "Tabela de horários por dia.",
+    defaultTitle: "Horários",
+  },
+  {
+    key: "address",
+    label: "Endereço e áreas atendidas",
+    description: "Endereço da loja e regiões de entrega.",
+    defaultTitle: "Onde entregamos",
+  },
+  {
+    key: "track_order",
+    label: "Botão de acompanhar pedido",
+    description: "Atalho para o acompanhamento.",
+    defaultTitle: "Acompanhar pedido",
+  },
+  {
+    key: "repeat_order",
+    label: "Botão de repetir pedido",
+    description: "Atalho para pedidos anteriores.",
+    defaultTitle: "Peça novamente",
+  },
+  {
+    key: "highlights",
+    label: "Destaques para você",
+    description: "Seleção especial de itens.",
+    defaultTitle: "Destaques para você",
+  },
+  {
+    key: "promotions",
+    label: "Promoções",
+    description: "Itens com preço promocional.",
+    defaultTitle: "Promoções",
+  },
+  {
+    key: "categories",
+    label: "Categorias",
+    description: "Navegação por categorias.",
+    defaultTitle: "Categorias",
+  },
+  {
+    key: "best_sellers",
+    label: "Produtos mais vendidos",
+    description: "Itens com maior número de pedidos.",
+    defaultTitle: "Mais pedidos",
+  },
+  {
+    key: "new_items",
+    label: "Novidades",
+    description: "Itens adicionados recentemente.",
+    defaultTitle: "Novidades",
+  },
+  {
+    key: "combos",
+    label: "Combos e kits",
+    description: "Kits montados pela loja.",
+    defaultTitle: "Combos e kits",
+  },
+  {
+    key: "offers",
+    label: "Produtos em oferta",
+    description: "Ofertas por tempo limitado.",
+    defaultTitle: "Ofertas do dia",
+  },
+  {
+    key: "recommended",
+    label: "Produtos recomendados",
+    description: "Sugestões complementares.",
+    defaultTitle: "Você também pode gostar",
+  },
+  {
+    key: "loyalty",
+    label: "Programa de fidelidade",
+    description: "Pontos, níveis e recompensas.",
+    defaultTitle: "Programa de fidelidade",
+  },
+  {
+    key: "delivery_info",
+    label: "Entrega e retirada",
+    description: "Como o cliente recebe o pedido.",
+    defaultTitle: "Entrega e retirada",
+  },
+  {
+    key: "reviews",
+    label: "Avaliações",
+    description: "Somente avaliações reais registradas.",
+    defaultTitle: "Avaliações",
+  },
+  {
+    key: "contact",
+    label: "WhatsApp ou contato",
+    description: "Canal direto com a loja.",
+    defaultTitle: "Fale com a gente",
+  },
+  {
+    key: "footer",
+    label: "Rodapé",
+    description: "Informações legais e links.",
+    defaultTitle: null,
+    required: true,
+  },
 ];
 
 export function blockByKey(key: string): BlockDefinition | undefined {
@@ -577,7 +765,9 @@ export function parseScheduleRule(value: unknown): SectionScheduleRule {
   if (!value || typeof value !== "object") return {};
   const raw = value as SectionScheduleRule;
   return {
-    days: Array.isArray(raw.days) ? raw.days.filter((d) => Number.isInteger(d) && d >= 0 && d <= 6) : [],
+    days: Array.isArray(raw.days)
+      ? raw.days.filter((d) => Number.isInteger(d) && d >= 0 && d <= 6)
+      : [],
     startTime: typeof raw.startTime === "string" ? raw.startTime : null,
     endTime: typeof raw.endTime === "string" ? raw.endTime : null,
     startDate: typeof raw.startDate === "string" ? raw.startDate : null,
@@ -618,10 +808,9 @@ export function isSectionVisibleNow(
 }
 
 /** Ordena e devolve apenas os blocos que o cliente deve ver agora. */
-export function visibleSections<T extends { block_key: string; sort_order: number; is_visible: boolean; schedule_rule: unknown }>(
-  sections: T[],
-  now: Date = new Date(),
-): T[] {
+export function visibleSections<
+  T extends { block_key: string; sort_order: number; is_visible: boolean; schedule_rule: unknown },
+>(sections: T[], now: Date = new Date()): T[] {
   return [...sections]
     .filter((section) => isSectionVisibleNow(section, now))
     .sort((a, b) => a.sort_order - b.sort_order);

@@ -1,15 +1,18 @@
-import { AlertTriangle, Image as ImageIcon } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
+import { AlertTriangle } from "lucide-react";
 
 import { ImageUploadField } from "@/components/store/ImageUploadField";
 import { Button } from "@/components/ui/button";
-import { uploadStoreImage } from "@/lib/image-upload";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
@@ -70,7 +73,6 @@ const COLOR_FIELDS: { key: keyof StoreThemeColors; label: string }[] = [
 
 export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
   const warnings = contrastWarnings(config.colors);
-  const [uploading, setUploading] = useState(false);
 
   const patch = (partial: Partial<StoreThemeConfig>) => onChange({ ...config, ...partial });
   const setColor = (key: keyof StoreThemeColors, value: string) =>
@@ -91,7 +93,9 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
     <div className="space-y-6">
       <section className="space-y-3">
         <h3 className="text-sm font-semibold text-foreground">Temas prontos</h3>
-        <p className="text-xs text-muted-foreground">Um ponto de partida. Você pode ajustar tudo depois.</p>
+        <p className="text-xs text-muted-foreground">
+          Um ponto de partida. Você pode ajustar tudo depois.
+        </p>
         <div className="grid gap-2 sm:grid-cols-2">
           {THEME_PRESETS.map((preset) => (
             <button
@@ -101,7 +105,11 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
               className="rounded-lg border border-border bg-card p-3 text-left transition hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <span className="flex items-center gap-2">
-                <span className="size-4 rounded-full" style={{ background: preset.config.colors.primary }} aria-hidden="true" />
+                <span
+                  className="size-4 rounded-full"
+                  style={{ background: preset.config.colors.primary }}
+                  aria-hidden="true"
+                />
                 <span className="text-sm font-medium">{preset.name}</span>
               </span>
               <span className="mt-1 block text-xs text-muted-foreground">{preset.description}</span>
@@ -115,7 +123,8 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
       <section className="space-y-3">
         <h3 className="text-sm font-semibold text-foreground">Cor da sua loja</h3>
         <p className="text-xs text-muted-foreground">
-          Escolha uma cor. O resto (fundos, textos e selos) é ajustado automaticamente para ficar legível.
+          Escolha uma cor. O resto (fundos, textos e selos) é ajustado automaticamente para ficar
+          legível.
         </p>
 
         <div className="flex flex-wrap gap-2">
@@ -165,7 +174,9 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
             </AlertDescription>
           </Alert>
         ) : (
-          <p className="text-xs text-muted-foreground">Contraste dentro do recomendado para leitura.</p>
+          <p className="text-xs text-muted-foreground">
+            Contraste dentro do recomendado para leitura.
+          </p>
         )}
 
         <details className="rounded-lg border border-border bg-card p-3">
@@ -182,7 +193,9 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
                   <input
                     id={`color-${field.key}`}
                     type="color"
-                    value={isValidHex(config.colors[field.key]) ? config.colors[field.key] : "#000000"}
+                    value={
+                      isValidHex(config.colors[field.key]) ? config.colors[field.key] : "#000000"
+                    }
                     onChange={(event) => setColor(field.key, event.target.value)}
                     className="h-9 w-10 cursor-pointer rounded border border-border bg-card"
                     aria-label={field.label}
@@ -226,14 +239,12 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
         </details>
       </section>
 
-
       <Separator />
 
       <section className="space-y-4">
         <h3 className="text-sm font-semibold text-foreground">Imagens</h3>
         <p className="text-xs text-muted-foreground">
-          Logo e capa aparecem no topo da loja pública. A capa do app é usada quando o cliente instala a loja no
-          celular (use uma imagem quadrada, mínimo 512×512).
+          Logo e capa aparecem no topo da loja pública.
         </p>
 
         <ImageUploadField
@@ -254,58 +265,40 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
           hint="Imagem horizontal (1600×900) exibida no topo da loja."
         />
 
-        <div className="flex items-center gap-3">
-          {config.branding.faviconUrl ? (
-            <img
-              src={config.branding.faviconUrl}
-              alt="Capa do app PWA"
-              className="size-16 shrink-0 rounded-xl border border-border object-cover"
-            />
-          ) : (
-            <div className="grid size-16 shrink-0 place-items-center rounded-xl border border-dashed border-border text-muted-foreground">
-              <ImageIcon className="size-5" aria-hidden="true" />
-            </div>
-          )}
-          <div className="min-w-0 space-y-2">
-            <Label htmlFor="branding-pwa" className="text-xs">
-              Capa do app (PWA)
-            </Label>
+        <div className="space-y-4 rounded-lg border border-border p-4">
+          <div className="space-y-2">
+            <Label htmlFor="branding-pwa-name">Nome do aplicativo da loja</Label>
             <Input
-              id="branding-pwa"
-              type="file"
-              accept="image/*"
-              disabled={!storeId || uploading}
-              onChange={async (event) => {
-                const file = event.target.files?.[0];
-                event.target.value = "";
-                if (!file || !storeId) return;
-                setUploading(true);
-                try {
-                  const url = await uploadStoreImage(storeId, "logo", file);
-                  patch({ branding: { ...config.branding, faviconUrl: url } });
-                  toast.success("Imagem enviada.");
-                } catch (error) {
-                  toast.error(error instanceof Error ? error.message : "Falha ao enviar a imagem.");
-                } finally {
-                  setUploading(false);
-                }
-              }}
+              id="branding-pwa-name"
+              value={config.branding.pwaName ?? ""}
+              maxLength={30}
+              placeholder="Usar o nome da loja"
+              onChange={(event) =>
+                patch({ branding: { ...config.branding, pwaName: event.target.value || null } })
+              }
             />
-            {config.branding.faviconUrl ? (
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => patch({ branding: { ...config.branding, faviconUrl: null } })}
-              >
-                Remover imagem
-              </Button>
-            ) : null}
+            <p className="text-xs text-muted-foreground">
+              Aparece abaixo do ícone na tela inicial do cliente.
+            </p>
           </div>
+          <ImageUploadField
+            storeId={storeId ?? null}
+            kind="pwa-icon"
+            label="Ícone do aplicativo"
+            value={config.branding.pwaIconUrl}
+            onChange={(url) => patch({ branding: { ...config.branding, pwaIconUrl: url } })}
+            hint="Imagem quadrada de 512×512. Se ficar vazio, usa a logo da loja."
+          />
+          <ImageUploadField
+            storeId={storeId ?? null}
+            kind="pwa-maskable"
+            label="Ícone adaptável"
+            value={config.branding.pwaMaskableIconUrl}
+            onChange={(url) => patch({ branding: { ...config.branding, pwaMaskableIconUrl: url } })}
+            hint="Deixe uma margem segura ao redor da marca para Android."
+          />
         </div>
-        {uploading ? <p className="text-xs text-muted-foreground">Enviando imagem…</p> : null}
       </section>
-
 
       <Separator />
 
@@ -320,7 +313,9 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
             ["square", "Reto"],
             ["pill", "Pílula"],
           ]}
-          onChange={(value) => patch({ layout: { ...config.layout, buttonShape: value as ButtonShape } })}
+          onChange={(value) =>
+            patch({ layout: { ...config.layout, buttonShape: value as ButtonShape } })
+          }
         />
         <SelectField
           label="Sombra dos cards"
@@ -331,7 +326,9 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
             ["medium", "Média"],
             ["strong", "Forte"],
           ]}
-          onChange={(value) => patch({ layout: { ...config.layout, shadow: value as ShadowLevel } })}
+          onChange={(value) =>
+            patch({ layout: { ...config.layout, shadow: value as ShadowLevel } })
+          }
         />
         <SelectField
           label="Estilo dos itens"
@@ -341,7 +338,9 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
             ["grid", "Grade"],
             ["compact", "Compacto"],
           ]}
-          onChange={(value) => patch({ layout: { ...config.layout, cardStyle: value as CardStyle } })}
+          onChange={(value) =>
+            patch({ layout: { ...config.layout, cardStyle: value as CardStyle } })
+          }
         />
         <SelectField
           label="Posição da imagem"
@@ -351,7 +350,9 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
             ["top", "Acima"],
             ["right", "À direita"],
           ]}
-          onChange={(value) => patch({ layout: { ...config.layout, imagePosition: value as ImagePosition } })}
+          onChange={(value) =>
+            patch({ layout: { ...config.layout, imagePosition: value as ImagePosition } })
+          }
         />
       </section>
 
@@ -376,17 +377,26 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
             <Switch
               id={`display-${key}`}
               checked={config.display[key]}
-              onCheckedChange={(checked) => patch({ display: { ...config.display, [key]: checked } })}
+              onCheckedChange={(checked) =>
+                patch({ display: { ...config.display, [key]: checked } })
+              }
             />
           </div>
         ))}
       </section>
-
     </div>
   );
 }
 
-function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+function ColorField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
   return (
     <div className="space-y-1">
       <Label className="text-xs">{label}</Label>
@@ -398,7 +408,11 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
           className="size-9 cursor-pointer rounded border border-border bg-transparent p-0"
           aria-label={label}
         />
-        <Input value={value} onChange={(event) => onChange(event.target.value)} className="font-mono text-xs" />
+        <Input
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="font-mono text-xs"
+        />
       </div>
     </div>
   );

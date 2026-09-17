@@ -11,17 +11,24 @@ import { usePwaInstall } from "@/hooks/usePwaInstall";
  * instruções de "Adicionar à Tela de Início". Some quando o app já está
  * instalado ou quando a pessoa dispensa o convite.
  */
-const DISMISS_KEY = "seupedido:instalar-dispensado";
-
-export function InstallAppBanner({ storeName }: { storeName?: string }) {
+export function InstallAppBanner({
+  storeName,
+  storeSlug,
+}: {
+  storeName?: string;
+  storeSlug?: string;
+}) {
   const { canInstall, installed, isIos, install } = usePwaInstall();
-  const [dismissed, setDismissed] = useState(() => typeof window !== "undefined" && window.localStorage.getItem(DISMISS_KEY) === "1");
+  const dismissKey = `pedium:instalar-loja:${storeSlug ?? "geral"}`;
+  const [dismissed, setDismissed] = useState(
+    () => typeof window !== "undefined" && window.localStorage.getItem(dismissKey) === "1",
+  );
   const visible = !installed && !dismissed && (canInstall || isIos);
 
   if (!visible) return null;
 
   function dismiss() {
-    window.localStorage.setItem(DISMISS_KEY, "1");
+    window.localStorage.setItem(dismissKey, "1");
     setDismissed(true);
   }
 
@@ -45,11 +52,7 @@ export function InstallAppBanner({ storeName }: { storeName?: string }) {
         </div>
       </div>
       <div className="flex gap-2">
-        {!isIos ? (
-          <Button onClick={() => void install()}>
-            Instalar
-          </Button>
-        ) : null}
+        {!isIos ? <Button onClick={() => void install()}>Instalar</Button> : null}
         <Button
           size="icon"
           variant="ghost"

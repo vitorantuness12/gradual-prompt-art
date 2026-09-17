@@ -14,21 +14,34 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime } from "@/lib/format";
 import { DEFAULT_MEMBER_PASSWORD, checkNewPassword } from "@/lib/membros";
-import { carregarMembro, linkMaterialMembro, loginMembro, sairMembro, trocarSenhaMembro } from "@/lib/membros.functions";
+import {
+  carregarMembro,
+  linkMaterialMembro,
+  loginMembro,
+  sairMembro,
+  trocarSenhaMembro,
+} from "@/lib/membros.functions";
 
 export const Route = createFileRoute("/$slug/membros")({
   component: MembrosPage,
-  head: () => ({
+  head: ({ params }) => ({
     meta: [
       { title: "Área de membros | Pedi Um" },
       {
         name: "description",
-        content: "Entre com seu e-mail para baixar os materiais dos produtos digitais que você comprou.",
+        content:
+          "Entre com seu e-mail para baixar os materiais dos produtos digitais que você comprou.",
       },
       { property: "og:title", content: "Área de membros" },
-      { property: "og:description", content: "Acesse os materiais dos produtos digitais que você comprou." },
+      {
+        property: "og:description",
+        content: "Acesse os materiais dos produtos digitais que você comprou.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+    ],
+    links: [
+      { rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` },
     ],
   }),
 });
@@ -68,7 +81,8 @@ function MembrosPage() {
   }, [contentQuery.data, slug]);
 
   const loginMutation = useMutation({
-    mutationFn: (input: { email: string; password: string }) => doLogin({ data: { slug, ...input } }),
+    mutationFn: (input: { email: string; password: string }) =>
+      doLogin({ data: { slug, ...input } }),
     onSuccess: (result) => {
       if (!result.ok || !result.token) {
         toast.error(result.message);
@@ -127,7 +141,10 @@ function MembrosPage() {
         <p className="mb-6 text-sm text-muted-foreground">
           Entre com o e-mail usado na compra. A senha inicial vai no e-mail de liberação.
         </p>
-        <LoginForm onSubmit={(values) => loginMutation.mutate(values)} pending={loginMutation.isPending} />
+        <LoginForm
+          onSubmit={(values) => loginMutation.mutate(values)}
+          pending={loginMutation.isPending}
+        />
       </main>
     );
   }
@@ -150,7 +167,8 @@ function MembrosPage() {
           <ShieldAlert className="h-4 w-4" />
           <AlertTitle>Troque sua senha</AlertTitle>
           <AlertDescription>
-            Você está usando a senha padrão ({DEFAULT_MEMBER_PASSWORD}). Defina uma senha só sua agora.
+            Você está usando a senha padrão ({DEFAULT_MEMBER_PASSWORD}). Defina uma senha só sua
+            agora.
           </AlertDescription>
         </Alert>
       ) : null}
@@ -175,7 +193,11 @@ function MembrosPage() {
               <CardHeader>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <CardTitle className="text-base">{product.productName}</CardTitle>
-                  {product.blocked ? <Badge variant="destructive">Indisponível</Badge> : <Badge>Liberado</Badge>}
+                  {product.blocked ? (
+                    <Badge variant="destructive">Indisponível</Badge>
+                  ) : (
+                    <Badge>Liberado</Badge>
+                  )}
                 </div>
                 <CardDescription>
                   {product.blocked
@@ -187,16 +209,27 @@ function MembrosPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {product.instructions ? (
-                  <p className="whitespace-pre-line text-sm text-muted-foreground">{product.instructions}</p>
+                  <p className="whitespace-pre-line text-sm text-muted-foreground">
+                    {product.instructions}
+                  </p>
                 ) : null}
                 {product.blocked ? null : product.resources.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">A loja ainda não publicou materiais deste produto.</p>
+                  <p className="text-sm text-muted-foreground">
+                    A loja ainda não publicou materiais deste produto.
+                  </p>
                 ) : (
                   <ul className="divide-y divide-border rounded-xl border border-border">
                     {product.resources.map((resource) => (
                       <li key={resource.id} className="flex items-center justify-between gap-3 p-3">
-                        <span className="min-w-0 truncate text-sm text-foreground">{resource.title}</span>
-                        <Button type="button" size="sm" variant="outline" onClick={() => void openResource(resource.id)}>
+                        <span className="min-w-0 truncate text-sm text-foreground">
+                          {resource.title}
+                        </span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => void openResource(resource.id)}
+                        >
                           {resource.kind === "link" ? (
                             <ExternalLink className="mr-2 h-4 w-4" />
                           ) : (
@@ -291,7 +324,9 @@ function ChangePasswordCard({
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Trocar senha</CardTitle>
-        <CardDescription>Use pelo menos 8 caracteres e algo diferente da senha padrão.</CardDescription>
+        <CardDescription>
+          Use pelo menos 8 caracteres e algo diferente da senha padrão.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-2">
@@ -313,7 +348,9 @@ function ChangePasswordCard({
             value={newPassword}
             onChange={(event) => setNewPassword(event.target.value)}
           />
-          {newPassword && !check.ok ? <p className="text-xs text-destructive">{check.message}</p> : null}
+          {newPassword && !check.ok ? (
+            <p className="text-xs text-destructive">{check.message}</p>
+          ) : null}
         </div>
         <Button
           type="button"

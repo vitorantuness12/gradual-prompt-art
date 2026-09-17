@@ -17,7 +17,14 @@ export interface ImageUploadFieldProps {
 }
 
 /** Upload de logo/capa com compressão automática no navegador. */
-export function ImageUploadField({ storeId, kind, label, value, onChange, hint }: ImageUploadFieldProps) {
+export function ImageUploadField({
+  storeId,
+  kind,
+  label,
+  value,
+  onChange,
+  hint,
+}: ImageUploadFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -47,7 +54,9 @@ export function ImageUploadField({ storeId, kind, label, value, onChange, hint }
         <div
           className={cn(
             "flex items-center justify-center overflow-hidden rounded-xl border border-dashed border-border bg-muted/40",
-            kind === "logo" ? "size-20" : "h-20 w-36",
+            kind === "logo" || kind === "pwa-icon" || kind === "pwa-maskable"
+              ? "size-20"
+              : "h-20 w-36",
           )}
         >
           {value ? (
@@ -65,7 +74,13 @@ export function ImageUploadField({ storeId, kind, label, value, onChange, hint }
             className="sr-only"
             onChange={(event) => void handleFile(event.target.files?.[0])}
           />
-          <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => inputRef.current?.click()}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={uploading}
+            onClick={() => inputRef.current?.click()}
+          >
             {uploading ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
             {uploading ? "Enviando..." : value ? "Trocar imagem" : "Enviar imagem"}
           </Button>
