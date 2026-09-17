@@ -16,7 +16,10 @@ export const Route = createFileRoute("/_authenticated/escolher-perfil")({
         content: "Escolha entre acessar como cliente, motoboy ou lojista usando a mesma conta.",
       },
       { property: "og:title", content: "Escolher ambiente de acesso" },
-      { property: "og:description", content: "Uma conta, vários perfis: cliente, motoboy e lojista." },
+      {
+        property: "og:description",
+        content: "Uma conta, vários perfis: cliente, motoboy e lojista.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -40,9 +43,12 @@ function ChooseProfilePage() {
   if (data?.merchant) available.push("lojista");
 
   function open(kind: AccountKind) {
-    if (kind === "cliente") return void navigate({ to: "/minha-conta", search: { aba: undefined } });
+    if (kind === "cliente")
+      return void navigate({ to: "/minha-conta", search: { aba: undefined } });
     if (kind === "lojista") return void navigate({ to: "/painel" });
-    void navigate({ to: courierCanWork(data?.courier_status) ? "/entregador" : "/entregador/status" });
+    void navigate({
+      to: courierCanWork(data?.courier_status) ? "/entregador" : "/entregador/status",
+    });
   }
 
   return (
@@ -101,7 +107,9 @@ function ChooseProfilePage() {
                   <Shield className="h-5 w-5" aria-hidden />
                 </span>
                 <span className="mt-3 text-base font-semibold">Superadmin</span>
-                <span className="mt-1 text-sm text-muted-foreground">Administração da plataforma.</span>
+                <span className="mt-1 text-sm text-muted-foreground">
+                  Administração da plataforma.
+                </span>
               </button>
             ) : null}
           </div>
