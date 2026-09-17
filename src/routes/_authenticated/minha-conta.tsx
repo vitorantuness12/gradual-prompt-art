@@ -1,11 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Home, LogOut, MapPin, Plus, RefreshCcw, Trash2 } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { Clock3, History, LogOut, MapPin, ShoppingBag, Store, UserRound } from "lucide-react";
+import { type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { Logo } from "@/components/brand/Logo";
-import { Badge } from "@/components/ui/badge";
+import { CustomerAddressManager } from "@/components/cliente/CustomerAddressManager";
+import {
+  CustomerDashboardOrders,
+  CustomerOrderSectionTitle,
+  isActiveCustomerOrder,
+} from "@/components/cliente/CustomerDashboardOrders";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,479 +18,329 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { myCustomerOrders } from "@/lib/contas.functions";
-import { ORDER_STATUS_LABEL, formatCurrency, formatDateTime } from "@/lib/format";
-import { deliveryAccess, SUBSCRIPTION_STATUS_LABEL } from "@/lib/digitais";
-import { maskPhone, maskZip, onlyDigits } from "@/lib/masks";
+import { getCustomerDashboard, saveCustomerProfile } from "@/lib/contas.functions";
+import { maskPhone, onlyDigits } from "@/lib/masks";
+
+type CustomerTab = "inicio" | "pedidos" | "enderecos" | "dados";
+const TABS: CustomerTab[] = ["inicio", "pedidos", "enderecos", "dados"];
 
 export const Route = createFileRoute("/_authenticated/minha-conta")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    aba: TABS.includes(search.aba as CustomerTab) ? (search.aba as CustomerTab) : "inicio",
+  }),
   head: () => ({
     meta: [
-      { title: "Minha conta — Pedi Um" },
+      { title: "Painel do cliente — Pedi Um" },
       {
         name: "description",
-        content:
-          "Gerencie seus dados, endereços, pedidos anteriores, consentimentos e privacidade na sua conta Pedi Um.",
+        content: "Acompanhe seus pedidos, consulte o histórico e gerencie seus endereços salvos.",
       },
-      { property: "og:title", content: "Minha conta — Pedi Um" },
-      { property: "og:description", content: "Seus pedidos, endereços e preferências em um só lugar." },
+      { property: "og:title", content: "Painel do cliente — Pedi Um" },
+      {
+        property: "og:description",
+        content: "Seus pedidos, histórico e endereços em um só lugar.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: MyAccountPage,
+  component: CustomerDashboardPage,
 });
 
-interface AddressForm {
-  label: string;
-  street: string;
-  number: string;
-  complement: string;
-  reference: string;
-  district: string;
-  city: string;
-  state: string;
-  zip_code: string;
-}
-
-const EMPTY_ADDRESS: AddressForm = {
-  label: "Casa",
-  street: "",
-  number: "",
-  complement: "",
-  reference: "",
-  district: "",
-  city: "",
-  state: "",
-  zip_code: "",
-};
-
-function MyAccountPage() {
-  const navigate = useNavigate();
+function CustomerDashboardPage() {
+  const { aba } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
   const queryClient = useQueryClient();
-  const [userId, setUserId] = useState<string | null>(null);
-  const [address, setAddress] = useState<AddressForm>(EMPTY_ADDRESS);
-  const [showAddressForm, setShowAddressForm] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
-  }, []);
-
-  const profileQuery = useQuery({
-    queryKey: ["customer-profile"],
-    queryFn: async () => {
-      const { data } = await supabase.from("customer_profiles").select("*").maybeSingle();
-      return data;
-    },
+  const loadDashboard = useServerFn(getCustomerDashboard);
+  const saveProfile = useServerFn(saveCustomerProfile);
+  const dashboard = useQuery({
+    queryKey: ["customer-dashboard"],
+    queryFn: () => loadDashboard(),
+    staleTime: 30_000,
   });
-
-  const addressesQuery = useQuery({
-    queryKey: ["saved-addresses"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("saved_addresses")
-        .select("*")
-        .order("is_default", { ascending: false })
-        .order("created_at");
-      return data ?? [];
-    },
-  });
-
-  const ordersQuery = useQuery({
-    queryKey: ["my-orders"],
-    queryFn: () => myCustomerOrders(),
-  });
-
-  const saveProfile = useMutation({
-    mutationFn: async (values: { full_name: string; phone: string; birth_date: string | null; marketing_opt_in: boolean }) => {
-      if (!userId) throw new Error("Sessão expirada.");
-      const { error } = await supabase.from("customer_profiles").upsert({ user_id: userId, ...values });
-      if (error) throw new Error(error.message);
-      await supabase.from("consent_records").insert({
-        user_id: userId,
-        kind: "marketing",
-        granted: values.marketing_opt_in,
-        source: "minha-conta",
-      });
-    },
+  const profileMutation = useMutation({
+    mutationFn: saveProfile,
     onSuccess: () => {
       toast.success("Dados atualizados.");
-      void queryClient.invalidateQueries({ queryKey: ["customer-profile"] });
+      void queryClient.invalidateQueries({ queryKey: ["customer-dashboard"] });
     },
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const saveAddress = useMutation({
-    mutationFn: async () => {
-      if (!userId) throw new Error("Sessão expirada.");
-      if (!address.street.trim() || !address.city.trim()) throw new Error("Informe rua e cidade.");
-      const { error } = await supabase.from("saved_addresses").insert({
-        user_id: userId,
-        ...address,
-        zip_code: onlyDigits(address.zip_code) || null,
-        is_default: (addressesQuery.data ?? []).length === 0,
-      });
-      if (error) throw new Error(error.message);
-    },
-    onSuccess: () => {
-      toast.success("Endereço salvo.");
-      setAddress(EMPTY_ADDRESS);
-      setShowAddressForm(false);
-      void queryClient.invalidateQueries({ queryKey: ["saved-addresses"] });
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
-  const setDefault = useMutation({
-    mutationFn: async (id: string) => {
-      if (!userId) return;
-      await supabase.from("saved_addresses").update({ is_default: false }).eq("user_id", userId);
-      const { error } = await supabase.from("saved_addresses").update({ is_default: true }).eq("id", id);
-      if (error) throw new Error(error.message);
-    },
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["saved-addresses"] }),
-  });
-
-  const removeAddress = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("saved_addresses").delete().eq("id", id);
-      if (error) throw new Error(error.message);
-    },
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["saved-addresses"] }),
-  });
+  const data = dashboard.data;
+  const activeOrders = (data?.orders ?? []).filter((order) => isActiveCustomerOrder(order.status));
+  const historyOrders = (data?.orders ?? []).filter(
+    (order) => !isActiveCustomerOrder(order.status),
+  );
+  const firstName = data?.profile?.fullName.trim().split(/\s+/)[0] || "cliente";
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
-    void navigate({ to: "/auth", search: { etapa: "entrar" }, replace: true });
+    void navigate({ to: "/auth", search: { modo: "entrar" }, replace: true });
   }
 
-  function handleProfileSubmit(event: FormEvent<HTMLFormElement>) {
+  function submitProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    saveProfile.mutate({
-      full_name: String(form.get("full_name") ?? "").trim(),
-      phone: onlyDigits(String(form.get("phone") ?? "")),
-      birth_date: String(form.get("birth_date") ?? "") || null,
-      marketing_opt_in: form.get("marketing") === "on",
+    profileMutation.mutate({
+      data: {
+        fullName: String(form.get("full_name") ?? "").trim(),
+        phone: onlyDigits(String(form.get("phone") ?? "")),
+        birthDate: String(form.get("birth_date") ?? "") || null,
+        marketingOptIn: form.get("marketing") === "on",
+      },
     });
   }
 
-  const profile = profileQuery.data;
-
   return (
-    <div className="min-h-screen bg-secondary/40">
-      <header className="mx-auto flex w-full max-w-4xl items-center justify-between px-4 py-6 sm:px-6">
-        <Logo />
-        <Button variant="ghost" size="sm" onClick={() => void handleSignOut()}>
-          <LogOut className="mr-2 h-4 w-4" aria-hidden /> Sair
-        </Button>
+    <div className="min-h-screen bg-secondary/40 pb-[env(safe-area-inset-bottom)]">
+      <header className="sticky top-0 z-30 border-b border-border/80 bg-background/95 backdrop-blur">
+        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
+          <Link to="/" aria-label="Página inicial do Pedi Um">
+            <Logo className="h-8 w-auto" />
+          </Link>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link to="/">
+                <Store className="mr-1.5 size-4" aria-hidden="true" />
+                Ver lojas
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => void handleSignOut()}
+              aria-label="Sair da conta"
+            >
+              <LogOut className="size-4" aria-hidden="true" />
+            </Button>
+          </div>
+        </div>
       </header>
 
-      <main className="mx-auto w-full max-w-4xl px-4 pb-16 sm:px-6">
-        <h1 className="text-2xl font-semibold sm:text-3xl">Minha conta</h1>
-        <p className="mt-1 text-muted-foreground">
-          Seus dados, endereços, pedidos e preferências de privacidade.
-        </p>
+      <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-9">
+        <div className="flex flex-col gap-1">
+          <p className="text-sm font-medium text-primary">Painel do cliente</p>
+          <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">Olá, {firstName}</h1>
+          <p className="text-sm text-muted-foreground sm:text-base">
+            Acompanhe suas compras e mantenha seus endereços organizados.
+          </p>
+        </div>
 
-        <Tabs defaultValue="pedidos" className="mt-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="pedidos">Pedidos</TabsTrigger>
-            <TabsTrigger value="produtos">Meus produtos</TabsTrigger>
-            <TabsTrigger value="enderecos">Endereços</TabsTrigger>
-            <TabsTrigger value="dados">Meus dados</TabsTrigger>
-          </TabsList>
+        {dashboard.isPending ? (
+          <DashboardSkeleton />
+        ) : dashboard.isError ? (
+          <Card className="mt-6 rounded-lg">
+            <CardContent className="py-10 text-center">
+              <p className="font-medium">Não foi possível carregar sua conta.</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Confira sua conexão e tente novamente.
+              </p>
+              <Button className="mt-4" variant="outline" onClick={() => void dashboard.refetch()}>
+                Tentar novamente
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Tabs
+            value={aba}
+            onValueChange={(value) =>
+              void navigate({ search: { aba: value as CustomerTab }, replace: true })
+            }
+            className="mt-7"
+          >
+            <TabsList className="grid h-auto w-full grid-cols-4 rounded-lg border border-border bg-card p-1 shadow-sm">
+              <TabsTrigger value="inicio" className="min-h-10 px-2">
+                <ShoppingBag className="size-4 sm:mr-2" aria-hidden="true" />
+                <span className="hidden sm:inline">Início</span>
+              </TabsTrigger>
+              <TabsTrigger value="pedidos" className="min-h-10 px-2">
+                <History className="size-4 sm:mr-2" aria-hidden="true" />
+                <span className="hidden sm:inline">Pedidos</span>
+              </TabsTrigger>
+              <TabsTrigger value="enderecos" className="min-h-10 px-2">
+                <MapPin className="size-4 sm:mr-2" aria-hidden="true" />
+                <span className="hidden sm:inline">Endereços</span>
+              </TabsTrigger>
+              <TabsTrigger value="dados" className="min-h-10 px-2">
+                <UserRound className="size-4 sm:mr-2" aria-hidden="true" />
+                <span className="hidden sm:inline">Meus dados</span>
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="pedidos" className="space-y-3">
-            {ordersQuery.isLoading ? (
-              <Skeleton className="h-32" />
-            ) : (ordersQuery.data ?? []).length === 0 ? (
-              <Card>
-                <CardContent className="py-10 text-center text-sm text-muted-foreground">
-                  Você ainda não tem pedidos vinculados a este telefone. Faça um pedido em uma loja e
-                  ele aparecerá aqui.
-                </CardContent>
-              </Card>
-            ) : (
-              (ordersQuery.data ?? []).map((order) => (
-                <Card key={order.id}>
-                  <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
-                    <div>
-                      <p className="font-medium">
-                        #{order.code} · {order.storeName}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {formatDateTime(order.createdAt)} · {formatCurrency(order.total)}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary">
-                        {ORDER_STATUS_LABEL[order.status as keyof typeof ORDER_STATUS_LABEL] ?? order.status}
-                      </Badge>
-                      {order.storeSlug ? (
-                        <>
-                          <Button asChild variant="outline" size="sm">
-                            <a href={`/${order.storeSlug}/acompanhar`}>Acompanhar</a>
-                          </Button>
-                          <Button asChild size="sm">
-                            <Link to="/$slug" params={{ slug: order.storeSlug }}>
-                              <RefreshCcw className="mr-2 h-4 w-4" aria-hidden /> Repetir
-                            </Link>
-                          </Button>
-                        </>
-                      ) : null}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </TabsContent>
-
-          <TabsContent value="enderecos" className="space-y-3">
-            {addressesQuery.isLoading ? (
-              <Skeleton className="h-24" />
-            ) : (
-              (addressesQuery.data ?? []).map((item) => (
-                <Card key={item.id}>
-                  <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
-                    <div>
-                      <p className="flex items-center gap-2 font-medium">
-                        <MapPin className="h-4 w-4 text-primary" aria-hidden /> {item.label}
-                        {item.is_default ? <Badge variant="secondary">Principal</Badge> : null}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {item.street}
-                        {item.number ? `, ${item.number}` : ""} {item.complement ?? ""} — {item.city}
-                        {item.reference ? ` · Ref.: ${item.reference}` : ""}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      {!item.is_default ? (
-                        <Button variant="outline" size="sm" onClick={() => setDefault.mutate(item.id)}>
-                          <Home className="mr-2 h-4 w-4" aria-hidden /> Tornar principal
-                        </Button>
-                      ) : null}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeAddress.mutate(item.id)}
-                        aria-label="Remover endereço"
-                      >
-                        <Trash2 className="h-4 w-4" aria-hidden />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-
-            {showAddressForm ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Novo endereço</CardTitle>
-                  <CardDescription>Inclua complemento e um ponto de referência.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-3 sm:grid-cols-2">
-                  <Input
-                    placeholder="Apelido (Casa, Trabalho)"
-                    value={address.label}
-                    onChange={(e) => setAddress({ ...address, label: e.target.value })}
-                  />
-                  <Input
-                    placeholder="CEP"
-                    value={address.zip_code}
-                    onChange={(e) => setAddress({ ...address, zip_code: maskZip(e.target.value) })}
-                  />
-                  <Input
-                    placeholder="Rua"
-                    value={address.street}
-                    onChange={(e) => setAddress({ ...address, street: e.target.value })}
-                  />
-                  <Input
-                    placeholder="Número"
-                    value={address.number}
-                    onChange={(e) => setAddress({ ...address, number: e.target.value })}
-                  />
-                  <Input
-                    placeholder="Complemento"
-                    value={address.complement}
-                    onChange={(e) => setAddress({ ...address, complement: e.target.value })}
-                  />
-                  <Input
-                    placeholder="Referência"
-                    value={address.reference}
-                    onChange={(e) => setAddress({ ...address, reference: e.target.value })}
-                  />
-                  <Input
-                    placeholder="Bairro"
-                    value={address.district}
-                    onChange={(e) => setAddress({ ...address, district: e.target.value })}
-                  />
-                  <Input
-                    placeholder="Cidade"
-                    value={address.city}
-                    onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                  />
-                  <div className="sm:col-span-2 flex gap-2">
-                    <Button onClick={() => saveAddress.mutate()} disabled={saveAddress.isPending}>
-                      Salvar endereço
-                    </Button>
-                    <Button variant="ghost" onClick={() => setShowAddressForm(false)}>
-                      Cancelar
+            <TabsContent value="inicio" className="mt-6 space-y-6">
+              <section aria-label="Resumo da conta" className="grid gap-3 sm:grid-cols-3">
+                <SummaryCard
+                  icon={Clock3}
+                  label="Em andamento"
+                  value={String(activeOrders.length)}
+                />
+                <SummaryCard
+                  icon={History}
+                  label="Pedidos realizados"
+                  value={String(data?.orders.length ?? 0)}
+                />
+                <SummaryCard
+                  icon={MapPin}
+                  label="Endereços salvos"
+                  value={String(data?.addresses.length ?? 0)}
+                />
+              </section>
+              <section className="space-y-3">
+                <h2 className="text-lg font-semibold">
+                  <CustomerOrderSectionTitle />
+                </h2>
+                <CustomerDashboardOrders orders={activeOrders.slice(0, 3)} mode="all" />
+              </section>
+              {historyOrders.length > 0 ? (
+                <section className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold">
+                      <CustomerOrderSectionTitle history />
+                    </h2>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => void navigate({ search: { aba: "pedidos" } })}
+                    >
+                      Ver todos
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Button variant="outline" onClick={() => setShowAddressForm(true)}>
-                <Plus className="mr-2 h-4 w-4" aria-hidden /> Adicionar endereço
-              </Button>
-            )}
-          </TabsContent>
+                  <CustomerDashboardOrders orders={historyOrders.slice(0, 3)} mode="all" />
+                </section>
+              ) : null}
+            </TabsContent>
 
-          <TabsContent value="dados">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Meus dados</CardTitle>
-                <CardDescription>Você pode editar seus dados e consentimentos quando quiser.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {profileQuery.isLoading ? (
-                  <Skeleton className="h-40" />
-                ) : (
-                  <form onSubmit={handleProfileSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="mc-nome">Nome completo</Label>
-                      <Input id="mc-nome" name="full_name" defaultValue={profile?.full_name ?? ""} required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="mc-tel">Telefone</Label>
+            <TabsContent value="pedidos" className="mt-6 space-y-7">
+              <section className="space-y-3">
+                <h2 className="text-lg font-semibold">
+                  <CustomerOrderSectionTitle />
+                </h2>
+                <CustomerDashboardOrders orders={data?.orders ?? []} mode="active" />
+              </section>
+              <section className="space-y-3">
+                <h2 className="text-lg font-semibold">
+                  <CustomerOrderSectionTitle history />
+                </h2>
+                <CustomerDashboardOrders orders={data?.orders ?? []} mode="history" />
+              </section>
+            </TabsContent>
+
+            <TabsContent value="enderecos" className="mt-6">
+              <CustomerAddressManager addresses={data?.addresses ?? []} />
+            </TabsContent>
+
+            <TabsContent value="dados" className="mt-6">
+              <Card className="max-w-2xl rounded-lg shadow-sm">
+                <CardHeader>
+                  <CardTitle className="text-lg">Meus dados</CardTitle>
+                  <CardDescription>Atualize seus dados de contato e preferências.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form
+                    key={data?.profile?.fullName}
+                    onSubmit={submitProfile}
+                    className="grid gap-4 sm:grid-cols-2"
+                  >
+                    <div className="space-y-2 sm:col-span-2">
+                      <Label htmlFor="customer-name">Nome completo</Label>
                       <Input
-                        id="mc-tel"
-                        name="phone"
-                        defaultValue={profile?.phone ? maskPhone(profile.phone) : ""}
-                        onChange={(e) => {
-                          e.target.value = maskPhone(e.target.value);
-                        }}
+                        id="customer-name"
+                        name="full_name"
+                        defaultValue={data?.profile?.fullName ?? ""}
+                        required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="mc-nasc">Data de nascimento</Label>
-                      <Input id="mc-nasc" name="birth_date" type="date" defaultValue={profile?.birth_date ?? ""} />
+                      <Label htmlFor="customer-email">E-mail</Label>
+                      <Input id="customer-email" value={data?.profile?.email ?? ""} disabled />
                     </div>
-                    <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Checkbox name="marketing" defaultChecked={profile?.marketing_opt_in ?? false} />
-                      Aceito receber novidades e promoções
+                    <div className="space-y-2">
+                      <Label htmlFor="customer-phone">WhatsApp</Label>
+                      <Input
+                        id="customer-phone"
+                        name="phone"
+                        defaultValue={data?.profile?.phone ? maskPhone(data.profile.phone) : ""}
+                        onChange={(event) => {
+                          event.target.value = maskPhone(event.target.value);
+                        }}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="customer-birth">Data de nascimento</Label>
+                      <Input
+                        id="customer-birth"
+                        name="birth_date"
+                        type="date"
+                        defaultValue={data?.profile?.birthDate ?? ""}
+                      />
+                    </div>
+                    <label className="flex items-center gap-2 text-sm text-muted-foreground sm:col-span-2">
+                      <Checkbox
+                        name="marketing"
+                        defaultChecked={data?.profile?.marketingOptIn ?? false}
+                      />
+                      Quero receber novidades e promoções
                     </label>
-                    <div className="flex flex-wrap gap-2">
-                      <Button type="submit" disabled={saveProfile.isPending}>
-                        Salvar alterações
+                    <div className="flex flex-wrap gap-2 sm:col-span-2">
+                      <Button type="submit" disabled={profileMutation.isPending}>
+                        {profileMutation.isPending ? "Salvando..." : "Salvar alterações"}
                       </Button>
-                      <Button asChild variant="outline" type="button">
-                        <Link to="/privacidade">Exportar ou excluir meus dados</Link>
+                      <Button asChild type="button" variant="outline">
+                        <Link to="/privacidade">Privacidade dos meus dados</Link>
                       </Button>
                     </div>
                   </form>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="produtos" className="space-y-3">
-            <MyDigitalProducts />
-          </TabsContent>
-        </Tabs>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        )}
       </main>
     </div>
   );
 }
 
-/** Área do comprador: produtos digitais liberados e assinaturas ativas. */
-function MyDigitalProducts() {
-  const deliveries = useQuery({
-    queryKey: ["my-digital-deliveries"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("digital_deliveries")
-        .select("id, access_token, expires_at, revoked_at, download_count, max_downloads, product:products(name), store:stores(name)")
-        .order("created_at", { ascending: false });
-      return data ?? [];
-    },
-  });
-
-  const subscriptions = useQuery({
-    queryKey: ["my-subscriptions"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("customer_subscriptions")
-        .select("id, amount, period, status, next_charge_at, product:products(name), store:stores(name)")
-        .order("created_at", { ascending: false });
-      return data ?? [];
-    },
-  });
-
-  if (deliveries.isLoading) return <Skeleton className="h-32 rounded-2xl" />;
-
-  const items = deliveries.data ?? [];
-  const plans = subscriptions.data ?? [];
-
+function SummaryCard({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof Clock3;
+  label: string;
+  value: string;
+}) {
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Produtos digitais</CardTitle>
-          <CardDescription>Baixe seus arquivos. Cada link tem validade e limite de downloads.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          {items.length === 0 ? <p className="text-muted-foreground">Você ainda não comprou produtos digitais.</p> : null}
-          {items.map((item) => {
-            const access = deliveryAccess(item);
-            return (
-              <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/70 p-3">
-                <div className="min-w-0">
-                  <p className="font-medium text-foreground">{item.product?.name ?? "Produto digital"}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {item.store?.name ?? ""} · {access.remaining} download(s) restantes
-                    {item.expires_at ? ` · válido até ${formatDateTime(item.expires_at)}` : ""}
-                  </p>
-                </div>
-                {access.allowed ? (
-                  <Button asChild size="sm">
-                    <a href={`/entrega/${item.access_token}`}>Abrir</a>
-                  </Button>
-                ) : (
-                  <Badge variant="outline">Indisponível</Badge>
-                )}
-              </div>
-            );
-          })}
-        </CardContent>
-      </Card>
+    <Card className="rounded-lg border-border/80 shadow-sm">
+      <CardContent className="flex items-center gap-4 p-4">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Icon className="size-5" aria-hidden="true" />
+        </span>
+        <div>
+          <p className="text-2xl font-semibold text-foreground">{value}</p>
+          <p className="text-xs text-muted-foreground">{label}</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Assinaturas</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          {plans.length === 0 ? <p className="text-muted-foreground">Nenhuma assinatura ativa.</p> : null}
-          {plans.map((plan) => (
-            <div key={plan.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/70 p-3">
-              <div className="min-w-0">
-                <p className="font-medium text-foreground">{plan.product?.name ?? "Assinatura"}</p>
-                <p className="text-xs text-muted-foreground">
-                  {plan.store?.name ?? ""} · {formatCurrency(Number(plan.amount))}
-                  {plan.next_charge_at ? ` · próxima cobrança ${formatDateTime(plan.next_charge_at)}` : ""}
-                </p>
-              </div>
-              <Badge variant={plan.status === "active" ? "secondary" : "outline"}>
-                {SUBSCRIPTION_STATUS_LABEL[plan.status] ?? plan.status}
-              </Badge>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+function DashboardSkeleton() {
+  return (
+    <div className="mt-7 space-y-6">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Skeleton className="h-20 rounded-lg" />
+        <Skeleton className="h-20 rounded-lg" />
+        <Skeleton className="h-20 rounded-lg" />
+      </div>
+      <Skeleton className="h-11 rounded-lg" />
+      <Skeleton className="h-40 rounded-lg" />
+      <Skeleton className="h-40 rounded-lg" />
     </div>
   );
 }

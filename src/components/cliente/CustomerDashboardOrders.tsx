@@ -7,7 +7,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ORDER_STATUS_LABEL, ORDER_TYPE_LABEL, formatCurrency, formatDateTime } from "@/lib/format";
 import type { MyOrderSummary } from "@/lib/contas.functions";
 
-const ACTIVE_STATUSES = new Set(["pending", "awaiting_payment", "paid", "confirmed", "preparing", "ready", "out_for_delivery"]);
+const ACTIVE_STATUSES = new Set([
+  "pending",
+  "awaiting_payment",
+  "paid",
+  "confirmed",
+  "preparing",
+  "ready",
+  "out_for_delivery",
+]);
 
 export function isActiveCustomerOrder(status: string): boolean {
   return ACTIVE_STATUSES.has(status);
@@ -19,7 +27,9 @@ interface CustomerDashboardOrdersProps {
 }
 
 export function CustomerDashboardOrders({ orders, mode }: CustomerDashboardOrdersProps) {
-  const visible = orders.filter((order) => mode === "all" || isActiveCustomerOrder(order.status) === (mode === "active"));
+  const visible = orders.filter(
+    (order) => mode === "all" || isActiveCustomerOrder(order.status) === (mode === "active"),
+  );
 
   if (visible.length === 0) {
     return (
@@ -48,24 +58,38 @@ export function CustomerDashboardOrders({ orders, mode }: CustomerDashboardOrder
                   <p className="truncate font-semibold text-foreground">{order.storeName}</p>
                   <p className="mt-1 text-xs text-muted-foreground">Pedido #{order.code}</p>
                 </div>
-                <Badge variant={order.status === "cancelled" || order.status === "rejected" ? "destructive" : "secondary"}>
+                <Badge
+                  variant={
+                    order.status === "cancelled" || order.status === "rejected"
+                      ? "destructive"
+                      : "secondary"
+                  }
+                >
                   {ORDER_STATUS_LABEL[order.status] ?? order.status}
                 </Badge>
               </div>
               <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5"><Clock3 className="size-4" aria-hidden="true" />{formatDateTime(order.createdAt)}</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock3 className="size-4" aria-hidden="true" />
+                  {formatDateTime(order.createdAt)}
+                </span>
                 <span>{ORDER_TYPE_LABEL[order.type] ?? order.type}</span>
                 <span className="font-semibold text-foreground">{formatCurrency(order.total)}</span>
               </div>
               <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-4">
                 {active ? (
                   <Button asChild size="sm">
-                    <Link to="/acompanhar" search={{ codigo: order.publicToken }}>Acompanhar <ChevronRight className="ml-1 size-4" aria-hidden="true" /></Link>
+                    <Link to="/acompanhar" search={{ codigo: order.publicToken }}>
+                      Acompanhar <ChevronRight className="ml-1 size-4" aria-hidden="true" />
+                    </Link>
                   </Button>
                 ) : null}
                 {order.storeSlug ? (
                   <Button asChild size="sm" variant="outline">
-                    <Link to="/$slug" params={{ slug: order.storeSlug }}><RotateCcw className="mr-1.5 size-4" aria-hidden="true" />Comprar novamente</Link>
+                    <Link to="/$slug" params={{ slug: order.storeSlug }}>
+                      <RotateCcw className="mr-1.5 size-4" aria-hidden="true" />
+                      Comprar novamente
+                    </Link>
                   </Button>
                 ) : null}
               </div>
@@ -79,5 +103,10 @@ export function CustomerDashboardOrders({ orders, mode }: CustomerDashboardOrder
 
 export function CustomerOrderSectionTitle({ history = false }: { history?: boolean }) {
   const Icon = history ? History : Clock3;
-  return <span className="inline-flex items-center gap-2"><Icon className="size-4 text-primary" aria-hidden="true" />{history ? "Histórico" : "Em andamento"}</span>;
+  return (
+    <span className="inline-flex items-center gap-2">
+      <Icon className="size-4 text-primary" aria-hidden="true" />
+      {history ? "Histórico" : "Em andamento"}
+    </span>
+  );
 }

@@ -23,9 +23,8 @@ export interface ResolveIdentifierResult {
 export const resolveLoginEmail = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => identifierInput.parse(data))
   .handler(async ({ data }): Promise<ResolveIdentifierResult> => {
-    const { clientIdentifier, consumeRateLimit, rateLimitMessage } = await import(
-      "@/lib/security.server"
-    );
+    const { clientIdentifier, consumeRateLimit, rateLimitMessage } =
+      await import("@/lib/security.server");
     const limit = await consumeRateLimit("login", clientIdentifier(getRequest()?.headers));
     if (!limit.allowed) return { ok: false, message: rateLimitMessage(limit) };
 
@@ -63,9 +62,8 @@ export const recordLoginAttempt = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => attemptInput.parse(data))
   .handler(async ({ data }): Promise<{ ok: boolean; blocked?: boolean; message?: string }> => {
     const headers = getRequest()?.headers;
-    const { clientIdentifier, consumeRateLimit, rateLimitMessage } = await import(
-      "@/lib/security.server"
-    );
+    const { clientIdentifier, consumeRateLimit, rateLimitMessage } =
+      await import("@/lib/security.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     await supabaseAdmin.from("login_attempts").insert({
@@ -141,7 +139,9 @@ export const myCustomerOrders = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows } = await supabaseAdmin
       .from("orders")
-      .select("id, code, status, type, total, created_at, customer_phone, public_token, store:stores(name, slug)")
+      .select(
+        "id, code, status, type, total, created_at, customer_phone, public_token, store:stores(name, slug)",
+      )
       .order("created_at", { ascending: false })
       .limit(200);
 
@@ -164,26 +164,31 @@ export const myCustomerOrders = createServerFn({ method: "POST" })
 export const getCustomerDashboard = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<CustomerDashboardData> => {
-    const [{ data: profile, error: profileError }, { data: orders, error: ordersError }, { data: addresses, error: addressesError }] =
-      await Promise.all([
-        context.supabase
-          .from("customer_profiles")
-          .select("full_name, email, phone, birth_date, marketing_opt_in")
-          .eq("user_id", context.userId)
-          .maybeSingle(),
-        context.supabase
-          .from("orders")
-          .select("id, code, status, type, total, created_at, public_token, store:stores(name, slug)")
-          .eq("user_id", context.userId)
-          .order("created_at", { ascending: false })
-          .limit(50),
-        context.supabase
-          .from("saved_addresses")
-          .select("id, label, street, number, complement, reference, district, city, state, zip_code, is_default")
-          .eq("user_id", context.userId)
-          .order("is_default", { ascending: false })
-          .order("created_at", { ascending: true }),
-      ]);
+    const [
+      { data: profile, error: profileError },
+      { data: orders, error: ordersError },
+      { data: addresses, error: addressesError },
+    ] = await Promise.all([
+      context.supabase
+        .from("customer_profiles")
+        .select("full_name, email, phone, birth_date, marketing_opt_in")
+        .eq("user_id", context.userId)
+        .maybeSingle(),
+      context.supabase
+        .from("orders")
+        .select("id, code, status, type, total, created_at, public_token, store:stores(name, slug)")
+        .eq("user_id", context.userId)
+        .order("created_at", { ascending: false })
+        .limit(50),
+      context.supabase
+        .from("saved_addresses")
+        .select(
+          "id, label, street, number, complement, reference, district, city, state, zip_code, is_default",
+        )
+        .eq("user_id", context.userId)
+        .order("is_default", { ascending: false })
+        .order("created_at", { ascending: true }),
+    ]);
 
     const error = profileError ?? ordersError ?? addressesError;
     if (error) throw new Error("Não foi possível carregar sua conta agora.");
@@ -266,7 +271,11 @@ export const saveMyAddress = createServerFn({ method: "POST" })
     }
 
     const query = data.id
-      ? context.supabase.from("saved_addresses").update(values).eq("id", data.id).eq("user_id", context.userId)
+      ? context.supabase
+          .from("saved_addresses")
+          .update(values)
+          .eq("id", data.id)
+          .eq("user_id", context.userId)
       : context.supabase.from("saved_addresses").insert(values);
     const { error } = await query;
     if (error) throw new Error("Não foi possível salvar o endereço.");
@@ -277,7 +286,9 @@ export const setMyDefaultAddress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.rpc("set_my_default_address", { _address_id: data.id });
+    const { error } = await context.supabase.rpc("set_my_default_address", {
+      _address_id: data.id,
+    });
     if (error) throw new Error("Não foi possível alterar o endereço principal.");
     return { ok: true };
   });
@@ -286,7 +297,9 @@ export const deleteMyAddress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.rpc("delete_my_saved_address", { _address_id: data.id });
+    const { error } = await context.supabase.rpc("delete_my_saved_address", {
+      _address_id: data.id,
+    });
     if (error) throw new Error("Não foi possível excluir o endereço.");
     return { ok: true };
   });
@@ -294,12 +307,14 @@ export const deleteMyAddress = createServerFn({ method: "POST" })
 export const saveCustomerProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
-    z.object({
-      fullName: z.string().trim().min(2).max(120),
-      phone: z.string().trim().min(10).max(14),
-      birthDate: z.string().date().nullable(),
-      marketingOptIn: z.boolean(),
-    }).parse(data),
+    z
+      .object({
+        fullName: z.string().trim().min(2).max(120),
+        phone: z.string().trim().min(10).max(14),
+        birthDate: z.string().date().nullable(),
+        marketingOptIn: z.boolean(),
+      })
+      .parse(data),
   )
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("customer_profiles").upsert({
