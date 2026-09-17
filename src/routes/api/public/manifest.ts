@@ -14,6 +14,11 @@ interface StoreManifestBranding {
   primary: string | null;
   icon: string | null;
   maskableIcon: string | null;
+  hasDedicatedIcon: boolean;
+}
+
+function nonEmptyString(value: unknown): string | null {
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
 }
 
 export const Route = createFileRoute("/api/public/manifest")({
@@ -25,6 +30,15 @@ export const Route = createFileRoute("/api/public/manifest")({
         const storeSlug = url.searchParams.get("loja")?.trim() || null;
         const branding = await getBranding();
         const store = storeSlug ? await getStoreBranding(storeSlug) : null;
+        if (storeSlug && !store) {
+          return Response.json(
+            { error: "Loja não encontrada ou indisponível." },
+            {
+              status: 404,
+              headers: { "cache-control": "no-store, max-age=0" },
+            },
+          );
+        }
         const storeName = store?.name ?? null;
         const icon = store
           ? (store.icon ?? "/store-app-fallback.png")
@@ -32,6 +46,21 @@ export const Route = createFileRoute("/api/public/manifest")({
         const maskableIcon = store
           ? (store.maskableIcon ?? store.icon ?? "/store-app-fallback.png")
           : (branding?.pwa_maskable_icon_url ?? "/pedium-app-icon-maskable-512.png");
+        const icons = store
+          ? [
+              {
+                src: icon,
+                sizes: store.hasDedicatedIcon || icon === "/store-app-fallback.png" ? "512x512" : "any",
+                purpose: "any",
+              },
+              ...(store.maskableIcon || store.hasDedicatedIcon
+                ? [{ src: maskableIcon, sizes: "512x512", purpose: "maskable" }]
+                : []),
+            ]
+          : [
+              { src: icon, sizes: "512x512", purpose: "any" },
+              { src: maskableIcon, sizes: "512x512", purpose: "maskable" },
+            ];
 
         const manifest = {
           name: panel ? "Painel Pedi Um" : (storeName ?? "Pedi Um"),
@@ -42,6 +71,7 @@ export const Route = createFileRoute("/api/public/manifest")({
               : "Peça na sua loja favorita, acompanhe o pedido em tempo real e repita compras anteriores.",
           lang: "pt-BR",
           dir: "ltr",
+          // O ID usa o UUID imutável para preservar a instalação se o slug da loja mudar.
           id: panel ? "/apps/lojista" : store ? `/apps/loja/${store.id}` : "/",
           start_url:
             panel || !storeSlug
@@ -53,10 +83,7 @@ export const Route = createFileRoute("/api/public/manifest")({
           background_color: "#030303",
           theme_color: store?.primary ?? "#dc2626",
           categories: ["food", "shopping", "business"],
-          icons: [
-            { src: icon, sizes: "512x512", purpose: "any" },
-            { src: maskableIcon, sizes: "512x512", purpose: "maskable" },
-          ],
+          icons,
           shortcuts: panel
             ? [
                 {
@@ -159,21 +186,15 @@ async function getStoreBranding(slug: string): Promise<StoreManifestBranding | n
     colorsValue && typeof colorsValue === "object" && !Array.isArray(colorsValue)
       ? (colorsValue as Record<string, unknown>)
       : {};
-  const pwaName =
-    typeof themeBranding["pwaName"] === "string" ? themeBranding["pwaName"].trim() : "";
+  const pwaName = nonEmptyString(themeBranding["pwaName"]);
+  const pwaIcon = nonEmptyString(themeBranding["pwaIconUrl"]);
+  const storeLogo = nonEmptyString(themeBranding["logoUrl"]) ?? nonEmptyString(data.logo_url);
   return {
     id: data.id,
     name: pwaName || data.name,
-    primary: typeof themeColors["primary"] === "string" ? themeColors["primary"] : null,
-    icon:
-      typeof themeBranding["pwaIconUrl"] === "string"
-        ? themeBranding["pwaIconUrl"]
-        : typeof themeBranding["logoUrl"] === "string"
-          ? themeBranding["logoUrl"]
-          : data.logo_url,
-    maskableIcon:
-      typeof themeBranding["pwaMaskableIconUrl"] === "string"
-        ? themeBranding["pwaMaskableIconUrl"]
-        : null,
+    primary: nonEmptyString(themeColors["primary"]),
+    icon: pwaIcon ?? storeLogo,
+    maskableIcon: nonEmptyString(themeBranding["pwaMaskableIconUrl"]),
+    hasDedicatedIcon: pwaIcon !== null,
   };
 }
