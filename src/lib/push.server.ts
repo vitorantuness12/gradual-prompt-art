@@ -67,6 +67,9 @@ interface CampaignRow {
   recurrence: { days?: number[]; time?: string } | null;
   frequency_cap_hours: number;
   next_run_at: string | null;
+  sent_count: number;
+  failed_count: number;
+  removed_count: number;
 }
 
 interface CustomerSubscriptionLink {
@@ -84,19 +87,32 @@ interface CustomerSubscriptionLink {
 export function nextRecurringRun(
   recurrence: CampaignRow["recurrence"],
   from = new Date(),
+  timeZone = "America/Sao_Paulo",
 ): string | null {
   const days = recurrence?.days ?? [];
   const match = /^(\d{2}):(\d{2})$/.exec(recurrence?.time ?? "");
   if (!days.length || !match) return null;
-  const hour = Number(match[1]);
-  const minute = Number(match[2]);
-  for (let offset = 0; offset <= 7; offset += 1) {
-    const candidate = new Date(from);
-    candidate.setUTCDate(candidate.getUTCDate() + offset);
-    candidate.setUTCHours(hour, minute, 0, 0);
-    if (days.includes(candidate.getUTCDay()) && candidate.getTime() > from.getTime()) {
-      return candidate.toISOString();
-    }
+  const targetTime = `${match[1]}:${match[2]}`;
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  });
+  const weekday = new Map([
+    ["Sun", 0], ["Mon", 1], ["Tue", 2], ["Wed", 3], ["Thu", 4], ["Fri", 5], ["Sat", 6],
+  ]);
+  const firstMinute = Math.floor(from.getTime() / 60_000) * 60_000 + 60_000;
+  for (let offset = 0; offset <= 8 * 24 * 60; offset += 1) {
+    const candidate = new Date(firstMinute + offset * 60_000);
+    const parts = Object.fromEntries(
+      formatter.formatToParts(candidate).map((part) => [part.type, part.value]),
+    );
+    if (
+      days.includes(weekday.get(parts["weekday"] ?? "") ?? -1) &&
+      `${parts["hour"]}:${parts["minute"]}` === targetTime
+    ) return candidate.toISOString();
   }
   return null;
 }
@@ -142,7 +158,7 @@ export async function dispatchPushCampaigns(client: SupabaseClient, limit = 20) 
   const { data, error } = await client
     .from("push_campaigns")
     .select(
-      "id, store_id, title, body, audience_type, audience_config, schedule_type, recurrence, frequency_cap_hours, next_run_at",
+      "id, store_id, title, body, audience_type, audience_config, schedule_type, recurrence, frequency_cap_hours, next_run_at, sent_count, failed_count, removed_count",
     )
     .eq("status", "scheduled")
     .lte("next_run_at", now.toISOString())
@@ -192,7 +208,7 @@ export async function dispatchPushCampaigns(client: SupabaseClient, limit = 20) 
           .not("customer_id", "is", null)
           .gte("updated_at", new Date(now.getTime() - 7 * 86_400_000).toISOString())
           .limit(2000),
-        client.from("stores").select("slug").eq("id", campaign.store_id).maybeSingle(),
+        client.from("stores").select("slug, timezone").eq("id", campaign.store_id).maybeSingle(),
       ]);
     const links = (rawLinks ?? []) as unknown as CustomerSubscriptionLink[];
     const orderRows = (orders ?? []) as { customer_id: string | null; created_at: string }[];
@@ -257,16 +273,16 @@ export async function dispatchPushCampaigns(client: SupabaseClient, limit = 20) 
       campaign.schedule_type === "recurring" || campaign.schedule_type === "automatic"
         ? campaign.schedule_type === "automatic"
           ? new Date(now.getTime() + 86_400_000).toISOString()
-          : nextRecurringRun(campaign.recurrence, now)
+          : nextRecurringRun(campaign.recurrence, now, store?.timezone ?? "America/Sao_Paulo")
         : null;
     await client
       .from("push_campaigns")
       .update({
         status: nextRun ? "scheduled" : "sent",
         next_run_at: nextRun,
-        sent_count: sent - campaignStartedSent,
-        failed_count: failed - campaignStartedFailed,
-        removed_count: removed - campaignStartedRemoved,
+        sent_count: campaign.sent_count + sent - campaignStartedSent,
+        failed_count: campaign.failed_count + failed - campaignStartedFailed,
+        removed_count: campaign.removed_count + removed - campaignStartedRemoved,
       })
       .eq("id", campaign.id);
   }
