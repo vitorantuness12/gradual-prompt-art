@@ -278,7 +278,8 @@ export const saveMyAddress = createServerFn({ method: "POST" })
       const { error: defaultError } = await context.supabase.rpc("set_my_default_address", {
         _address_id: savedAddress.id,
       });
-      if (defaultError) throw new Error("O endereço foi salvo, mas não pôde ser definido como principal.");
+      if (defaultError)
+        throw new Error("O endereço foi salvo, mas não pôde ser definido como principal.");
     }
     return { ok: true };
   });

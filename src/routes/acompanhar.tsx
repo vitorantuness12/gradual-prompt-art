@@ -165,7 +165,9 @@ function TrackPage() {
           <Logo />
         </Link>
         <Button asChild variant="outline" size="sm">
-          <Link to="/minha-conta" search={{ aba: undefined }}>Área do cliente</Link>
+          <Link to="/minha-conta" search={{ aba: undefined }}>
+            Área do cliente
+          </Link>
         </Button>
       </header>
 
@@ -190,7 +192,11 @@ function TrackPage() {
               </TabsList>
 
               <TabsContent value="code" className="pt-4">
-                <form onSubmit={submitCode} className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end" noValidate>
+                <form
+                  onSubmit={submitCode}
+                  className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+                  noValidate
+                >
                   <div className="space-y-2">
                     <Label htmlFor="codigo-pedido">Número do pedido</Label>
                     <Input
@@ -217,12 +223,17 @@ function TrackPage() {
                   </Button>
                 </form>
                 <p className="pt-3 text-xs text-muted-foreground">
-                  Pedimos o telefone junto do número do pedido para garantir que só você veja seus dados.
+                  Pedimos o telefone junto do número do pedido para garantir que só você veja seus
+                  dados.
                 </p>
               </TabsContent>
 
               <TabsContent value="phone" className="space-y-4 pt-4">
-                <form onSubmit={sendVerification} className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end" noValidate>
+                <form
+                  onSubmit={sendVerification}
+                  className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end"
+                  noValidate
+                >
                   <div className="space-y-2">
                     <Label htmlFor="telefone-historico">Telefone usado nos pedidos</Label>
                     <Input
@@ -234,13 +245,21 @@ function TrackPage() {
                       required
                     />
                   </div>
-                  <Button type="submit" variant={codeSent ? "outline" : "default"} disabled={sending}>
+                  <Button
+                    type="submit"
+                    variant={codeSent ? "outline" : "default"}
+                    disabled={sending}
+                  >
                     {sending ? "Enviando..." : codeSent ? "Enviar novo código" : "Enviar código"}
                   </Button>
                 </form>
 
                 {codeSent ? (
-                  <form onSubmit={confirmVerification} className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end" noValidate>
+                  <form
+                    onSubmit={confirmVerification}
+                    className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end"
+                    noValidate
+                  >
                     <div className="space-y-2">
                       <Label htmlFor="codigo-verificacao">Código de 6 dígitos</Label>
                       <Input
@@ -260,12 +279,17 @@ function TrackPage() {
                 ) : null}
 
                 <p className="text-xs text-muted-foreground">
-                  Enviamos o código pelo WhatsApp da loja. Ele vale por 10 minutos e permite até 5 tentativas.
+                  Enviamos o código pelo WhatsApp da loja. Ele vale por 10 minutos e permite até 5
+                  tentativas.
                 </p>
               </TabsContent>
 
               <TabsContent value="token" className="pt-4">
-                <form onSubmit={submitToken} className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end" noValidate>
+                <form
+                  onSubmit={submitToken}
+                  className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end"
+                  noValidate
+                >
                   <div className="space-y-2">
                     <Label htmlFor="codigo-publico">Código público do pedido</Label>
                     <Input
@@ -281,7 +305,8 @@ function TrackPage() {
                   </Button>
                 </form>
                 <p className="pt-3 text-xs text-muted-foreground">
-                  O código público vem no link enviado pela loja e pode expirar conforme a configuração da loja.
+                  O código público vem no link enviado pela loja e pode expirar conforme a
+                  configuração da loja.
                 </p>
               </TabsContent>
             </Tabs>
@@ -290,7 +315,9 @@ function TrackPage() {
 
         {emptyMessage ? (
           <Card className="border-border/70">
-            <CardContent className="py-8 text-center text-sm text-muted-foreground">{emptyMessage}</CardContent>
+            <CardContent className="py-8 text-center text-sm text-muted-foreground">
+              {emptyMessage}
+            </CardContent>
           </Card>
         ) : null}
 
@@ -298,7 +325,9 @@ function TrackPage() {
           <Card className="border-border/70 shadow-sm">
             <CardHeader>
               <CardTitle className="text-lg">Seus pedidos</CardTitle>
-              <CardDescription>Toque em um pedido para ver a linha do tempo completa.</CardDescription>
+              <CardDescription>
+                Toque em um pedido para ver a linha do tempo completa.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {summaries.map((item) => (
@@ -357,7 +386,8 @@ function OrderDetail({ order }: OrderDetailProps) {
           </span>
         </div>
         <CardDescription>
-          {order.storeName} · {ORDER_TYPE_LABEL[order.type] ?? order.type} · {formatDateTime(order.createdAt)}
+          {order.storeName} · {ORDER_TYPE_LABEL[order.type] ?? order.type} ·{" "}
+          {formatDateTime(order.createdAt)}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -372,10 +402,21 @@ function OrderDetail({ order }: OrderDetailProps) {
               const at = order.timeline.find((entry) => entry.status === step);
               return (
                 <li key={step} className="flex items-center gap-3">
-                  <span aria-hidden="true" className={`size-3 rounded-full ${done ? "bg-success" : "bg-muted"}`} />
-                  <span className={done ? "text-sm font-medium text-foreground" : "text-sm text-muted-foreground"}>
+                  <span
+                    aria-hidden="true"
+                    className={`size-3 rounded-full ${done ? "bg-success" : "bg-muted"}`}
+                  />
+                  <span
+                    className={
+                      done ? "text-sm font-medium text-foreground" : "text-sm text-muted-foreground"
+                    }
+                  >
                     {ORDER_STATUS_LABEL[step]}
-                    {at ? <span className="ml-2 text-xs text-muted-foreground">{formatDateTime(at.createdAt)}</span> : null}
+                    {at ? (
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        {formatDateTime(at.createdAt)}
+                      </span>
+                    ) : null}
                   </span>
                 </li>
               );
@@ -391,7 +432,9 @@ function OrderDetail({ order }: OrderDetailProps) {
                 <tr key={`${item.name}-${index}`} className="border-b border-border last:border-0">
                   <td className="px-3 py-2">
                     {item.quantity}× {item.name}
-                    {item.notes ? <span className="block text-xs text-muted-foreground">{item.notes}</span> : null}
+                    {item.notes ? (
+                      <span className="block text-xs text-muted-foreground">{item.notes}</span>
+                    ) : null}
                   </td>
                   <td className="px-3 py-2 text-right">{formatCurrency(item.total)}</td>
                 </tr>
