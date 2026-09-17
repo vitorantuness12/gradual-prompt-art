@@ -135,16 +135,14 @@ export const savePushCampaign = createServerFn({ method: "POST" })
     const { data: row, error } = await query.select("id").single();
     if (error) throw new Error(error.message);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin
-      .from("audit_logs")
-      .insert({
-        store_id: data.storeId,
-        user_id: context.userId,
-        action: data.id ? "push_campaign.updated" : "push_campaign.created",
-        entity: "push_campaigns",
-        entity_id: row.id,
-        metadata: { status: values.status, schedule_type: data.scheduleType },
-      });
+    await supabaseAdmin.from("audit_logs").insert({
+      store_id: data.storeId,
+      user_id: context.userId,
+      action: data.id ? "push_campaign.updated" : "push_campaign.created",
+      entity: "push_campaigns",
+      entity_id: row.id,
+      metadata: { status: values.status, schedule_type: data.scheduleType },
+    });
     if (data.action === "send_now") {
       const { dispatchPushCampaigns } = await import("@/lib/push.server");
       await dispatchPushCampaigns(supabaseAdmin, 20);
@@ -171,19 +169,17 @@ export const updatePushCampaignStatus = createServerFn({ method: "POST" })
     if (error || !campaign) throw new Error("Campanha não encontrada.");
     if (data.action === "duplicate") {
       const { id: _id, created_at: _created, updated_at: _updated, ...copy } = campaign;
-      const { error: insertError } = await context.supabase
-        .from("push_campaigns")
-        .insert({
-          ...copy,
-          name: `${campaign.name} — cópia`.slice(0, 80),
-          created_by: context.userId,
-          status: "draft",
-          next_run_at: null,
-          last_run_at: null,
-          sent_count: 0,
-          failed_count: 0,
-          removed_count: 0,
-        });
+      const { error: insertError } = await context.supabase.from("push_campaigns").insert({
+        ...copy,
+        name: `${campaign.name} — cópia`.slice(0, 80),
+        created_by: context.userId,
+        status: "draft",
+        next_run_at: null,
+        last_run_at: null,
+        sent_count: 0,
+        failed_count: 0,
+        removed_count: 0,
+      });
       if (insertError) throw new Error(insertError.message);
     } else {
       const status =
@@ -198,16 +194,14 @@ export const updatePushCampaignStatus = createServerFn({ method: "POST" })
       if (updateError) throw new Error(updateError.message);
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin
-      .from("audit_logs")
-      .insert({
-        store_id: data.storeId,
-        user_id: context.userId,
-        action: `push_campaign.${data.action}`,
-        entity: "push_campaigns",
-        entity_id: data.campaignId,
-        metadata: {},
-      });
+    await supabaseAdmin.from("audit_logs").insert({
+      store_id: data.storeId,
+      user_id: context.userId,
+      action: `push_campaign.${data.action}`,
+      entity: "push_campaigns",
+      entity_id: data.campaignId,
+      metadata: {},
+    });
     return { ok: true };
   });
 

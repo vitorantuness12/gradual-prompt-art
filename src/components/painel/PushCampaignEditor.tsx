@@ -85,10 +85,7 @@ export function PushCampaignEditor({ busy, onSave, onTest }: PushCampaignEditorP
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form
-          className="grid gap-5"
-        onSubmit={readForm}
-        >
+        <form className="grid gap-5" onSubmit={readForm}>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="push-name">Nome interno</Label>

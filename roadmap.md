@@ -25,4 +25,4 @@
 - [x] Criar página do lojista para mensagens, públicos e horários
 - [x] Ativar notificações no app da loja após login e em Meus dados
 - [x] Processar campanhas com segmentação, recorrência e deduplicação
-- [ ] Validar segurança, tipos, testes e experiência móvel
+- [x] Validar segurança, tipos, testes e experiência móvel

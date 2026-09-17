@@ -20,7 +20,7 @@ interface StoredSubscription {
 function vapid() {
   const publicKey = process.env["VAPID_PUBLIC_KEY"];
   const privateKey = process.env["VAPID_PRIVATE_KEY"];
-  const subject = process.env["VAPID_SUBJECT"] ?? "mailto:contato@oseupedido.com.br";
+  const subject = process.env["VAPID_SUBJECT"] ?? "mailto:contato@pedium.com.br";
   if (!publicKey || !privateKey) return null;
   return { publicKey, privateKey, subject };
 }
