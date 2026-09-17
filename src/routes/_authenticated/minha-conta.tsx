@@ -27,13 +27,16 @@ type CustomerTab = "inicio" | "pedidos" | "enderecos" | "dados";
 const TABS: CustomerTab[] = ["inicio", "pedidos", "enderecos", "dados"];
 
 export const Route = createFileRoute("/_authenticated/minha-conta")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    aba: TABS.includes(search["aba"] as CustomerTab) ? (search["aba"] as CustomerTab) : undefined,
-    loja:
+  validateSearch: (search: Record<string, unknown>): { aba?: CustomerTab; loja?: string } => {
+    const aba = TABS.includes(search["aba"] as CustomerTab)
+      ? (search["aba"] as CustomerTab)
+      : undefined;
+    const loja =
       typeof search["loja"] === "string" && /^[a-z0-9-]{1,80}$/.test(search["loja"])
         ? search["loja"]
-        : undefined,
-  }),
+        : undefined;
+    return { ...(aba ? { aba } : {}), ...(loja ? { loja } : {}) };
+  },
   head: () => ({
     meta: [
       { title: "Painel do cliente — Pedi Um" },
