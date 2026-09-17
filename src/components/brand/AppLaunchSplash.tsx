@@ -1,18 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import { fetchPlatformBranding, platformBrandingQueryKey } from "@/lib/platform-branding";
+import { fetchPlatformBranding } from "@/lib/platform-branding";
 
 const SPLASH_DURATION_MS = 700;
 const SPLASH_EXIT_MS = 180;
 
 export function AppLaunchSplash() {
-  const { data: branding } = useQuery({
-    queryKey: platformBrandingQueryKey,
-    queryFn: fetchPlatformBranding,
-    staleTime: 5 * 60_000,
-  });
   const [phase, setPhase] = useState<"visible" | "leaving" | "hidden">("visible");
+  const [platformIcon, setPlatformIcon] = useState<string | null>(null);
   const [storeIcon, setStoreIcon] = useState<string | null>(null);
 
   useEffect(() => {
@@ -24,6 +19,18 @@ export function AppLaunchSplash() {
     return () => {
       window.clearTimeout(exitTimer);
       window.clearTimeout(removeTimer);
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    void fetchPlatformBranding()
+      .then((branding) => {
+        if (active) setPlatformIcon(branding.pwaIconUrl);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
     };
   }, []);
 
@@ -61,7 +68,7 @@ export function AppLaunchSplash() {
     >
       <div className="app-launch-splash__glow" />
       <img
-        src={storeIcon ?? branding?.pwaIconUrl ?? "/pedium-app-icon-512.png"}
+        src={storeIcon ?? platformIcon ?? "/pedium-app-icon-512.png"}
         alt=""
         className="app-launch-splash__icon"
         fetchPriority="high"
