@@ -164,7 +164,10 @@ function CustomerDashboardPage() {
           <Tabs
             value={aba}
             onValueChange={(value) =>
-              void navigate({ search: { aba: value as CustomerTab, loja }, replace: true })
+              void navigate({
+                search: loja ? { aba: value as CustomerTab, loja } : { aba: value as CustomerTab },
+                replace: true,
+              })
             }
             className="mt-7"
           >
@@ -220,7 +223,9 @@ function CustomerDashboardPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => void navigate({ search: { aba: "pedidos", loja } })}
+                      onClick={() =>
+                        void navigate({ search: loja ? { aba: "pedidos", loja } : { aba: "pedidos" } })
+                      }
                     >
                       Ver todos
                     </Button>
