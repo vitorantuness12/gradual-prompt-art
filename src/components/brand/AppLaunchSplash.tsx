@@ -6,11 +6,28 @@ const SPLASH_DURATION_MS = 700;
 const SPLASH_EXIT_MS = 180;
 
 export function AppLaunchSplash() {
-  const [phase, setPhase] = useState<"visible" | "leaving" | "hidden">("visible");
+  const [phase, setPhase] = useState<"checking" | "visible" | "leaving" | "hidden">(
+    "checking",
+  );
   const [platformIcon, setPlatformIcon] = useState<string | null>(null);
-  const [storeIcon, setStoreIcon] = useState<string | null>(null);
 
   useEffect(() => {
+    const standalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    const url = new URL(window.location.href);
+    const isMerchantAppEntry =
+      url.pathname.startsWith("/painel") ||
+      (url.pathname === "/auth" &&
+        url.searchParams.get("origem") === "app" &&
+        url.searchParams.get("perfil") === "lojista");
+
+    if (!standalone || !isMerchantAppEntry) {
+      setPhase("hidden");
+      return;
+    }
+
+    setPhase("visible");
     const exitTimer = window.setTimeout(() => setPhase("leaving"), SPLASH_DURATION_MS);
     const removeTimer = window.setTimeout(
       () => setPhase("hidden"),
@@ -23,6 +40,7 @@ export function AppLaunchSplash() {
   }, []);
 
   useEffect(() => {
+    if (phase === "hidden") return;
     let active = true;
     void fetchPlatformBranding()
       .then((branding) => {
@@ -32,33 +50,9 @@ export function AppLaunchSplash() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [phase]);
 
-  useEffect(() => {
-    const standalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
-    const slug = window.location.pathname.split("/").filter(Boolean)[0];
-    if (!standalone || !slug || slug === "auth" || slug === "painel") return;
-
-    const controller = new AbortController();
-    void fetch(`/api/public/manifest?loja=${encodeURIComponent(slug)}`, {
-      signal: controller.signal,
-    })
-      .then((response) =>
-        response.ok
-          ? (response.json() as Promise<{ icons?: { src?: string; purpose?: string }[] }>)
-          : null,
-      )
-      .then((manifest) => {
-        const icon = manifest?.icons?.find((item) => item.purpose === "any")?.src;
-        if (icon) setStoreIcon(icon);
-      })
-      .catch(() => undefined);
-    return () => controller.abort();
-  }, []);
-
-  if (phase === "hidden") return null;
+  if (phase === "checking" || phase === "hidden") return null;
 
   return (
     <div
@@ -68,7 +62,7 @@ export function AppLaunchSplash() {
     >
       <div className="app-launch-splash__glow" />
       <img
-        src={storeIcon ?? platformIcon ?? "/pedium-app-icon-512.png"}
+        src={platformIcon ?? "/pedium-app-icon-512.png"}
         alt=""
         className="app-launch-splash__icon"
         fetchPriority="high"
