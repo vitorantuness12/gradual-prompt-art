@@ -22,7 +22,12 @@ export function AppLaunchSplash() {
         url.searchParams.get("origem") === "app" &&
         url.searchParams.get("perfil") === "lojista");
 
-    if (!standalone || !isMerchantAppEntry) {
+    const isExplicitMerchantAppEntry =
+      url.pathname === "/auth" &&
+      url.searchParams.get("origem") === "app" &&
+      url.searchParams.get("perfil") === "lojista";
+
+    if ((!standalone && !isExplicitMerchantAppEntry) || !isMerchantAppEntry) {
       setPhase("hidden");
       return;
     }
