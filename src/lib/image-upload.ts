@@ -7,6 +7,10 @@ export interface CompressOptions {
   maxWidth: number;
   maxHeight: number;
   quality?: number;
+  /** Gera um arquivo com dimensões exatas e centraliza a imagem sem recortá-la. */
+  exactSize?: boolean;
+  /** Espaço interno proporcional, útil para ícones adaptáveis do Android. */
+  paddingRatio?: number;
 }
 
 /**
@@ -17,16 +21,24 @@ export async function compressImage(file: File, options: CompressOptions): Promi
   if (typeof window === "undefined" || !file.type.startsWith("image/")) return file;
 
   const bitmap = await createImageBitmap(file);
-  const ratio = Math.min(options.maxWidth / bitmap.width, options.maxHeight / bitmap.height, 1);
+  const paddingRatio = Math.min(Math.max(options.paddingRatio ?? 0, 0), 0.4);
+  const availableWidth = options.maxWidth * (1 - paddingRatio * 2);
+  const availableHeight = options.maxHeight * (1 - paddingRatio * 2);
+  const ratio = Math.min(availableWidth / bitmap.width, availableHeight / bitmap.height, 1);
   const width = Math.round(bitmap.width * ratio);
   const height = Math.round(bitmap.height * ratio);
 
   const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
+  canvas.width = options.exactSize ? options.maxWidth : width;
+  canvas.height = options.exactSize ? options.maxHeight : height;
   const context = canvas.getContext("2d");
-  if (!context) return file;
-  context.drawImage(bitmap, 0, 0, width, height);
+  if (!context) {
+    bitmap.close();
+    return file;
+  }
+  const offsetX = Math.round((canvas.width - width) / 2);
+  const offsetY = Math.round((canvas.height - height) / 2);
+  context.drawImage(bitmap, offsetX, offsetY, width, height);
   bitmap.close();
 
   const blob = await new Promise<Blob | null>((resolve) =>
@@ -41,8 +53,14 @@ const PRESET: Record<StoreImageKind, CompressOptions> = {
   logo: { maxWidth: 512, maxHeight: 512 },
   cover: { maxWidth: 1600, maxHeight: 900 },
   product: { maxWidth: 1200, maxHeight: 1200 },
-  "pwa-icon": { maxWidth: 512, maxHeight: 512, quality: 0.9 },
-  "pwa-maskable": { maxWidth: 512, maxHeight: 512, quality: 0.9 },
+  "pwa-icon": { maxWidth: 512, maxHeight: 512, quality: 0.82, exactSize: true },
+  "pwa-maskable": {
+    maxWidth: 512,
+    maxHeight: 512,
+    quality: 0.82,
+    exactSize: true,
+    paddingRatio: 0.1,
+  },
 };
 
 /** Envia a imagem para a pasta da loja e devolve uma URL utilizável na loja pública. */

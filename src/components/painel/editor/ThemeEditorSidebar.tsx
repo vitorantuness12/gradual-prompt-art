@@ -287,7 +287,7 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
             label="Ícone do aplicativo"
             value={config.branding.pwaIconUrl}
             onChange={(url) => patch({ branding: { ...config.branding, pwaIconUrl: url } })}
-            hint="Imagem quadrada de 512×512. Se ficar vazio, usa a logo da loja."
+            hint="A imagem é ajustada para 512×512 e compactada automaticamente. Se ficar vazio, usa a logo da loja."
           />
           <ImageUploadField
             storeId={storeId ?? null}
@@ -295,7 +295,7 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
             label="Ícone adaptável"
             value={config.branding.pwaMaskableIconUrl}
             onChange={(url) => patch({ branding: { ...config.branding, pwaMaskableIconUrl: url } })}
-            hint="Deixe uma margem segura ao redor da marca para Android."
+            hint="A imagem é centralizada, recebe uma margem segura e é compactada para Android."
           />
         </div>
       </section>

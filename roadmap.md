@@ -7,6 +7,7 @@
 - [x] Impedir que o manifesto global do lojista substitua o manifesto individual da loja.
 - [x] Priorizar a logo da vitrine no app de cada loja, sem herdar a marca da plataforma.
 - [x] Exibir a tela de abertura somente no app instalado do lojista.
+- [x] Ajustar e compactar automaticamente imagens grandes dos ícones do app da loja.
 
 # Roadmap
 
