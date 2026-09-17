@@ -5,7 +5,7 @@ import { getStorePwaBranding } from "@/lib/store-pwa.server";
 export const Route = createFileRoute("/api/public/store-icon/$slug/$kind")({
   server: {
     handlers: {
-      GET: async ({ params }) => {
+      GET: async ({ params, request }) => {
         if (params.kind !== "any" && params.kind !== "maskable") {
           return new Response("Tipo de ícone inválido.", { status: 400 });
         }
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/api/public/store-icon/$slug/$kind")({
             ? (store.maskableIcon ?? store.icon)
             : store.icon;
         if (!source) {
-          return Response.redirect(new URL("/store-app-fallback.png", "http://localhost"), 302);
+          return Response.redirect(new URL("/store-app-fallback.png", request.url), 302);
         }
 
         try {
@@ -31,7 +31,7 @@ export const Route = createFileRoute("/api/public/store-icon/$slug/$kind")({
             },
           });
         } catch {
-          return Response.redirect(new URL("/store-app-fallback.png", "http://localhost"), 302);
+          return Response.redirect(new URL("/store-app-fallback.png", request.url), 302);
         }
       },
     },
