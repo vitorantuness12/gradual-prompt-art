@@ -69,8 +69,8 @@ export async function uploadStoreImage(
   kind: StoreImageKind,
   file: File,
 ): Promise<string> {
-  if (file.size > 8 * 1024 * 1024) {
-    throw new Error("A imagem deve ter no máximo 8 MB.");
+  if (file.size > 20 * 1024 * 1024) {
+    throw new Error("A imagem original deve ter no máximo 20 MB.");
   }
 
   const blob = await compressImage(file, PRESET[kind]);
