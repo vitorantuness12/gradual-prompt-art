@@ -27,9 +27,16 @@ type CustomerTab = "inicio" | "pedidos" | "enderecos" | "dados";
 const TABS: CustomerTab[] = ["inicio", "pedidos", "enderecos", "dados"];
 
 export const Route = createFileRoute("/_authenticated/minha-conta")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    aba: TABS.includes(search["aba"] as CustomerTab) ? (search["aba"] as CustomerTab) : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { aba?: CustomerTab; loja?: string } => {
+    const aba = TABS.includes(search["aba"] as CustomerTab)
+      ? (search["aba"] as CustomerTab)
+      : undefined;
+    const loja =
+      typeof search["loja"] === "string" && /^[a-z0-9-]{1,80}$/.test(search["loja"])
+        ? search["loja"]
+        : undefined;
+    return { ...(aba ? { aba } : {}), ...(loja ? { loja } : {}) };
+  },
   head: () => ({
     meta: [
       { title: "Painel do cliente — Pedi Um" },
@@ -50,7 +57,7 @@ export const Route = createFileRoute("/_authenticated/minha-conta")({
 });
 
 function CustomerDashboardPage() {
-  const { aba: searchTab } = Route.useSearch();
+  const { aba: searchTab, loja } = Route.useSearch();
   const aba = searchTab ?? "inicio";
   const navigate = useNavigate({ from: Route.fullPath });
   const queryClient = useQueryClient();
@@ -106,10 +113,17 @@ function CustomerDashboardPage() {
           </Link>
           <div className="flex items-center gap-2">
             <Button asChild variant="outline" size="sm">
-              <Link to="/">
-                <Store className="mr-1.5 size-4" aria-hidden="true" />
-                Ver lojas
-              </Link>
+              {loja ? (
+                <Link to="/$slug" params={{ slug: loja }}>
+                  <Store className="mr-1.5 size-4" aria-hidden="true" />
+                  Voltar à loja
+                </Link>
+              ) : (
+                <Link to="/">
+                  <Store className="mr-1.5 size-4" aria-hidden="true" />
+                  Ver lojas
+                </Link>
+              )}
             </Button>
             <Button
               variant="ghost"
@@ -150,7 +164,10 @@ function CustomerDashboardPage() {
           <Tabs
             value={aba}
             onValueChange={(value) =>
-              void navigate({ search: { aba: value as CustomerTab }, replace: true })
+              void navigate({
+                search: loja ? { aba: value as CustomerTab, loja } : { aba: value as CustomerTab },
+                replace: true,
+              })
             }
             className="mt-7"
           >
@@ -206,7 +223,11 @@ function CustomerDashboardPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => void navigate({ search: { aba: "pedidos" } })}
+                      onClick={() =>
+                        void navigate({
+                          search: loja ? { aba: "pedidos", loja } : { aba: "pedidos" },
+                        })
+                      }
                     >
                       Ver todos
                     </Button>

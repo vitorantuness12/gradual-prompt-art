@@ -63,7 +63,16 @@ export function StoreMobileNav({ slug, cartCount, onSearch, onCart }: StoreMobil
           <UtensilsCrossed className="size-5" aria-hidden="true" />
           Pedidos
         </Link>
-        <Link to="/minha-conta" search={{ aba: undefined }} className={itemClass}>
+        <Link
+          to="/auth"
+          search={{
+            etapa: "entrar",
+            perfil: "cliente",
+            redirect: `/minha-conta?loja=${encodeURIComponent(slug)}`,
+          }}
+          className={itemClass}
+          aria-label="Abrir minha conta"
+        >
           <UserRound className="size-5" aria-hidden="true" />
           Conta
         </Link>

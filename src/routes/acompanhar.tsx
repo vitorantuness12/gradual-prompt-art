@@ -165,7 +165,7 @@ function TrackPage() {
           <Logo />
         </Link>
         <Button asChild variant="outline" size="sm">
-          <Link to="/minha-conta" search={{ aba: undefined }}>
+          <Link to="/minha-conta" search={{}}>
             Área do cliente
           </Link>
         </Button>

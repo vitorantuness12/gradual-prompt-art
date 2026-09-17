@@ -86,7 +86,7 @@ export function CustomerDashboardOrders({ orders, mode }: CustomerDashboardOrder
                 ) : null}
                 {order.storeSlug ? (
                   <Button asChild size="sm" variant="outline">
-                    <Link to="/$slug" params={{ slug: order.storeSlug }}>
+                    <Link to="/$slug" params={{ slug: order.storeSlug }} search={{ repetir: true }}>
                       <RotateCcw className="mr-1.5 size-4" aria-hidden="true" />
                       Comprar novamente
                     </Link>

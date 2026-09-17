@@ -43,8 +43,7 @@ function ChooseProfilePage() {
   if (data?.merchant) available.push("lojista");
 
   function open(kind: AccountKind) {
-    if (kind === "cliente")
-      return void navigate({ to: "/minha-conta", search: { aba: undefined } });
+    if (kind === "cliente") return void navigate({ to: "/minha-conta", search: {} });
     if (kind === "lojista") return void navigate({ to: "/painel" });
     void navigate({
       to: courierCanWork(data?.courier_status) ? "/entregador" : "/entregador/status",

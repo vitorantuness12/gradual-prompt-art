@@ -22,17 +22,21 @@ import { trackOrder, type TrackedOrder } from "@/lib/tracking.functions";
 
 export const Route = createFileRoute("/$slug/acompanhar")({
   validateSearch: (search: Record<string, unknown>) => ({
-    codigo: typeof search['codigo'] === "string" ? (search['codigo'] as string) : undefined,
+    codigo: typeof search["codigo"] === "string" ? (search["codigo"] as string) : undefined,
   }),
   head: ({ params }) => ({
     meta: [
       { title: `Acompanhar pedido — ${params.slug} | Pedi Um` },
       {
         name: "description",
-        content: "Consulte a situação do seu pedido nesta loja informando o código e o telefone da compra.",
+        content:
+          "Consulte a situação do seu pedido nesta loja informando o código e o telefone da compra.",
       },
       { property: "og:title", content: "Acompanhar pedido" },
-      { property: "og:description", content: "Veja em que etapa está o seu pedido, em tempo real." },
+      {
+        property: "og:description",
+        content: "Veja em que etapa está o seu pedido, em tempo real.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -76,7 +80,6 @@ function StoreTrackPage() {
     }
   }
 
-
   // Vindo do checkout (?codigo=...): consulta automática usando o telefone salvo neste navegador.
   useEffect(() => {
     if (!codigo || order || loading) return;
@@ -107,15 +110,29 @@ function StoreTrackPage() {
     <CheckoutThemeProvider className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border/70 bg-card">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-5 sm:px-6">
-          <span className="text-base font-semibold tracking-tight text-foreground">{data?.store.name ?? ""}</span>
-
-          <Link
-            to="/$slug"
-            params={{ slug }}
-            className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-          >
-            Voltar ao catálogo
-          </Link>
+          <span className="text-base font-semibold tracking-tight text-foreground">
+            {data?.store.name ?? ""}
+          </span>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/auth"
+              search={{
+                etapa: "entrar",
+                perfil: "cliente",
+                redirect: `/minha-conta?loja=${encodeURIComponent(slug)}`,
+              }}
+              className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              Minha conta
+            </Link>
+            <Link
+              to="/$slug"
+              params={{ slug }}
+              className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            >
+              Voltar ao catálogo
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -130,17 +147,29 @@ function StoreTrackPage() {
         <Card className="border-border/70 shadow-sm">
           <CardHeader>
             <CardTitle className="text-base">Consultar situação</CardTitle>
-            <CardDescription>Use o código recebido ao finalizar o pedido e o telefone informado.</CardDescription>
+            <CardDescription>
+              Use o código recebido ao finalizar o pedido e o telefone informado.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end" noValidate>
+            <form
+              onSubmit={handleSubmit}
+              className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+              noValidate
+            >
               <div className="space-y-2">
                 <Label htmlFor="codigo">Código do pedido</Label>
                 <Input id="codigo" name="code" placeholder="Ex.: A1B2C3D4" required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="telefone">Telefone</Label>
-                <Input id="telefone" name="phone" inputMode="tel" placeholder="(00) 90000-0000" required />
+                <Input
+                  id="telefone"
+                  name="phone"
+                  inputMode="tel"
+                  placeholder="(00) 90000-0000"
+                  required
+                />
               </div>
               <Button type="submit" disabled={loading}>
                 {loading ? "Consultando..." : "Consultar"}
@@ -153,12 +182,17 @@ function StoreTrackPage() {
           <Card className="border-border/70">
             <CardHeader>
               <CardTitle className="text-base">Seus pedidos nesta loja</CardTitle>
-              <CardDescription>Guardamos apenas neste navegador, separados por loja.</CardDescription>
+              <CardDescription>
+                Guardamos apenas neste navegador, separados por loja.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="divide-y divide-border text-sm">
                 {history.map((entry) => (
-                  <li key={entry.code} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                  <li
+                    key={entry.code}
+                    className="flex flex-wrap items-center justify-between gap-2 py-2"
+                  >
                     <span className="font-medium text-foreground">
                       {entry.code} · {formatCurrency(entry.total)}
                     </span>
@@ -195,15 +229,24 @@ function StoreTrackPage() {
                 {order.isDemo ? <DemoBadge /> : null}
               </div>
               <CardDescription>
-                {order.storeName} · {ORDER_TYPE_LABEL[order.type] ?? order.type} · {formatDateTime(order.createdAt)}
+                {order.storeName} · {ORDER_TYPE_LABEL[order.type] ?? order.type} ·{" "}
+                {formatDateTime(order.createdAt)}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`rounded-full border px-3 py-1 text-xs font-medium ${checkoutStatusClass(order.status)}`}>
+                <span
+                  className={`rounded-full border px-3 py-1 text-xs font-medium ${checkoutStatusClass(order.status)}`}
+                >
                   {statusLabel(order.status)}
                 </span>
-                <Button type="button" size="sm" variant="outline" disabled={loading} onClick={() => void lookup(order.code, lastPhone)}>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={loading}
+                  onClick={() => void lookup(order.code, lastPhone)}
+                >
                   Atualizar
                 </Button>
               </div>
@@ -226,7 +269,10 @@ function StoreTrackPage() {
                   <p className="font-medium text-foreground">Cobrança</p>
                   <p className="mt-1 text-muted-foreground">
                     {CHARGE_STATUS_LABEL[order.charge.status] ?? order.charge.status} ·{" "}
-                    {order.charge.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                    {order.charge.amount.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
                     {order.charge.method ? ` · ${order.charge.method}` : ""}
                   </p>
                 </div>
@@ -238,8 +284,17 @@ function StoreTrackPage() {
                     const done = currentStep >= index;
                     return (
                       <li key={step} className="flex items-center gap-3">
-                        <span aria-hidden="true" className={`size-3 rounded-full ${done ? "bg-success" : "bg-muted"}`} />
-                        <span className={done ? "text-sm font-medium text-foreground" : "text-sm text-muted-foreground"}>
+                        <span
+                          aria-hidden="true"
+                          className={`size-3 rounded-full ${done ? "bg-success" : "bg-muted"}`}
+                        />
+                        <span
+                          className={
+                            done
+                              ? "text-sm font-medium text-foreground"
+                              : "text-sm text-muted-foreground"
+                          }
+                        >
                           {ORDER_STATUS_LABEL[step]}
                         </span>
                       </li>
