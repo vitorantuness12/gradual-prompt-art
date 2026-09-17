@@ -59,7 +59,7 @@ const PRESET: Record<StoreImageKind, CompressOptions> = {
     maxHeight: 512,
     quality: 0.82,
     exactSize: true,
-    paddingRatio: 0.1,
+    paddingRatio: 0.2,
   },
 };
 

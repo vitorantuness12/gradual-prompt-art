@@ -61,8 +61,17 @@ import { planAllowsModule } from "@/lib/plans";
 export const Route = createFileRoute("/_authenticated/painel")({
   component: PainelLayout,
   head: () => ({
+    meta: [
+      { name: "application-name", content: "Painel Pedi Um" },
+      { name: "apple-mobile-web-app-title", content: "Painel Pedi Um" },
+      { name: "theme-color", content: "#f97316" },
+    ],
     // O painel tem manifesto próprio para o app instalado abrir direto nos pedidos.
-    links: [{ rel: "manifest", href: "/api/public/manifest?painel=1" }],
+    links: [
+      { rel: "manifest", href: "/api/public/manifest?painel=1" },
+      { rel: "icon", type: "image/png", href: "/pedium-favicon.png" },
+      { rel: "apple-touch-icon", href: "/pedium-apple-touch-icon.png" },
+    ],
   }),
 });
 

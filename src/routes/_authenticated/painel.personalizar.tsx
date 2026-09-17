@@ -121,6 +121,7 @@ function PersonalizarPage() {
       toast.success("Loja publicada com o novo visual.");
       void queryClient.invalidateQueries({ queryKey: ["store-editor", storeId] });
       void queryClient.invalidateQueries({ queryKey: ["store-appearance"] });
+      if (active) void queryClient.invalidateQueries({ queryKey: ["store", active.store.slug] });
     },
     onError: () => toast.error("Não foi possível publicar as alterações."),
   });

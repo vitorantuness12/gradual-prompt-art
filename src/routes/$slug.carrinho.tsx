@@ -27,6 +27,7 @@ import { checkoutPathFor } from "@/lib/checkout-model";
 import { formatCurrency } from "@/lib/format";
 import { publicStoreQuery } from "@/lib/store-queries";
 import { storeAvailability } from "@/lib/store-config";
+import { storePwaLinks, storePwaMeta } from "@/lib/store-pwa-head";
 
 const searchSchema = z.object({
   /** Token do link enviado no lembrete de carrinho abandonado. */
@@ -52,10 +53,9 @@ export const Route = createFileRoute("/$slug/carrinho")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      ...storePwaMeta(params.slug),
     ],
-    links: [
-      { rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` },
-    ],
+    links: storePwaLinks(params.slug),
   }),
   component: StoreCartPage,
 });

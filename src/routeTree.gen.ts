@@ -97,6 +97,7 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as ApiPublicIntegracoesKindStoreIdRouteImport } from './routes/api/public/integracoes/$kind.$storeId'
+import { Route as ApiPublicStoreIconSlugKindRouteImport } from './routes/api/public/store-icon.$slug.$kind'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -584,6 +585,12 @@ const ApiPublicIntegracoesKindStoreIdRoute =
     path: '/api/public/integracoes/$kind/$storeId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicStoreIconSlugKindRoute =
+  ApiPublicStoreIconSlugKindRouteImport.update({
+    id: '/api/public/store-icon/$slug/$kind',
+    path: '/api/public/store-icon/$slug/$kind',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -673,6 +680,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/integracoes/$kind/$storeId': typeof ApiPublicIntegracoesKindStoreIdRoute
+  '/api/public/store-icon/$slug/$kind': typeof ApiPublicStoreIconSlugKindRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -761,6 +769,7 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/integracoes/$kind/$storeId': typeof ApiPublicIntegracoesKindStoreIdRoute
+  '/api/public/store-icon/$slug/$kind': typeof ApiPublicStoreIconSlugKindRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -852,6 +861,7 @@ export interface FileRoutesById {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/integracoes/$kind/$storeId': typeof ApiPublicIntegracoesKindStoreIdRoute
+  '/api/public/store-icon/$slug/$kind': typeof ApiPublicStoreIconSlugKindRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -943,6 +953,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
     | '/api/public/integracoes/$kind/$storeId'
+    | '/api/public/store-icon/$slug/$kind'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1031,6 +1042,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
     | '/api/public/integracoes/$kind/$storeId'
+    | '/api/public/store-icon/$slug/$kind'
   id:
     | '__root__'
     | '/'
@@ -1121,6 +1133,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
     | '/api/public/integracoes/$kind/$storeId'
+    | '/api/public/store-icon/$slug/$kind'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1167,6 +1180,7 @@ export interface RootRouteChildren {
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   ApiPublicIntegracoesKindStoreIdRoute: typeof ApiPublicIntegracoesKindStoreIdRoute
+  ApiPublicStoreIconSlugKindRoute: typeof ApiPublicStoreIconSlugKindRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1787,6 +1801,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIntegracoesKindStoreIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/store-icon/$slug/$kind': {
+      id: '/api/public/store-icon/$slug/$kind'
+      path: '/api/public/store-icon/$slug/$kind'
+      fullPath: '/api/public/store-icon/$slug/$kind'
+      preLoaderRoute: typeof ApiPublicStoreIconSlugKindRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1942,6 +1963,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   ApiPublicIntegracoesKindStoreIdRoute: ApiPublicIntegracoesKindStoreIdRoute,
+  ApiPublicStoreIconSlugKindRoute: ApiPublicStoreIconSlugKindRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

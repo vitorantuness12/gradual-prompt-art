@@ -68,6 +68,7 @@ import {
 import { browserKey, useEntryPopups } from "@/hooks/useEntryPopups";
 import { logPopupEvent, savePopupPreference } from "@/lib/popups.functions";
 import { cn } from "@/lib/utils";
+import { storePwaLinks, storePwaMeta } from "@/lib/store-pwa-head";
 
 export const Route = createFileRoute("/$slug/")({
   validateSearch: (search: Record<string, unknown>): { repetir?: boolean } =>
@@ -88,10 +89,11 @@ export const Route = createFileRoute("/$slug/")({
       { property: "og:type", content: "website" },
       { property: "og:url", content: `https://oseupedido.com.br/${params.slug}` },
       { name: "twitter:card", content: "summary_large_image" },
+      ...storePwaMeta(params.slug),
     ],
     links: [
       { rel: "canonical", href: `https://oseupedido.com.br/${params.slug}` },
-      { rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` },
+      ...storePwaLinks(params.slug),
     ],
   }),
   component: PublicStorePage,

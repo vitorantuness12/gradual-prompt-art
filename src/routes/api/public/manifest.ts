@@ -2,23 +2,11 @@ import { createClient } from "@supabase/supabase-js";
 import { createFileRoute } from "@tanstack/react-router";
 
 import type { Database } from "@/integrations/supabase/types";
+import { getStorePwaBranding } from "@/lib/store-pwa.server";
 
 interface ManifestBranding {
   pwa_icon_url: string | null;
   pwa_maskable_icon_url: string | null;
-}
-
-interface StoreManifestBranding {
-  id: string;
-  name: string;
-  primary: string | null;
-  icon: string | null;
-  maskableIcon: string | null;
-  hasDedicatedIcon: boolean;
-}
-
-function nonEmptyString(value: unknown): string | null {
-  return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
 }
 
 export const Route = createFileRoute("/api/public/manifest")({
@@ -29,7 +17,7 @@ export const Route = createFileRoute("/api/public/manifest")({
         const panel = url.searchParams.get("painel") === "1";
         const storeSlug = url.searchParams.get("loja")?.trim() || null;
         const branding = await getBranding();
-        const store = storeSlug ? await getStoreBranding(storeSlug) : null;
+        const store = storeSlug ? await getStorePwaBranding(storeSlug) : null;
         if (storeSlug && !store) {
           return Response.json(
             { error: "Loja não encontrada ou indisponível." },
@@ -40,17 +28,17 @@ export const Route = createFileRoute("/api/public/manifest")({
           );
         }
         const storeName = store?.name ?? null;
-        const icon = store
-          ? (store.icon ?? "/store-app-fallback.png")
+        const icon = storeSlug
+          ? `/api/public/store-icon/${encodeURIComponent(storeSlug)}/any`
           : (branding?.pwa_icon_url ?? "/pedium-app-icon-512.png");
-        const maskableIcon = store
-          ? (store.maskableIcon ?? store.icon ?? "/store-app-fallback.png")
+        const maskableIcon = storeSlug
+          ? `/api/public/store-icon/${encodeURIComponent(storeSlug)}/maskable`
           : (branding?.pwa_maskable_icon_url ?? "/pedium-app-icon-maskable-512.png");
         const icons = store
           ? [
               {
                 src: icon,
-                sizes: store.hasDedicatedIcon || icon === "/store-app-fallback.png" ? "512x512" : "any",
+                sizes: store.hasDedicatedIcon ? "512x512" : "any",
                 purpose: "any",
               },
               ...(store.maskableIcon || store.hasDedicatedIcon
@@ -154,47 +142,3 @@ async function getBranding(): Promise<ManifestBranding | null> {
   return data;
 }
 
-async function getStoreBranding(slug: string): Promise<StoreManifestBranding | null> {
-  const supabaseUrl = process.env["SUPABASE_URL"];
-  const publishableKey = process.env["SUPABASE_PUBLISHABLE_KEY"];
-  if (!supabaseUrl || !publishableKey) return null;
-
-  const client = createClient<Database>(supabaseUrl, publishableKey, {
-    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
-  });
-  const { data } = await client
-    .from("stores")
-    .select("id, name, logo_url, store_themes(published_config)")
-    .eq("slug", slug)
-    .eq("is_active", true)
-    .eq("is_published", true)
-    .maybeSingle();
-  if (!data) return null;
-  const relation = Array.isArray(data.store_themes) ? data.store_themes[0] : data.store_themes;
-  const published = relation?.published_config;
-  const config =
-    published && typeof published === "object" && !Array.isArray(published)
-      ? (published as Record<string, unknown>)
-      : {};
-  const brandingValue = config["branding"];
-  const colorsValue = config["colors"];
-  const themeBranding =
-    brandingValue && typeof brandingValue === "object" && !Array.isArray(brandingValue)
-      ? (brandingValue as Record<string, unknown>)
-      : {};
-  const themeColors =
-    colorsValue && typeof colorsValue === "object" && !Array.isArray(colorsValue)
-      ? (colorsValue as Record<string, unknown>)
-      : {};
-  const pwaName = nonEmptyString(themeBranding["pwaName"]);
-  const pwaIcon = nonEmptyString(themeBranding["pwaIconUrl"]);
-  const storeLogo = nonEmptyString(themeBranding["logoUrl"]) ?? nonEmptyString(data.logo_url);
-  return {
-    id: data.id,
-    name: pwaName || data.name,
-    primary: nonEmptyString(themeColors["primary"]),
-    icon: pwaIcon ?? storeLogo,
-    maskableIcon: nonEmptyString(themeBranding["pwaMaskableIconUrl"]),
-    hasDedicatedIcon: pwaIcon !== null,
-  };
-}
