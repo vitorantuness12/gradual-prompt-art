@@ -25,8 +25,12 @@ export const Route = createFileRoute("/api/public/notificacoes/push")({
           if (!token || !row || row.token !== token) return denied;
         }
 
-        const { dispatchPendingPush } = await import("@/lib/push.server");
-        const result = await dispatchPendingPush(supabaseAdmin);
+        const { dispatchPendingPush, dispatchPushCampaigns } = await import("@/lib/push.server");
+        const [internal, campaigns] = await Promise.all([
+          dispatchPendingPush(supabaseAdmin),
+          dispatchPushCampaigns(supabaseAdmin),
+        ]);
+        const result = { internal, campaigns };
 
         return new Response(JSON.stringify(result), {
           headers: { "content-type": "application/json" },
