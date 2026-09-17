@@ -103,7 +103,7 @@ export const Route = createFileRoute("/api/public/manifest")({
         return Response.json(manifest, {
           headers: {
             "content-type": "application/manifest+json; charset=utf-8",
-            "cache-control": "public, max-age=300, must-revalidate",
+            "cache-control": "no-store, max-age=0",
           },
         });
       },
@@ -166,12 +166,11 @@ async function getStoreBranding(slug: string): Promise<StoreManifestBranding | n
     name: pwaName || data.name,
     primary: typeof themeColors["primary"] === "string" ? themeColors["primary"] : null,
     icon:
-      typeof themeBranding["logoUrl"] === "string"
-        ? themeBranding["logoUrl"]
-        : data.logo_url ??
-          (typeof themeBranding["pwaIconUrl"] === "string"
-            ? themeBranding["pwaIconUrl"]
-            : null),
+      typeof themeBranding["pwaIconUrl"] === "string"
+        ? themeBranding["pwaIconUrl"]
+        : typeof themeBranding["logoUrl"] === "string"
+          ? themeBranding["logoUrl"]
+          : data.logo_url,
     maskableIcon:
       typeof themeBranding["pwaMaskableIconUrl"] === "string"
         ? themeBranding["pwaMaskableIconUrl"]
