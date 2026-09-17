@@ -10,3 +10,4 @@
 - [x] Preparar os e-mails transacionais e de acesso para notify.pedium.com.br
 - [x] Exigir conta de cliente no fechamento do checkout e reutilizar endereços salvos
 - [x] Criar painel do cliente logado com pedidos, histórico e endereços salvos
+- [x] Adicionar acesso à conta do cliente no catálogo, com retorno à loja após o login

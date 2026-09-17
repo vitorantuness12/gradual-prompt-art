@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Clock, Heart, History, Image as ImageIcon, MapPin, MessageCircle, Phone, Search, ShoppingBag, Sparkles, Star } from "lucide-react";
+import { Clock, Heart, History, Image as ImageIcon, MapPin, MessageCircle, Phone, Search, ShoppingBag, Sparkles, Star, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { DemoBadge } from "@/components/brand/DemoBadge";
@@ -358,6 +358,18 @@ function PublicStorePage() {
               </ul>
 
               <div className="mt-4 flex flex-wrap items-center gap-2 sm:gap-3">
+                <Button variant="outline" size="sm" className="hidden sm:inline-flex" asChild>
+                  <Link
+                    to="/auth"
+                    search={{
+                      etapa: "entrar",
+                      perfil: "cliente",
+                      redirect: `/minha-conta?loja=${encodeURIComponent(slug)}`,
+                    }}
+                  >
+                    <UserRound className="mr-2 size-4" aria-hidden="true" /> Minha conta
+                  </Link>
+                </Button>
                 {display.showPhone && contactNumber ? (
                   <Button variant="outline" size="sm" className="flex-1 sm:flex-none" asChild>
                     <a href={`https://wa.me/55${contactNumber}`} target="_blank" rel="noreferrer">

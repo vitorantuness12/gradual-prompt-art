@@ -108,14 +108,26 @@ function StoreTrackPage() {
       <header className="border-b border-border/70 bg-card">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-5 sm:px-6">
           <span className="text-base font-semibold tracking-tight text-foreground">{data?.store.name ?? ""}</span>
-
-          <Link
-            to="/$slug"
-            params={{ slug }}
-            className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-          >
-            Voltar ao catálogo
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/auth"
+              search={{
+                etapa: "entrar",
+                perfil: "cliente",
+                redirect: `/minha-conta?loja=${encodeURIComponent(slug)}`,
+              }}
+              className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              Minha conta
+            </Link>
+            <Link
+              to="/$slug"
+              params={{ slug }}
+              className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            >
+              Voltar ao catálogo
+            </Link>
+          </div>
         </div>
       </header>
 
