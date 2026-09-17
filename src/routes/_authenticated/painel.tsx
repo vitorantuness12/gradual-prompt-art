@@ -42,6 +42,7 @@ import { PanelMobileNav } from "@/components/painel/PanelMobileNav";
 import { ThemeToggle } from "@/components/painel/ThemeToggle";
 import { StorePauseButton } from "@/components/painel/StorePauseButton";
 import { Logo } from "@/components/brand/Logo";
+import { AppLaunchSplash } from "@/components/brand/AppLaunchSplash";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -59,7 +60,7 @@ import { FEATURE_GROUPS, type FeatureKey } from "@/lib/painel-segmentos";
 import { planAllowsModule } from "@/lib/plans";
 
 export const Route = createFileRoute("/_authenticated/painel")({
-  component: PainelLayout,
+  component: PainelRoute,
   head: () => ({
     meta: [
       { name: "application-name", content: "Painel Pedi Um" },
@@ -74,6 +75,15 @@ export const Route = createFileRoute("/_authenticated/painel")({
     ],
   }),
 });
+
+function PainelRoute() {
+  return (
+    <>
+      <AppLaunchSplash />
+      <PainelLayout />
+    </>
+  );
+}
 
 const NAV: Record<FeatureKey, { to: string; label: string; icon: typeof LayoutDashboard }> = {
   dashboard: { to: "/painel", label: "Dashboard", icon: LayoutDashboard },

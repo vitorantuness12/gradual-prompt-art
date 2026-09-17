@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { Logo } from "@/components/brand/Logo";
+import { AppLaunchSplash } from "@/components/brand/AppLaunchSplash";
 import { MerchantPwaLogin } from "@/components/auth/MerchantPwaLogin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -66,8 +67,17 @@ export const Route = createFileRoute("/auth")({
       { rel: "apple-touch-icon", href: "/pedium-apple-touch-icon.png" },
     ],
   }),
-  component: AuthPage,
+  component: AuthRoute,
 });
+
+function AuthRoute() {
+  return (
+    <>
+      <AppLaunchSplash />
+      <AuthPage />
+    </>
+  );
+}
 
 const KIND_ICON: Record<AccountKind, ReactNode> = {
   cliente: <UserRound className="h-5 w-5" aria-hidden />,
