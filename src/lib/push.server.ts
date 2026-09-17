@@ -101,7 +101,13 @@ export function nextRecurringRun(
     hourCycle: "h23",
   });
   const weekday = new Map([
-    ["Sun", 0], ["Mon", 1], ["Tue", 2], ["Wed", 3], ["Thu", 4], ["Fri", 5], ["Sat", 6],
+    ["Sun", 0],
+    ["Mon", 1],
+    ["Tue", 2],
+    ["Wed", 3],
+    ["Thu", 4],
+    ["Fri", 5],
+    ["Sat", 6],
   ]);
   const firstMinute = Math.floor(from.getTime() / 60_000) * 60_000 + 60_000;
   for (let offset = 0; offset <= 8 * 24 * 60; offset += 1) {
@@ -112,7 +118,8 @@ export function nextRecurringRun(
     if (
       days.includes(weekday.get(parts["weekday"] ?? "") ?? -1) &&
       `${parts["hour"]}:${parts["minute"]}` === targetTime
-    ) return candidate.toISOString();
+    )
+      return candidate.toISOString();
   }
   return null;
 }
