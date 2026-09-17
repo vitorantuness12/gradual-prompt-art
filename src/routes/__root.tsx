@@ -197,7 +197,51 @@ function RuntimeBrandingHead() {
       firstPathSegment &&
       !["auth", "painel", "admin", "acompanhar", "minha-conta"].includes(firstPathSegment),
     );
-    if (isStoreRoute) return;
+    if (isStoreRoute && firstPathSegment) {
+      const controller = new AbortController();
+      void fetch(`/api/public/manifest?loja=${encodeURIComponent(firstPathSegment)}`, {
+        cache: "no-store",
+        signal: controller.signal,
+      })
+        .then(async (response) => {
+          if (!response.ok) return null;
+          return response.json() as Promise<{
+            name?: unknown;
+            theme_color?: unknown;
+            icons?: Array<{ src?: unknown; purpose?: unknown }>;
+          }>;
+        })
+        .then((manifest) => {
+          if (!manifest) return;
+          const appIcon = manifest.icons?.find(
+            (icon) => icon.purpose === "any" && typeof icon.src === "string" && icon.src.length > 0,
+          )?.src;
+          if (appIcon) {
+            document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]').forEach((link) => {
+              link.href = appIcon;
+            });
+            const appleTouchIcon = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');
+            if (appleTouchIcon) appleTouchIcon.href = appIcon;
+          }
+          if (typeof manifest.name === "string" && manifest.name.trim()) {
+            document.querySelectorAll<HTMLMetaElement>(
+              'meta[name="application-name"], meta[name="apple-mobile-web-app-title"]',
+            ).forEach((meta) => {
+              meta.content = manifest.name as string;
+            });
+          }
+          if (typeof manifest.theme_color === "string" && manifest.theme_color) {
+            const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+            if (themeColor) themeColor.content = manifest.theme_color;
+          }
+        })
+        .catch((error: unknown) => {
+          if (!(error instanceof DOMException && error.name === "AbortError")) {
+            console.error("Não foi possível carregar a identidade do aplicativo da loja.", error);
+          }
+        });
+      return () => controller.abort();
+    }
     if (data?.faviconUrl) {
       document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]').forEach((link) => {
         link.href = data.faviconUrl ?? "/pedium-favicon.png";
@@ -222,6 +266,7 @@ function RuntimeBrandingHead() {
         meta.content = data.appCoverUrl ?? "";
       });
     }
+    return undefined;
   }, [data?.appCoverUrl, data?.faviconUrl, data?.pwaIconUrl]);
 
   return null;
