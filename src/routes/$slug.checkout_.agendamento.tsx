@@ -27,7 +27,7 @@ import { CheckoutCustomerAccess } from "@/components/store/CheckoutCustomerAcces
 import type { CheckoutCustomerSession } from "@/lib/checkout-customer.functions";
 
 export const Route = createFileRoute("/$slug/checkout_/agendamento")({
-  head: () => ({
+  head: ({ params }) => ({
     meta: [
       { title: "Agendar atendimento — Pedi Um" },
       {
@@ -39,6 +39,7 @@ export const Route = createFileRoute("/$slug/checkout_/agendamento")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` }],
   }),
   component: AgendamentoCheckout,
 });

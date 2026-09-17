@@ -1,3 +1,10 @@
+# PWA individual por loja
+
+- [x] Separar a identidade instalável do painel e de cada loja.
+- [x] Permitir nome, ícone e ícone adaptável próprios na identidade visual da loja.
+- [x] Manter o manifesto da loja em catálogo, carrinho, checkout, acompanhamento e área de membros.
+- [x] Restringir os arquivos de cada loja aos seus próprios gestores.
+
 # Roadmap
 
 - [x] Atualizar textos da homepage para a comunicação Pedi Um aprovada

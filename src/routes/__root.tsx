@@ -184,6 +184,9 @@ function RuntimeBrandingHead() {
   const { data } = useQuery({ queryKey: platformBrandingQueryKey, queryFn: fetchPlatformBranding, staleTime: 5 * 60_000 });
 
   useEffect(() => {
+    const firstPathSegment = window.location.pathname.split("/").filter(Boolean)[0];
+    const isStoreRoute = Boolean(firstPathSegment && !["auth", "painel", "admin", "acompanhar", "minha-conta"].includes(firstPathSegment));
+    if (isStoreRoute) return;
     if (data?.faviconUrl) {
       document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]').forEach((link) => {
         link.href = data.faviconUrl ?? "/pedium-favicon.png";

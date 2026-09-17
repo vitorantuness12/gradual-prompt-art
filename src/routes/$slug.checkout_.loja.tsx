@@ -30,7 +30,7 @@ import { CheckoutCustomerAccess, type CheckoutAddressValue } from "@/components/
 import type { CheckoutCustomerSession } from "@/lib/checkout-customer.functions";
 
 export const Route = createFileRoute("/$slug/checkout_/loja")({
-  head: () => ({
+  head: ({ params }) => ({
     meta: [
       { title: "Finalizar compra — Pedi Um" },
       {
@@ -43,6 +43,7 @@ export const Route = createFileRoute("/$slug/checkout_/loja")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` }],
   }),
   component: LojaCheckout,
 });

@@ -87,7 +87,7 @@ import {
 import type { CheckoutCustomerSession } from "@/lib/checkout-customer.functions";
 
 export const Route = createFileRoute("/$slug/checkout")({
-  head: () => ({
+  head: ({ params }) => ({
     meta: [
       { title: "Finalizar pedido — Pedi Um" },
       {
@@ -103,6 +103,7 @@ export const Route = createFileRoute("/$slug/checkout")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` }],
   }),
   component: CheckoutPage,
 });

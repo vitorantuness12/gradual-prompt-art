@@ -18,7 +18,7 @@ import { carregarMembro, linkMaterialMembro, loginMembro, sairMembro, trocarSenh
 
 export const Route = createFileRoute("/$slug/membros")({
   component: MembrosPage,
-  head: () => ({
+  head: ({ params }) => ({
     meta: [
       { title: "Área de membros | Pedi Um" },
       {
@@ -30,6 +30,7 @@ export const Route = createFileRoute("/$slug/membros")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` }],
   }),
 });
 
