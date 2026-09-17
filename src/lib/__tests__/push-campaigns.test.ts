@@ -26,10 +26,10 @@ const customer = {
 };
 
 describe("push campaign targeting", () => {
-  it("calcula a próxima recorrência sem repetir o instante atual", () => {
+  it("calcula a próxima recorrência no fuso da loja", () => {
     expect(
       nextRecurringRun({ days: [4], time: "10:00" }, new Date("2026-09-17T10:00:00.000Z")),
-    ).toBe("2026-09-24T10:00:00.000Z");
+    ).toBe("2026-09-17T13:00:00.000Z");
   });
 
   it("seleciona clientes recorrentes com dois pedidos", () => {
