@@ -40,7 +40,9 @@ export const Route = createFileRoute("/$slug/acompanhar")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` }],
+    links: [
+      { rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` },
+    ],
   }),
   component: StoreTrackPage,
 });

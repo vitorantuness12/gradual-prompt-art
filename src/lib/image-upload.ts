@@ -46,7 +46,11 @@ const PRESET: Record<StoreImageKind, CompressOptions> = {
 };
 
 /** Envia a imagem para a pasta da loja e devolve uma URL utilizável na loja pública. */
-export async function uploadStoreImage(storeId: string, kind: StoreImageKind, file: File): Promise<string> {
+export async function uploadStoreImage(
+  storeId: string,
+  kind: StoreImageKind,
+  file: File,
+): Promise<string> {
   if (file.size > 8 * 1024 * 1024) {
     throw new Error("A imagem deve ter no máximo 8 MB.");
   }
@@ -61,8 +65,11 @@ export async function uploadStoreImage(storeId: string, kind: StoreImageKind, fi
   });
   if (error) throw new Error("Não foi possível enviar a imagem. Tente novamente.");
 
-  const { data, error: signError } = await supabase.storage.from(BUCKET).createSignedUrl(path, SIGNED_URL_TTL);
-  if (signError || !data?.signedUrl) throw new Error("Imagem enviada, mas não foi possível gerar o link público.");
+  const { data, error: signError } = await supabase.storage
+    .from(BUCKET)
+    .createSignedUrl(path, SIGNED_URL_TTL);
+  if (signError || !data?.signedUrl)
+    throw new Error("Imagem enviada, mas não foi possível gerar o link público.");
 
   return data.signedUrl;
 }

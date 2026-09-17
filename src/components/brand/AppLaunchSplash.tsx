@@ -17,7 +17,10 @@ export function AppLaunchSplash() {
 
   useEffect(() => {
     const exitTimer = window.setTimeout(() => setPhase("leaving"), SPLASH_DURATION_MS);
-    const removeTimer = window.setTimeout(() => setPhase("hidden"), SPLASH_DURATION_MS + SPLASH_EXIT_MS);
+    const removeTimer = window.setTimeout(
+      () => setPhase("hidden"),
+      SPLASH_DURATION_MS + SPLASH_EXIT_MS,
+    );
     return () => {
       window.clearTimeout(exitTimer);
       window.clearTimeout(removeTimer);
@@ -25,14 +28,21 @@ export function AppLaunchSplash() {
   }, []);
 
   useEffect(() => {
-    const standalone = window.matchMedia("(display-mode: standalone)").matches
-      || (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    const standalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
     const slug = window.location.pathname.split("/").filter(Boolean)[0];
     if (!standalone || !slug || slug === "auth" || slug === "painel") return;
 
     const controller = new AbortController();
-    void fetch(`/api/public/manifest?loja=${encodeURIComponent(slug)}`, { signal: controller.signal })
-      .then((response) => response.ok ? response.json() as Promise<{ icons?: { src?: string; purpose?: string }[] }> : null)
+    void fetch(`/api/public/manifest?loja=${encodeURIComponent(slug)}`, {
+      signal: controller.signal,
+    })
+      .then((response) =>
+        response.ok
+          ? (response.json() as Promise<{ icons?: { src?: string; purpose?: string }[] }>)
+          : null,
+      )
       .then((manifest) => {
         const icon = manifest?.icons?.find((item) => item.purpose === "any")?.src;
         if (icon) setStoreIcon(icon);

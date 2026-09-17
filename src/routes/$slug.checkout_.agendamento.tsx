@@ -17,7 +17,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getAgendaOptions, getAgendaSlots, submitAgendamento } from "@/lib/checkout-especializado.functions";
+import {
+  getAgendaOptions,
+  getAgendaSlots,
+  submitAgendamento,
+} from "@/lib/checkout-especializado.functions";
 import { formatCurrency } from "@/lib/format";
 import { normalizePhoneBR } from "@/lib/phone";
 import { parsePaymentMethods } from "@/lib/store-config";
@@ -32,14 +36,20 @@ export const Route = createFileRoute("/$slug/checkout_/agendamento")({
       { title: "Agendar atendimento — Pedi Um" },
       {
         name: "description",
-        content: "Escolha o serviço, o profissional, a data e o horário disponível e confirme seu agendamento.",
+        content:
+          "Escolha o serviço, o profissional, a data e o horário disponível e confirme seu agendamento.",
       },
       { property: "og:title", content: "Agendar atendimento" },
-      { property: "og:description", content: "Agende com disponibilidade real, confirmada na hora." },
+      {
+        property: "og:description",
+        content: "Agende com disponibilidade real, confirmada na hora.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` }],
+    links: [
+      { rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` },
+    ],
   }),
   component: AgendamentoCheckout,
 });
@@ -72,7 +82,8 @@ function AgendamentoCheckout() {
   const [payment, setPayment] = useState("");
   const [saving, setSaving] = useState(false);
   const [accessOpen, setAccessOpen] = useState(false);
-  const [authenticatedCustomer, setAuthenticatedCustomer] = useState<CheckoutCustomerSession | null>(null);
+  const [authenticatedCustomer, setAuthenticatedCustomer] =
+    useState<CheckoutCustomerSession | null>(null);
 
   const service = useMemo(
     () => options.data?.services.find((item) => item.id === serviceId) ?? null,
@@ -100,7 +111,10 @@ function AgendamentoCheckout() {
   const deposit = useMemo(() => {
     const config = options.data?.config;
     if (!service || !config?.require_deposit) return 0;
-    return Math.round(service.price * (Math.min(100, Math.max(0, config.deposit_percent)) / 100) * 100) / 100;
+    return (
+      Math.round(service.price * (Math.min(100, Math.max(0, config.deposit_percent)) / 100) * 100) /
+      100
+    );
   }, [options.data, service]);
 
   async function confirm() {
@@ -132,7 +146,7 @@ function AgendamentoCheckout() {
           startsAt,
           paymentMethod: payment,
           name: customer.name.trim(),
-           phone: normalizePhoneBR(customer.phone).e164,
+          phone: normalizePhoneBR(customer.phone).e164,
           email: customer.email.trim() || null,
           notes: customer.notes.trim() || null,
         },
@@ -217,7 +231,10 @@ function AgendamentoCheckout() {
               <span className="text-muted-foreground">Horário</span>
               <span>
                 {startsAt
-                  ? new Date(startsAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
+                  ? new Date(startsAt).toLocaleString("pt-BR", {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    })
                   : "—"}
               </span>
             </div>
@@ -261,7 +278,9 @@ function AgendamentoCheckout() {
                 }}
                 className={cn(
                   "rounded-xl border px-4 py-3 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  active ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/50",
+                  active
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-card hover:border-primary/50",
                 )}
               >
                 <span className="block font-medium">{item.name}</span>
@@ -280,7 +299,9 @@ function AgendamentoCheckout() {
             <CardTitle className="flex items-center gap-2 text-base">
               <UserRound className="size-4" /> Profissional
             </CardTitle>
-            <CardDescription>Opcional: sem escolha, encaixamos em quem estiver livre.</CardDescription>
+            <CardDescription>
+              Opcional: sem escolha, encaixamos em quem estiver livre.
+            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-2 sm:grid-cols-2">
             <button
@@ -308,7 +329,9 @@ function AgendamentoCheckout() {
                 }}
                 className={cn(
                   "rounded-xl border px-4 py-3 text-left text-sm transition",
-                  professionalId === item.id ? "border-primary bg-primary/10" : "border-border bg-card",
+                  professionalId === item.id
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-card",
                 )}
               >
                 <span className="block font-medium">{item.name}</span>
@@ -368,7 +391,9 @@ function AgendamentoCheckout() {
           </div>
 
           {!serviceId ? (
-            <p className="text-sm text-muted-foreground">Escolha um serviço para ver os horários.</p>
+            <p className="text-sm text-muted-foreground">
+              Escolha um serviço para ver os horários.
+            </p>
           ) : slots.isLoading ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="size-4 animate-spin" /> Consultando disponibilidade…
@@ -407,7 +432,12 @@ function AgendamentoCheckout() {
           <CardDescription>Se necessário, deixe uma informação para o atendimento.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Input value={customer.notes} onChange={(event) => setCustomer((current) => ({ ...current, notes: event.target.value }))} />
+          <Input
+            value={customer.notes}
+            onChange={(event) =>
+              setCustomer((current) => ({ ...current, notes: event.target.value }))
+            }
+          />
         </CardContent>
       </Card>
       <PaymentChoice methods={methods} value={payment} onChange={setPayment} />
@@ -415,11 +445,25 @@ function AgendamentoCheckout() {
         open={accessOpen}
         storeSlug={slug}
         needsAddress={false}
-        initialAddress={{ zip: "", street: "", number: "", complement: "", reference: "", district: "", city: "", state: "" }}
+        initialAddress={{
+          zip: "",
+          street: "",
+          number: "",
+          complement: "",
+          reference: "",
+          district: "",
+          city: "",
+          state: "",
+        }}
         onOpenChange={setAccessOpen}
         onReady={(account) => {
           setAuthenticatedCustomer(account);
-          setCustomer((current) => ({ ...current, name: account.fullName, phone: account.phone, email: account.email }));
+          setCustomer((current) => ({
+            ...current,
+            name: account.fullName,
+            phone: account.phone,
+            email: account.email,
+          }));
           setAccessOpen(false);
           toast.success("Conta confirmada. Toque novamente em confirmar agendamento.");
         }}

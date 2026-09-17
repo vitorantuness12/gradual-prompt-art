@@ -67,8 +67,6 @@ import { DEFAULT_CHECKOUT_SETTINGS, getCheckoutSettings } from "@/lib/identifica
 import { normalizePhoneBR } from "@/lib/phone";
 import { maskPhone } from "@/lib/masks";
 
-
-
 import { fulfillmentOptions, timeSlots } from "@/lib/orders";
 import {
   PAYMENT_METHOD_LABEL,
@@ -103,7 +101,9 @@ export const Route = createFileRoute("/$slug/checkout")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` }],
+    links: [
+      { rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` },
+    ],
   }),
   component: CheckoutPage,
 });
@@ -138,7 +138,6 @@ function CheckoutPage() {
   const coupon = couponState.coupon;
   const checkingCoupon = couponState.checking;
 
-
   // Origem da venda: afiliado e UTMs vindos do link, guardados durante a sessão.
   useEffect(() => {
     const key = `origem:${slug}`;
@@ -165,7 +164,9 @@ function CheckoutPage() {
     queryFn: async () => {
       const { data: rows } = await supabase
         .from("checkout_offers")
-        .select("id, title, description, discount_percent, kind, impressions, conversions, product:products!checkout_offers_product_id_fkey(id, name, price)")
+        .select(
+          "id, title, description, discount_percent, kind, impressions, conversions, product:products!checkout_offers_product_id_fkey(id, name, price)",
+        )
         .eq("store_id", data!.store.id)
         .eq("is_active", true)
         .order("sort_order");
@@ -245,12 +246,16 @@ function CheckoutPage() {
   });
   const sendOrder = useServerFn(enviarPedidoLoja);
 
-
   // Funil: registra os eventos do checkout com a origem da visita.
   const logCheckout = useCallback(
     (
       kind: string,
-      extra: { amount?: number; couponCode?: string | null; offerId?: string | null; orderId?: string | null } = {},
+      extra: {
+        amount?: number;
+        couponCode?: string | null;
+        offerId?: string | null;
+        orderId?: string | null;
+      } = {},
     ) => {
       const storeId = data?.store.id;
       if (!storeId) return;
@@ -296,7 +301,6 @@ function CheckoutPage() {
 
   const store = data?.store ?? null;
   useStoreDocumentTitle(store?.name, "Finalizar pedido");
-
 
   const options = useMemo(() => (store ? fulfillmentOptions(store) : []), [store]);
   const payments = useMemo(
@@ -355,13 +359,17 @@ function CheckoutPage() {
   });
   const cashback = cashbackQuery.data ?? null;
 
-
-
   // Recuperação de carrinho abandonado: com o telefone já informado, guardamos
   // o carrinho no servidor para poder enviar um único lembrete depois. Sem
   // telefone válido não há nada a guardar — e nada é enviado.
   const cartSignature = JSON.stringify(
-    cart.items.map((item) => [item.productId, item.variantId ?? "", item.quantity, item.unitPrice, item.notes ?? ""]),
+    cart.items.map((item) => [
+      item.productId,
+      item.variantId ?? "",
+      item.quantity,
+      item.unitPrice,
+      item.notes ?? "",
+    ]),
   );
   useEffect(() => {
     if (!cart.hydrated) return;
@@ -401,11 +409,11 @@ function CheckoutPage() {
     // cartSignature resume o conteúdo do carrinho sem disparar a cada render.
   }, [cartSignature, cart.hydrated, form.phone, slug]);
 
-
-
   // Calcula distância, prazo e frete assim que o endereço estiver utilizável.
   const zipDigits = form.zip.replace(/\D/g, "");
-  const addressReady = isDeliverySelected && (zipDigits.length === 8 || (form.street.trim().length > 3 && form.district.trim().length > 2));
+  const addressReady =
+    isDeliverySelected &&
+    (zipDigits.length === 8 || (form.street.trim().length > 3 && form.district.trim().length > 2));
   useEffect(() => {
     if (!addressReady) {
       setEstimate(null);
@@ -438,7 +446,16 @@ function CheckoutPage() {
       active = false;
       window.clearTimeout(timer);
     };
-  }, [addressReady, form.zip, form.street, form.number, form.district, cart.subtotal, slug, quoteDeliveryFee]);
+  }, [
+    addressReady,
+    form.zip,
+    form.street,
+    form.number,
+    form.district,
+    cart.subtotal,
+    slug,
+    quoteDeliveryFee,
+  ]);
 
   // Busca automática de endereço pelo CEP (ViaCEP).
   useEffect(() => {
@@ -453,22 +470,31 @@ function CheckoutPage() {
     const timer = window.setTimeout(() => {
       fetch(`https://viacep.com.br/ws/${digits}/json/`)
         .then((res) => res.json())
-        .then((data: { erro?: boolean; logradouro?: string; bairro?: string; complemento?: string }) => {
-          if (!active) return;
-          if (data.erro) {
-            setCepError("Não encontramos este CEP. Você pode preencher o endereço manualmente.");
-            return;
-          }
-          setForm((current) => ({
-            ...current,
-            street: current.street.trim() || (data.logradouro ?? current.street),
-            district: current.district.trim() || (data.bairro ?? current.district),
-            complement: current.complement.trim() || (data.complemento ?? current.complement),
-          }));
-        })
+        .then(
+          (data: {
+            erro?: boolean;
+            logradouro?: string;
+            bairro?: string;
+            complemento?: string;
+          }) => {
+            if (!active) return;
+            if (data.erro) {
+              setCepError("Não encontramos este CEP. Você pode preencher o endereço manualmente.");
+              return;
+            }
+            setForm((current) => ({
+              ...current,
+              street: current.street.trim() || (data.logradouro ?? current.street),
+              district: current.district.trim() || (data.bairro ?? current.district),
+              complement: current.complement.trim() || (data.complemento ?? current.complement),
+            }));
+          },
+        )
         .catch(() => {
           if (!active) return;
-          setCepError("Não foi possível consultar o CEP agora. Você pode preencher o endereço manualmente.");
+          setCepError(
+            "Não foi possível consultar o CEP agora. Você pode preencher o endereço manualmente.",
+          );
         })
         .finally(() => {
           if (active) setIsSearchingCep(false);
@@ -491,10 +517,9 @@ function CheckoutPage() {
     }
     if (!stored) return;
     try {
-      const address = JSON.parse(stored) as Partial<Record<
-        "zip" | "street" | "number" | "district" | "complement" | "reference",
-        string
-      >>;
+      const address = JSON.parse(stored) as Partial<
+        Record<"zip" | "street" | "number" | "district" | "complement" | "reference", string>
+      >;
       setForm((current) => ({
         ...current,
         zip: current.zip.trim() || (address.zip ?? ""),
@@ -547,7 +572,11 @@ function CheckoutPage() {
   const discountFromCoupon = couponState.discount;
   const afterCoupon = Math.max(0, cart.subtotal - discountFromCoupon);
   // Teto de uso por pedido definido pelo lojista (ex.: no máximo 50% do valor).
-  const cashbackLimit = maxRedeemable(cashbackAvailable, afterCoupon, cashback?.maxPercentUse ?? 100);
+  const cashbackLimit = maxRedeemable(
+    cashbackAvailable,
+    afterCoupon,
+    cashback?.maxPercentUse ?? 100,
+  );
   const cashbackApplied = useCashback ? cashbackLimit : 0;
   const offers = (offersQuery.data ?? []).filter((offer) => offer.product);
   const bumpLines = offers
@@ -577,7 +606,10 @@ function CheckoutPage() {
   async function applyCoupon() {
     const result = await couponState.apply(couponCode);
     if (result.kind === "success") {
-      logCheckout("coupon", { couponCode: couponState.coupon?.code ?? null, amount: couponState.discount });
+      logCheckout("coupon", {
+        couponCode: couponState.coupon?.code ?? null,
+        amount: couponState.discount,
+      });
       toast.success(result.message);
     } else {
       toast.error(result.message);
@@ -663,9 +695,9 @@ function CheckoutPage() {
           customerEmail: form.email.trim() || null,
           type: scheduledFor ? "scheduled" : selected.orderType,
           tableNumber: fulfillment === "table" ? form.table.trim() : null,
-          distanceKm: isDelivery ? estimate?.distanceKm ?? null : null,
-          deliveryLat: isDelivery ? estimate?.destination?.lat ?? null : null,
-          deliveryLng: isDelivery ? estimate?.destination?.lng ?? null : null,
+          distanceKm: isDelivery ? (estimate?.distanceKm ?? null) : null,
+          deliveryLat: isDelivery ? (estimate?.destination?.lat ?? null) : null,
+          deliveryLng: isDelivery ? (estimate?.destination?.lng ?? null) : null,
           address: isDelivery
             ? {
                 zip: form.zip.trim(),
@@ -748,7 +780,11 @@ function CheckoutPage() {
         );
       }
 
-      logCheckout("purchase", { amount: finalTotal, orderId: order.id, couponCode: coupon?.code ?? null });
+      logCheckout("purchase", {
+        amount: finalTotal,
+        orderId: order.id,
+        couponCode: coupon?.code ?? null,
+      });
 
       // Fidelidade: credita pontos e cashback do pedido (silencioso em caso de falha).
       try {
@@ -802,7 +838,9 @@ function CheckoutPage() {
     <CheckoutThemeProvider className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border/70 bg-card">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-5 sm:px-6">
-          <span className="text-base font-semibold tracking-tight text-foreground">{store.name}</span>
+          <span className="text-base font-semibold tracking-tight text-foreground">
+            {store.name}
+          </span>
 
           <Link
             to="/$slug"
@@ -949,8 +987,8 @@ function CheckoutPage() {
                 className="flex flex-wrap gap-4"
               >
                 <Label htmlFor="agora" className="flex cursor-pointer items-center gap-2 text-sm">
-                  <RadioGroupItem id="agora" value="now" disabled={fulfillment === "scheduled"} />
-                  O mais breve possível
+                  <RadioGroupItem id="agora" value="now" disabled={fulfillment === "scheduled"} />O
+                  mais breve possível
                 </Label>
                 <Label
                   htmlFor="agendado"
@@ -1005,7 +1043,9 @@ function CheckoutPage() {
         <Card className="border-border/70 shadow-sm">
           <CardHeader>
             <CardTitle className="text-base">3. Detalhes do pedido</CardTitle>
-            <CardDescription>Ao confirmar, você acessará sua conta e escolherá o endereço salvo.</CardDescription>
+            <CardDescription>
+              Ao confirmar, você acessará sua conta e escolherá o endereço salvo.
+            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             {isDelivery ? (
@@ -1016,16 +1056,22 @@ function CheckoutPage() {
                   ) : estimate?.ok ? (
                     <>
                       <p className="text-sm text-foreground">
-                        Distância estimada: <strong>{formatKm(estimate.distanceKm)}</strong> · Entrega em
-                        aproximadamente <strong>{estimate.etaMinutes} min</strong> (chegada por volta das{" "}
+                        Distância estimada: <strong>{formatKm(estimate.distanceKm)}</strong> ·
+                        Entrega em aproximadamente <strong>{estimate.etaMinutes} min</strong>{" "}
+                        (chegada por volta das{" "}
                         <strong>
-                          {new Date(Date.now() + estimate.etaMinutes * 60_000).toLocaleTimeString("pt-BR", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {new Date(Date.now() + estimate.etaMinutes * 60_000).toLocaleTimeString(
+                            "pt-BR",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            },
+                          )}
                         </strong>
                         ) · Frete{" "}
-                        <strong>{estimate.fee === 0 ? "grátis" : formatCurrency(estimate.fee)}</strong>
+                        <strong>
+                          {estimate.fee === 0 ? "grátis" : formatCurrency(estimate.fee)}
+                        </strong>
                         {estimate.zoneLabel ? ` · Área: ${estimate.zoneLabel}` : ""}
                       </p>
                       {estimate.message ? (
@@ -1042,7 +1088,6 @@ function CheckoutPage() {
                           className="h-44"
                         />
                       ) : null}
-
                     </>
                   ) : (
                     <p className="text-sm text-muted-foreground">
@@ -1097,7 +1142,11 @@ function CheckoutPage() {
                     Remover
                   </Button>
                 ) : (
-                  <Button type="button" onClick={() => void applyCoupon()} disabled={checkingCoupon}>
+                  <Button
+                    type="button"
+                    onClick={() => void applyCoupon()}
+                    disabled={checkingCoupon}
+                  >
                     {checkingCoupon ? "Validando..." : "Aplicar"}
                   </Button>
                 )}
@@ -1116,7 +1165,10 @@ function CheckoutPage() {
                 {offers
                   .filter((offer) => offer.kind === "bump")
                   .map((offer) => {
-                    const price = bumpPrice(Number(offer.product!.price), Number(offer.discount_percent));
+                    const price = bumpPrice(
+                      Number(offer.product!.price),
+                      Number(offer.discount_percent),
+                    );
                     const checked = acceptedOffers.includes(offer.id);
                     return (
                       <label
@@ -1126,22 +1178,23 @@ function CheckoutPage() {
                         <input
                           type="checkbox"
                           checked={checked}
-                          onChange={(event) =>
-                            {
-                              if (event.target.checked) logCheckout("bump_accept", { offerId: offer.id });
-                              setAcceptedOffers((current) =>
-                                event.target.checked
-                                  ? [...current, offer.id]
-                                  : current.filter((id) => id !== offer.id),
-                              );
-                            }
-                          }
+                          onChange={(event) => {
+                            if (event.target.checked)
+                              logCheckout("bump_accept", { offerId: offer.id });
+                            setAcceptedOffers((current) =>
+                              event.target.checked
+                                ? [...current, offer.id]
+                                : current.filter((id) => id !== offer.id),
+                            );
+                          }}
                           className="mt-1 size-4 accent-primary"
                         />
                         <span className="min-w-0">
                           <span className="block font-medium text-foreground">{offer.title}</span>
                           {offer.description ? (
-                            <span className="block text-xs text-muted-foreground">{offer.description}</span>
+                            <span className="block text-xs text-muted-foreground">
+                              {offer.description}
+                            </span>
                           ) : null}
                           <span className="block text-xs text-muted-foreground">
                             {offer.product!.name} por {formatCurrency(price)}
@@ -1187,7 +1240,9 @@ function CheckoutPage() {
               </label>
             ) : null}
 
-            {cashback?.referralEnabled && !cashback.referredAlready && cashback.referralCount === 0 ? (
+            {cashback?.referralEnabled &&
+            !cashback.referredAlready &&
+            cashback.referralCount === 0 ? (
               <div className="space-y-2 rounded-xl border border-border/70 p-3 text-sm">
                 <p className="font-medium text-foreground">Tem um código de indicação?</p>
                 <p className="text-xs text-muted-foreground">
@@ -1230,7 +1285,6 @@ function CheckoutPage() {
                 ) : null}
               </div>
             ) : null}
-
 
             <PaymentMethodPicker
               enabled={enabledPayments}
@@ -1364,8 +1418,6 @@ function CheckoutPage() {
         />
       </main>
 
-
-
       {/* Barra fixa com o total */}
       <div className="fixed inset-x-0 bottom-0 border-t border-border/70 bg-card/95 backdrop-blur">
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
@@ -1480,14 +1532,16 @@ function CheckoutPage() {
             name: customer.fullName,
             email: customer.email,
             phone: customer.phone,
-            ...(address ? {
-              zip: address.zip,
-              street: address.street,
-              number: address.number,
-              complement: address.complement,
-              reference: address.reference,
-              district: address.district,
-            } : {}),
+            ...(address
+              ? {
+                  zip: address.zip,
+                  street: address.street,
+                  number: address.number,
+                  complement: address.complement,
+                  reference: address.reference,
+                  district: address.district,
+                }
+              : {}),
           }));
           setAccessOpen(false);
           setReview(true);

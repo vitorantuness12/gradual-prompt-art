@@ -13,7 +13,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAccountKinds } from "@/hooks/useAccountKinds";
@@ -148,7 +154,13 @@ function AuthPage() {
   }
 
   function go(next: Partial<z.infer<typeof searchSchema>>) {
-    const nextEtapa = (next.etapa && next.etapa !== "inicio" ? next.etapa : next.etapa === "inicio" ? "inicio" : etapa) as typeof urlEtapa;
+    const nextEtapa = (
+      next.etapa && next.etapa !== "inicio"
+        ? next.etapa
+        : next.etapa === "inicio"
+          ? "inicio"
+          : etapa
+    ) as typeof urlEtapa;
     const nextPerfil = "perfil" in next ? ((next.perfil ?? null) as AccountKind | null) : perfil;
     setStep({ etapa: nextEtapa, perfil: nextPerfil });
     void navigate({
@@ -310,7 +322,8 @@ function AuthPage() {
   /** Validação comum a todos os cadastros. */
   function validateBase(): string | null {
     if (form.fullName.trim().length < 3) return "Informe seu nome completo.";
-    if (!z.string().email().safeParse(form.email.trim()).success) return "Informe um e-mail válido.";
+    if (!z.string().email().safeParse(form.email.trim()).success)
+      return "Informe um e-mail válido.";
     if (!isValidPhone(form.phone)) return "Informe um telefone válido com DDD.";
     if (form.password.length < 8) return "A senha deve ter ao menos 8 caracteres.";
     if (form.password !== form.confirmPassword) return "As senhas não conferem.";
@@ -469,13 +482,14 @@ function AuthPage() {
             </Link>
           </Button>
         ) : null}
-
       </header>
 
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center px-4 pb-16 sm:px-6">
         {etapa === "inicio" ? (
           <section className="w-full">
-            <h1 className="text-center text-2xl font-semibold sm:text-3xl">Entrar ou criar conta</h1>
+            <h1 className="text-center text-2xl font-semibold sm:text-3xl">
+              Entrar ou criar conta
+            </h1>
             <p className="mt-2 text-center text-muted-foreground">
               Escolha como você quer continuar. Leva menos de um minuto.
             </p>
@@ -505,7 +519,6 @@ function AuthPage() {
                 <p className="mt-1 text-sm text-muted-foreground">Criar cadastro gratuito.</p>
               </Link>
             </div>
-
           </section>
         ) : null}
 
@@ -537,7 +550,6 @@ function AuthPage() {
                   <span className="mt-1 text-sm text-muted-foreground">{item.description}</span>
                 </Link>
               ))}
-
             </div>
           </section>
         ) : null}
@@ -550,7 +562,9 @@ function AuthPage() {
               </Badge>
               <CardTitle className="text-xl">
                 <h1 className="text-xl font-semibold">
-                  {etapa === "entrar" ? `Entrar como ${kindInfo?.label}` : `Criar conta de ${kindInfo?.label}`}
+                  {etapa === "entrar"
+                    ? `Entrar como ${kindInfo?.label}`
+                    : `Criar conta de ${kindInfo?.label}`}
                 </h1>
               </CardTitle>
               <CardDescription>{kindInfo?.description}</CardDescription>
@@ -624,7 +638,11 @@ function AuthPage() {
                           className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
                           aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                         >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -694,7 +712,11 @@ function AuthPage() {
                   </form>
                 )
               ) : (
-                <form onSubmit={(event) => void handleSignUp(event, perfil)} className="space-y-4" noValidate>
+                <form
+                  onSubmit={(event) => void handleSignUp(event, perfil)}
+                  className="space-y-4"
+                  noValidate
+                >
                   <div className="space-y-2">
                     <Label htmlFor="nome">Nome completo</Label>
                     <Input
@@ -816,7 +838,9 @@ function AuthPage() {
                           <Input
                             id="placa"
                             value={form.plate}
-                            onChange={(event) => update({ plate: event.target.value.toUpperCase() })}
+                            onChange={(event) =>
+                              update({ plate: event.target.value.toUpperCase() })
+                            }
                           />
                         </div>
                         <div className="space-y-2">
@@ -855,8 +879,8 @@ function AuthPage() {
                       </div>
                       <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
                         Depois do cadastro você envia os documentos (CNH, identificação, veículo e
-                        comprovante) e sua conta fica <strong>aguardando aprovação</strong>. As entregas
-                        são liberadas somente após a análise.
+                        comprovante) e sua conta fica <strong>aguardando aprovação</strong>. As
+                        entregas são liberadas somente após a análise.
                       </p>
                     </>
                   ) : null}
@@ -881,7 +905,11 @@ function AuthPage() {
                           className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
                           aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                         >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -906,13 +934,19 @@ function AuthPage() {
                       checked={form.terms}
                       onCheckedChange={(value) => update({ terms: value === true })}
                     />
-                    <Label htmlFor="termos" className="text-sm font-normal leading-snug text-muted-foreground">
+                    <Label
+                      htmlFor="termos"
+                      className="text-sm font-normal leading-snug text-muted-foreground"
+                    >
                       Li e aceito os{" "}
                       <Link to="/termos" className="text-foreground underline underline-offset-4">
                         Termos de uso
                       </Link>{" "}
                       e a{" "}
-                      <Link to="/privacidade" className="text-foreground underline underline-offset-4">
+                      <Link
+                        to="/privacidade"
+                        className="text-foreground underline underline-offset-4"
+                      >
                         Política de privacidade
                       </Link>
                       {perfil === "motoboy" ? ", incluindo as regras de entrega" : ""}.
@@ -926,7 +960,10 @@ function AuthPage() {
                       checked={form.marketing}
                       onCheckedChange={(value) => update({ marketing: value === true })}
                     />
-                    <Label htmlFor="mkt" className="text-sm font-normal leading-snug text-muted-foreground">
+                    <Label
+                      htmlFor="mkt"
+                      className="text-sm font-normal leading-snug text-muted-foreground"
+                    >
                       Quero receber novidades e promoções (opcional).
                     </Label>
                   </div>

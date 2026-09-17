@@ -26,7 +26,10 @@ import { normalizePhoneBR } from "@/lib/phone";
 import { parsePaymentMethods } from "@/lib/store-config";
 import { publicStoreQuery } from "@/lib/store-queries";
 import { cn } from "@/lib/utils";
-import { CheckoutCustomerAccess, type CheckoutAddressValue } from "@/components/store/CheckoutCustomerAccess";
+import {
+  CheckoutCustomerAccess,
+  type CheckoutAddressValue,
+} from "@/components/store/CheckoutCustomerAccess";
 import type { CheckoutCustomerSession } from "@/lib/checkout-customer.functions";
 
 export const Route = createFileRoute("/$slug/checkout_/loja")({
@@ -39,11 +42,16 @@ export const Route = createFileRoute("/$slug/checkout_/loja")({
           "Confirme os produtos, calcule o frete pelo CEP e finalize sua compra com estoque e preço verificados.",
       },
       { property: "og:title", content: "Finalizar compra" },
-      { property: "og:description", content: "Frete calculado pelo CEP e estoque conferido antes de fechar." },
+      {
+        property: "og:description",
+        content: "Frete calculado pelo CEP e estoque conferido antes de fechar.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` }],
+    links: [
+      { rel: "manifest", href: `/api/public/manifest?loja=${encodeURIComponent(params.slug)}` },
+    ],
   }),
   component: LojaCheckout,
 });
@@ -84,11 +92,17 @@ function LojaCheckout() {
   const [customer, setCustomer] = useState<CustomerFormValue>(emptyCustomer);
   const [payment, setPayment] = useState("");
   const [couponInput, setCouponInput] = useState("");
-  const [shipping, setShipping] = useState<{ fee: number; label: string; message: string; ok: boolean } | null>(null);
+  const [shipping, setShipping] = useState<{
+    fee: number;
+    label: string;
+    message: string;
+    ok: boolean;
+  } | null>(null);
   const [quoting, setQuoting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [accessOpen, setAccessOpen] = useState(false);
-  const [authenticatedCustomer, setAuthenticatedCustomer] = useState<CheckoutCustomerSession | null>(null);
+  const [authenticatedCustomer, setAuthenticatedCustomer] =
+    useState<CheckoutCustomerSession | null>(null);
 
   const cartLines = cart.items.map((item) => ({
     productId: item.productId,
@@ -129,7 +143,12 @@ function LojaCheckout() {
         const result = await quote({
           data: { slug, lines: cartLines, zip: digits, district: address.district || null },
         });
-        setShipping({ fee: result.fee, label: result.label, message: result.message, ok: result.ok });
+        setShipping({
+          fee: result.fee,
+          label: result.label,
+          message: result.message,
+          ok: result.ok,
+        });
         result.problems.forEach((problem) => toast.warning(problem));
       } finally {
         setQuoting(false);
@@ -138,7 +157,9 @@ function LojaCheckout() {
     [address.district, cartLines, quote, slug],
   );
 
-  const total = Math.max(0, cart.subtotal - coupon.discount) + (fulfillment === "delivery" ? shipping?.fee ?? 0 : 0);
+  const total =
+    Math.max(0, cart.subtotal - coupon.discount) +
+    (fulfillment === "delivery" ? (shipping?.fee ?? 0) : 0);
   const methods = parsePaymentMethods(store.data?.store.payment_methods);
 
   async function confirm() {
@@ -167,7 +188,7 @@ function LojaCheckout() {
           fulfillment,
           address: fulfillment === "delivery" ? address : null,
           name: customer.name.trim(),
-           phone: normalizePhoneBR(customer.phone).e164,
+          phone: normalizePhoneBR(customer.phone).e164,
           email: customer.email.trim() || null,
           notes: customer.notes.trim() || null,
         },
@@ -328,7 +349,11 @@ function LojaCheckout() {
                     if (value.replace(/\D/g, "").length === 8) void lookupZip(value);
                   }}
                 />
-                <Button variant="outline" onClick={() => void lookupZip(address.zip)} disabled={quoting}>
+                <Button
+                  variant="outline"
+                  onClick={() => void lookupZip(address.zip)}
+                  disabled={quoting}
+                >
                   {quoting ? <Loader2 className="size-4 animate-spin" /> : "Calcular"}
                 </Button>
               </div>
@@ -338,7 +363,9 @@ function LojaCheckout() {
               <Input
                 id="loja-street"
                 value={address.street}
-                onChange={(event) => setAddress((current) => ({ ...current, street: event.target.value }))}
+                onChange={(event) =>
+                  setAddress((current) => ({ ...current, street: event.target.value }))
+                }
               />
             </div>
             <div className="grid gap-1.5">
@@ -346,7 +373,9 @@ function LojaCheckout() {
               <Input
                 id="loja-number"
                 value={address.number}
-                onChange={(event) => setAddress((current) => ({ ...current, number: event.target.value }))}
+                onChange={(event) =>
+                  setAddress((current) => ({ ...current, number: event.target.value }))
+                }
               />
             </div>
             <div className="grid gap-1.5">
@@ -354,7 +383,9 @@ function LojaCheckout() {
               <Input
                 id="loja-district"
                 value={address.district}
-                onChange={(event) => setAddress((current) => ({ ...current, district: event.target.value }))}
+                onChange={(event) =>
+                  setAddress((current) => ({ ...current, district: event.target.value }))
+                }
               />
             </div>
             <div className="grid gap-1.5">
@@ -362,7 +393,9 @@ function LojaCheckout() {
               <Input
                 id="loja-city"
                 value={address.city}
-                onChange={(event) => setAddress((current) => ({ ...current, city: event.target.value }))}
+                onChange={(event) =>
+                  setAddress((current) => ({ ...current, city: event.target.value }))
+                }
               />
             </div>
             <div className="grid gap-1.5">
@@ -381,7 +414,9 @@ function LojaCheckout() {
               <Input
                 id="loja-complement"
                 value={address.complement}
-                onChange={(event) => setAddress((current) => ({ ...current, complement: event.target.value }))}
+                onChange={(event) =>
+                  setAddress((current) => ({ ...current, complement: event.target.value }))
+                }
               />
             </div>
             {shipping ? (
@@ -442,8 +477,22 @@ function LojaCheckout() {
         onOpenChange={setAccessOpen}
         onReady={(account: CheckoutCustomerSession, selected: CheckoutAddressValue | null) => {
           setAuthenticatedCustomer(account);
-          setCustomer((current) => ({ ...current, name: account.fullName, phone: account.phone, email: account.email }));
-          if (selected) setAddress({ zip: selected.zip, street: selected.street, number: selected.number, district: selected.district, city: selected.city, state: selected.state, complement: selected.complement });
+          setCustomer((current) => ({
+            ...current,
+            name: account.fullName,
+            phone: account.phone,
+            email: account.email,
+          }));
+          if (selected)
+            setAddress({
+              zip: selected.zip,
+              street: selected.street,
+              number: selected.number,
+              district: selected.district,
+              city: selected.city,
+              state: selected.state,
+              complement: selected.complement,
+            });
           setAccessOpen(false);
           toast.success("Conta confirmada. Toque novamente em concluir pedido.");
         }}
