@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Logo } from "@/components/brand/Logo";
 import { CustomerAddressManager } from "@/components/cliente/CustomerAddressManager";
+import { CustomerPushCard } from "@/components/cliente/CustomerPushCard";
 import {
   CustomerDashboardOrders,
   CustomerOrderSectionTitle,
@@ -257,7 +258,8 @@ function CustomerDashboardPage() {
             </TabsContent>
 
             <TabsContent value="dados" className="mt-6">
-              <Card className="max-w-2xl rounded-lg shadow-sm">
+              <div className="max-w-2xl space-y-4">
+              <Card className="rounded-lg shadow-sm">
                 <CardHeader>
                   <CardTitle className="text-lg">Meus dados</CardTitle>
                   <CardDescription>Atualize seus dados de contato e preferências.</CardDescription>
@@ -320,6 +322,8 @@ function CustomerDashboardPage() {
                   </form>
                 </CardContent>
               </Card>
+              {loja ? <CustomerPushCard storeSlug={loja} /> : null}
+              </div>
             </TabsContent>
           </Tabs>
         )}

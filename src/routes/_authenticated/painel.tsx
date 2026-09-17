@@ -9,6 +9,7 @@ import {
   Bike,
   
   CalendarClock,
+  BellRing,
   ClipboardList,
   CreditCard,
   FileText,
@@ -86,6 +87,7 @@ const NAV: Record<FeatureKey, { to: string; label: string; icon: typeof LayoutDa
   avaliacoes: { to: "/painel/avaliacoes", label: "Avaliações", icon: Star },
   promocoes: { to: "/painel/promocoes", label: "Cupons e promoções", icon: Tag },
   marketing: { to: "/painel/marketing", label: "Marketing automático", icon: Megaphone },
+  notificacoes: { to: "/painel/notificacoes", label: "Notificações push", icon: BellRing },
   fidelidade: { to: "/painel/fidelidade", label: "Fidelidade e CRM", icon: Gift },
   relatorios: { to: "/painel/relatorios", label: "Relatórios", icon: BarChart3 },
   metas: { to: "/painel/metas", label: "Metas e resumo", icon: Target },
