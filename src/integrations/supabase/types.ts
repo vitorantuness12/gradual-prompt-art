@@ -10211,6 +10211,10 @@ export type Database = {
         }
         Returns: Json
       }
+      delete_my_saved_address: {
+        Args: { _address_id: string }
+        Returns: undefined
+      }
       enqueue_appointment_reminders: { Args: never; Returns: undefined }
       has_role: {
         Args: {
@@ -10260,6 +10264,10 @@ export type Database = {
         }[]
       }
       my_account_kinds: { Args: never; Returns: Json }
+      set_my_default_address: {
+        Args: { _address_id: string }
+        Returns: undefined
+      }
       store_plan_limits: { Args: { _store_id: string }; Returns: Json }
       store_rating_summary: { Args: { _store_id: string }; Returns: Json }
     }

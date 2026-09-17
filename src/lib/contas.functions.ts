@@ -23,9 +23,8 @@ export interface ResolveIdentifierResult {
 export const resolveLoginEmail = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => identifierInput.parse(data))
   .handler(async ({ data }): Promise<ResolveIdentifierResult> => {
-    const { clientIdentifier, consumeRateLimit, rateLimitMessage } = await import(
-      "@/lib/security.server"
-    );
+    const { clientIdentifier, consumeRateLimit, rateLimitMessage } =
+      await import("@/lib/security.server");
     const limit = await consumeRateLimit("login", clientIdentifier(getRequest()?.headers));
     if (!limit.allowed) return { ok: false, message: rateLimitMessage(limit) };
 
@@ -63,9 +62,8 @@ export const recordLoginAttempt = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => attemptInput.parse(data))
   .handler(async ({ data }): Promise<{ ok: boolean; blocked?: boolean; message?: string }> => {
     const headers = getRequest()?.headers;
-    const { clientIdentifier, consumeRateLimit, rateLimitMessage } = await import(
-      "@/lib/security.server"
-    );
+    const { clientIdentifier, consumeRateLimit, rateLimitMessage } =
+      await import("@/lib/security.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     await supabaseAdmin.from("login_attempts").insert({
@@ -96,6 +94,33 @@ export interface MyOrderSummary {
   createdAt: string;
   storeName: string;
   storeSlug: string;
+  publicToken: string;
+}
+
+export interface MySavedAddress {
+  id: string;
+  label: string;
+  street: string;
+  number: string | null;
+  complement: string | null;
+  reference: string | null;
+  district: string | null;
+  city: string;
+  state: string | null;
+  zipCode: string | null;
+  isDefault: boolean;
+}
+
+export interface CustomerDashboardData {
+  profile: {
+    fullName: string;
+    email: string;
+    phone: string;
+    birthDate: string | null;
+    marketingOptIn: boolean;
+  } | null;
+  orders: MyOrderSummary[];
+  addresses: MySavedAddress[];
 }
 
 /** Pedidos feitos pelo telefone do cliente logado, em todas as lojas. */
@@ -114,7 +139,9 @@ export const myCustomerOrders = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows } = await supabaseAdmin
       .from("orders")
-      .select("id, code, status, type, total, created_at, customer_phone, store:stores(name, slug)")
+      .select(
+        "id, code, status, type, total, created_at, customer_phone, public_token, store:stores(name, slug)",
+      )
       .order("created_at", { ascending: false })
       .limit(200);
 
@@ -130,5 +157,175 @@ export const myCustomerOrders = createServerFn({ method: "POST" })
         createdAt: row.created_at,
         storeName: (row.store as { name: string } | null)?.name ?? "Loja",
         storeSlug: (row.store as { slug: string } | null)?.slug ?? "",
+        publicToken: row.public_token,
       }));
+  });
+
+export const getCustomerDashboard = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<CustomerDashboardData> => {
+    const [
+      { data: profile, error: profileError },
+      { data: orders, error: ordersError },
+      { data: addresses, error: addressesError },
+    ] = await Promise.all([
+      context.supabase
+        .from("customer_profiles")
+        .select("full_name, email, phone, birth_date, marketing_opt_in")
+        .eq("user_id", context.userId)
+        .maybeSingle(),
+      context.supabase
+        .from("orders")
+        .select("id, code, status, type, total, created_at, public_token, store:stores(name, slug)")
+        .eq("user_id", context.userId)
+        .order("created_at", { ascending: false })
+        .limit(50),
+      context.supabase
+        .from("saved_addresses")
+        .select(
+          "id, label, street, number, complement, reference, district, city, state, zip_code, is_default",
+        )
+        .eq("user_id", context.userId)
+        .order("is_default", { ascending: false })
+        .order("created_at", { ascending: true }),
+    ]);
+
+    const error = profileError ?? ordersError ?? addressesError;
+    if (error) throw new Error("Não foi possível carregar sua conta agora.");
+
+    return {
+      profile: profile
+        ? {
+            fullName: profile.full_name,
+            email: profile.email ?? String(context.claims.email ?? ""),
+            phone: profile.phone ?? "",
+            birthDate: profile.birth_date,
+            marketingOptIn: profile.marketing_opt_in,
+          }
+        : null,
+      orders: (orders ?? []).map((order) => ({
+        id: order.id,
+        code: order.code,
+        status: order.status,
+        type: order.type,
+        total: Number(order.total),
+        createdAt: order.created_at,
+        storeName: (order.store as { name: string } | null)?.name ?? "Loja",
+        storeSlug: (order.store as { slug: string } | null)?.slug ?? "",
+        publicToken: order.public_token,
+      })),
+      addresses: (addresses ?? []).map((item) => ({
+        id: item.id,
+        label: item.label,
+        street: item.street,
+        number: item.number,
+        complement: item.complement,
+        reference: item.reference,
+        district: item.district,
+        city: item.city,
+        state: item.state,
+        zipCode: item.zip_code,
+        isDefault: item.is_default,
+      })),
+    };
+  });
+
+const addressInput = z.object({
+  id: z.string().uuid().optional(),
+  label: z.string().trim().min(1).max(40),
+  street: z.string().trim().min(2).max(160),
+  number: z.string().trim().max(30).optional(),
+  complement: z.string().trim().max(120).optional(),
+  reference: z.string().trim().max(160).optional(),
+  district: z.string().trim().max(120).optional(),
+  city: z.string().trim().min(2).max(120),
+  state: z.string().trim().max(40).optional(),
+  zipCode: z.string().trim().max(20).optional(),
+  makeDefault: z.boolean(),
+});
+
+export const saveMyAddress = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => addressInput.parse(data))
+  .handler(async ({ data, context }) => {
+    const values = {
+      user_id: context.userId,
+      label: data.label,
+      street: data.street,
+      number: data.number || null,
+      complement: data.complement || null,
+      reference: data.reference || null,
+      district: data.district || null,
+      city: data.city,
+      state: data.state || null,
+      zip_code: data.zipCode?.replace(/\D/g, "") || null,
+      ...(data.makeDefault ? {} : { is_default: false }),
+    };
+
+    const query = data.id
+      ? context.supabase
+          .from("saved_addresses")
+          .update(values)
+          .eq("id", data.id)
+          .eq("user_id", context.userId)
+          .select("id")
+          .single()
+      : context.supabase.from("saved_addresses").insert(values).select("id").single();
+    const { data: savedAddress, error } = await query;
+    if (error) throw new Error("Não foi possível salvar o endereço.");
+
+    if (data.makeDefault) {
+      const { error: defaultError } = await context.supabase.rpc("set_my_default_address", {
+        _address_id: savedAddress.id,
+      });
+      if (defaultError)
+        throw new Error("O endereço foi salvo, mas não pôde ser definido como principal.");
+    }
+    return { ok: true };
+  });
+
+export const setMyDefaultAddress = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("set_my_default_address", {
+      _address_id: data.id,
+    });
+    if (error) throw new Error("Não foi possível alterar o endereço principal.");
+    return { ok: true };
+  });
+
+export const deleteMyAddress = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("delete_my_saved_address", {
+      _address_id: data.id,
+    });
+    if (error) throw new Error("Não foi possível excluir o endereço.");
+    return { ok: true };
+  });
+
+export const saveCustomerProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        fullName: z.string().trim().min(2).max(120),
+        phone: z.string().trim().min(10).max(14),
+        birthDate: z.string().date().nullable(),
+        marketingOptIn: z.boolean(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("customer_profiles").upsert({
+      user_id: context.userId,
+      full_name: data.fullName,
+      phone: data.phone.replace(/\D/g, ""),
+      birth_date: data.birthDate,
+      marketing_opt_in: data.marketingOptIn,
+    });
+    if (error) throw new Error("Não foi possível atualizar seus dados.");
+    return { ok: true };
   });

@@ -9,3 +9,4 @@
 - [x] Repetir o alerta de pedido novo até aceitar ou recusar, com controle de volume
 - [x] Preparar os e-mails transacionais e de acesso para notify.pedium.com.br
 - [x] Exigir conta de cliente no fechamento do checkout e reutilizar endereços salvos
+- [x] Criar painel do cliente logado com pedidos, histórico e endereços salvos
