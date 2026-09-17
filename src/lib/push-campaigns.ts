@@ -26,10 +26,10 @@ export interface PushCampaignSummary {
   title: string;
   body: string;
   audienceType: PushAudienceType;
-  audienceConfig: Record<string, unknown>;
+  audienceConfig: { inactiveDays?: number };
   scheduleType: PushScheduleType;
   scheduledAt: string | null;
-  recurrence: Record<string, unknown>;
+  recurrence: { days?: number[]; time?: string };
   status: PushCampaignStatus;
   nextRunAt: string | null;
   sentCount: number;

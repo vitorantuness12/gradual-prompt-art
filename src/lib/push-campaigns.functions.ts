@@ -37,10 +37,10 @@ function mapCampaign(row: Record<string, unknown>): PushCampaignSummary {
   return {
     id: String(row["id"]), name: String(row["name"]), title: String(row["title"]), body: String(row["body"]),
     audienceType: row["audience_type"] as PushCampaignSummary["audienceType"],
-    audienceConfig: (row["audience_config"] ?? {}) as Record<string, unknown>,
+    audienceConfig: (row["audience_config"] ?? {}) as { inactiveDays?: number },
     scheduleType: row["schedule_type"] as PushCampaignSummary["scheduleType"],
     scheduledAt: (row["scheduled_at"] as string | null) ?? null,
-    recurrence: (row["recurrence"] ?? {}) as Record<string, unknown>,
+    recurrence: (row["recurrence"] ?? {}) as { days?: number[]; time?: string },
     status: row["status"] as PushCampaignSummary["status"],
     nextRunAt: (row["next_run_at"] as string | null) ?? null,
     sentCount: Number(row["sent_count"] ?? 0), failedCount: Number(row["failed_count"] ?? 0),

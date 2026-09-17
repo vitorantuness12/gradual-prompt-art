@@ -37,6 +37,7 @@ const SHORTCUT_PATH: Record<FeatureKey, string> = {
   pagamentos: "/painel/pagamentos",
   fiscal: "/painel/fiscal",
   marketing: "/painel/marketing",
+  notificacoes: "/painel/notificacoes",
   inteligencia: "/painel/inteligencia",
   metas: "/painel/metas",
   whatsapp: "/painel/whatsapp",
