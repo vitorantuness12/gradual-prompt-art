@@ -19,6 +19,7 @@ export const FEATURE_KEYS = [
   "avaliacoes",
   "promocoes",
   "marketing",
+  "notificacoes",
   "fidelidade",
   "relatorios",
   "metas",
@@ -68,6 +69,7 @@ export const FEATURE_LABEL: Record<FeatureKey, string> = {
   avaliacoes: "Avaliações",
   promocoes: "Cupons e promoções",
   marketing: "Marketing automático",
+  notificacoes: "Notificações push",
   fidelidade: "Fidelidade e CRM",
   relatorios: "Relatórios",
   metas: "Metas e resumo do dia",
@@ -85,10 +87,16 @@ export const FEATURE_LABEL: Record<FeatureKey, string> = {
 
 /** Grupos visuais do menu lateral, na ordem de exibição. */
 export const FEATURE_GROUPS: { title: string; keys: FeatureKey[] }[] = [
-  { title: "Operação", keys: ["dashboard", "pedidos", "encomendas", "pdv", "salao", "kds", "agendamentos"] },
+  {
+    title: "Operação",
+    keys: ["dashboard", "pedidos", "encomendas", "pdv", "salao", "kds", "agendamentos"],
+  },
   { title: "Catálogo", keys: ["produtos", "estoque", "inteligencia", "personalizar"] },
   { title: "Logística", keys: ["entregas", "entregadores", "frete"] },
-  { title: "Clientes", keys: ["clientes", "avaliacoes", "promocoes", "marketing", "fidelidade"] },
+  {
+    title: "Clientes",
+    keys: ["clientes", "avaliacoes", "promocoes", "marketing", "notificacoes", "fidelidade"],
+  },
   { title: "Gestão", keys: ["relatorios", "metas", "pagamentos", "fiscal"] },
   { title: "Canais", keys: ["whatsapp", "impressao", "integracoes"] },
   { title: "Conta", keys: ["equipe", "assinatura", "privacidade", "configuracoes", "suporte"] },
@@ -114,7 +122,16 @@ export const SEGMENT_GROUPS: SegmentGroup[] = [
     id: "alimentacao",
     label: "Alimentação e delivery rápido",
     description: "Pedidos em tempo real, cozinha e entregas.",
-    examples: ["Restaurante", "Hamburgueria", "Pizzaria", "Açaí", "Pastelaria", "Marmitaria", "Doceria", "Padaria"],
+    examples: [
+      "Restaurante",
+      "Hamburgueria",
+      "Pizzaria",
+      "Açaí",
+      "Pastelaria",
+      "Marmitaria",
+      "Doceria",
+      "Padaria",
+    ],
     hidden: [],
     highlights: ["pedidos", "encomendas", "pdv", "kds", "agendamentos", "entregas"],
     dashboard: "alimentacao",
@@ -123,7 +140,15 @@ export const SEGMENT_GROUPS: SegmentGroup[] = [
     id: "varejo",
     label: "Varejo e lojas físicas/online",
     description: "Vitrine, estoque e vendas no balcão.",
-    examples: ["Roupas", "Calçados", "Eletrônicos", "Utilidades", "Tabacaria", "Cosméticos", "Presentes"],
+    examples: [
+      "Roupas",
+      "Calçados",
+      "Eletrônicos",
+      "Utilidades",
+      "Tabacaria",
+      "Cosméticos",
+      "Presentes",
+    ],
     hidden: ["salao", "kds"],
     highlights: ["produtos", "estoque", "pedidos", "encomendas", "agendamentos"],
     dashboard: "varejo",
@@ -147,9 +172,25 @@ export function segmentGroupById(id: string | null | undefined): SegmentGroup | 
 const KEYWORDS: { group: SegmentGroupId; terms: string[] }[] = [
   {
     group: "alimentacao",
-    terms: ["restaur", "hamb", "pizza", "açaí", "acai", "pastel", "marmit", "doce", "padar", "lanch", "bar", "food"],
+    terms: [
+      "restaur",
+      "hamb",
+      "pizza",
+      "açaí",
+      "acai",
+      "pastel",
+      "marmit",
+      "doce",
+      "padar",
+      "lanch",
+      "bar",
+      "food",
+    ],
   },
-  { group: "conveniencia", terms: ["drogar", "farm", "mercad", "hortifruti", "açougue", "acougue", "pet"] },
+  {
+    group: "conveniencia",
+    terms: ["drogar", "farm", "mercad", "hortifruti", "açougue", "acougue", "pet"],
+  },
   { group: "alimentacao", terms: ["café", "cafe", "cafeter", "padar"] },
   { group: "varejo", terms: ["loja"] },
 ];
@@ -171,9 +212,14 @@ export function defaultFeaturesFor(groupId: SegmentGroupId): FeatureKey[] {
 }
 
 /** Garante que essenciais estejam sempre presentes e remove chaves desconhecidas. */
-export function normalizeFeatures(values: readonly string[] | null | undefined, groupId?: string | null): FeatureKey[] {
+export function normalizeFeatures(
+  values: readonly string[] | null | undefined,
+  groupId?: string | null,
+): FeatureKey[] {
   if (!values || values.length === 0) return defaultFeaturesFor(suggestOrDefault(groupId));
-  const set = new Set(values.filter((value): value is FeatureKey => FEATURE_KEYS.includes(value as FeatureKey)));
+  const set = new Set(
+    values.filter((value): value is FeatureKey => FEATURE_KEYS.includes(value as FeatureKey)),
+  );
   for (const key of ESSENTIAL_FEATURES) set.add(key);
   return FEATURE_KEYS.filter((key) => set.has(key));
 }
