@@ -54,6 +54,9 @@ export const Route = createFileRoute("/")({
         content:
           "Loja online, pedidos, PDV, estoque e gestão em uma única plataforma para o seu negócio.",
       },
+      { name: "application-name", content: "Pedi Um" },
+      { name: "apple-mobile-web-app-title", content: "Pedi Um" },
+      { name: "theme-color", content: "#f97316" },
     ],
     links: [
       { rel: "canonical", href: "https://oseupedido.com.br/" },

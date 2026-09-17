@@ -103,11 +103,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Loja online, pedidos, PDV, estoque e gestão em uma única plataforma para o seu negócio.",
       },
-      { name: "application-name", content: "Pedi Um" },
-      { name: "theme-color", content: "#f97316" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-title", content: "Pedi Um" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
     ],
     links: [
