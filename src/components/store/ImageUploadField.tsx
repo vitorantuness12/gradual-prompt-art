@@ -47,7 +47,7 @@ export function ImageUploadField({ storeId, kind, label, value, onChange, hint }
         <div
           className={cn(
             "flex items-center justify-center overflow-hidden rounded-xl border border-dashed border-border bg-muted/40",
-            kind === "logo" ? "size-20" : "h-20 w-36",
+            kind === "logo" || kind === "pwa-icon" || kind === "pwa-maskable" ? "size-20" : "h-20 w-36",
           )}
         >
           {value ? (

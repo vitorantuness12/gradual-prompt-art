@@ -1,10 +1,7 @@
-import { AlertTriangle, Image as ImageIcon } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
+import { AlertTriangle } from "lucide-react";
 
 import { ImageUploadField } from "@/components/store/ImageUploadField";
 import { Button } from "@/components/ui/button";
-import { uploadStoreImage } from "@/lib/image-upload";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
@@ -70,7 +67,6 @@ const COLOR_FIELDS: { key: keyof StoreThemeColors; label: string }[] = [
 
 export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
   const warnings = contrastWarnings(config.colors);
-  const [uploading, setUploading] = useState(false);
 
   const patch = (partial: Partial<StoreThemeConfig>) => onChange({ ...config, ...partial });
   const setColor = (key: keyof StoreThemeColors, value: string) =>
@@ -231,10 +227,7 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
 
       <section className="space-y-4">
         <h3 className="text-sm font-semibold text-foreground">Imagens</h3>
-        <p className="text-xs text-muted-foreground">
-          Logo e capa aparecem no topo da loja pública. A capa do app é usada quando o cliente instala a loja no
-          celular (use uma imagem quadrada, mínimo 512×512).
-        </p>
+        <p className="text-xs text-muted-foreground">Logo e capa aparecem no topo da loja pública.</p>
 
         <ImageUploadField
           storeId={storeId ?? null}
@@ -254,56 +247,35 @@ export function ThemeEditorSidebar({ config, onChange, storeId }: Props) {
           hint="Imagem horizontal (1600×900) exibida no topo da loja."
         />
 
-        <div className="flex items-center gap-3">
-          {config.branding.faviconUrl ? (
-            <img
-              src={config.branding.faviconUrl}
-              alt="Capa do app PWA"
-              className="size-16 shrink-0 rounded-xl border border-border object-cover"
-            />
-          ) : (
-            <div className="grid size-16 shrink-0 place-items-center rounded-xl border border-dashed border-border text-muted-foreground">
-              <ImageIcon className="size-5" aria-hidden="true" />
-            </div>
-          )}
-          <div className="min-w-0 space-y-2">
-            <Label htmlFor="branding-pwa" className="text-xs">
-              Capa do app (PWA)
-            </Label>
+        <div className="space-y-4 rounded-lg border border-border p-4">
+          <div className="space-y-2">
+            <Label htmlFor="branding-pwa-name">Nome do aplicativo da loja</Label>
             <Input
-              id="branding-pwa"
-              type="file"
-              accept="image/*"
-              disabled={!storeId || uploading}
-              onChange={async (event) => {
-                const file = event.target.files?.[0];
-                event.target.value = "";
-                if (!file || !storeId) return;
-                setUploading(true);
-                try {
-                  const url = await uploadStoreImage(storeId, "logo", file);
-                  patch({ branding: { ...config.branding, faviconUrl: url } });
-                  toast.success("Imagem enviada.");
-                } catch (error) {
-                  toast.error(error instanceof Error ? error.message : "Falha ao enviar a imagem.");
-                } finally {
-                  setUploading(false);
-                }
-              }}
+              id="branding-pwa-name"
+              value={config.branding.pwaName ?? ""}
+              maxLength={30}
+              placeholder="Usar o nome da loja"
+              onChange={(event) => patch({ branding: { ...config.branding, pwaName: event.target.value || null } })}
             />
-            {config.branding.faviconUrl ? (
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => patch({ branding: { ...config.branding, faviconUrl: null } })}
-              >
-                Remover imagem
-              </Button>
-            ) : null}
+            <p className="text-xs text-muted-foreground">Aparece abaixo do ícone na tela inicial do cliente.</p>
           </div>
+          <ImageUploadField
+            storeId={storeId ?? null}
+            kind="pwa-icon"
+            label="Ícone do aplicativo"
+            value={config.branding.pwaIconUrl}
+            onChange={(url) => patch({ branding: { ...config.branding, pwaIconUrl: url } })}
+            hint="Imagem quadrada de 512×512. Se ficar vazio, usa a logo da loja."
+          />
+          <ImageUploadField
+            storeId={storeId ?? null}
+            kind="pwa-maskable"
+            label="Ícone adaptável"
+            value={config.branding.pwaMaskableIconUrl}
+            onChange={(url) => patch({ branding: { ...config.branding, pwaMaskableIconUrl: url } })}
+            hint="Deixe uma margem segura ao redor da marca para Android."
+          />
         </div>
-        {uploading ? <p className="text-xs text-muted-foreground">Enviando imagem…</p> : null}
       </section>
 
 

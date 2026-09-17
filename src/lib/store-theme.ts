@@ -39,6 +39,9 @@ export interface StoreThemeConfig {
     logoMobileUrl: string | null;
     faviconUrl: string | null;
     coverUrl: string | null;
+    pwaName: string | null;
+    pwaIconUrl: string | null;
+    pwaMaskableIconUrl: string | null;
     promoImages: string[];
   };
   typography: {
@@ -230,7 +233,16 @@ export function resolvedFooterColors(
 export function defaultThemeConfig(): StoreThemeConfig {
   return {
     colors: paletteFromPrimary("#e2452b"),
-    branding: { logoUrl: null, logoMobileUrl: null, faviconUrl: null, coverUrl: null, promoImages: [] },
+    branding: {
+      logoUrl: null,
+      logoMobileUrl: null,
+      faviconUrl: null,
+      coverUrl: null,
+      pwaName: null,
+      pwaIconUrl: null,
+      pwaMaskableIconUrl: null,
+      promoImages: [],
+    },
     typography: { font: "sora", titleSize: 1, titleWeight: 600 },
     layout: {
       radius: 16,
