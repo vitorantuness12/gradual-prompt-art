@@ -15,17 +15,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAccountKinds } from "@/hooks/useAccountKinds";
-import { ACCOUNT_KINDS, VEHICLE_TYPES, redirectForAccount, type AccountKind } from "@/lib/contas";
+import { ACCOUNT_KINDS, redirectForAccount, type AccountKind } from "@/lib/contas";
 import { persistProfile, savePendingProfile, type PendingProfile } from "@/lib/contas-pending";
 import { recordLoginAttempt, resolveLoginEmail } from "@/lib/contas.functions";
 import { isValidDocument, isValidPhone, maskDocument, maskPhone, onlyDigits } from "@/lib/masks";
