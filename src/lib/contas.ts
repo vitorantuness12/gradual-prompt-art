@@ -102,9 +102,3 @@ export const VEHICLE_TYPES = [
   { value: "outro", label: "Outro" },
 ];
 
-export const COURIER_DOCUMENT_KINDS = [
-  { value: "cnh", label: "CNH", hint: "Frente e verso legíveis, em JPG ou PNG (até 5 MB)." },
-  { value: "identidade", label: "Documento de identificação", hint: "RG ou CPF digitalizado." },
-  { value: "veiculo", label: "Documento do veículo", hint: "CRLV atualizado, quando aplicável." },
-  { value: "comprovante", label: "Comprovante de residência", hint: "Emitido nos últimos 3 meses." },
-];

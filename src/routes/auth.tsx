@@ -7,6 +7,7 @@ import { z } from "zod";
 import { Logo } from "@/components/brand/Logo";
 import { AppLaunchSplash } from "@/components/brand/AppLaunchSplash";
 import { MerchantPwaLogin } from "@/components/auth/MerchantPwaLogin";
+import { CourierPwaLogin } from "@/components/auth/CourierPwaLogin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -197,7 +198,7 @@ function AuthPage() {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) return;
       const kinds = await fetchAccountKinds();
-      if (search.origem === "app" && !kinds.merchant) {
+       if (search.origem === "app" && search.perfil === "lojista" && !kinds.merchant) {
         await supabase.auth.signOut();
         toast.error("Este aplicativo é exclusivo para contas de lojista.");
         return;
@@ -210,7 +211,7 @@ function AuthPage() {
   /** Depois de autenticar, decide o destino conforme os perfis da conta. */
   async function routeAfterLogin(chosen: AccountKind | null) {
     const kinds = await fetchAccountKinds();
-    if (search.origem === "app" && !kinds.merchant) {
+    if (search.origem === "app" && perfil === "lojista" && !kinds.merchant) {
       await supabase.auth.signOut();
       toast.error("Esta conta não possui acesso de lojista.");
       return;
@@ -452,6 +453,7 @@ function AuthPage() {
 
   const kindInfo = ACCOUNT_KINDS.find((item) => item.key === perfil);
   const merchantApp = search.origem === "app" && etapa === "entrar" && perfil === "lojista";
+  const courierApp = search.origem === "app" && etapa === "entrar" && perfil === "motoboy";
 
   if (merchantApp) {
     return (
@@ -473,6 +475,29 @@ function AuthPage() {
         onSendOtp={() => void handleSendOtp()}
         onVerifyOtp={() => void handleVerifyOtp()}
         onCreateAccount={() => go({ etapa: "criar", perfil: "lojista" })}
+      />
+    );
+  }
+
+  if (courierApp) {
+    return (
+      <CourierPwaLogin
+        identifier={form.identifier}
+        password={form.password}
+        otpCode={otpCode}
+        loading={loading}
+        recovering={recovering}
+        otpSent={otpSent}
+        showPassword={showPassword}
+        onIdentifierChange={(identifier) => update({ identifier })}
+        onPasswordChange={(password) => update({ password })}
+        onOtpCodeChange={setOtpCode}
+        onTogglePassword={() => setShowPassword((value) => !value)}
+        onLogin={handleLogin}
+        onRecover={handleRecover}
+        onSetRecovering={setRecovering}
+        onSendOtp={() => void handleSendOtp()}
+        onVerifyOtp={() => void handleVerifyOtp()}
       />
     );
   }

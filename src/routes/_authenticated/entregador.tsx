@@ -29,6 +29,19 @@ import { formatKm, routeUrl } from "@/lib/geo";
 import { ORDER_STATUS_LABEL, formatCurrency, formatDateTime } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/entregador")({
+  head: () => ({
+    meta: [
+      { title: "Minhas entregas — Pedi Um Entregadores" },
+      { name: "application-name", content: "Pedi Um Entregadores" },
+      { name: "apple-mobile-web-app-title", content: "Entregador" },
+      { name: "theme-color", content: "#f97316" },
+    ],
+    links: [
+      { rel: "manifest", href: "/api/public/manifest?entregador=1" },
+      { rel: "icon", type: "image/png", href: "/pedium-entregadores-favicon.png" },
+      { rel: "apple-touch-icon", href: "/pedium-entregadores-apple-touch-icon.png" },
+    ],
+  }),
   beforeLoad: async () => {
     // Sem aprovação, o entregador vai para a tela de status do cadastro.
     const { data } = await supabase
