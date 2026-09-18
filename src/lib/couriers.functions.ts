@@ -17,7 +17,7 @@ const inviteInput = z.object({
 });
 const tokenInput = z.object({ token: z.string().trim().min(32).max(128) });
 const activateInput = tokenInput.extend({ password: z.string().min(8).max(72) });
-const manageInput = z.object({ storeId: z.string().uuid(), linkId: z.string().uuid(), action: z.enum(["approve", "block", "reactivate", "remove", "resend"]) });
+const manageInput = z.object({ storeId: z.string().uuid(), linkId: z.string().uuid(), action: z.enum(["block", "reactivate", "remove", "resend"]) });
 
 export interface CourierInvitePreview {
   ok: boolean;
@@ -182,14 +182,14 @@ export const manageCourierLink = createServerFn({ method: "POST" })
       return { ok: true, token, message: emailed ? "Convite reenviado." : "Novo link criado." };
     }
     const now = new Date().toISOString();
-    const patch = data.action === "approve" || data.action === "reactivate"
+    const patch = data.action === "reactivate"
       ? { status: "approved" as const, approved_at: now, approved_by: context.userId, blocked_until: null, status_reason: null }
       : data.action === "block"
         ? { status: "blocked" as const, blocked_until: null, status_reason: "Bloqueado pela loja" }
         : { status: "removed" as const, blocked_until: null, status_reason: "Removido pela loja" };
     const { error } = await supabaseAdmin.from("store_couriers").update(patch).eq("id", link.id);
     if (error) throw new Error(error.message);
-    if (link.courier_user_id) await supabaseAdmin.from("couriers").update({ is_active: data.action === "approve" || data.action === "reactivate", is_online: false }).eq("store_id", data.storeId).eq("user_id", link.courier_user_id);
+    if (link.courier_user_id) await supabaseAdmin.from("couriers").update({ is_active: data.action === "reactivate", is_online: false }).eq("store_id", data.storeId).eq("user_id", link.courier_user_id);
     await supabaseAdmin.from("audit_logs").insert({ store_id: data.storeId, user_id: context.userId, action: `courier.${data.action}`, entity: "store_couriers", entity_id: link.id });
     return { ok: true, message: "Vínculo atualizado." };
   });

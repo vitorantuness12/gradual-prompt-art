@@ -37,7 +37,7 @@
 ## Cadastro, convite e PWA de entregadores
 - [ ] Ativar proteção contra senhas vazadas no Supabase ou registrar bloqueio externo
 - [ ] Criar funções protegidas de convite, ativação e gestão por loja
-- [ ] Atualizar painel de entregadores e sincronização operacional
-- [ ] Criar login direto e ativação em /entregadores
-- [ ] Criar manifesto, metadados e ícones do PWA Entregadores
+- [x] Atualizar painel de entregadores e sincronização operacional
+- [x] Criar login direto e ativação em /entregadores
+- [x] Criar manifesto, metadados e ícones do PWA Entregadores
 - [ ] Remover exigência visual de documentos e validar fluxos

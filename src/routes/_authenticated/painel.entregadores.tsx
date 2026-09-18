@@ -61,7 +61,7 @@ function StoreCouriersPage() {
   });
 
   const manage = useMutation({
-    mutationFn: async ({ linkId, action }: { linkId: string; action: "approve" | "block" | "reactivate" | "remove" | "resend" }) => {
+    mutationFn: async ({ linkId, action }: { linkId: string; action: "block" | "reactivate" | "remove" | "resend" }) => {
       if (!storeId) throw new Error("Selecione uma loja.");
       return manageLink({ data: { storeId, linkId, action } });
     },

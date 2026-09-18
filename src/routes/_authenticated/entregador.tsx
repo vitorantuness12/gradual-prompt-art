@@ -43,12 +43,12 @@ export const Route = createFileRoute("/_authenticated/entregador")({
     ],
   }),
   beforeLoad: async () => {
-    // Sem aprovação, o entregador vai para a tela de status do cadastro.
-    const { data } = await supabase
-      .from("delivery_profiles")
-      .select("status")
-      .maybeSingle();
-    if (!data || !courierCanWork(data.status)) throw redirect({ to: "/entregador/status" });
+    // O acesso operacional exige perfil ativo e ao menos uma loja que autorizou o vínculo.
+    const [{ data }, { data: hasApprovedStore }] = await Promise.all([
+      supabase.from("delivery_profiles").select("status").maybeSingle(),
+      supabase.rpc("courier_has_approved_store"),
+    ]);
+    if (!data || !courierCanWork(data.status) || !hasApprovedStore) throw redirect({ to: "/entregador/status" });
   },
   component: CourierPage,
 });
