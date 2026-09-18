@@ -216,6 +216,10 @@ function AuthPage() {
       toast.error("Esta conta não possui acesso de lojista.");
       return;
     }
+    if (chosen === "motoboy" && search.redirect?.startsWith("/entregadores?convite=")) {
+      window.location.assign(search.redirect);
+      return;
+    }
     const available = [
       kinds.customer ? "cliente" : null,
       kinds.courier ? "motoboy" : null,
@@ -231,10 +235,6 @@ function AuthPage() {
     }
     if (available.length > 1 && !chosen) {
       void navigate({ to: "/escolher-perfil", replace: true });
-      return;
-    }
-    if (chosen === "motoboy" && search.redirect?.startsWith("/entregadores?convite=")) {
-      window.location.assign(search.redirect);
       return;
     }
     void navigate({ to: redirectForAccount(kinds, chosen, search.redirect), replace: true });

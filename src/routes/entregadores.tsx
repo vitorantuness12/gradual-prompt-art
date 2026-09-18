@@ -44,22 +44,26 @@ function CouriersAccessPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
+    if (!search.convite && search.origem === "app") {
+      void navigate({ to: "/auth", search: { etapa: "entrar", perfil: "motoboy", origem: "app", redirect: "/entregador" }, replace: true });
+      return undefined;
+    }
     if (!search.convite) return undefined;
     void previewCourierInvite({ data: { token: search.convite } }).then(setPreview).finally(() => setLoading(false));
     return undefined;
   }, [search.convite]);
 
-  async function activate(event: FormEvent) {
+  async function activate(event: FormEvent): Promise<void> {
     event.preventDefault();
     if (!search.convite) return;
-    if (password.length < 8) return toast.error("Use uma senha com pelo menos 8 caracteres.");
-    if (password !== confirmPassword) return toast.error("As senhas não conferem.");
+    if (password.length < 8) { toast.error("Use uma senha com pelo menos 8 caracteres."); return; }
+    if (password !== confirmPassword) { toast.error("As senhas não conferem."); return; }
     setLoading(true);
     try {
       const result = await activateNewCourierInvite({ data: { token: search.convite, password } });
       if (!result.ok) {
         toast.info(result.message);
-        void navigate({ to: "/auth", search: { etapa: "entrar", perfil: "motoboy", origem: "app", redirect: `/entregador?convite=${search.convite}` } });
+        void navigate({ to: "/auth", search: { etapa: "entrar", perfil: "motoboy", origem: "app", redirect: `/entregadores?convite=${search.convite}` } });
         return;
       }
       const { error } = await supabase.auth.signInWithPassword({ email: result.email, password });
@@ -76,7 +80,7 @@ function CouriersAccessPage() {
     try {
       const { data } = await supabase.auth.getUser();
       if (!data.user) {
-        void navigate({ to: "/auth", search: { etapa: "entrar", perfil: "motoboy", origem: "app", redirect: `/entregador?convite=${search.convite}` } });
+        void navigate({ to: "/auth", search: { etapa: "entrar", perfil: "motoboy", origem: "app", redirect: `/entregadores?convite=${search.convite}` } });
         return;
       }
       const result = await acceptCourierInvite({ data: { token: search.convite } });
