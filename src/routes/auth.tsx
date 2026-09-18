@@ -573,7 +573,7 @@ function AuthPage() {
               Escolha o tipo de acesso. Seus dados preenchidos são mantidos se você voltar.
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              {ACCOUNT_KINDS.map((item) => (
+              {ACCOUNT_KINDS.filter((item) => etapa === "entrar" || item.key !== "motoboy").map((item) => (
                 <Link
                   key={item.key}
                   to="/auth"
@@ -609,7 +609,11 @@ function AuthPage() {
                     : `Criar conta de ${kindInfo?.label}`}
                 </h1>
               </CardTitle>
-              <CardDescription>{kindInfo?.description}</CardDescription>
+              <CardDescription>
+                {etapa === "criar" && perfil === "motoboy"
+                  ? "O acesso de entregador é criado somente pelo convite de uma loja."
+                  : kindInfo?.description}
+              </CardDescription>
               {etapa === "criar" ? (
                 <Progress value={perfil === "motoboy" ? 50 : 66} className="mt-2 h-1.5" />
               ) : null}
@@ -625,7 +629,16 @@ function AuthPage() {
                 </div>
               ) : null}
 
-              {etapa === "entrar" ? (
+              {etapa === "criar" && perfil === "motoboy" ? (
+                <div className="space-y-4">
+                  <p className="rounded-xl bg-orange-50 p-4 text-sm text-orange-950">
+                    Peça à loja parceira para cadastrar seus dados em Entregadores. Você receberá um link pessoal para definir sua senha.
+                  </p>
+                  <Button asChild className="w-full bg-orange-600 hover:bg-orange-700">
+                    <Link to="/entregadores">Ir para Pedi Um Entregadores</Link>
+                  </Button>
+                </div>
+              ) : etapa === "entrar" ? (
                 recovering ? (
                   <form onSubmit={handleRecover} className="space-y-4" noValidate>
                     <div className="space-y-2">

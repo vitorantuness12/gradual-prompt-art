@@ -141,7 +141,7 @@ function CompleteSignupPage() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                 <div className="grid gap-2 sm:grid-cols-3">
-                  {ACCOUNT_KINDS.map((item) => (
+                  {ACCOUNT_KINDS.filter((item) => item.key !== "motoboy").map((item) => (
                     <button
                       key={item.key}
                       type="button"
