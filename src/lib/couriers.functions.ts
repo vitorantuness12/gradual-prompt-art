@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { consumeRateLimit, rateLimitMessage } from "@/lib/security.server";
 
 const inviteInput = z.object({
   storeId: z.string().uuid(),
@@ -106,6 +107,8 @@ export const createCourierInvite = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: allowed } = await context.supabase.rpc("has_store_role", { _store_id: data.storeId, _user_id: context.userId, _roles: ["owner", "manager"] });
     if (!allowed) throw new Error("Você não pode cadastrar entregadores nesta loja.");
+    const limit = await consumeRateLimit("invite", `${context.userId}:${data.storeId}`);
+    if (!limit.allowed) throw new Error(rateLimitMessage(limit));
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: store } = await supabaseAdmin.from("stores").select("name").eq("id", data.storeId).single();
     const existingUser = await findAuthUserByEmail(data.email);
@@ -134,6 +137,8 @@ export const previewCourierInvite = createServerFn({ method: "POST" })
 export const activateNewCourierInvite = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => activateInput.parse(data))
   .handler(async ({ data }) => {
+    const limit = await consumeRateLimit("signup", `courier:${data.token.slice(0, 16)}`);
+    if (!limit.allowed) throw new Error(rateLimitMessage(limit));
     const preview = await loadInvitePreview(data.token);
     if (!preview.ok || !preview.email) throw new Error(preview.message);
     if (preview.existingAccount) return { ok: false, existingAccount: true, email: preview.email, message: "Esta conta já existe. Entre com sua senha para aceitar o convite." };
