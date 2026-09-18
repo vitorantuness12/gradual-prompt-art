@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import welcomeImg from "@/assets/welcome-img.png";
+import heroPhoneAsset from "@/assets/pedium-store-phone.png.asset.json";
 import { Smartphone, Zap, Users, TrendingUp } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -258,10 +258,10 @@ const Hero = () => {
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] sm:w-[300px] md:w-[400px] h-[200px] sm:h-[300px] md:h-[400px] bg-primary/20 blur-[60px] sm:blur-[80px] md:blur-[100px] rounded-full" />
 
               <motion.img
-                src={welcomeImg}
-                alt="Painel da Pedi Um"
-                width={460}
-                height={407}
+                src={heroPhoneAsset.url}
+                alt="Loja online criada com a Pedi Um exibida em um celular"
+                width={848}
+                height={766}
                 fetchPriority="high"
                 decoding="async"
                 className="relative z-10 w-full h-auto object-contain drop-shadow-[0_10px_30px_rgba(239,68,68,0.3)] sm:drop-shadow-[0_20px_60px_rgba(239,68,68,0.3)]"
