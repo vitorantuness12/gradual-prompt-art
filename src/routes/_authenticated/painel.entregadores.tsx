@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { Ban, Copy, RefreshCw, RotateCcw, UserPlus, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -29,6 +30,8 @@ function StoreCouriersPage() {
   const { active, isLoading: loadingStore } = useActiveStore();
   const queryClient = useQueryClient();
   const storeId = active?.storeId ?? null;
+  const createInvite = useServerFn(createCourierInvite);
+  const manageLink = useServerFn(manageCourierLink);
   const [form, setForm] = useState({ fullName: "", email: "", phone: "", vehicleType: "moto", plate: "", region: "", pixKey: "", commission: "0" });
   const update = (patch: Partial<typeof form>) => setForm((current) => ({ ...current, ...patch }));
 
@@ -44,7 +47,7 @@ function StoreCouriersPage() {
   const invite = useMutation({
     mutationFn: async () => {
       if (!storeId) throw new Error("Selecione uma loja.");
-      return createCourierInvite({ data: { storeId, fullName: form.fullName, email: form.email, phone: form.phone,
+      return createInvite({ data: { storeId, fullName: form.fullName, email: form.email, phone: form.phone,
         vehicleType: form.vehicleType as "moto" | "carro" | "bicicleta" | "outro", plate: form.plate || undefined,
         region: form.region || undefined, pixKey: form.pixKey, commissionAmount: Number(form.commission.replace(",", ".")) || 0 } });
     },
@@ -60,7 +63,7 @@ function StoreCouriersPage() {
   const manage = useMutation({
     mutationFn: async ({ linkId, action }: { linkId: string; action: "approve" | "block" | "reactivate" | "remove" | "resend" }) => {
       if (!storeId) throw new Error("Selecione uma loja.");
-      return manageCourierLink({ data: { storeId, linkId, action } });
+      return manageLink({ data: { storeId, linkId, action } });
     },
     onSuccess: (result) => { if (result.token) void navigator.clipboard?.writeText(`${window.location.origin}/entregadores?convite=${result.token}`); toast.success(result.message); void queryClient.invalidateQueries({ queryKey: ["store-couriers", storeId] }); },
     onError: (error: Error) => toast.error(error.message),

@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { Bike, Download, Eye, EyeOff, KeyRound, Mail } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -37,6 +38,9 @@ function CouriersAccessPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
   const install = usePwaInstall();
+  const previewInvite = useServerFn(previewCourierInvite);
+  const activateInvite = useServerFn(activateNewCourierInvite);
+  const acceptInvite = useServerFn(acceptCourierInvite);
   const [preview, setPreview] = useState<CourierInvitePreview | null>(null);
   const [loading, setLoading] = useState(Boolean(search.convite));
   const [password, setPassword] = useState("");
@@ -49,7 +53,7 @@ function CouriersAccessPage() {
       return undefined;
     }
     if (!search.convite) return undefined;
-    void previewCourierInvite({ data: { token: search.convite } }).then(setPreview).finally(() => setLoading(false));
+    void previewInvite({ data: { token: search.convite } }).then(setPreview).finally(() => setLoading(false));
     return undefined;
   }, [search.convite]);
 
@@ -60,7 +64,7 @@ function CouriersAccessPage() {
     if (password !== confirmPassword) { toast.error("As senhas não conferem."); return; }
     setLoading(true);
     try {
-      const result = await activateNewCourierInvite({ data: { token: search.convite, password } });
+      const result = await activateInvite({ data: { token: search.convite, password } });
       if (!result.ok) {
         toast.info(result.message);
         void navigate({ to: "/auth", search: { etapa: "entrar", perfil: "motoboy", origem: "app", redirect: `/entregadores?convite=${search.convite}` } });
@@ -83,7 +87,7 @@ function CouriersAccessPage() {
         void navigate({ to: "/auth", search: { etapa: "entrar", perfil: "motoboy", origem: "app", redirect: `/entregadores?convite=${search.convite}` } });
         return;
       }
-      const result = await acceptCourierInvite({ data: { token: search.convite } });
+      const result = await acceptInvite({ data: { token: search.convite } });
       toast.success(result.message);
       void navigate({ to: "/entregador", replace: true });
     } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível aceitar o convite."); }
