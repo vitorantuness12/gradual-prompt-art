@@ -772,7 +772,7 @@ function PosScreen() {
               {batchAlerts.size > 3 ? ` e mais ${batchAlerts.size - 3} item(ns).` : "."}
             </div>
           ) : null}
-          <div className="min-h-0 flex-1">
+          <div className="min-h-0 flex-1 overflow-y-scroll overscroll-contain pr-1 [scrollbar-gutter:stable]">
             <PosProductGrid
               products={visibleProducts}
               isLoading={catalogQuery.isLoading}

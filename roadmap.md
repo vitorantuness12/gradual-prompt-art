@@ -11,6 +11,9 @@
 
 # Roadmap
 
+- [x] Compactar os cards de produtos do PDV
+- [x] Manter a lista de produtos do PDV com rolagem vertical visível
+- [x] Pedir confirmação antes de marcar um produto como esgotado no PDV
 - [x] Atualizar textos da homepage para a comunicação Pedi Um aprovada
 - [x] Remover referências públicas de agendamento da homepage
 - [x] Atualizar SEO, metadados globais e descrição do PWA
