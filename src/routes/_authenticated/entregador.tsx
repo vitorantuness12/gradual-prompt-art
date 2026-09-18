@@ -3,7 +3,7 @@ import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-ro
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Logo } from "@/components/brand/Logo";
+import courierLogoAsset from "@/assets/pedium-entregadores-logo.webp.asset.json";
 import { EmptyState } from "@/components/painel/PageHeader";
 import { PushNotificationsCard } from "@/components/painel/PushNotificationsCard";
 import { Badge } from "@/components/ui/badge";
@@ -221,8 +221,8 @@ function CourierPage() {
     <div className="min-h-screen bg-secondary/30">
       <header className="border-b border-border/70 bg-card">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4 sm:px-6">
-          <Link to="/" aria-label="Página inicial">
-            <Logo withWordmark={false} />
+          <Link to="/entregadores" aria-label="Pedi Um Entregadores">
+            <img src={courierLogoAsset.url} alt="" width={320} height={320} className="size-10 rounded-xl object-cover" />
           </Link>
           <h1 className="text-base font-semibold text-foreground">Área do entregador</h1>
           <Button variant="ghost" size="sm" onClick={handleSignOut}>
