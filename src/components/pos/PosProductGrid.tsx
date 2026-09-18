@@ -1,5 +1,15 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/lib/format";
@@ -19,6 +29,7 @@ import {
 } from "@/lib/pos-kds";
 import { cn } from "@/lib/utils";
 import { AlertTriangle, Ban, Minus, PackageX, Plus, RotateCcw, Star } from "lucide-react";
+import { useState } from "react";
 
 /** Trilha de categorias e filtros rápidos, com rolagem em telas pequenas. */
 export function PosCategoryRail({
@@ -117,11 +128,13 @@ export function PosProductGrid({
   onTogglePause,
   emptyState,
 }: PosProductGridProps) {
+  const [pauseCandidate, setPauseCandidate] = useState<PosProductLike | null>(null);
+
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, index) => (
-          <Skeleton key={index} className="h-40 rounded-2xl" />
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+        {Array.from({ length: 12 }).map((_, index) => (
+          <Skeleton key={index} className="h-36 rounded-lg" />
         ))}
       </div>
     );
@@ -148,7 +161,7 @@ export function PosProductGrid({
           </p>
         </div>
       ) : null}
-    <ul className={cn("grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4", DENSITY_GAP[settings.density])}>
+    <ul className={cn("grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6", DENSITY_GAP[settings.density])}>
       {products.map((product) => {
         const out = isOutOfStock(product);
         const price = unitPriceOf(product);
@@ -157,8 +170,7 @@ export function PosProductGrid({
           <li key={product.id}>
             <div
               className={cn(
-                "flex h-full flex-col rounded-2xl border-2 bg-card transition-colors",
-                CARD_PADDING[settings.density],
+                "flex h-full flex-col rounded-lg border bg-card p-2 transition-colors",
                 out ? "border-border/60 opacity-60" : "border-border hover:border-primary",
                 quantity > 0 && "border-primary ring-2 ring-primary/25",
               )}
@@ -170,7 +182,7 @@ export function PosProductGrid({
                 aria-label={`Detalhes de ${product.name}`}
               >
                 {settings.showProductImages ? (
-                  <div className="mb-2 aspect-square w-full overflow-hidden rounded-xl bg-secondary">
+                  <div className="mb-1.5 aspect-[4/3] w-full overflow-hidden rounded-md bg-secondary">
                     {product.image_url ? (
                       <img
                         src={product.image_url}
@@ -180,14 +192,14 @@ export function PosProductGrid({
                         decoding="async"
                       />
                     ) : (
-                      <span className="flex size-full items-center justify-center text-2xl font-bold text-muted-foreground">
+                      <span className="flex size-full items-center justify-center text-xl font-bold text-muted-foreground">
                         {productInitials(product.name)}
                       </span>
                     )}
                   </div>
                 ) : null}
 
-                <div className="mb-1 flex flex-wrap gap-1">
+                <div className="mb-1 flex flex-wrap gap-1 [&_[data-slot=badge]]:text-[10px]">
                   {product.is_available === false ? (
                     <Badge variant="outline" className="gap-1 border-amber-500/50 bg-amber-500/10 text-amber-600">
                       <Ban className="size-3" aria-hidden="true" />
@@ -223,8 +235,8 @@ export function PosProductGrid({
                   ) : null}
                 </div>
 
-                <p className="line-clamp-2 text-sm leading-snug font-semibold">{product.name}</p>
-                <p className="mt-1 text-base font-bold text-foreground">
+                <p className="line-clamp-2 text-xs leading-snug font-semibold sm:text-sm">{product.name}</p>
+                <p className="mt-0.5 text-sm font-bold text-foreground">
                   {formatCurrency(price)}
                   {hasPromo(product) ? (
                     <span className="ml-1.5 text-xs font-normal text-muted-foreground line-through">
@@ -252,14 +264,20 @@ export function PosProductGrid({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="mt-2 h-8 w-full justify-center gap-1 text-xs font-semibold"
+                  className="mt-1.5 h-7 w-full justify-center gap-1 text-[11px] font-semibold"
                   disabled={product.is_available === false && out}
                   title={
                     product.is_available === false && out
                       ? "Item pausado automaticamente por falta de estoque. Reponha o estoque para voltar a vender."
                       : undefined
                   }
-                  onClick={() => onTogglePause(product, product.is_available === false)}
+                  onClick={() => {
+                    if (product.is_available === false) {
+                      onTogglePause(product, true);
+                      return;
+                    }
+                    setPauseCandidate(product);
+                  }}
                 >
                   {product.is_available === false ? (
                     <>
@@ -276,13 +294,13 @@ export function PosProductGrid({
               ) : null}
 
 
-              <div className="mt-2 flex items-center gap-1">
+              <div className="mt-1.5 flex items-center gap-1">
                 {quantity > 0 ? (
                   <>
                     <Button
                       variant="outline"
                       size="icon"
-                      className="size-10 shrink-0"
+                      className="size-9 shrink-0"
                       aria-label={`Diminuir ${product.name}`}
                       onClick={() => onAdd(product, -1)}
                     >
@@ -291,7 +309,7 @@ export function PosProductGrid({
                     <span className="flex-1 text-center text-base font-bold tabular-nums">{quantity}</span>
                     <Button
                       size="icon"
-                      className="size-10 shrink-0"
+                      className="size-9 shrink-0"
                       aria-label={`Aumentar ${product.name}`}
                       disabled={out}
                       onClick={() => onAdd(product, 1)}
@@ -302,7 +320,7 @@ export function PosProductGrid({
                 ) : (
                   <Button
                     size="lg"
-                    className="h-10 w-full font-semibold"
+                    className="h-9 w-full text-xs font-semibold"
                     disabled={out}
                     onClick={() => onAdd(product, 1)}
                   >
@@ -316,6 +334,31 @@ export function PosProductGrid({
         );
       })}
     </ul>
+      <AlertDialog open={pauseCandidate !== null} onOpenChange={(open) => !open && setPauseCandidate(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar item como esgotado?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pauseCandidate
+                ? `“${pauseCandidate.name}” ficará indisponível para novas vendas até você escolher “Voltar a vender”.`
+                : "O item ficará indisponível para novas vendas."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (!pauseCandidate || !onTogglePause) return;
+                onTogglePause(pauseCandidate, false);
+                setPauseCandidate(null);
+              }}
+            >
+              Sim, marcar como esgotado
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
