@@ -74,29 +74,30 @@ function CourierPage() {
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       const userId = userData.user?.id;
-      if (!userId) return { deliveries: [], courier: null, userId: null };
+      if (!userId) return { deliveries: [], couriers: [], userId: null };
 
-      const [deliveries, courier] = await Promise.all([
+      const [deliveries, couriers] = await Promise.all([
         supabase
           .from("deliveries")
           .select("*, order:orders(*), store:stores(name)")
           .eq("delivery_person_id", userId)
           .order("created_at", { ascending: false })
           .limit(50),
-        supabase.from("couriers").select("*").eq("user_id", userId).maybeSingle(),
+        supabase.from("couriers").select("*").eq("user_id", userId).eq("is_active", true),
       ]);
       if (deliveries.error) throw new Error(deliveries.error.message);
-      return { deliveries: deliveries.data ?? [], courier: courier.data, userId };
+      return { deliveries: deliveries.data ?? [], couriers: couriers.data ?? [], userId };
     },
   });
 
   const deliveries = data?.deliveries ?? [];
-  const courier = data?.courier;
+  const couriers = data?.couriers ?? [];
+  const courier = couriers[0];
 
   const toggleOnline = useMutation({
     mutationFn: async (value: boolean) => {
-      if (!courier) throw new Error("Seu cadastro de entregador ainda não foi vinculado pela loja.");
-      const { error } = await supabase.from("couriers").update({ is_online: value }).eq("id", courier.id);
+      if (!data?.userId || !couriers.length) throw new Error("Seu cadastro de entregador ainda não foi vinculado pela loja.");
+      const { error } = await supabase.from("couriers").update({ is_online: value }).eq("user_id", data.userId).eq("is_active", true);
       if (error) throw new Error(error.message);
     },
     onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["courier-deliveries"] }),
