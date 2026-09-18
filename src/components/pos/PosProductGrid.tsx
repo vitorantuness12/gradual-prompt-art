@@ -14,7 +14,6 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/lib/format";
 import {
-  CARD_PADDING,
   DENSITY_GAP,
   POS_QUICK_FILTERS,
   hasPromo,
