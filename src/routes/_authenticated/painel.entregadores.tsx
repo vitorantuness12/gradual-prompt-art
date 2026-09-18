@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Ban, Check, Copy, Link2, UserPlus, X } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { Ban, Copy, RefreshCw, RotateCcw, UserPlus, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -10,241 +11,91 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveStore } from "@/hooks/useMyStores";
 import { supabase } from "@/integrations/supabase/client";
-import type { TablesUpdate } from "@/integrations/supabase/types";
-import { COURIER_STATUS_LABEL } from "@/lib/contas";
+import { createCourierInvite, manageCourierLink } from "@/lib/couriers.functions";
 import { formatCurrency } from "@/lib/format";
-import { maskPhone, onlyDigits } from "@/lib/masks";
+import { maskPhone } from "@/lib/masks";
 
 export const Route = createFileRoute("/_authenticated/painel/entregadores")({
-  head: () => ({
-    meta: [
-      { title: "Entregadores da loja — Pedi Um" },
-      {
-        name: "description",
-        content: "Convide motoboys, aprove vínculos, defina comissão por entrega e acompanhe a equipe de entrega.",
-      },
-      { property: "og:title", content: "Entregadores da loja" },
-      { property: "og:description", content: "Convites, comissões e vínculos com motoboys." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "Entregadores da loja — Pedi Um" }, { name: "description", content: "Cadastre, convide e gerencie os entregadores autorizados pela sua loja." }] }),
   component: StoreCouriersPage,
 });
+
+const STATUS_LABEL: Record<string, string> = { invited: "Convite enviado", pending: "Pendente", approved: "Ativo", blocked: "Bloqueado", removed: "Removido" };
 
 function StoreCouriersPage() {
   const { active, isLoading: loadingStore } = useActiveStore();
   const queryClient = useQueryClient();
   const storeId = active?.storeId ?? null;
-
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [commission, setCommission] = useState("0");
-  const [region, setRegion] = useState("");
+  const createInvite = useServerFn(createCourierInvite);
+  const manageLink = useServerFn(manageCourierLink);
+  const [form, setForm] = useState({ fullName: "", email: "", phone: "", vehicleType: "moto", plate: "", region: "", pixKey: "", commission: "0" });
+  const update = (patch: Partial<typeof form>) => setForm((current) => ({ ...current, ...patch }));
 
   const linksQuery = useQuery({
-    queryKey: ["store-couriers", storeId],
-    enabled: Boolean(storeId),
+    queryKey: ["store-couriers", storeId], enabled: Boolean(storeId),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("store_couriers")
-        .select("*")
-        .eq("store_id", storeId!)
-        .order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("store_couriers").select("*").eq("store_id", storeId!).order("created_at", { ascending: false });
       if (error) throw new Error(error.message);
-
-      const ids = (data ?? []).map((row) => row.courier_user_id).filter(Boolean) as string[];
-      const profiles = ids.length
-        ? (
-            await supabase
-              .from("delivery_profiles")
-              .select("user_id, full_name, phone, city, status, is_online")
-              .in("user_id", ids)
-          ).data ?? []
-        : [];
-
-      return (data ?? []).map((row) => ({
-        ...row,
-        courier: profiles.find((item) => item.user_id === row.courier_user_id) ?? null,
-      }));
+      return data ?? [];
     },
   });
 
   const invite = useMutation({
     mutationFn: async () => {
       if (!storeId) throw new Error("Selecione uma loja.");
-      if (!phone.trim() && !email.trim()) throw new Error("Informe telefone ou e-mail do motoboy.");
-      const token = crypto.randomUUID().replace(/-/g, "").slice(0, 24);
-      const { error } = await supabase.from("store_couriers").insert({
-        store_id: storeId,
-        invite_phone: onlyDigits(phone) || null,
-        invite_email: email.trim().toLowerCase() || null,
-        invite_token: token,
-        commission_amount: Number(commission.replace(",", ".")) || 0,
-        region: region.trim() || null,
-        status: "invited",
-      });
-      if (error) throw new Error(error.message);
-      return token;
+      return createInvite({ data: { storeId, fullName: form.fullName, email: form.email, phone: form.phone,
+        vehicleType: form.vehicleType as "moto" | "carro" | "bicicleta" | "outro", plate: form.plate || undefined,
+        region: form.region || undefined, pixKey: form.pixKey, commissionAmount: Number(form.commission.replace(",", ".")) || 0 } });
     },
-    onSuccess: (token) => {
-      setPhone("");
-      setEmail("");
-      void navigator.clipboard?.writeText(`${window.location.origin}/auth?etapa=criar&perfil=motoboy&convite=${token}`);
-      toast.success("Convite criado e link copiado.");
+    onSuccess: (result) => {
+      const url = `${window.location.origin}/entregadores?convite=${result.token}`;
+      void navigator.clipboard?.writeText(url);
+      toast.success(`${result.message} O link também foi copiado.`);
+      setForm({ fullName: "", email: "", phone: "", vehicleType: "moto", plate: "", region: "", pixKey: "", commission: "0" });
       void queryClient.invalidateQueries({ queryKey: ["store-couriers", storeId] });
-    },
-    onError: (error: Error) => toast.error(error.message),
+    }, onError: (error: Error) => toast.error(error.message),
   });
 
-  const updateLink = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: TablesUpdate<"store_couriers"> }) => {
-      const { error } = await supabase.from("store_couriers").update(patch).eq("id", id);
-      if (error) throw new Error(error.message);
+  const manage = useMutation({
+    mutationFn: async ({ linkId, action }: { linkId: string; action: "block" | "reactivate" | "remove" | "resend" }) => {
+      if (!storeId) throw new Error("Selecione uma loja.");
+      return manageLink({ data: { storeId, linkId, action } });
     },
-    onSuccess: () => {
-      toast.success("Vínculo atualizado.");
-      void queryClient.invalidateQueries({ queryKey: ["store-couriers", storeId] });
-    },
+    onSuccess: (result) => { if (result.token) void navigator.clipboard?.writeText(`${window.location.origin}/entregadores?convite=${result.token}`); toast.success(result.message); void queryClient.invalidateQueries({ queryKey: ["store-couriers", storeId] }); },
     onError: (error: Error) => toast.error(error.message),
   });
 
   if (loadingStore) return <Skeleton className="h-64" />;
-
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Entregadores"
-        description="Convide motoboys, aprove vínculos e defina comissão e região de atendimento."
-      />
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Convidar motoboy</CardTitle>
-          <CardDescription>
-            Envie o convite por telefone, e-mail ou compartilhe o link gerado.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-3 sm:grid-cols-4">
-          <div className="space-y-2">
-            <Label htmlFor="conv-tel">Telefone</Label>
-            <Input id="conv-tel" value={phone} onChange={(e) => setPhone(maskPhone(e.target.value))} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="conv-email">E-mail</Label>
-            <Input id="conv-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="conv-com">Comissão por entrega (R$)</Label>
-            <Input id="conv-com" inputMode="decimal" value={commission} onChange={(e) => setCommission(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="conv-reg">Região</Label>
-            <Input id="conv-reg" value={region} onChange={(e) => setRegion(e.target.value)} />
-          </div>
-          <div className="sm:col-span-4">
-            <Button onClick={() => invite.mutate()} disabled={invite.isPending}>
-              <UserPlus className="mr-2 h-4 w-4" aria-hidden /> Criar convite e copiar link
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Equipe de entrega</CardTitle>
-          <CardDescription>Somente motoboys vinculados recebem os pedidos desta loja.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {linksQuery.isLoading ? (
-            <Skeleton className="h-24" />
-          ) : (linksQuery.data ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Nenhum entregador vinculado ainda. Crie um convite acima.
-            </p>
-          ) : (
-            (linksQuery.data ?? []).map((link) => {
-              const courier = link.courier;
-              return (
-                <div
-                  key={link.id}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/70 p-3"
-                >
-                  <div className="text-sm">
-                    <p className="font-medium">
-                      {courier?.full_name ?? link.invite_email ?? maskPhone(link.invite_phone ?? "") ?? "Convite"}
-                      {courier?.is_online ? (
-                        <Badge className="ml-2" variant="default">
-                          Online
-                        </Badge>
-                      ) : null}
-                    </p>
-                    <p className="text-muted-foreground">
-                      {courier ? COURIER_STATUS_LABEL[courier.status] ?? courier.status : "Convite pendente"} ·
-                      Comissão {formatCurrency(Number(link.commission_amount))}
-                      {link.region ? ` · ${link.region}` : ""}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {link.invite_token ? (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          void navigator.clipboard?.writeText(
-                            `${window.location.origin}/auth?etapa=criar&perfil=motoboy&convite=${link.invite_token}`,
-                          );
-                          toast.success("Link copiado.");
-                        }}
-                      >
-                        <Copy className="mr-2 h-4 w-4" aria-hidden /> Link
-                      </Button>
-                    ) : null}
-                    {link.status !== "approved" ? (
-                      <Button
-                        size="sm"
-                        onClick={() => updateLink.mutate({ id: link.id, patch: { status: "approved" } })}
-                      >
-                        <Check className="mr-2 h-4 w-4" aria-hidden /> Aprovar
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          updateLink.mutate({
-                            id: link.id,
-                            patch: {
-                              status: "blocked",
-                              blocked_until: new Date(Date.now() + 86_400_000).toISOString(),
-                            },
-                          })
-                        }
-                      >
-                        <Ban className="mr-2 h-4 w-4" aria-hidden /> Bloquear 24h
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => updateLink.mutate({ id: link.id, patch: { status: "removed" } })}
-                    >
-                      <X className="mr-2 h-4 w-4" aria-hidden /> Remover
-                    </Button>
-                  </div>
-                </div>
-              );
-            })
-          )}
-          <p className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Link2 className="h-3.5 w-3.5" aria-hidden />
-            O motoboy precisa estar aprovado pela plataforma para ficar online.
-          </p>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  return <div className="space-y-6">
+    <PageHeader title="Entregadores" description="Cadastre os dados operacionais e envie um link para o entregador definir a própria senha." />
+    <Card><CardHeader><CardTitle className="text-base">Cadastrar entregador</CardTitle><CardDescription>Não há análise de documentos. A autorização e o vínculo ficam sob responsabilidade da loja.</CardDescription></CardHeader>
+      <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Field id="courier-name" label="Nome completo"><Input id="courier-name" value={form.fullName} onChange={(e) => update({ fullName: e.target.value })} /></Field>
+        <Field id="courier-email" label="E-mail"><Input id="courier-email" type="email" value={form.email} onChange={(e) => update({ email: e.target.value })} /></Field>
+        <Field id="courier-phone" label="Telefone"><Input id="courier-phone" value={form.phone} onChange={(e) => update({ phone: maskPhone(e.target.value) })} /></Field>
+        <Field id="courier-vehicle" label="Veículo"><Select value={form.vehicleType} onValueChange={(vehicleType) => update({ vehicleType })}><SelectTrigger id="courier-vehicle"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="moto">Moto</SelectItem><SelectItem value="carro">Carro</SelectItem><SelectItem value="bicicleta">Bicicleta</SelectItem><SelectItem value="outro">Outro</SelectItem></SelectContent></Select></Field>
+        <Field id="courier-plate" label="Placa (opcional)"><Input id="courier-plate" value={form.plate} onChange={(e) => update({ plate: e.target.value.toUpperCase() })} /></Field>
+        <Field id="courier-region" label="Região / bairros"><Input id="courier-region" value={form.region} onChange={(e) => update({ region: e.target.value })} /></Field>
+        <Field id="courier-pix" label="Chave Pix"><Input id="courier-pix" value={form.pixKey} onChange={(e) => update({ pixKey: e.target.value })} /></Field>
+        <Field id="courier-commission" label="Comissão por entrega (R$)"><Input id="courier-commission" inputMode="decimal" value={form.commission} onChange={(e) => update({ commission: e.target.value })} /></Field>
+        <div className="sm:col-span-2 lg:col-span-4"><Button onClick={() => invite.mutate()} disabled={invite.isPending}><UserPlus className="mr-2 h-4 w-4" />{invite.isPending ? "Criando…" : "Cadastrar e enviar convite"}</Button></div>
+      </CardContent>
+    </Card>
+    <Card><CardHeader><CardTitle className="text-base">Equipe de entrega</CardTitle><CardDescription>Cada autorização vale somente para esta loja.</CardDescription></CardHeader><CardContent className="space-y-3">
+      {linksQuery.isLoading ? <Skeleton className="h-24" /> : linksQuery.data?.length ? linksQuery.data.map((link) => {
+        const info = (link.invite_data ?? {}) as Record<string, unknown>;
+        return <div key={link.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4"><div><div className="flex items-center gap-2"><p className="font-medium">{String(info["fullName"] ?? link.invite_email ?? "Entregador")}</p><Badge variant={link.status === "approved" ? "default" : "secondary"}>{STATUS_LABEL[link.status] ?? link.status}</Badge></div><p className="mt-1 text-sm text-muted-foreground">{link.invite_email} · {maskPhone(link.invite_phone ?? "")} · {formatCurrency(Number(link.commission_amount))}{link.region ? ` · ${link.region}` : ""}</p></div><div className="flex flex-wrap gap-2">
+          {link.invite_token && ["invited", "pending"].includes(link.status) ? <><Button size="sm" variant="ghost" onClick={() => { void navigator.clipboard?.writeText(`${window.location.origin}/entregadores?convite=${link.invite_token}`); toast.success("Link copiado."); }}><Copy className="mr-2 h-4 w-4" />Link</Button><Button size="sm" variant="outline" onClick={() => manage.mutate({ linkId: link.id, action: "resend" })}><RefreshCw className="mr-2 h-4 w-4" />Reenviar</Button></> : null}
+          {link.status === "approved" ? <Button size="sm" variant="outline" onClick={() => manage.mutate({ linkId: link.id, action: "block" })}><Ban className="mr-2 h-4 w-4" />Bloquear</Button> : link.status === "blocked" ? <Button size="sm" onClick={() => manage.mutate({ linkId: link.id, action: "reactivate" })}><RotateCcw className="mr-2 h-4 w-4" />Reativar</Button> : null}
+          {link.status !== "removed" ? <Button size="sm" variant="ghost" onClick={() => manage.mutate({ linkId: link.id, action: "remove" })}><X className="mr-2 h-4 w-4" />Remover</Button> : null}
+        </div></div>;
+      }) : <p className="text-sm text-muted-foreground">Nenhum entregador cadastrado.</p>}
+    </CardContent></Card>
+  </div>;
 }
+
+function Field({ id, label, children }: { id: string; label: string; children: React.ReactNode }) { return <div className="space-y-2"><Label htmlFor={id}>{label}</Label>{children}</div>; }

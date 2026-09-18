@@ -82,8 +82,8 @@ function CompleteSignupPage() {
     event.preventDefault();
     if (fullName.trim().length < 3) { toast.error("Informe seu nome completo."); return; }
     if (!isValidPhone(phone)) { toast.error("Informe um telefone válido com DDD."); return; }
-    if (kind !== "cliente" && !isValidDocument(document)) {
-      toast.error(kind === "motoboy" ? "Informe um CPF válido." : "Informe um CPF ou CNPJ válido.");
+    if (kind === "lojista" && !isValidDocument(document)) {
+      toast.error("Informe um CPF ou CNPJ válido.");
       return;
     }
     if (kind === "motoboy" && (!city.trim() || !pixKey.trim())) {
@@ -141,7 +141,7 @@ function CompleteSignupPage() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                 <div className="grid gap-2 sm:grid-cols-3">
-                  {ACCOUNT_KINDS.map((item) => (
+                  {ACCOUNT_KINDS.filter((item) => item.key !== "motoboy").map((item) => (
                     <button
                       key={item.key}
                       type="button"
@@ -176,9 +176,9 @@ function CompleteSignupPage() {
                     <Label htmlFor="cc-nasc">Data de nascimento (opcional)</Label>
                     <Input id="cc-nasc" type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
                   </div>
-                ) : (
+                ) : kind === "lojista" ? (
                   <div className="space-y-2">
-                    <Label htmlFor="cc-doc">{kind === "motoboy" ? "CPF" : "CPF ou CNPJ"}</Label>
+                    <Label htmlFor="cc-doc">CPF ou CNPJ</Label>
                     <Input
                       id="cc-doc"
                       value={document}
@@ -187,7 +187,7 @@ function CompleteSignupPage() {
                       required
                     />
                   </div>
-                )}
+                ) : null}
 
                 {kind === "motoboy" ? (
                   <div className="grid gap-4 sm:grid-cols-2">

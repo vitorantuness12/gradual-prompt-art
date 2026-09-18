@@ -29,13 +29,26 @@ import { formatKm, routeUrl } from "@/lib/geo";
 import { ORDER_STATUS_LABEL, formatCurrency, formatDateTime } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/entregador")({
+  head: () => ({
+    meta: [
+      { title: "Minhas entregas — Pedi Um Entregadores" },
+      { name: "application-name", content: "Pedi Um Entregadores" },
+      { name: "apple-mobile-web-app-title", content: "Entregador" },
+      { name: "theme-color", content: "#f97316" },
+    ],
+    links: [
+      { rel: "manifest", href: "/api/public/manifest?entregador=1" },
+      { rel: "icon", type: "image/png", href: "/pedium-entregadores-favicon.png" },
+      { rel: "apple-touch-icon", href: "/pedium-entregadores-apple-touch-icon.png" },
+    ],
+  }),
   beforeLoad: async () => {
-    // Sem aprovação, o entregador vai para a tela de status do cadastro.
-    const { data } = await supabase
-      .from("delivery_profiles")
-      .select("status")
-      .maybeSingle();
-    if (!data || !courierCanWork(data.status)) throw redirect({ to: "/entregador/status" });
+    // O acesso operacional exige perfil ativo e ao menos uma loja que autorizou o vínculo.
+    const [{ data }, { data: hasApprovedStore }] = await Promise.all([
+      supabase.from("delivery_profiles").select("status").maybeSingle(),
+      supabase.rpc("courier_has_approved_store"),
+    ]);
+    if (!data || !courierCanWork(data.status) || !hasApprovedStore) throw redirect({ to: "/entregador/status" });
   },
   component: CourierPage,
 });
@@ -61,29 +74,30 @@ function CourierPage() {
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       const userId = userData.user?.id;
-      if (!userId) return { deliveries: [], courier: null, userId: null };
+      if (!userId) return { deliveries: [], couriers: [], userId: null };
 
-      const [deliveries, courier] = await Promise.all([
+      const [deliveries, couriers] = await Promise.all([
         supabase
           .from("deliveries")
           .select("*, order:orders(*), store:stores(name)")
           .eq("delivery_person_id", userId)
           .order("created_at", { ascending: false })
           .limit(50),
-        supabase.from("couriers").select("*").eq("user_id", userId).maybeSingle(),
+        supabase.from("couriers").select("*").eq("user_id", userId).eq("is_active", true),
       ]);
       if (deliveries.error) throw new Error(deliveries.error.message);
-      return { deliveries: deliveries.data ?? [], courier: courier.data, userId };
+      return { deliveries: deliveries.data ?? [], couriers: couriers.data ?? [], userId };
     },
   });
 
   const deliveries = data?.deliveries ?? [];
-  const courier = data?.courier;
+  const couriers = data?.couriers ?? [];
+  const courier = couriers[0];
 
   const toggleOnline = useMutation({
     mutationFn: async (value: boolean) => {
-      if (!courier) throw new Error("Seu cadastro de entregador ainda não foi vinculado pela loja.");
-      const { error } = await supabase.from("couriers").update({ is_online: value }).eq("id", courier.id);
+      if (!data?.userId || !couriers.length) throw new Error("Seu cadastro de entregador ainda não foi vinculado pela loja.");
+      const { error } = await supabase.from("couriers").update({ is_online: value }).eq("user_id", data.userId).eq("is_active", true);
       if (error) throw new Error(error.message);
     },
     onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["courier-deliveries"] }),

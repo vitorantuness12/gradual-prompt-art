@@ -7,6 +7,7 @@ import { z } from "zod";
 import { Logo } from "@/components/brand/Logo";
 import { AppLaunchSplash } from "@/components/brand/AppLaunchSplash";
 import { MerchantPwaLogin } from "@/components/auth/MerchantPwaLogin";
+import { CourierPwaLogin } from "@/components/auth/CourierPwaLogin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,17 +15,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAccountKinds } from "@/hooks/useAccountKinds";
-import { ACCOUNT_KINDS, VEHICLE_TYPES, redirectForAccount, type AccountKind } from "@/lib/contas";
+import { ACCOUNT_KINDS, redirectForAccount, type AccountKind } from "@/lib/contas";
 import { persistProfile, savePendingProfile, type PendingProfile } from "@/lib/contas-pending";
 import { recordLoginAttempt, resolveLoginEmail } from "@/lib/contas.functions";
 import { isValidDocument, isValidPhone, maskDocument, maskPhone, onlyDigits } from "@/lib/masks";
@@ -197,7 +191,7 @@ function AuthPage() {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) return;
       const kinds = await fetchAccountKinds();
-      if (search.origem === "app" && !kinds.merchant) {
+       if (search.origem === "app" && search.perfil === "lojista" && !kinds.merchant) {
         await supabase.auth.signOut();
         toast.error("Este aplicativo é exclusivo para contas de lojista.");
         return;
@@ -210,9 +204,13 @@ function AuthPage() {
   /** Depois de autenticar, decide o destino conforme os perfis da conta. */
   async function routeAfterLogin(chosen: AccountKind | null) {
     const kinds = await fetchAccountKinds();
-    if (search.origem === "app" && !kinds.merchant) {
+    if (search.origem === "app" && perfil === "lojista" && !kinds.merchant) {
       await supabase.auth.signOut();
       toast.error("Esta conta não possui acesso de lojista.");
+      return;
+    }
+    if (chosen === "motoboy" && search.redirect?.startsWith("/entregadores?convite=")) {
+      window.location.assign(search.redirect);
       return;
     }
     const available = [
@@ -352,12 +350,7 @@ function AuthPage() {
   async function handleSignUp(event: FormEvent<HTMLFormElement>, kind: AccountKind) {
     event.preventDefault();
     let problem = validateBase();
-    if (!problem && kind === "motoboy") {
-      if (!isValidDocument(form.cpf)) problem = "Informe um CPF válido.";
-      else if (!form.birthDate) problem = "Informe sua data de nascimento.";
-      else if (!form.city.trim()) problem = "Informe a cidade de atuação.";
-      else if (!form.pixKey.trim()) problem = "Informe a chave Pix para recebimento.";
-    }
+    if (!problem && kind === "motoboy") problem = "O cadastro de entregadores é feito somente por convite de uma loja.";
     if (!problem && kind === "lojista" && !isValidDocument(form.document)) {
       problem = "Informe um CPF ou CNPJ válido.";
     }
@@ -452,6 +445,7 @@ function AuthPage() {
 
   const kindInfo = ACCOUNT_KINDS.find((item) => item.key === perfil);
   const merchantApp = search.origem === "app" && etapa === "entrar" && perfil === "lojista";
+  const courierApp = search.origem === "app" && etapa === "entrar" && perfil === "motoboy";
 
   if (merchantApp) {
     return (
@@ -473,6 +467,29 @@ function AuthPage() {
         onSendOtp={() => void handleSendOtp()}
         onVerifyOtp={() => void handleVerifyOtp()}
         onCreateAccount={() => go({ etapa: "criar", perfil: "lojista" })}
+      />
+    );
+  }
+
+  if (courierApp) {
+    return (
+      <CourierPwaLogin
+        identifier={form.identifier}
+        password={form.password}
+        otpCode={otpCode}
+        loading={loading}
+        recovering={recovering}
+        otpSent={otpSent}
+        showPassword={showPassword}
+        onIdentifierChange={(identifier) => update({ identifier })}
+        onPasswordChange={(password) => update({ password })}
+        onOtpCodeChange={setOtpCode}
+        onTogglePassword={() => setShowPassword((value) => !value)}
+        onLogin={handleLogin}
+        onRecover={handleRecover}
+        onSetRecovering={setRecovering}
+        onSendOtp={() => void handleSendOtp()}
+        onVerifyOtp={() => void handleVerifyOtp()}
       />
     );
   }
@@ -549,7 +566,7 @@ function AuthPage() {
               Escolha o tipo de acesso. Seus dados preenchidos são mantidos se você voltar.
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              {ACCOUNT_KINDS.map((item) => (
+              {ACCOUNT_KINDS.filter((item) => etapa === "entrar" || item.key !== "motoboy").map((item) => (
                 <Link
                   key={item.key}
                   to="/auth"
@@ -585,7 +602,11 @@ function AuthPage() {
                     : `Criar conta de ${kindInfo?.label}`}
                 </h1>
               </CardTitle>
-              <CardDescription>{kindInfo?.description}</CardDescription>
+              <CardDescription>
+                {etapa === "criar" && perfil === "motoboy"
+                  ? "O acesso de entregador é criado somente pelo convite de uma loja."
+                  : kindInfo?.description}
+              </CardDescription>
               {etapa === "criar" ? (
                 <Progress value={perfil === "motoboy" ? 50 : 66} className="mt-2 h-1.5" />
               ) : null}
@@ -601,7 +622,16 @@ function AuthPage() {
                 </div>
               ) : null}
 
-              {etapa === "entrar" ? (
+              {etapa === "criar" && perfil === "motoboy" ? (
+                <div className="space-y-4">
+                  <p className="rounded-xl bg-orange-50 p-4 text-sm text-orange-950">
+                    Peça à loja parceira para cadastrar seus dados em Entregadores. Você receberá um link pessoal para definir sua senha.
+                  </p>
+                  <Button asChild className="w-full bg-orange-600 hover:bg-orange-700">
+                    <Link to="/entregadores">Ir para Pedi Um Entregadores</Link>
+                  </Button>
+                </div>
+              ) : etapa === "entrar" ? (
                 recovering ? (
                   <form onSubmit={handleRecover} className="space-y-4" noValidate>
                     <div className="space-y-2">
@@ -791,116 +821,6 @@ function AuthPage() {
                         required
                       />
                     </div>
-                  ) : null}
-
-                  {perfil === "motoboy" ? (
-                    <>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label htmlFor="cpf">CPF</Label>
-                          <Input
-                            id="cpf"
-                            inputMode="numeric"
-                            value={form.cpf}
-                            onChange={(event) => update({ cpf: maskDocument(event.target.value) })}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="nasc-m">Data de nascimento</Label>
-                          <Input
-                            id="nasc-m"
-                            type="date"
-                            value={form.birthDate}
-                            onChange={(event) => update({ birthDate: event.target.value })}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="cidade">Cidade de atuação</Label>
-                          <Input
-                            id="cidade"
-                            value={form.city}
-                            onChange={(event) => update({ city: event.target.value })}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="regiao">Região / bairros</Label>
-                          <Input
-                            id="regiao"
-                            value={form.region}
-                            onChange={(event) => update({ region: event.target.value })}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="veiculo">Tipo de veículo</Label>
-                          <Select
-                            value={form.vehicleType}
-                            onValueChange={(value) => update({ vehicleType: value })}
-                          >
-                            <SelectTrigger id="veiculo">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {VEHICLE_TYPES.map((item) => (
-                                <SelectItem key={item.value} value={item.value}>
-                                  {item.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="placa">Placa (se aplicável)</Label>
-                          <Input
-                            id="placa"
-                            value={form.plate}
-                            onChange={(event) =>
-                              update({ plate: event.target.value.toUpperCase() })
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="marca">Marca do veículo</Label>
-                          <Input
-                            id="marca"
-                            value={form.vehicleBrand}
-                            onChange={(event) => update({ vehicleBrand: event.target.value })}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="modelo">Modelo</Label>
-                          <Input
-                            id="modelo"
-                            value={form.vehicleModel}
-                            onChange={(event) => update({ vehicleModel: event.target.value })}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="cnh">CNH (se aplicável)</Label>
-                          <Input
-                            id="cnh"
-                            value={form.cnhNumber}
-                            onChange={(event) => update({ cnhNumber: event.target.value })}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="pix">Chave Pix</Label>
-                          <Input
-                            id="pix"
-                            value={form.pixKey}
-                            onChange={(event) => update({ pixKey: event.target.value })}
-                            required
-                          />
-                        </div>
-                      </div>
-                      <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
-                        Depois do cadastro você envia os documentos (CNH, identificação, veículo e
-                        comprovante) e sua conta fica <strong>aguardando aprovação</strong>. As
-                        entregas são liberadas somente após a análise.
-                      </p>
-                    </>
                   ) : null}
 
                   <div className="grid gap-4 sm:grid-cols-2">

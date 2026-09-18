@@ -90,7 +90,7 @@ export async function persistProfile(userId: string, profile: PendingProfile): P
       cnh_number: profile.cnhNumber || null,
       pix_key: profile.pixKey || null,
       pix_key_type: profile.pixKeyType || null,
-      status: "awaiting_approval",
+      status: "active",
       terms_accepted_at: new Date().toISOString(),
     });
     await supabase.from("consent_records").insert({
