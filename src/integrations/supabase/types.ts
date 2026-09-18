@@ -7962,47 +7962,68 @@ export type Database = {
       }
       store_couriers: {
         Row: {
+          activated_at: string | null
+          approved_at: string | null
+          approved_by: string | null
           blocked_until: string | null
           commission_amount: number
           courier_user_id: string | null
           created_at: string
           id: string
+          invitation_expires_at: string | null
           invite_email: string | null
           invite_phone: string | null
           invite_token: string | null
+          invited_at: string
+          invited_by: string | null
           priority: number
           region: string | null
           status: Database["public"]["Enums"]["store_courier_status"]
+          status_reason: string | null
           store_id: string
           updated_at: string
         }
         Insert: {
+          activated_at?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           blocked_until?: string | null
           commission_amount?: number
           courier_user_id?: string | null
           created_at?: string
           id?: string
+          invitation_expires_at?: string | null
           invite_email?: string | null
           invite_phone?: string | null
           invite_token?: string | null
+          invited_at?: string
+          invited_by?: string | null
           priority?: number
           region?: string | null
           status?: Database["public"]["Enums"]["store_courier_status"]
+          status_reason?: string | null
           store_id: string
           updated_at?: string
         }
         Update: {
+          activated_at?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           blocked_until?: string | null
           commission_amount?: number
           courier_user_id?: string | null
           created_at?: string
           id?: string
+          invitation_expires_at?: string | null
           invite_email?: string | null
           invite_phone?: string | null
           invite_token?: string | null
+          invited_at?: string
+          invited_by?: string | null
           priority?: number
           region?: string | null
           status?: Database["public"]["Enums"]["store_courier_status"]
+          status_reason?: string | null
           store_id?: string
           updated_at?: string
         }
@@ -10425,6 +10446,10 @@ export type Database = {
           _window_seconds: number
         }
         Returns: Json
+      }
+      courier_has_approved_store: {
+        Args: { _user_id?: string }
+        Returns: boolean
       }
       delete_my_saved_address: {
         Args: { _address_id: string }
