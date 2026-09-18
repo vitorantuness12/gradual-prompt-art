@@ -233,6 +233,10 @@ function AuthPage() {
       void navigate({ to: "/escolher-perfil", replace: true });
       return;
     }
+    if (chosen === "motoboy" && search.redirect?.startsWith("/entregadores?convite=")) {
+      window.location.assign(search.redirect);
+      return;
+    }
     void navigate({ to: redirectForAccount(kinds, chosen, search.redirect), replace: true });
   }
 
@@ -353,12 +357,7 @@ function AuthPage() {
   async function handleSignUp(event: FormEvent<HTMLFormElement>, kind: AccountKind) {
     event.preventDefault();
     let problem = validateBase();
-    if (!problem && kind === "motoboy") {
-      if (!isValidDocument(form.cpf)) problem = "Informe um CPF válido.";
-      else if (!form.birthDate) problem = "Informe sua data de nascimento.";
-      else if (!form.city.trim()) problem = "Informe a cidade de atuação.";
-      else if (!form.pixKey.trim()) problem = "Informe a chave Pix para recebimento.";
-    }
+    if (!problem && kind === "motoboy") problem = "O cadastro de entregadores é feito somente por convite de uma loja.";
     if (!problem && kind === "lojista" && !isValidDocument(form.document)) {
       problem = "Informe um CPF ou CNPJ válido.";
     }

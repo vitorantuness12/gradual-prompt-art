@@ -44,8 +44,9 @@ function CouriersAccessPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    if (!search.convite) return;
+    if (!search.convite) return undefined;
     void previewCourierInvite({ data: { token: search.convite } }).then(setPreview).finally(() => setLoading(false));
+    return undefined;
   }, [search.convite]);
 
   async function activate(event: FormEvent) {
