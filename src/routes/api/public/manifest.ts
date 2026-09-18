@@ -15,6 +15,7 @@ export const Route = createFileRoute("/api/public/manifest")({
       GET: async ({ request }) => {
         const url = new URL(request.url);
         const panel = url.searchParams.get("painel") === "1";
+        const courier = url.searchParams.get("entregador") === "1";
         const storeSlug = url.searchParams.get("loja")?.trim() || null;
         const branding = await getBranding();
         const store = storeSlug ? await getStorePwaBranding(storeSlug) : null;
@@ -28,10 +29,14 @@ export const Route = createFileRoute("/api/public/manifest")({
           );
         }
         const storeName = store?.name ?? null;
-        const icon = storeSlug
+        const icon = courier
+          ? "/pedium-entregadores-icon-512.png"
+          : storeSlug
           ? `/api/public/store-icon/${encodeURIComponent(storeSlug)}/any`
           : (branding?.pwa_icon_url ?? "/pedium-app-icon-512.png");
-        const maskableIcon = storeSlug
+        const maskableIcon = courier
+          ? "/pedium-entregadores-maskable-512.png"
+          : storeSlug
           ? `/api/public/store-icon/${encodeURIComponent(storeSlug)}/maskable`
           : (branding?.pwa_maskable_icon_url ?? "/pedium-app-icon-maskable-512.png");
         const icons = store
@@ -51,28 +56,35 @@ export const Route = createFileRoute("/api/public/manifest")({
             ];
 
         const manifest = {
-          name: panel ? "Painel Pedi Um" : (storeName ?? "Pedi Um"),
-          short_name: panel ? "Meu Painel" : (storeName ?? "Pedi Um"),
+          name: courier ? "Pedi Um Entregadores" : panel ? "Painel Pedi Um" : (storeName ?? "Pedi Um"),
+          short_name: courier ? "Entregador" : panel ? "Meu Painel" : (storeName ?? "Pedi Um"),
           description:
-            panel || !storeSlug
+            courier ? "Receba e acompanhe suas entregas pelo aplicativo Pedi Um Entregadores."
+              : panel || !storeSlug
               ? "Tudo pra vender. Tudo em um."
               : "Peça na sua loja favorita, acompanhe o pedido em tempo real e repita compras anteriores.",
           lang: "pt-BR",
           dir: "ltr",
           // O ID usa o UUID imutável para preservar a instalação se o slug da loja mudar.
-          id: panel ? "/apps/lojista" : store ? `/apps/loja/${store.id}` : "/",
+          id: courier ? "/apps/entregadores" : panel ? "/apps/lojista" : store ? `/apps/loja/${store.id}` : "/",
           start_url:
-            panel || !storeSlug
+            courier ? "/entregadores?origem=app"
+              : panel || !storeSlug
               ? "/auth?modo=entrar&perfil=lojista&origem=app&redirect=%2Fpainel%2Fpedidos"
               : `/${storeSlug}?origem=app`,
-          scope: storeSlug ? `/${storeSlug}` : "/",
+          scope: courier ? "/" : storeSlug ? `/${storeSlug}` : "/",
           display: "standalone",
           orientation: "portrait",
           background_color: "#030303",
-          theme_color: store?.primary ?? "#dc2626",
-          categories: ["food", "shopping", "business"],
+          theme_color: courier ? "#f97316" : store?.primary ?? "#dc2626",
+          categories: courier ? ["navigation", "business"] : ["food", "shopping", "business"],
           icons,
-          shortcuts: panel
+          shortcuts: courier
+            ? [
+                { name: "Minhas entregas", short_name: "Entregas", url: "/entregador" },
+                { name: "Disponibilidade", short_name: "Online", url: "/entregador" },
+              ]
+            : panel
             ? [
                 {
                   name: "Pedidos",

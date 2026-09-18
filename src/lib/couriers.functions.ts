@@ -21,11 +21,11 @@ const manageInput = z.object({ storeId: z.string().uuid(), linkId: z.string().uu
 export interface CourierInvitePreview {
   ok: boolean;
   message: string;
-  email?: string;
-  fullName?: string;
-  storeName?: string;
-  expiresAt?: string;
-  existingAccount?: boolean;
+  email?: string | undefined;
+  fullName?: string | undefined;
+  storeName?: string | undefined;
+  expiresAt?: string | undefined;
+  existingAccount?: boolean | undefined;
 }
 
 async function findAuthUserByEmail(email: string) {
@@ -138,7 +138,8 @@ export const activateNewCourierInvite = createServerFn({ method: "POST" })
     if (!preview.ok || !preview.email) throw new Error(preview.message);
     if (preview.existingAccount) return { ok: false, existingAccount: true, email: preview.email, message: "Esta conta já existe. Entre com sua senha para aceitar o convite." };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: link } = await supabaseAdmin.from("store_couriers").select("id, invite_phone").eq("invite_token", data.token).single();
+    const { data: link, error: linkError } = await supabaseAdmin.from("store_couriers").select("id, invite_phone").eq("invite_token", data.token).single();
+    if (linkError || !link) throw new Error("Convite não encontrado.");
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({ email: preview.email, password: data.password,
       email_confirm: true, user_metadata: { full_name: preview.fullName, phone: link.invite_phone, account_kind: "motoboy" } });
     if (error || !created.user) throw new Error(error?.message ?? "Não foi possível criar a conta.");
