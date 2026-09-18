@@ -33,3 +33,11 @@
 - [x] Ativar notificações no app da loja após login e em Meus dados
 - [x] Processar campanhas com segmentação, recorrência e deduplicação
 - [x] Validar segurança, tipos, testes e experiência móvel
+
+## Cadastro, convite e PWA de entregadores
+- [ ] Ativar proteção contra senhas vazadas no Supabase ou registrar bloqueio externo
+- [ ] Criar funções protegidas de convite, ativação e gestão por loja
+- [ ] Atualizar painel de entregadores e sincronização operacional
+- [ ] Criar login direto e ativação em /entregadores
+- [ ] Criar manifesto, metadados e ícones do PWA Entregadores
+- [ ] Remover exigência visual de documentos e validar fluxos
