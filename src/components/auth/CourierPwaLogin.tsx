@@ -1,6 +1,7 @@
-import { Bike, Eye, EyeOff, KeyRound, Mail } from "lucide-react";
+import { Eye, EyeOff, KeyRound, Mail } from "lucide-react";
 import type { FormEvent } from "react";
 
+import courierLogoAsset from "@/assets/pedium-entregadores-logo.webp.asset.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,9 +30,13 @@ export function CourierPwaLogin(props: CourierPwaLoginProps) {
     <main className="min-h-dvh bg-[#fffaf5] px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(2rem,env(safe-area-inset-top))] text-slate-950">
       <div className="mx-auto flex min-h-[calc(100dvh-3.5rem)] w-full max-w-sm flex-col">
         <header className="flex flex-col items-center pt-[7dvh] text-center">
-          <div className="grid size-20 place-items-center rounded-[1.75rem] bg-orange-500 shadow-lg shadow-orange-500/25">
-            <Bike className="size-10 text-white" aria-hidden="true" />
-          </div>
+          <img
+            src={courierLogoAsset.url}
+            alt="Pedi Um Entregadores"
+            width={320}
+            height={320}
+            className="size-20 rounded-[1.75rem] object-cover shadow-lg"
+          />
           <p className="mt-5 text-lg font-black tracking-tight">Pedi Um <span className="text-orange-600">Entregadores</span></p>
           <h1 className="mt-4 text-3xl font-black tracking-tight">Suas entregas em um só lugar</h1>
           <p className="mt-2 text-sm leading-relaxed text-slate-600">Acesso exclusivo para entregadores convidados por uma loja.</p>

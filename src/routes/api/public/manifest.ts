@@ -75,8 +75,8 @@ export const Route = createFileRoute("/api/public/manifest")({
           scope: courier ? "/" : storeSlug ? `/${storeSlug}` : "/",
           display: "standalone",
           orientation: "portrait",
-          background_color: "#030303",
-          theme_color: courier ? "#f97316" : store?.primary ?? "#dc2626",
+          background_color: courier ? "#ffffff" : "#030303",
+          theme_color: courier ? "#ff0018" : store?.primary ?? "#dc2626",
           categories: courier ? ["navigation", "business"] : ["food", "shopping", "business"],
           icons,
           shortcuts: courier
